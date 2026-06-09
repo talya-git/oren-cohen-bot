@@ -63,10 +63,9 @@ class Conversation:
             data = json.loads(json_str)
             turn = BotTurn(**data)
         except (json.JSONDecodeError, Exception):
-            # fallback — המודל לא החזיר JSON תקין, נשתמש בטקסט כתשובה
-            # ננקה JSON אם מופיע בתוך הטקסט
+            # fallback — חילוץ הטקסט שלפני ה-JSON כתשובה
             clean_reply = raw.split("```")[0].strip() if "```" in raw else raw
-            if clean_reply.startswith("{"):
+            if clean_reply.startswith("{") or not clean_reply:
                 clean_reply = "מה אוכל לעזור לך?"
             turn = BotTurn(
                 reply=clean_reply,

@@ -19,13 +19,13 @@ class ExtractedParams(BaseModel):
     """הנתונים שהבוט מחלץ מהשיחה. כולם אופציונליים — מצטברים לאורך התורות."""
 
     budget_ils: Optional[int] = Field(None, description="אומדן תקציב נקודתי בש\"ח")
-    timeline: Timeline = "unknown"
-    financing: Financing = "unknown"
-    intent: Intent = "unknown"
+    timeline: Optional[Timeline] = "unknown"
+    financing: Optional[Financing] = "unknown"
+    intent: Optional[Intent] = "unknown"
     has_property_to_sell: Optional[bool] = None
     area: Optional[str] = None
     rooms: Optional[int] = None
-    engagement: Engagement = "medium"
+    engagement: Optional[Engagement] = "medium"
     contact_name: Optional[str] = None
     phone: Optional[str] = None
 
