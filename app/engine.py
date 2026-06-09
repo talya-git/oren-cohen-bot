@@ -56,20 +56,20 @@ class Conversation:
 
         raw = response.choices[0].message.content.strip()
 
-        # ניקוי markdown code fences אם קיימים
-        if raw.startswith("```"):
-            raw = raw.split("\n", 1)[1] if "\n" in raw else raw[3:]
-            if raw.endswith("```"):
-                raw = raw[:-3]
-            raw = raw.strip()
+        # חילוץ JSON מתוך התשובה (גם אם יש טקסט מסביב)
+        json_str = self._extract_json(raw)
 
         try:
-            data = json.loads(raw)
+            data = json.loads(json_str)
             turn = BotTurn(**data)
         except (json.JSONDecodeError, Exception):
-            # fallback — המודל לא החזיר JSON תקין
+            # fallback — המודל לא החזיר JSON תקין, נשתמש בטקסט כתשובה
+            # ננקה JSON אם מופיע בתוך הטקסט
+            clean_reply = raw.split("```")[0].strip() if "```" in raw else raw
+            if clean_reply.startswith("{"):
+                clean_reply = "מה אוכל לעזור לך?"
             turn = BotTurn(
-                reply=raw,
+                reply=clean_reply,
                 stage="engagement",
                 extracted=ExtractedParams(),
                 handoff_to_human=False,
@@ -83,6 +83,33 @@ class Conversation:
         self.messages.append({"role": "assistant", "content": raw})
 
         return turn, score
+
+    @staticmethod
+    def _extract_json(text: str) -> str:
+        """חילוץ JSON מתוך טקסט שעשוי להכיל גם טקסט רגיל."""
+        # ניקוי code fences
+        if "```json" in text:
+            text = text.split("```json")[1].split("```")[0].strip()
+        elif "```" in text:
+            parts = text.split("```")
+            for part in parts:
+                stripped = part.strip()
+                if stripped.startswith("{"):
+                    text = stripped
+                    break
+        # אם יש טקסט לפני ה-JSON, נחלץ רק את ה-JSON
+        start = text.find("{")
+        if start != -1:
+            # מוצאים את הסוגר התואם
+            depth = 0
+            for i in range(start, len(text)):
+                if text[i] == "{":
+                    depth += 1
+                elif text[i] == "}":
+                    depth -= 1
+                    if depth == 0:
+                        return text[start:i+1]
+        return text
 
     def _merge(self, extracted: ExtractedParams) -> None:
         """מיזוג — ערכים חדשים דורסים null/unknown בלבד."""
