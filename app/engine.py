@@ -61,11 +61,21 @@ class Conversation:
 
         try:
             data = json.loads(json_str)
+            # תיקונים לנתונים שהמודל מחזיר
+            if data.get("notes") is None:
+                data["notes"] = ""
+            if data.get("stage") is None:
+                data["stage"] = "engagement"
+            if data.get("handoff_to_human") is None:
+                data["handoff_to_human"] = False
+            if data.get("extracted") is None:
+                data["extracted"] = {}
             turn = BotTurn(**data)
         except (json.JSONDecodeError, Exception):
             # fallback — חילוץ הטקסט שלפני ה-JSON כתשובה
-            clean_reply = raw.split("```")[0].strip() if "```" in raw else raw
-            if clean_reply.startswith("{") or not clean_reply:
+            clean_reply = raw.split("{")[0].strip() if "{" in raw else raw
+            clean_reply = clean_reply.split("```")[0].strip()
+            if not clean_reply:
                 clean_reply = "מה אוכל לעזור לך?"
             turn = BotTurn(
                 reply=clean_reply,

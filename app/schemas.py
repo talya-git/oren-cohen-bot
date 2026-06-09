@@ -39,7 +39,7 @@ class BotTurn(BaseModel):
     handoff_to_human: bool = Field(
         description="האם להעביר לסוכן אנושי (escape hatch)"
     )
-    notes: str = Field(default="", description="הערה פנימית קצרה, לא מוצגת ללקוח")
+    notes: Optional[str] = Field(default="", description="הערה פנימית קצרה, לא מוצגת ללקוח")
 
 
 class LeadScore(BaseModel):
