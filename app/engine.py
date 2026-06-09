@@ -1,12 +1,10 @@
-"""מנוע השיחה — חיבור ל-Gemini API עם חילוץ פרמטרים וסיווג."""
+"""מנוע השיחה — חיבור ל-OpenAI GPT API עם חילוץ פרמטרים וסיווג."""
 
 import json
 import os
-import ssl
 
-import httpx
 from dotenv import load_dotenv
-from google import genai
+from openai import OpenAI
 
 from .prompts import GOLDEN_EXAMPLES, SYSTEM_PROMPT
 from .schemas import BotTurn, ExtractedParams
@@ -14,20 +12,14 @@ from .scoring import score_lead, LeadScore
 
 load_dotenv()
 
-# Bypass SSL verification for corporate networks
-client = genai.Client(
-    api_key=os.getenv("GOOGLE_API_KEY"),
-    http_options={"api_version": "v1beta", "headers": {}},
-)
-# Patch the internal httpx client to skip SSL
-client._api_client._httpx_client = httpx.Client(verify=False)
-MODEL = "gemini-2.0-flash"
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+MODEL = "gpt-4o-mini"
 
 
 class Conversation:
     def __init__(self):
         self.profile = ExtractedParams()
-        self.history: list[dict] = []
+        self.messages: list[dict] = []
 
         # בניית system instruction עם דוגמאות זהב
         system = SYSTEM_PROMPT
@@ -36,15 +28,8 @@ class Conversation:
             for ex in GOLDEN_EXAMPLES[:5]:
                 system += f"\nלקוח: {ex.get('user','')}\nדניאל: {ex.get('assistant','')}\n"
 
-        self.chat = client.chats.create(
-            model=MODEL,
-            config={"system_instruction": system},
-        )
-
-    def send(self, user_message: str) -> tuple[BotTurn, LeadScore]:
-        prompt = (
-            f"{user_message}\n\n"
-            "--- הנחיות מערכת פנימיות (לא מוצגות ללקוח) ---\n"
+        system += (
+            "\n\n--- הנחיות פלט ---\n"
             "החזר JSON תקני בלבד עם השדות: reply, stage, extracted, handoff_to_human, notes.\n"
             "extracted חייב לכלול: budget_ils, timeline, financing, intent, "
             "has_property_to_sell, area, rooms, engagement, contact_name, phone.\n"
@@ -52,8 +37,18 @@ class Conversation:
             "אל תוסיף טקסט מחוץ ל-JSON."
         )
 
-        response = self.chat.send_message(prompt)
-        raw = response.text.strip()
+        self.messages.append({"role": "system", "content": system})
+
+    def send(self, user_message: str) -> tuple[BotTurn, LeadScore]:
+        self.messages.append({"role": "user", "content": user_message})
+
+        response = client.chat.completions.create(
+            model=MODEL,
+            messages=self.messages,
+            temperature=0.7,
+        )
+
+        raw = response.choices[0].message.content.strip()
 
         # ניקוי markdown code fences אם קיימים
         if raw.startswith("```"):
@@ -68,7 +63,7 @@ class Conversation:
         except (json.JSONDecodeError, Exception):
             # fallback — המודל לא החזיר JSON תקין
             turn = BotTurn(
-                reply=response.text,
+                reply=raw,
                 stage="engagement",
                 extracted=ExtractedParams(),
                 handoff_to_human=False,
@@ -79,8 +74,7 @@ class Conversation:
         self._merge(turn.extracted)
         score = score_lead(self.profile)
 
-        self.history.append({"role": "user", "content": user_message})
-        self.history.append({"role": "assistant", "content": turn.reply})
+        self.messages.append({"role": "assistant", "content": raw})
 
         return turn, score
 

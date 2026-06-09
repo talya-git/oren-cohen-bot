@@ -85,7 +85,7 @@
         addMsg(data.reply, "bot");
         addMeta(data.level, data.score, data.handoff_to_human);
       } catch (e) {
-        addMsg("שגיאה בחיבור לשרת. ודאי שהשרת רץ ושמוגדר מפתח GOOGLE_API_KEY.", "bot");
+        addMsg("שגיאה בחיבור לשרת. ודאי שהשרת רץ ושמוגדר מפתח OPENAI_API_KEY.", "bot");
       }
       sendBtn.disabled = false;
       input.focus();
