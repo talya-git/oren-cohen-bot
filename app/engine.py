@@ -2,7 +2,9 @@
 
 import json
 import os
+import ssl
 
+import httpx
 from dotenv import load_dotenv
 from google import genai
 
@@ -12,7 +14,13 @@ from .scoring import score_lead, LeadScore
 
 load_dotenv()
 
-client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+# Bypass SSL verification for corporate networks
+client = genai.Client(
+    api_key=os.getenv("GOOGLE_API_KEY"),
+    http_options={"api_version": "v1beta", "headers": {}},
+)
+# Patch the internal httpx client to skip SSL
+client._api_client._httpx_client = httpx.Client(verify=False)
 MODEL = "gemini-2.0-flash"
 
 
