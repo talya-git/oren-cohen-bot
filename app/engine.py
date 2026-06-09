@@ -3,6 +3,7 @@
 import json
 import os
 
+import httpx
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -12,7 +13,11 @@ from .scoring import score_lead, LeadScore
 
 load_dotenv()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Bypass SSL for corporate networks
+client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    http_client=httpx.Client(verify=False),
+)
 MODEL = "gpt-4o-mini"
 
 
