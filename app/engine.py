@@ -70,6 +70,23 @@ class Conversation:
                 data["handoff_to_human"] = False
             if data.get("extracted") is None:
                 data["extracted"] = {}
+            # תיקון extracted - המודל לפעמים מחזיר עברית במקום אנגלית
+            ext = data.get("extracted", {})
+            intent_map = {"קנייה": "buy", "מכירה": "sell", "השקעה": "invest", "מתעניין": "browsing"}
+            if ext.get("intent") in intent_map:
+                ext["intent"] = intent_map[ext["intent"]]
+            elif ext.get("intent") not in (None, "buy", "sell", "invest", "browsing", "unknown"):
+                ext["intent"] = "unknown"
+            timeline_map = {"מיידי": "immediate"}
+            if ext.get("timeline") in timeline_map:
+                ext["timeline"] = timeline_map[ext["timeline"]]
+            elif ext.get("timeline") not in (None, "immediate", "3_months", "6_12_months", "exploring", "unknown"):
+                ext["timeline"] = "unknown"
+            if ext.get("financing") not in (None, "cash", "mortgage_approved", "mortgage_needed", "unknown"):
+                ext["financing"] = "unknown"
+            if ext.get("engagement") not in (None, "high", "medium", "low"):
+                ext["engagement"] = "medium"
+            data["extracted"] = ext
             turn = BotTurn(**data)
         except (json.JSONDecodeError, Exception):
             # fallback — חילוץ הטקסט שלפני ה-JSON כתשובה

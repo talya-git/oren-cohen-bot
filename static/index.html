@@ -142,12 +142,36 @@
         sessionId = data.session_id;
         hideTyping();
         addMsg(data.reply, "in");
+        // הצגת כפתורי דירוג אם השיחה הסתיימה
+        if (data.handoff_to_human || data.stage === "handoff") {
+          showRatingButtons();
+        }
       } catch (e) {
         hideTyping();
         addMsg("לא הצלחתי להתחבר, נסו שוב", "in");
       }
       sendBtn.disabled = false;
       input.focus();
+    }
+
+    function showRatingButtons() {
+      const d = document.createElement("div");
+      d.style.cssText = "align-self:center;display:flex;gap:12px;margin:16px 0;";
+      d.innerHTML = `
+        <button onclick="rate('red')" style="width:50px;height:50px;border-radius:50%;border:none;background:#e53935;cursor:pointer;font-size:20px;"הגדר="ליד חם">🔴</button>
+        <button onclick="rate('orange')" style="width:50px;height:50px;border-radius:50%;border:none;background:#fb8c00;cursor:pointer;font-size:20px;" title="ליד בינוני">🟠</button>
+        <button onclick="rate('green')" style="width:50px;height:50px;border-radius:50%;border:none;background:#43a047;cursor:pointer;font-size:20px;" title="ליד קר">🟢</button>
+      `;
+      chat.appendChild(d);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function rate(color) {
+      const labels = {red: "🔴 ליד חם - רציני", orange: "🟠 ליד בינוני", green: "🟢 ליד קר"};
+      // הסרת הכפתורים
+      const btns = document.querySelectorAll("[onclick^='rate']");
+      btns.forEach(b => b.parentElement.remove());
+      addMsg("דירוג: " + labels[color], "in");
     }
 
     sendBtn.onclick = send;
