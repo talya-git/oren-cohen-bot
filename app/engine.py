@@ -19,7 +19,7 @@ client = OpenAI(
     base_url="https://api.groq.com/openai/v1",
     http_client=httpx.Client(verify=False),
 )
-MODEL = "llama-3.3-70b-versatile"
+MODEL = "llama-3.1-8b-instant"
 
 
 class Conversation:
