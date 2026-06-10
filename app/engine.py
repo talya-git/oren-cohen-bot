@@ -13,13 +13,12 @@ from .scoring import score_lead, LeadScore
 
 load_dotenv()
 
-# Groq API (compatible with OpenAI SDK)
+# OpenAI API
 client = OpenAI(
-    api_key=os.getenv("GROQ_API_KEY"),
-    base_url="https://api.groq.com/openai/v1",
+    api_key=os.getenv("OPENAI_API_KEY"),
     http_client=httpx.Client(verify=False),
 )
-MODEL = "llama-3.3-70b-versatile"
+MODEL = "gpt-4o-mini"
 
 
 class Conversation:
