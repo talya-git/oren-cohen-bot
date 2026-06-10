@@ -54,9 +54,11 @@ class Conversation:
         )
 
         raw = response.choices[0].message.content.strip()
+        print(f"[DEBUG RAW] {raw[:200]}")
 
         # חילוץ JSON מתוך התשובה (גם אם יש טקסט מסביב)
         json_str = self._extract_json(raw)
+        print(f"[DEBUG JSON] {json_str[:200]}")
 
         try:
             data = json.loads(json_str)
