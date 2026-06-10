@@ -62,6 +62,27 @@ GREETING = (
     "איך אוכל לעזור לך?"
 )
 
+# === מאגר נכסים ===
+PROPERTIES_FILE = Path(__file__).resolve().parent.parent / "data" / "properties.json"
+
+
+def _load_properties() -> str:
+    if PROPERTIES_FILE.exists():
+        props = json.loads(PROPERTIES_FILE.read_text(encoding="utf-8"))
+        if not props:
+            return ""
+        summary = "\n\n## מאגר נכסים זמינים (מידע פנימי - אל תחשוף מחירים מדויקים ללקוח!)\n"
+        summary += "השתמש במידע הזה כדי להתאים נכס ללקוח לפי הצרכים שלו.\n"
+        summary += "אם לקוח שואל על מחיר - תגיד בטווח מחירים כללי (למשל בין 6 ל-7 מליון) ולא מחיר מדויק.\n"
+        summary += "אל תחשוף מספרי יחידות, שמות רוכשים, או מידע רגיש ללקוח.\n\n"
+        for p in props:
+            summary += f"- {p['project']} | {p['type']} | {p['rooms']} חדרים | {p['size_sqm']} מ״ר | קומה {p['floor']} | ~{p['price']:,} ש״ח\n"
+        return summary
+    return ""
+
+
+PROPERTIES_CONTEXT: str = _load_properties()
+
 # === דוגמאות זהב (Few-shot) ===
 GOLDEN_EXAMPLES_FILE = Path(__file__).resolve().parent.parent / "data" / "golden_examples.json"
 
