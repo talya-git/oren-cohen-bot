@@ -25,22 +25,19 @@ PROPERTIES_FILE = Path(__file__).resolve().parent.parent / "data" / "properties.
 def login(page):
     """התחברות לשכל."""
     print("[1] מתחבר לשכל...")
-    page.goto(SEHEL_URL)
-    page.wait_for_load_state("networkidle")
-    time.sleep(2)
+    page.goto(SEHEL_URL, timeout=60000)
+    page.wait_for_load_state("domcontentloaded")
+    time.sleep(5)
 
-    # דף הלוגין - שני שדות input וכפתור "כניסה"
-    inputs = page.query_selector_all("input")
-    for inp in inputs:
-        inp_type = inp.get_attribute("type") or ""
-        if inp_type == "email" or inp_type == "text":
-            inp.fill(USERNAME)
-        elif inp_type == "password":
-            inp.fill(PASSWORD)
+    # דף הלוגין - ממלא שדות
+    page.fill('input[type="email"], input[type="text"]', USERNAME)
+    page.fill('input[type="password"]', PASSWORD)
+    time.sleep(1)
 
     # לחיצה על כפתור "כניסה"
     page.click('button:has-text("כניסה")')
-    page.wait_for_load_state("networkidle")
+    time.sleep(5)
+    page.wait_for_load_state("domcontentloaded")
     time.sleep(3)
     print("   ✓ התחברות הצליחה")
 
@@ -75,7 +72,8 @@ def export_all_pages(page, section_name):
 
         if next_btn and next_btn.is_visible() and next_btn.is_enabled():
             next_btn.click()
-            page.wait_for_load_state("networkidle")
+            page.wait_for_load_state("domcontentloaded")
+        time.sleep(3)
             time.sleep(2)
             page_num += 1
         else:
@@ -190,7 +188,8 @@ def main():
         print("\n[2] נכנס למלאי פרויקטים...")
         # בתפריט העליון - "מלאי פרויקטים" (אייקון עם בניין)
         page.click('a:has-text("מלאי פרויקטים"), [title="מלאי פרויקטים"], :text("מלאי פרויקטים")')
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
+        time.sleep(3)
         time.sleep(3)
 
         project_files = export_all_pages(page, "projects")
@@ -199,12 +198,14 @@ def main():
         print("\n[3] נכנס למלאי דירות יד 2...")
         # חוזר לדף הבית קודם
         page.goto(SEHEL_URL)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
+        time.sleep(3)
         time.sleep(2)
 
         # בתפריט העליון - "מלאי דירות יד 2"
         page.click('a:has-text("מלאי דירות יד"), [title*="מלאי דירות יד"], :text("מלאי דירות יד")')
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
+        time.sleep(3)
         time.sleep(3)
 
         yad2_files = export_all_pages(page, "yad2")
