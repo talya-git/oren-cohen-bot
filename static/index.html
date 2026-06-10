@@ -7,24 +7,15 @@
   <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;500;600&display=swap" rel="stylesheet" />
+  <!-- Emoji Picker -->
+  <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: { sans: ['Noto Sans Hebrew', 'Segoe UI', 'sans-serif'] },
           colors: {
-            wa: {
-              bg: '#efeae2',
-              header: '#f0f2f5',
-              green: '#d9fdd3',
-              bubble: '#ffffff',
-              text: '#111b21',
-              meta: '#667781',
-              border: '#d1d7db',
-              teal: '#00a884',
-              check: '#53bdeb',
-              icon: '#54656f',
-            }
+            wa: { bg: '#efeae2', header: '#f0f2f5', green: '#d9fdd3', bubble: '#ffffff', text: '#111b21', meta: '#667781', border: '#d1d7db', teal: '#00a884', check: '#53bdeb', icon: '#54656f' }
           }
         }
       }
@@ -35,33 +26,33 @@
     .wa-pattern {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cdefs%3E%3Cpattern id='p' width='40' height='40' patternUnits='userSpaceOnUse'%3E%3Cpath d='M20 0v40M0 20h40' stroke='%23d6d0c5' stroke-width='0.3'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='300' height='300' fill='%23efeae2'/%3E%3Crect width='300' height='300' fill='url(%23p)' opacity='0.5'/%3E%3C/svg%3E");
     }
-    .msg-tail-in::before {
-      content: ''; position: absolute; top: 0; right: -8px;
-      border-left: 8px solid #fff; border-bottom: 8px solid transparent;
-    }
-    .msg-tail-out::before {
-      content: ''; position: absolute; top: 0; left: -8px;
-      border-right: 8px solid #d9fdd3; border-bottom: 8px solid transparent;
-    }
+    .msg-tail-in::before { content: ''; position: absolute; top: 0; right: -8px; border-left: 8px solid #fff; border-bottom: 8px solid transparent; }
+    .msg-tail-out::before { content: ''; position: absolute; top: 0; left: -8px; border-right: 8px solid #d9fdd3; border-bottom: 8px solid transparent; }
     .typing-dot { animation: bounce 1.4s infinite; }
     .typing-dot:nth-child(2) { animation-delay: 0.2s; }
     .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes bounce {
-      0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-      30% { transform: translateY(-4px); opacity: 1; }
-    }
+    @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-4px); opacity: 1; } }
     #chat::-webkit-scrollbar { width: 6px; }
     #chat::-webkit-scrollbar-thumb { background: #c5c5c5; border-radius: 3px; }
     #input { scrollbar-width: none; }
     #input::-webkit-scrollbar { display: none; }
+    emoji-picker-element {
+      --emoji-size: 1.4rem;
+      --num-columns: 8;
+      --background: #fff;
+      --border-color: #d1d7db;
+      height: 300px;
+      width: 320px;
+    }
+    .emoji-container { position: absolute; bottom: 65px; right: 16px; z-index: 30; display: none; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+    .emoji-container.show { display: block; }
+    .recording-indicator { animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .file-preview { max-width: 200px; max-height: 150px; border-radius: 8px; }
   </style>
 </head>
 <body class="h-screen overflow-hidden flex flex-col font-sans">
-
-  <!-- Background pattern -->
   <div class="fixed inset-0 wa-pattern opacity-90 z-0"></div>
-
-  <!-- App container -->
   <div class="relative z-10 flex flex-col h-full">
 
     <!-- Header -->
@@ -79,39 +70,239 @@
       </div>
     </header>
 
-    <!-- End chat button -->
-    <button onclick="endChat()" class="fixed top-[70px] left-5 z-10 bg-white text-wa-text text-xs border border-wa-border rounded-full px-4 py-1.5 shadow-sm hover:bg-gray-50 transition font-medium">
-      סיום שיחה
-    </button>
+    <button onclick="endChat()" class="fixed top-[70px] left-5 z-10 bg-white text-wa-text text-xs border border-wa-border rounded-full px-4 py-1.5 shadow-sm hover:bg-gray-50 transition font-medium">סיום שיחה</button>
 
-    <!-- Chat area -->
+    <!-- Chat -->
     <div id="chat" class="flex-1 overflow-y-auto px-4 md:px-16 py-4 flex flex-col gap-0.5 scroll-smooth"></div>
 
+    <!-- Emoji Picker -->
+    <div class="emoji-container" id="emoji-container">
+      <emoji-picker-element></emoji-picker-element>
+    </div>
+
+    <!-- Hidden file input -->
+    <input type="file" id="file-input" accept="image/*,.pdf,.doc,.docx" class="hidden" />
+
     <!-- Input bar -->
-    <footer class="bg-wa-header border-t border-wa-border px-4 py-2 flex items-end gap-2.5 shrink-0">
-      <svg class="w-7 h-7 fill-wa-icon cursor-pointer hover:fill-wa-teal transition-colors shrink-0 mb-2" viewBox="0 0 24 24"><path d="M9.153 11.603c.795 0 1.44-.88 1.44-1.962s-.645-1.96-1.44-1.96c-.795 0-1.44.879-1.44 1.96s.645 1.962 1.44 1.962zm5.694 0c.795 0 1.44-.88 1.44-1.962s-.645-1.96-1.44-1.96c-.795 0-1.44.879-1.44 1.96s.645 1.962 1.44 1.962zM11.84 15.757c2.24 0 3.76-1.26 3.76-2.63h-7.52c0 1.37 1.52 2.63 3.76 2.63zM12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.418 0-8-3.582-8-8s3.582-8 8-8 8 3.582 8 8-3.582 8-8 8z"/></svg>
-      <svg class="w-7 h-7 fill-wa-icon cursor-pointer hover:fill-wa-teal transition-colors shrink-0 mb-2" viewBox="0 0 24 24"><path d="M1.816 15.556v.002c0 1.502.584 2.912 1.646 3.972s2.472 1.647 3.974 1.647a5.58 5.58 0 003.972-1.645l9.547-9.548c.769-.768 1.147-1.767 1.058-2.817-.079-.968-.548-1.927-1.319-2.698-1.594-1.592-4.068-1.711-5.517-.262l-7.916 7.915c-.881.881-.792 2.25.214 3.261.501.501 1.134.813 1.78.884.606.064 1.159-.114 1.533-.49l5.763-5.762a.456.456 0 00-.646-.643l-5.762 5.763c-.226.226-.479.293-.695.272-.473-.049-.913-.274-1.248-.608-.727-.727-.665-1.6-.043-2.226l7.921-7.916c1.08-1.08 3.053-.96 4.282.266.587.588.934 1.303.994 2.013.06.71-.199 1.407-.727 1.934L9.438 19.93a4.726 4.726 0 01-3.384 1.398 4.64 4.64 0 01-3.382-1.398c-1.867-1.866-1.867-4.899 0-6.766l8.589-8.59a.456.456 0 00-.646-.646l-8.589 8.59c-2.222 2.222-2.222 5.836 0 8.058z"/></svg>
+    <footer class="bg-wa-header border-t border-wa-border px-4 py-2 flex items-end gap-2.5 shrink-0 relative">
+      <!-- Emoji button -->
+      <button onclick="toggleEmoji()" id="emoji-btn" class="shrink-0 mb-2">
+        <svg class="w-7 h-7 fill-wa-icon hover:fill-wa-teal transition-colors" viewBox="0 0 24 24"><path d="M9.153 11.603c.795 0 1.44-.88 1.44-1.962s-.645-1.96-1.44-1.96c-.795 0-1.44.879-1.44 1.96s.645 1.962 1.44 1.962zm5.694 0c.795 0 1.44-.88 1.44-1.962s-.645-1.96-1.44-1.96c-.795 0-1.44.879-1.44 1.96s.645 1.962 1.44 1.962zM11.84 15.757c2.24 0 3.76-1.26 3.76-2.63h-7.52c0 1.37 1.52 2.63 3.76 2.63zM12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.418 0-8-3.582-8-8s3.582-8 8-8 8 3.582 8 8-3.582 8-8 8z"/></svg>
+      </button>
+      <!-- Attach button -->
+      <button onclick="document.getElementById('file-input').click()" class="shrink-0 mb-2">
+        <svg class="w-7 h-7 fill-wa-icon hover:fill-wa-teal transition-colors" viewBox="0 0 24 24"><path d="M1.816 15.556v.002c0 1.502.584 2.912 1.646 3.972s2.472 1.647 3.974 1.647a5.58 5.58 0 003.972-1.645l9.547-9.548c.769-.768 1.147-1.767 1.058-2.817-.079-.968-.548-1.927-1.319-2.698-1.594-1.592-4.068-1.711-5.517-.262l-7.916 7.915c-.881.881-.792 2.25.214 3.261.501.501 1.134.813 1.78.884.606.064 1.159-.114 1.533-.49l5.763-5.762a.456.456 0 00-.646-.643l-5.762 5.763c-.226.226-.479.293-.695.272-.473-.049-.913-.274-1.248-.608-.727-.727-.665-1.6-.043-2.226l7.921-7.916c1.08-1.08 3.053-.96 4.282.266.587.588.934 1.303.994 2.013.06.71-.199 1.407-.727 1.934L9.438 19.93a4.726 4.726 0 01-3.384 1.398 4.64 4.64 0 01-3.382-1.398c-1.867-1.866-1.867-4.899 0-6.766l8.589-8.59a.456.456 0 00-.646-.646l-8.589 8.59c-2.222 2.222-2.222 5.836 0 8.058z"/></svg>
+      </button>
+      <!-- Text input -->
       <div class="flex-1 bg-white rounded-lg border border-wa-border flex items-end px-3 py-2">
         <textarea id="input" rows="1" placeholder="הקלידו הודעה" class="flex-1 bg-transparent text-[15px] text-wa-text placeholder-wa-meta outline-none resize-none leading-5 max-h-[100px]"></textarea>
       </div>
-      <button id="send" class="w-[42px] h-[42px] rounded-full flex items-center justify-center shrink-0 mb-0.5 hover:scale-105 transition-transform">
-        <svg class="w-7 h-7 fill-wa-icon hover:fill-wa-teal transition-colors" viewBox="0 0 24 24"><path d="M1.101 21.757L23.8 12.028 1.101 2.3l.011 7.912 13.623 1.816-13.623 1.817-.011 7.912z"/></svg>
+      <!-- Send / Mic button -->
+      <button id="send-btn" onclick="handleSendOrMic()" class="w-[42px] h-[42px] rounded-full flex items-center justify-center shrink-0 mb-0.5 hover:scale-105 transition-transform">
+        <svg id="send-icon" class="w-7 h-7 fill-wa-icon hover:fill-wa-teal transition-colors hidden" viewBox="0 0 24 24"><path d="M1.101 21.757L23.8 12.028 1.101 2.3l.011 7.912 13.623 1.816-13.623 1.817-.011 7.912z"/></svg>
+        <svg id="mic-icon" class="w-7 h-7 fill-wa-icon hover:fill-wa-teal transition-colors" viewBox="0 0 24 24"><path d="M11.999 14.942c2.001 0 3.531-1.53 3.531-3.531V4.35c0-2.001-1.53-3.531-3.531-3.531S8.469 2.35 8.469 4.35v7.061c0 2.001 1.53 3.531 3.53 3.531zm6.238-3.53c0 3.531-2.942 6.002-6.237 6.002s-6.237-2.471-6.237-6.002H3.761c0 4.001 3.178 7.297 7.061 7.885v3.884h2.354v-3.884c3.884-.588 7.061-3.884 7.061-7.885h-2z"/></svg>
       </button>
     </footer>
+
+    <!-- Recording indicator -->
+    <div id="recording-bar" class="hidden fixed bottom-0 left-0 right-0 bg-wa-header border-t border-wa-border px-4 py-3 flex items-center gap-3 z-20">
+      <button onclick="cancelRecording()" class="text-red-500 font-medium text-sm">ביטול</button>
+      <div class="flex-1 flex items-center gap-2">
+        <div class="recording-indicator w-3 h-3 bg-red-500 rounded-full"></div>
+        <span id="rec-timer" class="text-sm text-wa-meta">0:00</span>
+      </div>
+      <button onclick="stopRecording()" class="bg-wa-teal text-white rounded-full px-4 py-1.5 text-sm font-medium">שלח</button>
+    </div>
   </div>
 
-  <!-- Rating Modal -->
   <script>
     const chat = document.getElementById("chat");
     const input = document.getElementById("input");
-    const sendBtn = document.getElementById("send");
+    const sendIcon = document.getElementById("send-icon");
+    const micIcon = document.getElementById("mic-icon");
+    const emojiContainer = document.getElementById("emoji-container");
+    const fileInput = document.getElementById("file-input");
+    const recordingBar = document.getElementById("recording-bar");
+    const recTimer = document.getElementById("rec-timer");
     let sessionId = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let recInterval = null;
+    let recSeconds = 0;
 
+    // Show send icon when there's text, mic when empty
     input.addEventListener("input", () => {
       input.style.height = "auto";
       input.style.height = Math.min(input.scrollHeight, 100) + "px";
+      if (input.value.trim()) {
+        sendIcon.classList.remove("hidden");
+        micIcon.classList.add("hidden");
+      } else {
+        sendIcon.classList.add("hidden");
+        micIcon.classList.remove("hidden");
+      }
     });
 
+    function handleSendOrMic() {
+      if (input.value.trim()) {
+        send();
+      } else {
+        startRecording();
+      }
+    }
+
+    // === EMOJI ===
+    function toggleEmoji() {
+      emojiContainer.classList.toggle("show");
+    }
+
+    document.querySelector("emoji-picker-element").addEventListener("emoji-click", (e) => {
+      input.value += e.detail.unicode;
+      input.dispatchEvent(new Event("input"));
+      emojiContainer.classList.remove("show");
+      input.focus();
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!emojiContainer.contains(e.target) && e.target.id !== "emoji-btn" && !e.target.closest("#emoji-btn")) {
+        emojiContainer.classList.remove("show");
+      }
+    });
+
+    // === FILE UPLOAD ===
+    fileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          addImageMsg(ev.target.result, "out");
+          // Send description to bot
+          sendText("שלחתי תמונה");
+        };
+        reader.readAsDataURL(file);
+      } else {
+        addMsg("📎 " + file.name, "out");
+        sendText("שלחתי קובץ: " + file.name);
+      }
+      fileInput.value = "";
+    });
+
+    function addImageMsg(src, type) {
+      addDateSep();
+      const d = document.createElement("div");
+      const isOut = type === "out";
+      d.className = `relative max-w-[55%] md:max-w-[45%] p-1 rounded-lg text-sm shadow-sm mb-0.5 ${isOut ? "self-end bg-wa-green rounded-tl-none msg-tail-out" : "self-start bg-wa-bubble rounded-tr-none msg-tail-in"}`;
+      const checks = isOut ? '<svg class="w-4 h-[11px] fill-wa-check inline" viewBox="0 0 16 11"><path d="M11.07 0L5.96 5.11 4.47 3.63 3.06 5.04l2.9 2.9 6.52-6.52L11.07 0zM7.54 5.11L6.13 6.52l1.41 1.41 1.41-1.41-1.41-1.41zM1.41 5.04L0 6.45l2.9 2.9 1.41-1.41-2.9-2.9z"/></svg>' : "";
+      d.innerHTML = `<img src="${src}" class="file-preview rounded-md" /><span class="inline-flex items-center gap-1 float-left ml-1 pt-1"><span class="text-[11px] text-wa-meta">${getTime()}</span>${checks}</span>`;
+      chat.appendChild(d);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    // === VOICE RECORDING ===
+    async function startRecording() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        recSeconds = 0;
+
+        mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+        mediaRecorder.onstop = () => {
+          stream.getTracks().forEach(t => t.stop());
+        };
+
+        mediaRecorder.start();
+        recordingBar.classList.remove("hidden");
+        recInterval = setInterval(() => {
+          recSeconds++;
+          const m = Math.floor(recSeconds / 60);
+          const s = recSeconds % 60;
+          recTimer.textContent = `${m}:${s.toString().padStart(2, "0")}`;
+        }, 1000);
+      } catch (err) {
+        addMsg("לא ניתן לגשת למיקרופון", "in");
+      }
+    }
+
+    function cancelRecording() {
+      if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        mediaRecorder.stop();
+      }
+      clearInterval(recInterval);
+      recordingBar.classList.add("hidden");
+      audioChunks = [];
+    }
+
+    function stopRecording() {
+      if (!mediaRecorder || mediaRecorder.state === "inactive") return;
+
+      mediaRecorder.onstop = async () => {
+        mediaRecorder.stream.getTracks().forEach(t => t.stop());
+        clearInterval(recInterval);
+        recordingBar.classList.add("hidden");
+
+        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+
+        // Show voice message bubble
+        addVoiceMsg(recSeconds, "out");
+
+        // Try to transcribe using browser Speech Recognition
+        transcribeAudio(audioBlob);
+      };
+      mediaRecorder.stop();
+    }
+
+    function addVoiceMsg(seconds, type) {
+      addDateSep();
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      const duration = `${m}:${s.toString().padStart(2, "0")}`;
+      const d = document.createElement("div");
+      const isOut = type === "out";
+      d.className = `relative max-w-[55%] md:max-w-[45%] px-3 py-2 rounded-lg text-sm shadow-sm mb-0.5 ${isOut ? "self-end bg-wa-green rounded-tl-none msg-tail-out" : "self-start bg-wa-bubble rounded-tr-none msg-tail-in"}`;
+      const checks = isOut ? '<svg class="w-4 h-[11px] fill-wa-check inline" viewBox="0 0 16 11"><path d="M11.07 0L5.96 5.11 4.47 3.63 3.06 5.04l2.9 2.9 6.52-6.52L11.07 0zM7.54 5.11L6.13 6.52l1.41 1.41 1.41-1.41-1.41-1.41zM1.41 5.04L0 6.45l2.9 2.9 1.41-1.41-2.9-2.9z"/></svg>' : "";
+      d.innerHTML = `<div class="flex items-center gap-2"><svg class="w-5 h-5 fill-wa-teal" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg><div class="flex-1 h-1 bg-gray-300 rounded-full"><div class="h-1 bg-wa-teal rounded-full" style="width:100%"></div></div><span class="text-xs text-wa-meta">${duration}</span></div><span class="inline-flex items-center gap-1 float-left ml-1 pt-1"><span class="text-[11px] text-wa-meta">${getTime()}</span>${checks}</span>`;
+      chat.appendChild(d);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function transcribeAudio(blob) {
+      // Use browser's SpeechRecognition API
+      if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
+        sendText("שלחתי הודעה קולית");
+        return;
+      }
+
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.lang = "he-IL";
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      // Play audio silently to trigger recognition
+      const audio = new Audio(URL.createObjectURL(blob));
+      audio.volume = 0;
+
+      recognition.onresult = (e) => {
+        const text = e.results[0][0].transcript;
+        if (text) sendText(text);
+      };
+
+      recognition.onerror = () => {
+        sendText("שלחתי הודעה קולית");
+      };
+
+      recognition.start();
+      audio.play();
+
+      // Fallback timeout
+      setTimeout(() => {
+        try { recognition.stop(); } catch(e) {}
+      }, 10000);
+    }
+
+    // === CORE MESSAGING ===
     function getTime() {
       return new Date().toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
     }
@@ -128,11 +319,7 @@
       addDateSep();
       const d = document.createElement("div");
       const isOut = type === "out";
-      d.className = `relative max-w-[55%] md:max-w-[45%] px-2.5 py-1.5 rounded-lg text-sm leading-[19px] whitespace-pre-wrap break-words shadow-sm mb-0.5 ${
-        isOut
-          ? "self-end bg-wa-green text-wa-text rounded-tl-none msg-tail-out"
-          : "self-start bg-wa-bubble text-wa-text rounded-tr-none msg-tail-in"
-      }`;
+      d.className = `relative max-w-[55%] md:max-w-[45%] px-2.5 py-1.5 rounded-lg text-sm leading-[19px] whitespace-pre-wrap break-words shadow-sm mb-0.5 ${isOut ? "self-end bg-wa-green text-wa-text rounded-tl-none msg-tail-out" : "self-start bg-wa-bubble text-wa-text rounded-tr-none msg-tail-in"}`;
       const checks = isOut ? '<svg class="w-4 h-[11px] fill-wa-check inline" viewBox="0 0 16 11"><path d="M11.07 0L5.96 5.11 4.47 3.63 3.06 5.04l2.9 2.9 6.52-6.52L11.07 0zM7.54 5.11L6.13 6.52l1.41 1.41 1.41-1.41-1.41-1.41zM1.41 5.04L0 6.45l2.9 2.9 1.41-1.41-2.9-2.9z"/></svg>' : "";
       d.innerHTML = `${text}<span class="inline-flex items-center gap-1 float-left ml-1 pt-1"><span class="text-[11px] text-wa-meta whitespace-nowrap">${getTime()}</span>${checks}</span>`;
       chat.appendChild(d);
@@ -159,7 +346,11 @@
       addMsg(text, "out");
       input.value = "";
       input.style.height = "auto";
-      sendBtn.disabled = true;
+      input.dispatchEvent(new Event("input"));
+      await sendText(text);
+    }
+
+    async function sendText(text) {
       showTyping();
       try {
         const res = await fetch("/chat", {
@@ -178,8 +369,6 @@
         hideTyping();
         addMsg("לא הצלחתי להתחבר, נסו שוב", "in");
       }
-      sendBtn.disabled = false;
-      input.focus();
     }
 
     function endChat() { showRating(); }
@@ -187,21 +376,7 @@
     function showRating() {
       const overlay = document.createElement("div");
       overlay.className = "fixed inset-0 z-50 bg-black/60 flex items-center justify-center backdrop-blur-sm";
-      overlay.innerHTML = `
-        <div class="bg-white rounded-2xl p-8 shadow-2xl text-center animate-[scale-in_0.2s_ease-out]">
-          <h2 class="text-lg font-medium text-wa-text mb-6">דרגי את הליד</h2>
-          <div class="flex gap-6 justify-center">
-            <button onclick="rate('red', this)" class="w-16 h-16 rounded-full bg-red-600 text-2xl hover:scale-110 transition-transform shadow-lg hover:shadow-red-300">🔴</button>
-            <button onclick="rate('orange', this)" class="w-16 h-16 rounded-full bg-orange-500 text-2xl hover:scale-110 transition-transform shadow-lg hover:shadow-orange-300">🟠</button>
-            <button onclick="rate('green', this)" class="w-16 h-16 rounded-full bg-green-600 text-2xl hover:scale-110 transition-transform shadow-lg hover:shadow-green-300">🟢</button>
-          </div>
-          <div class="flex gap-6 justify-center mt-2">
-            <span class="w-16 text-center text-[11px] text-wa-meta">ליד חם</span>
-            <span class="w-16 text-center text-[11px] text-wa-meta">בינוני</span>
-            <span class="w-16 text-center text-[11px] text-wa-meta">ליד קר</span>
-          </div>
-        </div>
-      `;
+      overlay.innerHTML = `<div class="bg-white rounded-2xl p-8 shadow-2xl text-center"><h2 class="text-lg font-medium text-wa-text mb-6">דרגי את הליד</h2><div class="flex gap-6 justify-center"><button onclick="rate('red', this)" class="w-16 h-16 rounded-full bg-red-600 text-2xl hover:scale-110 transition-transform shadow-lg">🔴</button><button onclick="rate('orange', this)" class="w-16 h-16 rounded-full bg-orange-500 text-2xl hover:scale-110 transition-transform shadow-lg">🟠</button><button onclick="rate('green', this)" class="w-16 h-16 rounded-full bg-green-600 text-2xl hover:scale-110 transition-transform shadow-lg">🟢</button></div><div class="flex gap-6 justify-center mt-2"><span class="w-16 text-center text-[11px] text-wa-meta">ליד חם</span><span class="w-16 text-center text-[11px] text-wa-meta">בינוני</span><span class="w-16 text-center text-[11px] text-wa-meta">ליד קר</span></div></div>`;
       document.body.appendChild(overlay);
     }
 
@@ -212,7 +387,6 @@
       setTimeout(() => overlay.remove(), 1500);
     }
 
-    sendBtn.onclick = send;
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
     });
