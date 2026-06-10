@@ -16,8 +16,8 @@ from playwright.sync_api import sync_playwright
 
 # === הגדרות ===
 SEHEL_URL = "https://crm.sehel.co.il"
-USERNAME = "tsalyato@orencohengroup.com"
-PASSWORD = "YBpB23rM"
+USERNAME = os.getenv("SEHEL_USER", "tsalyato@orencohengroup.com")
+PASSWORD = os.getenv("SEHEL_PASS", "YBpB23rM")
 DOWNLOAD_DIR = Path(__file__).resolve().parent / "downloads"
 PROPERTIES_FILE = Path(__file__).resolve().parent.parent / "data" / "properties.json"
 
@@ -176,7 +176,7 @@ def main():
         os.remove(f)
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=os.getenv("CI", "") == "true")
         context = browser.new_context(accept_downloads=True)
         page = context.new_page()
 
