@@ -10,7 +10,7 @@
   <!-- Emoji Picker -->
   <script type="module">
     import 'https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js';
-    const picker = document.querySelector('emoji-picker-element');
+    const picker = document.querySelector('emoji-picker');
     picker.addEventListener('emoji-click', (e) => {
       document.getElementById('input').value += e.detail.unicode;
       document.getElementById('input').dispatchEvent(new Event('input'));
@@ -45,7 +45,7 @@
     #chat::-webkit-scrollbar-thumb { background: #c5c5c5; border-radius: 3px; }
     #input { scrollbar-width: none; }
     #input::-webkit-scrollbar { display: none; }
-    emoji-picker-element {
+    emoji-picker {
       --emoji-size: 1.4rem;
       --num-columns: 8;
       --background: #fff;
@@ -86,7 +86,7 @@
 
     <!-- Emoji Picker -->
     <div class="emoji-container" id="emoji-container">
-      <emoji-picker-element></emoji-picker-element>
+      <emoji-picker></emoji-picker>
     </div>
 
     <!-- Hidden file input -->
