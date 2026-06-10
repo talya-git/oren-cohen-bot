@@ -80,6 +80,7 @@
     </header>
 
     <button onclick="endChat()" class="fixed top-[70px] left-5 z-10 bg-white text-wa-text text-xs border border-wa-border rounded-full px-4 py-1.5 shadow-sm hover:bg-gray-50 transition font-medium">סיום שיחה</button>
+    <button onclick="newChat()" class="fixed top-[70px] left-[120px] z-10 bg-wa-teal text-white text-xs border border-wa-teal rounded-full px-4 py-1.5 shadow-sm hover:opacity-90 transition font-medium">שיחה חדשה +</button>
 
     <!-- Chat -->
     <div id="chat" class="flex-1 overflow-y-auto px-4 md:px-16 py-4 flex flex-col gap-0.5 scroll-smooth"></div>
@@ -365,6 +366,13 @@
     }
 
     function endChat() { showRating(); }
+
+    function newChat() {
+      sessionId = null;
+      chat.innerHTML = "";
+      input.value = "";
+      input.focus();
+    }
 
     function showRating() {
       const overlay = document.createElement("div");
