@@ -34,13 +34,14 @@ def save_rating(session_id: str, color: str, profile: dict, transcript: list) ->
     _save(RATINGS_FILE, records)
 
 
-def save_feedback(session_id: str, rating: str, notes: str) -> None:
+def save_feedback(session_id: str, rating: str, notes: str, transcript: list = None) -> None:
     """שמירת פידבק על איכות השיחה."""
     records = _load(FEEDBACK_FILE)
     records.append({
         "session_id": session_id,
         "rating": rating,
         "notes": notes,
+        "transcript": transcript or [],
         "timestamp": datetime.now(timezone.utc).isoformat(),
     })
     _save(FEEDBACK_FILE, records)

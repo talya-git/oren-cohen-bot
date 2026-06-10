@@ -136,7 +136,9 @@ class FeedbackRequest(BaseModel):
 @app.post("/feedback")
 def save_feedback(req: FeedbackRequest) -> dict:
     """שמירת פידבק על איכות השיחה."""
-    ratings.save_feedback(req.session_id, req.rating, req.notes)
+    convo = _sessions.get(req.session_id)
+    transcript = convo.messages if convo else []
+    ratings.save_feedback(req.session_id, req.rating, req.notes, transcript)
     return {"status": "saved"}
 
 
