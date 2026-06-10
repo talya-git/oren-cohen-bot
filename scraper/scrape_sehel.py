@@ -176,7 +176,7 @@ def main():
         os.remove(f)
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=os.getenv("CI", "") == "true")
+        browser = p.chromium.launch(headless=True)
         context = browser.new_context(accept_downloads=True)
         page = context.new_page()
 
