@@ -96,6 +96,55 @@ def _load_properties() -> str:
 
 PROPERTIES_CONTEXT: str = _load_properties()
 
+
+# === למידה מפידבק ===
+FEEDBACK_FILE = Path(__file__).resolve().parent.parent / "data" / "feedback.json"
+RATINGS_FILE = Path(__file__).resolve().parent.parent / "data" / "ratings.json"
+
+
+def _load_lessons() -> str:
+    """קורא פידבקים שליליים ומחלץ לקחים ל-prompt."""
+    import re
+    lessons = ""
+
+    def is_valid_text(text: str) -> bool:
+        """בודק שהטקסט תקין ולא חירבושים."""
+        if not text or len(text.strip()) < 3:
+            return False
+        # בודק שיש לפחות 50% תווים קריאים (עברית/אנגלית/מספרים/רווחים)
+        readable = len(re.findall(r'[\u0590-\u05FFa-zA-Z0-9\s.,!?\-\'\"()]', text))
+        return readable / max(len(text), 1) > 0.5
+
+    # קריאת פידבקים שליליים
+    if FEEDBACK_FILE.exists():
+        feedbacks = json.loads(FEEDBACK_FILE.read_text(encoding="utf-8"))
+        bad_feedbacks = [f for f in feedbacks if f.get("rating") == "bad" and f.get("notes") and is_valid_text(f["notes"])]
+        if bad_feedbacks:
+            lessons += "\n\n## לקחים משיחות קודמות (חשוב - אל תחזור על הטעויות האלה!)\n"
+            for f in bad_feedbacks[-10:]:
+                lessons += f"- {f['notes']}\n"
+
+    # קריאת שיחות שדורגו כ"ליד חם" - ללמוד מהן
+    if RATINGS_FILE.exists():
+        ratings = json.loads(RATINGS_FILE.read_text(encoding="utf-8"))
+        hot_leads = [r for r in ratings if r.get("color") == "red" and r.get("transcript")]
+        if hot_leads:
+            lessons += "\n\n## דוגמאות לשיחות מוצלחות (לידים חמים - למד מהטון)\n"
+            for lead in hot_leads[-3:]:
+                transcript = lead.get("transcript", [])
+                valid_msgs = [m for m in transcript if is_valid_text(m.get("content", ""))]
+                if valid_msgs:
+                    lessons += "שיחה מוצלחת:\n"
+                    for msg in valid_msgs[-6:]:
+                        role = "לקוח" if msg.get("role") == "user" else "דניאל"
+                        lessons += f"  {role}: {msg.get('content', '')}\n"
+                    lessons += "\n"
+
+    return lessons
+
+
+LESSONS_CONTEXT: str = _load_lessons()
+
 # === דוגמאות זהב (Few-shot) ===
 GOLDEN_EXAMPLES_FILE = Path(__file__).resolve().parent.parent / "data" / "golden_examples.json"
 

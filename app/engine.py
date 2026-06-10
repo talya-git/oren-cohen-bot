@@ -7,7 +7,7 @@ import httpx
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from .prompts import GOLDEN_EXAMPLES, SYSTEM_PROMPT, PROPERTIES_CONTEXT
+from .prompts import GOLDEN_EXAMPLES, SYSTEM_PROMPT, PROPERTIES_CONTEXT, LESSONS_CONTEXT
 from .schemas import BotTurn, ExtractedParams
 from .scoring import score_lead, LeadScore
 
@@ -30,6 +30,8 @@ class Conversation:
         system = SYSTEM_PROMPT
         if PROPERTIES_CONTEXT:
             system += PROPERTIES_CONTEXT
+        if LESSONS_CONTEXT:
+            system += LESSONS_CONTEXT
         if GOLDEN_EXAMPLES:
             system += "\n\n## דוגמאות מאושרות (few-shot)\n"
             for ex in GOLDEN_EXAMPLES[:5]:
