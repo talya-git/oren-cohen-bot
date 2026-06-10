@@ -5,279 +5,108 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>WhatsApp</title>
   <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Noto Sans Hebrew', 'Segoe UI', 'sans-serif'] },
+          colors: {
+            wa: {
+              bg: '#efeae2',
+              header: '#f0f2f5',
+              green: '#d9fdd3',
+              bubble: '#ffffff',
+              text: '#111b21',
+              meta: '#667781',
+              border: '#d1d7db',
+              teal: '#00a884',
+              check: '#53bdeb',
+              icon: '#54656f',
+            }
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;500;600&display=swap');
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Noto Sans Hebrew', 'Segoe UI', Helvetica, Arial, sans-serif;
-      height: 100vh; height: 100dvh;
-      display: flex; flex-direction: column;
-      background: #111b21;
-      overflow: hidden;
+    body { background: #efeae2; }
+    .wa-pattern {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cdefs%3E%3Cpattern id='p' width='40' height='40' patternUnits='userSpaceOnUse'%3E%3Cpath d='M20 0v40M0 20h40' stroke='%23d6d0c5' stroke-width='0.3'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='300' height='300' fill='%23efeae2'/%3E%3Crect width='300' height='300' fill='url(%23p)' opacity='0.5'/%3E%3C/svg%3E");
     }
-
-    /* Header - WhatsApp style */
-    .header {
-      background: #202c33;
-      padding: 10px 16px;
-      display: flex; align-items: center; gap: 10px;
-      min-height: 60px;
-      border-bottom: 1px solid #0d1418;
+    .msg-tail-in::before {
+      content: ''; position: absolute; top: 0; right: -8px;
+      border-left: 8px solid #fff; border-bottom: 8px solid transparent;
     }
-    .header .back {
-      display: none;
-      width: 24px; height: 24px;
-      fill: #aebac1; cursor: pointer;
+    .msg-tail-out::before {
+      content: ''; position: absolute; top: 0; left: -8px;
+      border-right: 8px solid #d9fdd3; border-bottom: 8px solid transparent;
     }
-    @media (max-width: 600px) {
-      .header .back { display: block; }
-    }
-    .avatar {
-      width: 40px; height: 40px; border-radius: 50%;
-      background: #6b7b8a;
-      display: flex; align-items: center; justify-content: center;
-      overflow: hidden; flex-shrink: 0;
-    }
-    .avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .header-info { flex: 1; }
-    .header-info h1 {
-      font-size: 16px; font-weight: 500; color: #e9edef;
-      line-height: 1.2;
-    }
-    .header-info .status {
-      font-size: 13px; color: #8696a0;
-    }
-    .header-actions { display: flex; gap: 20px; }
-    .header-actions svg { width: 24px; height: 24px; fill: #aebac1; cursor: pointer; }
-
-    /* Chat area */
-    .chat-wrapper {
-      flex: 1; overflow: hidden; position: relative;
-      background: #0b141a;
-    }
-    .chat-bg {
-      position: absolute; inset: 0;
-      background-color: #0b141a;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cdefs%3E%3Cpattern id='a' width='20' height='20' patternUnits='userSpaceOnUse'%3E%3Ccircle cx='2' cy='2' r='0.5' fill='%23182229'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='300' height='300' fill='url(%23a)'/%3E%3C/svg%3E");
-      opacity: 0.4;
-    }
-    #chat {
-      position: absolute; inset: 0;
-      overflow-y: auto; padding: 12px 16px 12px;
-      display: flex; flex-direction: column; gap: 2px;
-      z-index: 1;
-      scrollbar-width: thin;
-      scrollbar-color: #374045 transparent;
-    }
-    #chat::-webkit-scrollbar { width: 6px; }
-    #chat::-webkit-scrollbar-thumb { background: #374045; border-radius: 3px; }
-
-    /* Messages */
-    .msg {
-      max-width: 65%; padding: 6px 7px 8px 9px;
-      border-radius: 7.5px; position: relative;
-      font-size: 14.2px; line-height: 19px;
-      word-wrap: break-word; white-space: pre-wrap;
-      margin-bottom: 2px;
-    }
-    .msg.in {
-      align-self: flex-start;
-      background: #202c33;
-      color: #e9edef;
-      border-top-right-radius: 0;
-    }
-    .msg.in::before {
-      content: '';
-      position: absolute; top: 0; right: -8px;
-      width: 0; height: 0;
-      border-left: 8px solid #202c33;
-      border-bottom: 8px solid transparent;
-    }
-    .msg.out {
-      align-self: flex-end;
-      background: #005c4b;
-      color: #e9edef;
-      border-top-left-radius: 0;
-    }
-    .msg.out::before {
-      content: '';
-      position: absolute; top: 0; left: -8px;
-      width: 0; height: 0;
-      border-right: 8px solid #005c4b;
-      border-bottom: 8px solid transparent;
-    }
-    .msg .meta {
-      display: flex; align-items: center; justify-content: flex-end;
-      gap: 4px; margin-top: 2px;
-      float: left; margin-right: 0; margin-left: 4px;
-      padding-top: 4px;
-    }
-    .msg .time {
-      font-size: 11px; color: rgba(233,237,239,0.6);
-      white-space: nowrap;
-    }
-    .msg.out .checks { display: inline-flex; }
-    .msg.in .checks { display: none; }
-    .checks svg { width: 16px; height: 16px; fill: #53bdeb; }
-
-    /* Date separator */
-    .date-sep {
-      align-self: center;
-      background: #182229;
-      color: rgba(233,237,239,0.7);
-      font-size: 12px;
-      padding: 5px 12px;
-      border-radius: 7px;
-      margin: 8px 0;
-    }
-
-    /* Typing indicator */
-    .typing {
-      align-self: flex-start;
-      background: #202c33;
-      padding: 12px 16px;
-      border-radius: 7.5px;
-      border-top-right-radius: 0;
-      display: flex; gap: 4px; align-items: center;
-    }
-    .typing span {
-      width: 7px; height: 7px;
-      background: #8696a0;
-      border-radius: 50%;
-      animation: typing 1.4s infinite;
-    }
-    .typing span:nth-child(2) { animation-delay: 0.2s; }
-    .typing span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes typing {
-      0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
+    .typing-dot { animation: bounce 1.4s infinite; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
       30% { transform: translateY(-4px); opacity: 1; }
     }
-
-    /* Input bar */
-    .input-bar {
-      background: #202c33;
-      padding: 8px 10px;
-      display: flex; align-items: flex-end; gap: 8px;
-      min-height: 56px;
-    }
-    .input-bar .emoji-btn {
-      width: 26px; height: 26px; fill: #8696a0;
-      cursor: pointer; flex-shrink: 0;
-      margin-bottom: 8px;
-    }
-    .input-container {
-      flex: 1; background: #2a3942;
-      border-radius: 8px; display: flex;
-      align-items: flex-end;
-      padding: 6px 12px;
-    }
-    #input {
-      flex: 1; border: none; background: transparent;
-      color: #e9edef; font-size: 15px;
-      font-family: inherit; outline: none;
-      max-height: 100px; overflow-y: auto;
-      line-height: 20px; padding: 4px 0;
-      resize: none;
-    }
-    #input::placeholder { color: #8696a0; }
-    #send {
-      width: 42px; height: 42px; border: none;
-      border-radius: 50%; background: #00a884;
-      cursor: pointer; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      transition: transform 0.1s;
-    }
-    #send:active { transform: scale(0.95); }
-    #send svg { width: 20px; height: 20px; fill: #111b21; }
-    #send:disabled { opacity: 0.5; cursor: default; }
-
-    /* End conversation button */
-    .end-chat-btn {
-      position: absolute; top: 70px; left: 16px;
-      background: #202c33; color: #e9edef;
-      border: 1px solid #374045; border-radius: 18px;
-      padding: 6px 14px; font-size: 12px;
-      cursor: pointer; z-index: 10;
-      font-family: inherit;
-      transition: background 0.2s;
-    }
-    .end-chat-btn:hover { background: #374045; }
-
-    /* Rating overlay */
-    .rating-overlay {
-      position: absolute; inset: 0; z-index: 20;
-      background: rgba(11,20,26,0.92);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 20px;
-    }
-    .rating-overlay h2 {
-      color: #e9edef; font-size: 18px; font-weight: 500;
-    }
-    .rating-buttons { display: flex; gap: 24px; }
-    .rate-btn {
-      width: 64px; height: 64px; border-radius: 50%;
-      border: 3px solid transparent;
-      cursor: pointer; font-size: 28px;
-      display: flex; align-items: center; justify-content: center;
-      transition: transform 0.2s, border-color 0.2s;
-    }
-    .rate-btn:hover { transform: scale(1.15); border-color: rgba(255,255,255,0.3); }
-    .rate-btn.red { background: #e53935; }
-    .rate-btn.orange { background: #fb8c00; }
-    .rate-btn.green { background: #43a047; }
-    .rating-labels { display: flex; gap: 24px; }
-    .rating-labels span {
-      width: 64px; text-align: center;
-      color: #8696a0; font-size: 11px;
-    }
-    .rating-done {
-      color: #00a884; font-size: 16px;
-      margin-top: 12px; display: none;
-    }
+    #chat::-webkit-scrollbar { width: 6px; }
+    #chat::-webkit-scrollbar-thumb { background: #c5c5c5; border-radius: 3px; }
+    #input { scrollbar-width: none; }
+    #input::-webkit-scrollbar { display: none; }
   </style>
 </head>
-<body>
+<body class="h-screen overflow-hidden flex flex-col font-sans">
 
-  <div class="header">
-    <svg class="back" viewBox="0 0 24 24"><path d="M12 4l1.41 1.41L7.83 11H20v2H7.83l5.58 5.59L12 20l-8-8 8-8z"/></svg>
-    <div class="avatar">
-      <svg viewBox="0 0 212 212" width="40" height="40"><path fill="#6b7b8a" d="M106 0C47.5 0 0 47.5 0 106s47.5 106 106 106 106-47.5 106-106S164.5 0 106 0zm0 28c21 0 38 17 38 38s-17 38-38 38-38-17-38-38 17-38 38-38zm0 150c-27 0-51-14-65-35 1-22 43-34 65-34s64 12 65 34c-14 21-38 35-65 35z"/></svg>
-    </div>
-    <div class="header-info">
-      <h1>דניאל כהן</h1>
-      <span class="status">מקוון</span>
-    </div>
-    <div class="header-actions">
-      <svg viewBox="0 0 24 24"><path d="M15.9 14.3H15l-.3-.3c1-1.1 1.6-2.7 1.6-4.3 0-3.7-3-6.7-6.7-6.7S3 6 3 9.7s3 6.7 6.7 6.7c1.6 0 3.2-.6 4.3-1.6l.3.3v.8l5.1 5.1 1.5-1.5-5-5.2zm-6.2 0c-2.6 0-4.6-2.1-4.6-4.6s2.1-4.6 4.6-4.6 4.6 2.1 4.6 4.6-2 4.6-4.6 4.6z"/></svg>
-      <svg viewBox="0 0 24 24"><path d="M12 7a2 2 0 1 0-.001-4.001A2 2 0 0 0 12 7zm0 2a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 9zm0 6a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 15z"/></svg>
-    </div>
-  </div>
+  <!-- Background pattern -->
+  <div class="fixed inset-0 wa-pattern opacity-90 z-0"></div>
 
-  <div class="chat-wrapper">
-    <div class="chat-bg"></div>
-    <button class="end-chat-btn" onclick="endChat()">סיום שיחה ⏹</button>
-    <div id="chat"></div>
-  </div>
+  <!-- App container -->
+  <div class="relative z-10 flex flex-col h-full">
 
-  <div class="input-bar">
-    <svg class="emoji-btn" viewBox="0 0 24 24"><path d="M9.153 11.603c.795 0 1.44-.88 1.44-1.962s-.645-1.96-1.44-1.96c-.795 0-1.44.879-1.44 1.96s.645 1.962 1.44 1.962zm5.694 0c.795 0 1.44-.88 1.44-1.962s-.645-1.96-1.44-1.96c-.795 0-1.44.879-1.44 1.96s.645 1.962 1.44 1.962zM11.84 15.757c2.24 0 3.76-1.26 3.76-2.63h-7.52c0 1.37 1.52 2.63 3.76 2.63zM12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.418 0-8-3.582-8-8s3.582-8 8-8 8 3.582 8 8-3.582 8-8 8z"/></svg>
-    <div class="input-container">
-      <textarea id="input" rows="1" placeholder="הקלידו הודעה"></textarea>
-    </div>
-    <button id="send">
-      <svg viewBox="0 0 24 24"><path d="M1.101 21.757L23.8 12.028 1.101 2.3l.011 7.912 13.623 1.816-13.623 1.817-.011 7.912z"/></svg>
+    <!-- Header -->
+    <header class="bg-wa-header border-b border-wa-border px-4 py-2.5 flex items-center gap-3 shrink-0">
+      <div class="w-[42px] h-[42px] rounded-full overflow-hidden bg-[#1a2c25] shrink-0 ring-2 ring-white/20">
+        <img src="/static/img/logo.png" alt="אורן כהן גרופ" class="w-full h-full object-cover" />
+      </div>
+      <div class="flex-1 min-w-0">
+        <h1 class="text-[16px] font-medium text-wa-text truncate">דניאל · אורן כהן גרופ</h1>
+        <p class="text-[13px] text-wa-meta">מקוון</p>
+      </div>
+      <div class="flex items-center gap-5">
+        <svg class="w-6 h-6 fill-wa-icon cursor-pointer hover:fill-wa-teal transition-colors" viewBox="0 0 24 24"><path d="M15.9 14.3H15l-.3-.3c1-1.1 1.6-2.7 1.6-4.3 0-3.7-3-6.7-6.7-6.7S3 6 3 9.7s3 6.7 6.7 6.7c1.6 0 3.2-.6 4.3-1.6l.3.3v.8l5.1 5.1 1.5-1.5-5-5.2zm-6.2 0c-2.6 0-4.6-2.1-4.6-4.6s2.1-4.6 4.6-4.6 4.6 2.1 4.6 4.6-2 4.6-4.6 4.6z"/></svg>
+        <svg class="w-6 h-6 fill-wa-icon cursor-pointer hover:fill-wa-teal transition-colors" viewBox="0 0 24 24"><path d="M12 7a2 2 0 1 0-.001-4.001A2 2 0 0 0 12 7zm0 2a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 9zm0 6a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 15z"/></svg>
+      </div>
+    </header>
+
+    <!-- End chat button -->
+    <button onclick="endChat()" class="fixed top-[70px] left-5 z-10 bg-white text-wa-text text-xs border border-wa-border rounded-full px-4 py-1.5 shadow-sm hover:bg-gray-50 transition font-medium">
+      סיום שיחה
     </button>
+
+    <!-- Chat area -->
+    <div id="chat" class="flex-1 overflow-y-auto px-4 md:px-16 py-4 flex flex-col gap-0.5 scroll-smooth"></div>
+
+    <!-- Input bar -->
+    <footer class="bg-wa-header border-t border-wa-border px-4 py-2 flex items-end gap-2.5 shrink-0">
+      <svg class="w-7 h-7 fill-wa-icon cursor-pointer hover:fill-wa-teal transition-colors shrink-0 mb-2" viewBox="0 0 24 24"><path d="M9.153 11.603c.795 0 1.44-.88 1.44-1.962s-.645-1.96-1.44-1.96c-.795 0-1.44.879-1.44 1.96s.645 1.962 1.44 1.962zm5.694 0c.795 0 1.44-.88 1.44-1.962s-.645-1.96-1.44-1.96c-.795 0-1.44.879-1.44 1.96s.645 1.962 1.44 1.962zM11.84 15.757c2.24 0 3.76-1.26 3.76-2.63h-7.52c0 1.37 1.52 2.63 3.76 2.63zM12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.418 0-8-3.582-8-8s3.582-8 8-8 8 3.582 8 8-3.582 8-8 8z"/></svg>
+      <svg class="w-7 h-7 fill-wa-icon cursor-pointer hover:fill-wa-teal transition-colors shrink-0 mb-2" viewBox="0 0 24 24"><path d="M1.816 15.556v.002c0 1.502.584 2.912 1.646 3.972s2.472 1.647 3.974 1.647a5.58 5.58 0 003.972-1.645l9.547-9.548c.769-.768 1.147-1.767 1.058-2.817-.079-.968-.548-1.927-1.319-2.698-1.594-1.592-4.068-1.711-5.517-.262l-7.916 7.915c-.881.881-.792 2.25.214 3.261.501.501 1.134.813 1.78.884.606.064 1.159-.114 1.533-.49l5.763-5.762a.456.456 0 00-.646-.643l-5.762 5.763c-.226.226-.479.293-.695.272-.473-.049-.913-.274-1.248-.608-.727-.727-.665-1.6-.043-2.226l7.921-7.916c1.08-1.08 3.053-.96 4.282.266.587.588.934 1.303.994 2.013.06.71-.199 1.407-.727 1.934L9.438 19.93a4.726 4.726 0 01-3.384 1.398 4.64 4.64 0 01-3.382-1.398c-1.867-1.866-1.867-4.899 0-6.766l8.589-8.59a.456.456 0 00-.646-.646l-8.589 8.59c-2.222 2.222-2.222 5.836 0 8.058z"/></svg>
+      <div class="flex-1 bg-white rounded-lg border border-wa-border flex items-end px-3 py-2">
+        <textarea id="input" rows="1" placeholder="הקלידו הודעה" class="flex-1 bg-transparent text-[15px] text-wa-text placeholder-wa-meta outline-none resize-none leading-5 max-h-[100px]"></textarea>
+      </div>
+      <button id="send" class="w-[42px] h-[42px] rounded-full flex items-center justify-center shrink-0 mb-0.5 hover:scale-105 transition-transform">
+        <svg class="w-7 h-7 fill-wa-icon hover:fill-wa-teal transition-colors" viewBox="0 0 24 24"><path d="M1.101 21.757L23.8 12.028 1.101 2.3l.011 7.912 13.623 1.816-13.623 1.817-.011 7.912z"/></svg>
+      </button>
+    </footer>
   </div>
 
+  <!-- Rating Modal -->
   <script>
     const chat = document.getElementById("chat");
     const input = document.getElementById("input");
     const sendBtn = document.getElementById("send");
     let sessionId = null;
 
-    // Auto-resize textarea
     input.addEventListener("input", () => {
       input.style.height = "auto";
       input.style.height = Math.min(input.scrollHeight, 100) + "px";
@@ -290,7 +119,7 @@
     function addDateSep() {
       if (chat.querySelector(".date-sep")) return;
       const d = document.createElement("div");
-      d.className = "date-sep";
+      d.className = "date-sep self-center bg-white text-wa-meta text-xs px-3 py-1.5 rounded-lg shadow-sm my-2";
       d.textContent = "היום";
       chat.appendChild(d);
     }
@@ -298,17 +127,23 @@
     function addMsg(text, type) {
       addDateSep();
       const d = document.createElement("div");
-      d.className = "msg " + type;
-      const checks = type === "out" ? `<span class="checks"><svg viewBox="0 0 16 15"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.88a.32.32 0 0 1-.484.032l-.358-.325a.32.32 0 0 0-.484.032l-.378.48a.418.418 0 0 0 .036.54l1.32 1.267a.32.32 0 0 0 .484-.034l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.88a.32.32 0 0 1-.484.032L1.892 7.77a.366.366 0 0 0-.516.005l-.423.433a.364.364 0 0 0 .006.514l3.255 3.185a.32.32 0 0 0 .484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"/></svg></span>` : "";
-      d.innerHTML = `${text}<span class="meta"><span class="time">${getTime()}</span>${checks}</span>`;
+      const isOut = type === "out";
+      d.className = `relative max-w-[55%] md:max-w-[45%] px-2.5 py-1.5 rounded-lg text-sm leading-[19px] whitespace-pre-wrap break-words shadow-sm mb-0.5 ${
+        isOut
+          ? "self-end bg-wa-green text-wa-text rounded-tl-none msg-tail-out"
+          : "self-start bg-wa-bubble text-wa-text rounded-tr-none msg-tail-in"
+      }`;
+      const checks = isOut ? '<svg class="w-4 h-[11px] fill-wa-check inline" viewBox="0 0 16 11"><path d="M11.07 0L5.96 5.11 4.47 3.63 3.06 5.04l2.9 2.9 6.52-6.52L11.07 0zM7.54 5.11L6.13 6.52l1.41 1.41 1.41-1.41-1.41-1.41zM1.41 5.04L0 6.45l2.9 2.9 1.41-1.41-2.9-2.9z"/></svg>' : "";
+      d.innerHTML = `${text}<span class="inline-flex items-center gap-1 float-left ml-1 pt-1"><span class="text-[11px] text-wa-meta whitespace-nowrap">${getTime()}</span>${checks}</span>`;
       chat.appendChild(d);
       chat.scrollTop = chat.scrollHeight;
     }
 
     function showTyping() {
       const d = document.createElement("div");
-      d.className = "typing"; d.id = "typing-ind";
-      d.innerHTML = "<span></span><span></span><span></span>";
+      d.className = "self-start bg-white px-4 py-2.5 rounded-lg rounded-tr-none shadow-sm flex gap-1 items-center";
+      d.id = "typing-ind";
+      d.innerHTML = '<span class="typing-dot w-[7px] h-[7px] bg-gray-400 rounded-full"></span><span class="typing-dot w-[7px] h-[7px] bg-gray-400 rounded-full"></span><span class="typing-dot w-[7px] h-[7px] bg-gray-400 rounded-full"></span>';
       chat.appendChild(d);
       chat.scrollTop = chat.scrollHeight;
     }
@@ -347,42 +182,34 @@
       input.focus();
     }
 
-    function endChat() {
-      showRating();
-    }
+    function endChat() { showRating(); }
 
     function showRating() {
-      const wrapper = document.querySelector(".chat-wrapper");
       const overlay = document.createElement("div");
-      overlay.className = "rating-overlay";
+      overlay.className = "fixed inset-0 z-50 bg-black/60 flex items-center justify-center backdrop-blur-sm";
       overlay.innerHTML = `
-        <h2>דרגי את הליד</h2>
-        <div class="rating-buttons">
-          <button class="rate-btn red" onclick="rate('red')">🔴</button>
-          <button class="rate-btn orange" onclick="rate('orange')">🟠</button>
-          <button class="rate-btn green" onclick="rate('green')">🟢</button>
+        <div class="bg-white rounded-2xl p-8 shadow-2xl text-center animate-[scale-in_0.2s_ease-out]">
+          <h2 class="text-lg font-medium text-wa-text mb-6">דרגי את הליד</h2>
+          <div class="flex gap-6 justify-center">
+            <button onclick="rate('red', this)" class="w-16 h-16 rounded-full bg-red-600 text-2xl hover:scale-110 transition-transform shadow-lg hover:shadow-red-300">🔴</button>
+            <button onclick="rate('orange', this)" class="w-16 h-16 rounded-full bg-orange-500 text-2xl hover:scale-110 transition-transform shadow-lg hover:shadow-orange-300">🟠</button>
+            <button onclick="rate('green', this)" class="w-16 h-16 rounded-full bg-green-600 text-2xl hover:scale-110 transition-transform shadow-lg hover:shadow-green-300">🟢</button>
+          </div>
+          <div class="flex gap-6 justify-center mt-2">
+            <span class="w-16 text-center text-[11px] text-wa-meta">ליד חם</span>
+            <span class="w-16 text-center text-[11px] text-wa-meta">בינוני</span>
+            <span class="w-16 text-center text-[11px] text-wa-meta">ליד קר</span>
+          </div>
         </div>
-        <div class="rating-labels">
-          <span>ליד חם</span>
-          <span>בינוני</span>
-          <span>ליד קר</span>
-        </div>
-        <div class="rating-done">✓ הדירוג נשמר</div>
       `;
-      wrapper.appendChild(overlay);
+      document.body.appendChild(overlay);
     }
 
-    function rate(color) {
+    function rate(color, btn) {
       const labels = { red: "ליד חם 🔴", orange: "ליד בינוני 🟠", green: "ליד קר 🟢" };
-      const overlay = document.querySelector(".rating-overlay");
-      const btns = overlay.querySelector(".rating-buttons");
-      const lbls = overlay.querySelector(".rating-labels");
-      const done = overlay.querySelector(".rating-done");
-      btns.style.display = "none";
-      lbls.style.display = "none";
-      done.style.display = "block";
-      done.textContent = `✓ ${labels[color]} — נשמר`;
-      setTimeout(() => overlay.remove(), 2000);
+      const overlay = btn.closest(".fixed");
+      overlay.querySelector(".bg-white").innerHTML = `<div class="text-wa-teal text-lg font-medium py-4">✓ ${labels[color]} — נשמר</div>`;
+      setTimeout(() => overlay.remove(), 1500);
     }
 
     sendBtn.onclick = send;
