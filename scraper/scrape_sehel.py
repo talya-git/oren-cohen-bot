@@ -73,8 +73,7 @@ def export_all_pages(page, section_name):
         if next_btn and next_btn.is_visible() and next_btn.is_enabled():
             next_btn.click()
             page.wait_for_load_state("domcontentloaded")
-        time.sleep(3)
-            time.sleep(2)
+            time.sleep(3)
             page_num += 1
         else:
             print(f"   סה\"כ {page_num} עמודים ב-{section_name}")
@@ -190,7 +189,6 @@ def main():
         page.click('a:has-text("מלאי פרויקטים"), [title="מלאי פרויקטים"], :text("מלאי פרויקטים")')
         page.wait_for_load_state("domcontentloaded")
         time.sleep(3)
-        time.sleep(3)
 
         project_files = export_all_pages(page, "projects")
 
@@ -200,12 +198,10 @@ def main():
         page.goto(SEHEL_URL)
         page.wait_for_load_state("domcontentloaded")
         time.sleep(3)
-        time.sleep(2)
 
         # בתפריט העליון - "מלאי דירות יד 2"
         page.click('a:has-text("מלאי דירות יד"), [title*="מלאי דירות יד"], :text("מלאי דירות יד")')
         page.wait_for_load_state("domcontentloaded")
-        time.sleep(3)
         time.sleep(3)
 
         yad2_files = export_all_pages(page, "yad2")
