@@ -8,7 +8,16 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;500;600&display=swap" rel="stylesheet" />
   <!-- Emoji Picker -->
-  <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js"></script>
+  <script type="module">
+    import 'https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js';
+    const picker = document.querySelector('emoji-picker-element');
+    picker.addEventListener('emoji-click', (e) => {
+      document.getElementById('input').value += e.detail.unicode;
+      document.getElementById('input').dispatchEvent(new Event('input'));
+      document.getElementById('emoji-container').classList.remove('show');
+      document.getElementById('input').focus();
+    });
+  </script>
   <script>
     tailwind.config = {
       theme: {
@@ -125,8 +134,6 @@
     const recordingBar = document.getElementById("recording-bar");
     const recTimer = document.getElementById("rec-timer");
     let sessionId = null;
-    let mediaRecorder = null;
-    let audioChunks = [];
     let recInterval = null;
     let recSeconds = 0;
 
@@ -155,13 +162,6 @@
     function toggleEmoji() {
       emojiContainer.classList.toggle("show");
     }
-
-    document.querySelector("emoji-picker-element").addEventListener("emoji-click", (e) => {
-      input.value += e.detail.unicode;
-      input.dispatchEvent(new Event("input"));
-      emojiContainer.classList.remove("show");
-      input.focus();
-    });
 
     document.addEventListener("click", (e) => {
       if (!emojiContainer.contains(e.target) && e.target.id !== "emoji-btn" && !e.target.closest("#emoji-btn")) {
@@ -200,57 +200,85 @@
     }
 
     // === VOICE RECORDING ===
+    let recognition = null;
+    let isRecording = false;
+
     async function startRecording() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
-        audioChunks = [];
+      // First try live Speech Recognition (best approach)
+      if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.lang = "he-IL";
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        let finalText = "";
         recSeconds = 0;
 
-        mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
-        mediaRecorder.onstop = () => {
-          stream.getTracks().forEach(t => t.stop());
+        recognition.onresult = (e) => {
+          let interim = "";
+          for (let i = e.resultIndex; i < e.results.length; i++) {
+            if (e.results[i].isFinal) {
+              finalText += e.results[i][0].transcript + " ";
+            } else {
+              interim += e.results[i][0].transcript;
+            }
+          }
+          recTimer.textContent = finalText + interim || "מאזין...";
         };
 
-        mediaRecorder.start();
-        recordingBar.classList.remove("hidden");
-        recInterval = setInterval(() => {
-          recSeconds++;
-          const m = Math.floor(recSeconds / 60);
-          const s = recSeconds % 60;
-          recTimer.textContent = `${m}:${s.toString().padStart(2, "0")}`;
-        }, 1000);
-      } catch (err) {
-        addMsg("לא ניתן לגשת למיקרופון", "in");
+        recognition.onerror = (e) => {
+          if (e.error === "not-allowed") {
+            addMsg("לא ניתן לגשת למיקרופון", "in");
+            cancelRecording();
+          }
+        };
+
+        recognition.onend = () => {
+          if (isRecording) {
+            // Send the transcribed text
+            clearInterval(recInterval);
+            recordingBar.classList.add("hidden");
+            isRecording = false;
+            const text = finalText.trim();
+            if (text) {
+              addVoiceMsg(recSeconds, "out");
+              addMsg(text, "out");
+              sendText(text);
+            }
+          }
+        };
+
+        try {
+          recognition.start();
+          isRecording = true;
+          recordingBar.classList.remove("hidden");
+          recTimer.textContent = "מאזין...";
+          recInterval = setInterval(() => {
+            recSeconds++;
+          }, 1000);
+        } catch (err) {
+          addMsg("לא ניתן להפעיל הקלטה קולית", "in");
+        }
+      } else {
+        addMsg("הדפדפן לא תומך בהקלטה קולית", "in");
       }
     }
 
     function cancelRecording() {
-      if (mediaRecorder && mediaRecorder.state !== "inactive") {
-        mediaRecorder.stop();
+      if (recognition) {
+        isRecording = false;
+        recognition.abort();
+        recognition = null;
       }
       clearInterval(recInterval);
       recordingBar.classList.add("hidden");
-      audioChunks = [];
     }
 
     function stopRecording() {
-      if (!mediaRecorder || mediaRecorder.state === "inactive") return;
-
-      mediaRecorder.onstop = async () => {
-        mediaRecorder.stream.getTracks().forEach(t => t.stop());
-        clearInterval(recInterval);
-        recordingBar.classList.add("hidden");
-
-        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-
-        // Show voice message bubble
-        addVoiceMsg(recSeconds, "out");
-
-        // Try to transcribe using browser Speech Recognition
-        transcribeAudio(audioBlob);
-      };
-      mediaRecorder.stop();
+      if (recognition) {
+        recognition.stop(); // This will trigger onend which sends the text
+      }
     }
 
     function addVoiceMsg(seconds, type) {
@@ -265,41 +293,6 @@
       d.innerHTML = `<div class="flex items-center gap-2"><svg class="w-5 h-5 fill-wa-teal" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg><div class="flex-1 h-1 bg-gray-300 rounded-full"><div class="h-1 bg-wa-teal rounded-full" style="width:100%"></div></div><span class="text-xs text-wa-meta">${duration}</span></div><span class="inline-flex items-center gap-1 float-left ml-1 pt-1"><span class="text-[11px] text-wa-meta">${getTime()}</span>${checks}</span>`;
       chat.appendChild(d);
       chat.scrollTop = chat.scrollHeight;
-    }
-
-    function transcribeAudio(blob) {
-      // Use browser's SpeechRecognition API
-      if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
-        sendText("שלחתי הודעה קולית");
-        return;
-      }
-
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
-      recognition.lang = "he-IL";
-      recognition.continuous = false;
-      recognition.interimResults = false;
-
-      // Play audio silently to trigger recognition
-      const audio = new Audio(URL.createObjectURL(blob));
-      audio.volume = 0;
-
-      recognition.onresult = (e) => {
-        const text = e.results[0][0].transcript;
-        if (text) sendText(text);
-      };
-
-      recognition.onerror = () => {
-        sendText("שלחתי הודעה קולית");
-      };
-
-      recognition.start();
-      audio.play();
-
-      // Fallback timeout
-      setTimeout(() => {
-        try { recognition.stop(); } catch(e) {}
-      }, 10000);
     }
 
     // === CORE MESSAGING ===
