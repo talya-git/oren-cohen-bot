@@ -183,10 +183,21 @@ def main():
         # התחברות
         login(page)
 
+        # screenshot לדיבאג — לראות איך הדף נראה אחרי לוגין
+        page.screenshot(path=str(DOWNLOAD_DIR / "after_login.png"))
+        print("   URL אחרי לוגין:", page.url)
+
         # === מלאי פרויקטים ===
         print("\n[2] נכנס למלאי פרויקטים...")
-        # בתפריט העליון - "מלאי פרויקטים" (אייקון עם בניין)
-        page.click('a:has-text("מלאי פרויקטים"), [title="מלאי פרויקטים"], :text("מלאי פרויקטים")')
+        # מנסה כמה selectors
+        try:
+            page.click('text=מלאי פרויקטים', timeout=10000)
+        except:
+            try:
+                page.click('a >> text=מלאי', timeout=10000)
+            except:
+                # ניסיון ישיר דרך URL
+                page.goto(SEHEL_URL + '/projects-inventory', timeout=30000)
         page.wait_for_load_state("domcontentloaded")
         time.sleep(3)
 
@@ -200,7 +211,13 @@ def main():
         time.sleep(3)
 
         # בתפריט העליון - "מלאי דירות יד 2"
-        page.click('a:has-text("מלאי דירות יד"), [title*="מלאי דירות יד"], :text("מלאי דירות יד")')
+        try:
+            page.click('text=מלאי דירות יד', timeout=10000)
+        except:
+            try:
+                page.click('a >> text=יד 2', timeout=10000)
+            except:
+                page.goto(SEHEL_URL + '/yad2-inventory', timeout=30000)
         page.wait_for_load_state("domcontentloaded")
         time.sleep(3)
 
