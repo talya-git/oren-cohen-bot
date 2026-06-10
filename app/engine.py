@@ -73,7 +73,7 @@ class Conversation:
                 data["extracted"] = {}
             # תיקון extracted - המודל לפעמים מחזיר עברית במקום אנגלית
             ext = data.get("extracted", {})
-            intent_map = {"קנייה": "buy", "מכירה": "sell", "השקעה": "invest", "מתעניין": "browsing"}
+            intent_map = {"קנייה": "buy", "מכירה": "sell", "השקעה": "invest", "מתעניין": "browsing", "inquiry": "browsing"}
             if ext.get("intent") in intent_map:
                 ext["intent"] = intent_map[ext["intent"]]
             elif ext.get("intent") not in (None, "buy", "sell", "invest", "browsing", "unknown"):
@@ -88,6 +88,10 @@ class Conversation:
             if ext.get("engagement") not in (None, "high", "medium", "low"):
                 ext["engagement"] = "medium"
             data["extracted"] = ext
+            # תיקון stage - המודל לפעמים מחזיר ערכים שלא ברשימה
+            valid_stages = ("greeting", "intent", "qualification", "engagement", "cta", "handoff")
+            if data.get("stage") not in valid_stages:
+                data["stage"] = "engagement"
             turn = BotTurn(**data)
         except (json.JSONDecodeError, Exception):
             # fallback — חילוץ הטקסט שלפני ה-JSON כתשובה
