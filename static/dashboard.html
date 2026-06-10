@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>דשבורד - אורן כהן גרופ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body class="bg-gray-50 font-[Noto_Sans_Hebrew] min-h-screen p-6">
+  <div class="max-w-5xl mx-auto">
+    <header class="flex items-center gap-4 mb-8">
+      <img src="/static/img/logo.png" class="w-12 h-12 rounded-full" />
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800">דשבורד לידים</h1>
+        <p class="text-sm text-gray-500">אורן כהן גרופ — סיווג ופידבק</p>
+      </div>
+    </header>
+
+    <!-- Tabs -->
+    <div class="flex gap-2 mb-6">
+      <button onclick="showTab('ratings')" id="tab-ratings" class="px-4 py-2 rounded-full text-sm font-medium bg-emerald-600 text-white">דירוגי לידים</button>
+      <button onclick="showTab('feedback')" id="tab-feedback" class="px-4 py-2 rounded-full text-sm font-medium bg-gray-200 text-gray-700">פידבק שיחות</button>
+    </div>
+
+    <!-- Ratings -->
+    <div id="section-ratings">
+      <div id="ratings-list" class="space-y-3"></div>
+      <p id="no-ratings" class="text-gray-400 text-center py-8 hidden">אין דירוגים עדיין</p>
+    </div>
+
+    <!-- Feedback -->
+    <div id="section-feedback" class="hidden">
+      <div id="feedback-list" class="space-y-3"></div>
+      <p id="no-feedback" class="text-gray-400 text-center py-8 hidden">אין פידבק עדיין</p>
+    </div>
+  </div>
+
+  <script>
+    function showTab(tab) {
+      document.getElementById("section-ratings").classList.toggle("hidden", tab !== "ratings");
+      document.getElementById("section-feedback").classList.toggle("hidden", tab !== "feedback");
+      document.getElementById("tab-ratings").className = tab === "ratings"
+        ? "px-4 py-2 rounded-full text-sm font-medium bg-emerald-600 text-white"
+        : "px-4 py-2 rounded-full text-sm font-medium bg-gray-200 text-gray-700";
+      document.getElementById("tab-feedback").className = tab === "feedback"
+        ? "px-4 py-2 rounded-full text-sm font-medium bg-emerald-600 text-white"
+        : "px-4 py-2 rounded-full text-sm font-medium bg-gray-200 text-gray-700";
+    }
+
+    const colorMap = { red: "🔴", orange: "🟠", green: "🟢" };
+    const colorBg = { red: "bg-red-50 border-red-200", orange: "bg-orange-50 border-orange-200", green: "bg-green-50 border-green-200" };
+
+    async function loadRatings() {
+      const res = await fetch("/api/ratings");
+      const data = await res.json();
+      const list = document.getElementById("ratings-list");
+      if (!data.length) { document.getElementById("no-ratings").classList.remove("hidden"); return; }
+      list.innerHTML = data.reverse().map(r => `
+        <div class="border rounded-xl p-4 ${colorBg[r.color] || 'bg-white border-gray-200'}">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-lg">${colorMap[r.color] || ''} ${r.level}</span>
+            <span class="text-xs text-gray-400">${new Date(r.timestamp).toLocaleString("he-IL")}</span>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-gray-600">
+            ${r.profile.contact_name ? `<div><b>שם:</b> ${r.profile.contact_name}</div>` : ''}
+            ${r.profile.phone ? `<div><b>טלפון:</b> ${r.profile.phone}</div>` : ''}
+            ${r.profile.area ? `<div><b>אזור:</b> ${r.profile.area}</div>` : ''}
+            ${r.profile.budget_ils ? `<div><b>תקציב:</b> ${r.profile.budget_ils.toLocaleString()} ₪</div>` : ''}
+            ${r.profile.rooms ? `<div><b>חדרים:</b> ${r.profile.rooms}</div>` : ''}
+            ${r.profile.intent ? `<div><b>כוונה:</b> ${r.profile.intent}</div>` : ''}
+          </div>
+          ${r.transcript && r.transcript.length ? `
+            <details class="mt-3">
+              <summary class="text-xs text-gray-400 cursor-pointer">הצג שיחה</summary>
+              <div class="mt-2 space-y-1 text-xs bg-white/50 rounded-lg p-3 max-h-48 overflow-y-auto">
+                ${r.transcript.map(m => `<div><b>${m.role === 'user' ? 'לקוח' : 'דניאל'}:</b> ${m.content}</div>`).join('')}
+              </div>
+            </details>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+
+    async function loadFeedback() {
+      const res = await fetch("/api/feedback");
+      const data = await res.json();
+      const list = document.getElementById("feedback-list");
+      if (!data.length) { document.getElementById("no-feedback").classList.remove("hidden"); return; }
+      list.innerHTML = data.reverse().map(f => `
+        <div class="border rounded-xl p-4 ${f.rating === 'good' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-base">${f.rating === 'good' ? '👍 שיחה טובה' : '👎 שיחה לא טובה'}</span>
+            <span class="text-xs text-gray-400">${new Date(f.timestamp).toLocaleString("he-IL")}</span>
+          </div>
+          ${f.notes ? `<p class="text-sm text-gray-600 mt-1">הערות: ${f.notes}</p>` : ''}
+        </div>
+      `).join('');
+    }
+
+    loadRatings();
+    loadFeedback();
+  </script>
+</body>
+</html>

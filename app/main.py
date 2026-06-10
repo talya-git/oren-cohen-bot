@@ -13,6 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from . import sehel
+from . import ratings
 from .engine import Conversation
 from .prompts import GREETING
 
@@ -109,3 +110,47 @@ def get_profile(session_id: str) -> dict:
     if not convo:
         raise HTTPException(404, "session not found")
     return convo.profile.model_dump()
+
+
+class RatingRequest(BaseModel):
+    session_id: str
+    color: str  # red / orange / green
+
+
+@app.post("/rate")
+def rate_lead(req: RatingRequest) -> dict:
+    """שמירת דירוג ליד."""
+    convo = _sessions.get(req.session_id)
+    profile = convo.profile.model_dump() if convo else {}
+    transcript = convo.messages if convo else []
+    ratings.save_rating(req.session_id, req.color, profile, transcript)
+    return {"status": "saved"}
+
+
+class FeedbackRequest(BaseModel):
+    session_id: str
+    rating: str  # good / bad
+    notes: str = ""
+
+
+@app.post("/feedback")
+def save_feedback(req: FeedbackRequest) -> dict:
+    """שמירת פידבק על איכות השיחה."""
+    ratings.save_feedback(req.session_id, req.rating, req.notes)
+    return {"status": "saved"}
+
+
+@app.get("/dashboard")
+def dashboard() -> FileResponse:
+    """דף דשבורד לצפייה בדירוגים ופידבק."""
+    return FileResponse(STATIC_DIR / "dashboard.html")
+
+
+@app.get("/api/ratings")
+def api_ratings() -> list:
+    return ratings.get_all_ratings()
+
+
+@app.get("/api/feedback")
+def api_feedback() -> list:
+    return ratings.get_all_feedback()

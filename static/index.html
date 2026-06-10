@@ -369,15 +369,85 @@
     function showRating() {
       const overlay = document.createElement("div");
       overlay.className = "fixed inset-0 z-50 bg-black/60 flex items-center justify-center backdrop-blur-sm";
-      overlay.innerHTML = `<div class="bg-white rounded-2xl p-8 shadow-2xl text-center"><h2 class="text-lg font-medium text-wa-text mb-6">דרגי את הליד</h2><div class="flex gap-6 justify-center"><button onclick="rate('red', this)" class="w-16 h-16 rounded-full bg-red-600 text-2xl hover:scale-110 transition-transform shadow-lg">🔴</button><button onclick="rate('orange', this)" class="w-16 h-16 rounded-full bg-orange-500 text-2xl hover:scale-110 transition-transform shadow-lg">🟠</button><button onclick="rate('green', this)" class="w-16 h-16 rounded-full bg-green-600 text-2xl hover:scale-110 transition-transform shadow-lg">🟢</button></div><div class="flex gap-6 justify-center mt-2"><span class="w-16 text-center text-[11px] text-wa-meta">ליד חם</span><span class="w-16 text-center text-[11px] text-wa-meta">בינוני</span><span class="w-16 text-center text-[11px] text-wa-meta">ליד קר</span></div></div>`;
+      overlay.id = "rating-overlay";
+      overlay.innerHTML = `<div class="bg-white rounded-2xl p-8 shadow-2xl text-center max-w-sm w-full mx-4">
+        <h2 class="text-lg font-medium text-wa-text mb-6">דרגי את הליד</h2>
+        <div class="flex gap-6 justify-center">
+          <button onclick="rate('red', this)" class="w-16 h-16 rounded-full bg-red-600 text-2xl hover:scale-110 transition-transform shadow-lg">🔴</button>
+          <button onclick="rate('orange', this)" class="w-16 h-16 rounded-full bg-orange-500 text-2xl hover:scale-110 transition-transform shadow-lg">🟠</button>
+          <button onclick="rate('green', this)" class="w-16 h-16 rounded-full bg-green-600 text-2xl hover:scale-110 transition-transform shadow-lg">🟢</button>
+        </div>
+        <div class="flex gap-6 justify-center mt-2">
+          <span class="w-16 text-center text-[11px] text-wa-meta">ליד חם</span>
+          <span class="w-16 text-center text-[11px] text-wa-meta">בינוני</span>
+          <span class="w-16 text-center text-[11px] text-wa-meta">ליד קר</span>
+        </div>
+      </div>`;
       document.body.appendChild(overlay);
     }
 
     function rate(color, btn) {
+      // Save rating to server
+      fetch("/rate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId, color: color }),
+      });
+
       const labels = { red: "ליד חם 🔴", orange: "ליד בינוני 🟠", green: "ליד קר 🟢" };
-      const overlay = btn.closest(".fixed");
+      const overlay = document.getElementById("rating-overlay");
       overlay.querySelector(".bg-white").innerHTML = `<div class="text-wa-teal text-lg font-medium py-4">✓ ${labels[color]} — נשמר</div>`;
-      setTimeout(() => overlay.remove(), 1500);
+      setTimeout(() => {
+        overlay.remove();
+        showFeedback();
+      }, 1200);
+    }
+
+    function showFeedback() {
+      const overlay = document.createElement("div");
+      overlay.className = "fixed inset-0 z-50 bg-black/60 flex items-center justify-center backdrop-blur-sm";
+      overlay.id = "feedback-overlay";
+      overlay.innerHTML = `<div class="bg-white rounded-2xl p-8 shadow-2xl text-center max-w-sm w-full mx-4">
+        <h2 class="text-lg font-medium text-wa-text mb-4">איך הייתה השיחה עם הבוט?</h2>
+        <div class="flex gap-4 justify-center mb-4">
+          <button onclick="submitFeedback('good')" class="px-6 py-2.5 bg-green-100 text-green-700 rounded-full font-medium hover:bg-green-200 transition">👍 טובה</button>
+          <button onclick="showFeedbackNotes()" class="px-6 py-2.5 bg-red-100 text-red-700 rounded-full font-medium hover:bg-red-200 transition">👎 לא טובה</button>
+        </div>
+        <div id="feedback-notes" class="hidden">
+          <textarea id="feedback-text" rows="3" placeholder="מה לא היה טוב?" class="w-full border border-wa-border rounded-lg p-3 text-sm outline-none resize-none mb-3 text-right" dir="rtl"></textarea>
+          <button onclick="submitFeedbackWithNotes()" class="bg-wa-teal text-white rounded-full px-6 py-2 text-sm font-medium hover:opacity-90 transition">שלח</button>
+        </div>
+      </div>`;
+      document.body.appendChild(overlay);
+    }
+
+    function showFeedbackNotes() {
+      document.getElementById("feedback-notes").classList.remove("hidden");
+    }
+
+    function submitFeedback(rating) {
+      fetch("/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId, rating: rating, notes: "" }),
+      });
+      closeFeedback("תודה על הפידבק!");
+    }
+
+    function submitFeedbackWithNotes() {
+      const notes = document.getElementById("feedback-text").value;
+      fetch("/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId, rating: "bad", notes: notes }),
+      });
+      closeFeedback("תודה, נשתפר!");
+    }
+
+    function closeFeedback(msg) {
+      const overlay = document.getElementById("feedback-overlay");
+      overlay.querySelector(".bg-white").innerHTML = `<div class="text-wa-teal text-lg font-medium py-4">✓ ${msg}</div>`;
+      setTimeout(() => overlay.remove(), 1200);
     }
 
     input.addEventListener("keydown", (e) => {
