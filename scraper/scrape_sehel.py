@@ -25,6 +25,10 @@ PROPERTIES_FILE = Path(__file__).resolve().parent.parent / "data" / "properties.
 def login(page):
     """התחברות לשכל."""
     print("[1] מתחבר לשכל...")
+    page.set_extra_http_headers({
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        "X-Forwarded-For": "31.154.0.1",
+    })
     page.goto(SEHEL_URL, timeout=60000)
     page.wait_for_load_state("domcontentloaded")
     time.sleep(5)
