@@ -25,8 +25,7 @@ def _load(bin_id: str) -> list:
         if resp.status_code == 200:
             data = resp.json().get("record", [])
             if isinstance(data, list):
-                # Filter out init record
-                return [d for d in data if not d.get("init")]
+                return [d for d in data if not d.get("init") and not d.get("_empty")]
     except:
         pass
     return []
@@ -38,13 +37,15 @@ def _save(bin_id: str, data: list) -> None:
         print(f"[SAVE] No key or bin_id: key={bool(JSONBIN_KEY)}, bin={bin_id}")
         return
     try:
+        # JSONBin doesn't accept empty arrays
+        save_data = data if data else [{"_empty": True}]
         resp = httpx.put(
             f"{JSONBIN_API}/b/{bin_id}",
             headers={
                 "X-Master-Key": JSONBIN_KEY,
                 "Content-Type": "application/json",
             },
-            json=data,
+            json=save_data,
             timeout=15,
         )
         print(f"[SAVE] bin={bin_id} status={resp.status_code} items={len(data)}")
