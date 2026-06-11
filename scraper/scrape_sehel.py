@@ -205,40 +205,34 @@ def main():
 
     with sync_playwright() as p:
         # אם יש session שמור — משתמשים בו (בלי 2FA)
-        if SESSION_DIR.exists():
+        state_file = SESSION_DIR / "state.json"
+        if state_file.exists():
             print("   משתמש ב-session שמור...")
-            browser = p.chromium.launch_persistent_context(
-                user_data_dir=str(SESSION_DIR),
-                headless=True,
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(
+                storage_state=str(state_file),
                 accept_downloads=True,
                 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
             )
-            page = browser.pages[0] if browser.pages else browser.new_page()
-            page.goto(SEHEL_URL, timeout=60000)
+            page = context.new_page()
+            page.goto(SEHEL_URL + '/projects/app/listing', timeout=60000)
             page.wait_for_load_state("domcontentloaded")
             time.sleep(5)
 
-            # בודק אם אנחנו מחוברים (לא בדף לוגין)
-            if "/login" in page.url and "projects" not in page.url and "listing" not in page.url:
-                print("   Session פג תוקף — מנסה להתחבר עם סיסמא...")
-                login(page)
+            if "/login" in page.url:
+                print("   Session פג תוקף — צריך להריץ save_state.py מחדש")
+                browser.close()
+                return
             else:
                 print("   ✓ מחובר (בלי 2FA)")
         else:
-            # אין session — לוגין רגיל
-            browser = p.chromium.launch(headless=True)
-            context = browser.new_context(
-                accept_downloads=True,
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
-            )
-            page = context.new_page()
-            login(page)
+            print("   אין session שמור — הריצי קודם: python scraper/save_state.py")
+            return
 
         # === מלאי פרויקטים ===
         print("\n[2] נכנס למלאי פרויקטים...")
-        page.goto(SEHEL_URL + '/projects/app/listing', timeout=30000)
-        page.wait_for_load_state("domcontentloaded")
-        time.sleep(3)
+        # כבר שם אחרי ההתחברות
+        time.sleep(2)
 
         project_files = export_all_pages(page, "projects")
 
