@@ -8,64 +8,13 @@ from datetime import datetime, timezone
 JSONBIN_API = "https://api.jsonbin.io/v3"
 JSONBIN_KEY = os.getenv("JSONBIN_KEY", "$2a$10$KoACzRcY64gqyT2LnOQ9UOG06ZE8gub8FZLzOm3B5nwUxz7mDEN92")
 
-# Bin IDs - will be created on first use
-RATINGS_BIN = os.getenv("RATINGS_BIN", "")
-FEEDBACK_BIN = os.getenv("FEEDBACK_BIN", "")
+# Bin IDs
+RATINGS_BIN = "6a2a95b3da38895dfeacbd8a"
+FEEDBACK_BIN = "6a2a95b3f5f4af5e29de4696"
 
-_cache = {"ratings_bin": RATINGS_BIN, "feedback_bin": FEEDBACK_BIN}
-
-
-def _create_bin(name: str) -> str:
-    """יוצר bin חדש ב-JSONBin."""
-    try:
-        resp = httpx.post(
-            f"{JSONBIN_API}/b",
-            headers={
-                "X-Master-Key": JSONBIN_KEY,
-                "Content-Type": "application/json",
-                "X-Bin-Name": name,
-            },
-            json=[],
-            timeout=15,
-        )
-        if resp.status_code == 200:
-            return resp.json()["metadata"]["id"]
-    except:
-        pass
-    return ""
-
-
-def _get_bin_id(name: str) -> str:
-    """מחזיר bin ID, יוצר אם לא קיים."""
-    key = f"{name}_bin"
-    if _cache.get(key):
-        return _cache[key]
-
-    # Try to find existing bin
-    try:
-        resp = httpx.get(
-            f"{JSONBIN_API}/bins",
-            headers={"X-Master-Key": JSONBIN_KEY},
-            timeout=15,
-        )
-        if resp.status_code == 200:
-            for b in resp.json():
-                if b.get("snippetMeta", {}).get("name") == name:
-                    _cache[key] = b["id"]
-                    return b["id"]
-    except:
-        pass
-
-    # Create new bin
-    bin_id = _create_bin(name)
-    _cache[key] = bin_id
-    return bin_id
-
-
-def _load(name: str) -> list:
+def _load(bin_id: str) -> list:
     """טוען נתונים מ-JSONBin."""
-    bin_id = _get_bin_id(name)
-    if not bin_id:
+    if not JSONBIN_KEY or not bin_id:
         return []
     try:
         resp = httpx.get(
@@ -76,16 +25,16 @@ def _load(name: str) -> list:
         if resp.status_code == 200:
             data = resp.json().get("record", [])
             if isinstance(data, list):
-                return data
+                # Filter out init record
+                return [d for d in data if not d.get("init")]
     except:
         pass
     return []
 
 
-def _save(name: str, data: list) -> None:
+def _save(bin_id: str, data: list) -> None:
     """שומר נתונים ל-JSONBin."""
-    bin_id = _get_bin_id(name)
-    if not bin_id:
+    if not JSONBIN_KEY or not bin_id:
         return
     try:
         httpx.put(
@@ -103,7 +52,7 @@ def _save(name: str, data: list) -> None:
 
 def save_rating(session_id: str, color: str, profile: dict, transcript: list) -> None:
     """שמירת דירוג ליד."""
-    records = _load("oren-ratings")
+    records = _load(RATINGS_BIN)
     records.append({
         "session_id": session_id,
         "color": color,
@@ -112,12 +61,12 @@ def save_rating(session_id: str, color: str, profile: dict, transcript: list) ->
         "transcript": transcript,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     })
-    _save("oren-ratings", records)
+    _save(RATINGS_BIN, records)
 
 
 def save_feedback(session_id: str, rating: str, notes: str, transcript: list = None) -> None:
     """שמירת פידבק על איכות השיחה."""
-    records = _load("oren-feedback")
+    records = _load(FEEDBACK_BIN)
     records.append({
         "session_id": session_id,
         "rating": rating,
@@ -125,12 +74,12 @@ def save_feedback(session_id: str, rating: str, notes: str, transcript: list = N
         "transcript": transcript or [],
         "timestamp": datetime.now(timezone.utc).isoformat(),
     })
-    _save("oren-feedback", records)
+    _save(FEEDBACK_BIN, records)
 
 
 def get_all_ratings() -> list:
-    return _load("oren-ratings")
+    return _load(RATINGS_BIN)
 
 
 def get_all_feedback() -> list:
-    return _load("oren-feedback")
+    return _load(FEEDBACK_BIN)
