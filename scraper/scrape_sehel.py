@@ -127,10 +127,10 @@ def parse_excel_files(files):
         if len(rows) < 2:
             continue
 
-        # מוצא שורת כותרות (שורה ראשונה או שנייה)
+        # מוצא שורת כותרות (שורה שמתחילה במילה "פרויקט" בדיוק)
         header_row = 0
         for i, row in enumerate(rows):
-            if row and "פרויקט" in str(row):
+            if row and row[0] == "פרויקט":
                 header_row = i
                 break
 
@@ -238,7 +238,7 @@ def main():
 
         # === מלאי יד 2 ===
         print("\n[3] נכנס למלאי דירות יד 2...")
-        page.goto(SEHEL_URL + '/projects/app/yad2', timeout=30000)
+        page.goto(SEHEL_URL + '/projects/app/listing/yad2', timeout=30000)
         page.wait_for_load_state("domcontentloaded")
         time.sleep(3)
 
@@ -256,7 +256,7 @@ def main():
 
         # Push to git if possible
         print("\n[5] מעלה לגיט...")
-        os.system(f'cd "{PROPERTIES_FILE.parent.parent}" && git add data/properties.json && git commit -m "Auto-update properties" && git push origin main')
+        os.system(f'cd "{PROPERTIES_FILE.parent.parent}" && git add -A && git commit -m "Auto-update properties" && git push origin main')
     else:
         print("⚠ לא הורדו קבצים.")
         print("   בדקי את צילומי המסך בתיקיית downloads")
