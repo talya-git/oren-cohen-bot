@@ -39,3 +39,16 @@ jobs:
           git diff --staged --quiet || git commit -m "Auto-update properties from Sehel"
           git pull origin main --rebase
           git push origin main
+
+      - name: Notify if session expired
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.NOTIFY_EMAIL }}
+          password: ${{ secrets.NOTIFY_EMAIL_PASSWORD }}
+          subject: "⚠️ Sehel Bot - Session פג תוקף"
+          body: "ה-session של שכל פג תוקף. צריך להריץ מהבית: python scraper/save_state.py"
+          to: tsalyato@orencohengroup.com
+          from: ${{ secrets.NOTIFY_EMAIL }}
