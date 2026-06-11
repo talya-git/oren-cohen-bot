@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>מצב אימון — אורן כהן גרופ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body class="bg-gray-50 font-[Noto_Sans_Hebrew] h-[100dvh] flex flex-col">
+  <header class="bg-emerald-700 text-white px-4 py-3 flex items-center gap-3">
+    <div>
+      <h1 class="text-lg font-medium">מצב אימון 🎯</h1>
+      <p class="text-xs opacity-80">הבוט = לקוח | אתה = הסוכן</p>
+    </div>
+    <button onclick="newTraining()" class="mr-auto bg-white/20 text-white text-xs rounded-full px-3 py-1 hover:bg-white/30">שיחה חדשה</button>
+  </header>
+
+  <div id="chat" class="flex-1 overflow-y-auto p-4 flex flex-col gap-2"></div>
+
+  <footer class="bg-white border-t p-3 flex gap-2">
+    <input id="input" type="text" placeholder="הקלד תשובה כסוכן..." class="flex-1 border rounded-lg px-3 py-2 text-sm outline-none" />
+    <button onclick="send()" class="bg-emerald-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-emerald-700">שלח</button>
+  </footer>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("input");
+    let sessionId = null;
+
+    function addMsg(text, type) {
+      const d = document.createElement("div");
+      d.className = type === "client"
+        ? "self-start bg-blue-50 border border-blue-200 text-blue-900 px-3 py-2 rounded-lg max-w-[80%] text-sm"
+        : "self-end bg-emerald-50 border border-emerald-200 text-emerald-900 px-3 py-2 rounded-lg max-w-[80%] text-sm";
+      const label = type === "client" ? "🧑 לקוח:" : "👔 סוכן (אתה):";
+      d.innerHTML = `<span class="font-medium text-xs block mb-1 opacity-70">${label}</span>${text}`;
+      chat.appendChild(d);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function addSystem(text) {
+      const d = document.createElement("div");
+      d.className = "self-center bg-gray-100 text-gray-500 text-xs px-3 py-1.5 rounded-full";
+      d.textContent = text;
+      chat.appendChild(d);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    async function startTraining() {
+      addSystem("שיחה חדשה — הבוט ישחק לקוח, אתה הסוכן");
+      const res = await fetch("/train/start", { method: "POST" });
+      const data = await res.json();
+      sessionId = data.session_id;
+      addMsg(data.client_message, "client");
+      input.focus();
+    }
+
+    async function send() {
+      const text = input.value.trim();
+      if (!text) return;
+      addMsg(text, "agent");
+      input.value = "";
+
+      const res = await fetch("/train/respond", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId, agent_response: text }),
+      });
+      const data = await res.json();
+
+      if (data.done) {
+        addSystem("✅ שיחה הסתיימה! התשובות שלך נשמרו ללמידה.");
+      } else {
+        addMsg(data.client_message, "client");
+      }
+      input.focus();
+    }
+
+    function newTraining() {
+      chat.innerHTML = "";
+      sessionId = null;
+      startTraining();
+    }
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") send();
+    });
+
+    startTraining();
+  </script>
+</body>
+</html>

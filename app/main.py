@@ -6,6 +6,7 @@
 
 from pathlib import Path
 from uuid import uuid4
+import os
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
@@ -151,6 +152,80 @@ def dashboard() -> FileResponse:
 @app.get("/api/ratings")
 def api_ratings() -> list:
     return ratings.get_all_ratings()
+
+
+# === Training Mode ===
+_train_sessions: dict[str, list] = {}
+
+
+@app.get("/train")
+def train_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "train.html")
+
+
+@app.post("/train/start")
+def train_start() -> dict:
+    """מתחיל שיחת אימון — הבוט משחק לקוח."""
+    from openai import OpenAI
+    import httpx
+    client = OpenAI(
+        api_key=os.getenv("OPENAI_API_KEY"),
+        http_client=httpx.Client(verify=False),
+    )
+    sid = str(uuid4())
+    system = """אתה לקוח שמתעניין בנדל"ן יוקרה בירושלים. אתה פונה לחברת אורן כהן גרופ.
+תתנהג כמו לקוח אמיתי — שאל שאלות טבעיות, תגיב כאדם.
+אתה יכול להיות: משקיע מחו"ל, קונה ישראלי, מחפש שכירות, מתעניין בפרויקט ספציפי, וכו'.
+פתח עם הודעה ראשונה קצרה וטבעית כלקוח. יכול להיות בעברית או באנגלית.
+אל תהיה ארוך — משפט-שניים מקסימום בכל הודעה."""
+
+    messages = [{"role": "system", "content": system}]
+    resp = client.chat.completions.create(
+        model="gpt-4o-mini", messages=messages, temperature=0.9
+    )
+    client_msg = resp.choices[0].message.content.strip()
+    messages.append({"role": "assistant", "content": client_msg})
+    _train_sessions[sid] = messages
+    return {"session_id": sid, "client_message": client_msg}
+
+
+@app.post("/train/respond")
+def train_respond(req: dict) -> dict:
+    """הסוכן עונה, הבוט ממשיך כלקוח."""
+    from openai import OpenAI
+    import httpx
+    client = OpenAI(
+        api_key=os.getenv("OPENAI_API_KEY"),
+        http_client=httpx.Client(verify=False),
+    )
+    sid = req.get("session_id", "")
+    agent_response = req.get("agent_response", "")
+    messages = _train_sessions.get(sid, [])
+
+    if not messages:
+        return {"done": True}
+
+    messages.append({"role": "user", "content": agent_response})
+
+    # Check if conversation should end (after 6-8 exchanges)
+    turns = len([m for m in messages if m["role"] == "user"])
+    if turns >= 6:
+        # Save the training conversation
+        transcript = []
+        for m in messages[1:]:  # skip system
+            role = "client" if m["role"] == "assistant" else "agent"
+            transcript.append({"role": role, "content": m["content"]})
+        ratings.save_feedback(sid, "training", "שיחת אימון", transcript)
+        del _train_sessions[sid]
+        return {"done": True}
+
+    resp = client.chat.completions.create(
+        model="gpt-4o-mini", messages=messages, temperature=0.9
+    )
+    client_msg = resp.choices[0].message.content.strip()
+    messages.append({"role": "assistant", "content": client_msg})
+    _train_sessions[sid] = messages
+    return {"done": False, "client_message": client_msg}
 
 
 @app.delete("/api/ratings/{index}")
