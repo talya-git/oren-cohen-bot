@@ -53,14 +53,21 @@
       height: 300px;
       width: 320px;
     }
-    .emoji-container { position: absolute; bottom: 65px; right: 16px; z-index: 30; display: none; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+    .emoji-container { position: absolute; bottom: 55px; right: 8px; z-index: 30; display: none; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
     .emoji-container.show { display: block; }
+    @media (max-height: 500px) {
+      header { padding: 4px 8px; min-height: 40px; }
+      header h1 { font-size: 14px; }
+      header .text-\[13px\] { font-size: 11px; }
+      .end-chat-btn, .new-chat-btn { top: 45px; font-size: 10px; padding: 3px 8px; }
+      footer { padding: 4px 8px; }
+    }
     .recording-indicator { animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     .file-preview { max-width: 200px; max-height: 150px; border-radius: 8px; }
   </style>
 </head>
-<body class="h-screen overflow-hidden flex flex-col font-sans">
+<body class="h-[100dvh] overflow-hidden flex flex-col font-sans">
   <div class="fixed inset-0 wa-pattern opacity-90 z-0"></div>
   <div class="relative z-10 flex flex-col h-full">
 
