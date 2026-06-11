@@ -13,4 +13,4 @@ for name in ["oren-ratings", "oren-feedback"]:
         json=[],
         timeout=15,
     )
-    print(f"{name}: {r.json()['metadata']['id']}")
+    print(f"{name}: {r.status_code} - {r.text[:200]}")
