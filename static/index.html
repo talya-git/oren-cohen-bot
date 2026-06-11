@@ -83,7 +83,7 @@
     <button onclick="newChat()" class="fixed top-[70px] left-[120px] z-10 bg-wa-teal text-white text-xs border border-wa-teal rounded-full px-4 py-1.5 shadow-sm hover:opacity-90 transition font-medium">שיחה חדשה +</button>
 
     <!-- Chat -->
-    <div id="chat" class="flex-1 overflow-y-auto px-4 md:px-16 py-4 flex flex-col gap-0.5 scroll-smooth"></div>
+    <div id="chat" class="flex-1 overflow-y-auto px-2 sm:px-4 md:px-16 py-4 flex flex-col gap-0.5 scroll-smooth"></div>
 
     <!-- Emoji Picker -->
     <div class="emoji-container" id="emoji-container">
@@ -94,23 +94,23 @@
     <input type="file" id="file-input" accept="image/*,.pdf,.doc,.docx" class="hidden" />
 
     <!-- Input bar -->
-    <footer class="bg-wa-header border-t border-wa-border px-4 py-2 flex items-end gap-2.5 shrink-0 relative">
+    <footer class="bg-wa-header border-t border-wa-border px-2 sm:px-4 py-2 flex items-end gap-1.5 sm:gap-2.5 shrink-0 relative">
       <!-- Emoji button -->
-      <button onclick="toggleEmoji()" id="emoji-btn" class="shrink-0 mb-2">
+      <button onclick="toggleEmoji()" id="emoji-btn" class="shrink-0 mb-2 hidden sm:block">
         <svg class="w-7 h-7 fill-wa-icon hover:fill-wa-teal transition-colors" viewBox="0 0 24 24"><path d="M9.153 11.603c.795 0 1.44-.88 1.44-1.962s-.645-1.96-1.44-1.96c-.795 0-1.44.879-1.44 1.96s.645 1.962 1.44 1.962zm5.694 0c.795 0 1.44-.88 1.44-1.962s-.645-1.96-1.44-1.96c-.795 0-1.44.879-1.44 1.96s.645 1.962 1.44 1.962zM11.84 15.757c2.24 0 3.76-1.26 3.76-2.63h-7.52c0 1.37 1.52 2.63 3.76 2.63zM12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.418 0-8-3.582-8-8s3.582-8 8-8 8 3.582 8 8-3.582 8-8 8z"/></svg>
       </button>
       <!-- Attach button -->
-      <button onclick="document.getElementById('file-input').click()" class="shrink-0 mb-2">
+      <button onclick="document.getElementById('file-input').click()" class="shrink-0 mb-2 hidden sm:block">
         <svg class="w-7 h-7 fill-wa-icon hover:fill-wa-teal transition-colors" viewBox="0 0 24 24"><path d="M1.816 15.556v.002c0 1.502.584 2.912 1.646 3.972s2.472 1.647 3.974 1.647a5.58 5.58 0 003.972-1.645l9.547-9.548c.769-.768 1.147-1.767 1.058-2.817-.079-.968-.548-1.927-1.319-2.698-1.594-1.592-4.068-1.711-5.517-.262l-7.916 7.915c-.881.881-.792 2.25.214 3.261.501.501 1.134.813 1.78.884.606.064 1.159-.114 1.533-.49l5.763-5.762a.456.456 0 00-.646-.643l-5.762 5.763c-.226.226-.479.293-.695.272-.473-.049-.913-.274-1.248-.608-.727-.727-.665-1.6-.043-2.226l7.921-7.916c1.08-1.08 3.053-.96 4.282.266.587.588.934 1.303.994 2.013.06.71-.199 1.407-.727 1.934L9.438 19.93a4.726 4.726 0 01-3.384 1.398 4.64 4.64 0 01-3.382-1.398c-1.867-1.866-1.867-4.899 0-6.766l8.589-8.59a.456.456 0 00-.646-.646l-8.589 8.59c-2.222 2.222-2.222 5.836 0 8.058z"/></svg>
       </button>
       <!-- Text input -->
-      <div class="flex-1 bg-white rounded-lg border border-wa-border flex items-end px-3 py-2">
-        <textarea id="input" rows="1" placeholder="הקלידו הודעה" class="flex-1 bg-transparent text-[15px] text-wa-text placeholder-wa-meta outline-none resize-none leading-5 max-h-[100px]"></textarea>
+      <div class="flex-1 min-w-0 bg-white rounded-lg border border-wa-border flex items-end px-3 py-2">
+        <textarea id="input" rows="1" placeholder="הקלידו הודעה" class="flex-1 w-full bg-transparent text-[15px] text-wa-text placeholder-wa-meta outline-none resize-none leading-5 max-h-[100px]"></textarea>
       </div>
       <!-- Send / Mic button -->
-      <button id="send-btn" onclick="handleSendOrMic()" class="w-[42px] h-[42px] rounded-full flex items-center justify-center shrink-0 mb-0.5 hover:scale-105 transition-transform">
-        <svg id="send-icon" class="w-7 h-7 fill-wa-icon hover:fill-wa-teal transition-colors hidden" viewBox="0 0 24 24"><path d="M1.101 21.757L23.8 12.028 1.101 2.3l.011 7.912 13.623 1.816-13.623 1.817-.011 7.912z"/></svg>
-        <svg id="mic-icon" class="w-7 h-7 fill-wa-icon hover:fill-wa-teal transition-colors" viewBox="0 0 24 24"><path d="M11.999 14.942c2.001 0 3.531-1.53 3.531-3.531V4.35c0-2.001-1.53-3.531-3.531-3.531S8.469 2.35 8.469 4.35v7.061c0 2.001 1.53 3.531 3.53 3.531zm6.238-3.53c0 3.531-2.942 6.002-6.237 6.002s-6.237-2.471-6.237-6.002H3.761c0 4.001 3.178 7.297 7.061 7.885v3.884h2.354v-3.884c3.884-.588 7.061-3.884 7.061-7.885h-2z"/></svg>
+      <button id="send-btn" onclick="handleSendOrMic()" class="w-[38px] h-[38px] sm:w-[42px] sm:h-[42px] rounded-full flex items-center justify-center shrink-0 mb-0.5 hover:scale-105 transition-transform">
+        <svg id="send-icon" class="w-6 h-6 sm:w-7 sm:h-7 fill-wa-icon hover:fill-wa-teal transition-colors hidden" viewBox="0 0 24 24"><path d="M1.101 21.757L23.8 12.028 1.101 2.3l.011 7.912 13.623 1.816-13.623 1.817-.011 7.912z"/></svg>
+        <svg id="mic-icon" class="w-6 h-6 sm:w-7 sm:h-7 fill-wa-icon hover:fill-wa-teal transition-colors" viewBox="0 0 24 24"><path d="M11.999 14.942c2.001 0 3.531-1.53 3.531-3.531V4.35c0-2.001-1.53-3.531-3.531-3.531S8.469 2.35 8.469 4.35v7.061c0 2.001 1.53 3.531 3.53 3.531zm6.238-3.53c0 3.531-2.942 6.002-6.237 6.002s-6.237-2.471-6.237-6.002H3.761c0 4.001 3.178 7.297 7.061 7.885v3.884h2.354v-3.884c3.884-.588 7.061-3.884 7.061-7.885h-2z"/></svg>
       </button>
     </footer>
 
@@ -313,7 +313,7 @@
       addDateSep();
       const d = document.createElement("div");
       const isOut = type === "out";
-      d.className = `relative max-w-[55%] md:max-w-[45%] px-2.5 py-1.5 rounded-lg text-sm leading-[19px] whitespace-pre-wrap break-words shadow-sm mb-0.5 ${isOut ? "self-end bg-wa-green text-wa-text rounded-tl-none msg-tail-out" : "self-start bg-wa-bubble text-wa-text rounded-tr-none msg-tail-in"}`;
+      d.className = `relative max-w-[80%] sm:max-w-[55%] md:max-w-[45%] px-2.5 py-1.5 rounded-lg text-sm leading-[19px] whitespace-pre-wrap break-words shadow-sm mb-0.5 ${isOut ? "self-end bg-wa-green text-wa-text rounded-tl-none msg-tail-out" : "self-start bg-wa-bubble text-wa-text rounded-tr-none msg-tail-in"}`;
       const checks = isOut ? '<svg class="w-4 h-[11px] fill-wa-check inline" viewBox="0 0 16 11"><path d="M11.07 0L5.96 5.11 4.47 3.63 3.06 5.04l2.9 2.9 6.52-6.52L11.07 0zM7.54 5.11L6.13 6.52l1.41 1.41 1.41-1.41-1.41-1.41zM1.41 5.04L0 6.45l2.9 2.9 1.41-1.41-2.9-2.9z"/></svg>' : "";
       d.innerHTML = `${text}<span class="inline-flex items-center gap-1 float-left ml-1 pt-1"><span class="text-[11px] text-wa-meta whitespace-nowrap">${getTime()}</span>${checks}</span>`;
       chat.appendChild(d);
