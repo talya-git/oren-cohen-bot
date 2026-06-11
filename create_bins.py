@@ -10,7 +10,7 @@ for name in ["oren-ratings", "oren-feedback"]:
             "Content-Type": "application/json",
             "X-Bin-Name": name,
         },
-        json=[],
+        json=[{"init": True}],
         timeout=15,
     )
     print(f"{name}: {r.status_code} - {r.text[:200]}")
