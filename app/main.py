@@ -141,6 +141,8 @@ def chat(req: ChatRequest) -> ChatResponse:
         for m in messages[1:]:
             role = "client" if m["role"] == "assistant" else "agent"
             transcript.append({"role": role, "content": m["content"]})
+        # שומר גם ברייטינג וגם בפידבק — כדי שהבוט ילמד מכל השיחות
+        ratings.save_rating(sid, "green", {}, transcript)
         ratings.save_feedback(sid, "training", "שיחת אימון", transcript)
         del _train_sessions[sid]
         return ChatResponse(
