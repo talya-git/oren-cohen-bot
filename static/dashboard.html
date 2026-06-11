@@ -115,13 +115,13 @@
     async function deleteRating(index) {
       if (!confirm('בטוח שרוצה למחוק?')) return;
       await fetch('/api/ratings/' + index, { method: 'DELETE' });
-      location.reload();
+      setTimeout(() => location.reload(), 1500);
     }
 
     async function deleteFeedback(index) {
       if (!confirm('בטוח שרוצה למחוק?')) return;
       await fetch('/api/feedback/' + index, { method: 'DELETE' });
-      location.reload();
+      setTimeout(() => location.reload(), 1500);
     }
 
     loadRatings();
