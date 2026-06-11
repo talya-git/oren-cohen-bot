@@ -56,7 +56,30 @@ def export_all_pages(page, section_name):
         print(f"   עמוד {page_num} - מייצא...")
 
         # לוחץ על "יצוא לאקסל" (כפתור בצד שמאל למעלה)
-        export_btn = page.query_selector('button:has-text("יצוא לאקסל"), a:has-text("יצוא לאקסל"), :text("יצוא לאקסל")')
+        export_btn = None
+        for selector in [
+            'text="יצוא לאקסל"',
+            'button:has-text("יצוא")',
+            'a:has-text("יצוא")',
+            'input[value*="יצוא"]',
+            '[onclick*="export"]',
+            '[onclick*="excel"]',
+            '[class*="export"]',
+        ]:
+            export_btn = page.query_selector(selector)
+            if export_btn and export_btn.is_visible():
+                break
+            export_btn = None
+        # ניסיון אחרון — חיפוש בכל האלמנטים
+        if not export_btn:
+            for el in page.query_selector_all('button, a, span, input'):
+                try:
+                    txt = el.inner_text()
+                    if 'יצוא' in txt and 'אקסל' in txt:
+                        export_btn = el
+                        break
+                except:
+                    continue
 
         if export_btn:
             with page.expect_download(timeout=30000) as download_info:
