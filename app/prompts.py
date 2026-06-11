@@ -146,6 +146,11 @@ def _load_lessons() -> str:
 
 LESSONS_CONTEXT: str = _load_lessons()
 
+
+def get_fresh_lessons() -> str:
+    """טוען לקחים עדכניים בכל שיחה חדשה."""
+    return _load_lessons()
+
 # === דוגמאות זהב (Few-shot) ===
 GOLDEN_EXAMPLES_FILE = Path(__file__).resolve().parent.parent / "data" / "golden_examples.json"
 
