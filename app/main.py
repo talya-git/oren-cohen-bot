@@ -55,25 +55,96 @@ class ChatResponse(BaseModel):
 
 @app.post("/chat", response_model=ChatResponse)
 def chat(req: ChatRequest) -> ChatResponse:
+    """Training mode: bot plays as client, user is the agent."""
     if req.session_id and req.session_id in _sessions:
-        sid, convo = req.session_id, _sessions[req.session_id]
+        sid = req.session_id
     else:
         sid = str(uuid4())
-        convo = _sessions[sid] = Conversation()
+        # Create training session - bot as client
+        from openai import OpenAI
+        import httpx as hx
+        client_ai = OpenAI(
+            api_key=os.getenv("OPENAI_API_KEY"),
+            http_client=hx.Client(verify=False),
+        )
+        system = """אתה לקוח שמתעניין בנדל"ן בירושלים. אתה פונה לחברת אורן כהן גרופ.
 
-    turn, score = convo.send(req.message)
+תתנהג כמו לקוח אמיתי — בנאלי, טבעי, לא מושלם. לקוחות אמיתיים:
+- כותבים קצר, לפעמים עם שגיאות כתיב
+- לא תמיד ברורים במה שהם רוצים
+- שואלים שאלות פשוטות ויומיומיות
+- לפעמים עונים בחצי משפט
+- לפעמים שולחים רק "היי" או "שלום"
+- לפעמים שואלים על מחיר ישר בלי הקדמה
+- לפעמים כועסים או חסרי סבלנות
+- לפעמים מדברים באנגלית (משקיעים מחו"ל)
 
-    # הזרקה לשכל פעם אחת — כשהליד בשל (handoff או High) ויש טלפון
-    lead_id = _maybe_push_to_sehel(sid, convo, score.level, score.score, req.media_source, turn.handoff_to_human)
+כללים:
+- משפט-שניים מקסימום בכל הודעה
+- אם הסוכן שואל שאלות — תענה, אבל לא תמיד בצורה מלאה
+- אם הסוכן אומר שיחזור אליך / תודה / ביי — תגיב תודה ותסיים
+- יכול להיות בעברית או באנגלית
+- המשך בהתאם לתשובות הסוכן"""
+        _train_sessions[sid] = {
+            "messages": [{"role": "system", "content": system}],
+            "client": client_ai,
+        }
+        # Generate first client message
+        resp = client_ai.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=_train_sessions[sid]["messages"],
+            temperature=0.9,
+        )
+        first_msg = resp.choices[0].message.content.strip()
+        _train_sessions[sid]["messages"].append({"role": "assistant", "content": first_msg})
+        return ChatResponse(
+            session_id=sid, reply=first_msg, stage="greeting",
+            level="Medium", score=0.5, handoff_to_human=False,
+        )
+
+    # Continue training conversation
+    session = _train_sessions.get(sid)
+    if not session:
+        return ChatResponse(
+            session_id=sid, reply="שיחה הסתיימה. לחץ 'שיחה חדשה' להתחיל.",
+            stage="handoff", level="Low", score=0, handoff_to_human=True,
+        )
+
+    messages = session["messages"]
+    client_ai = session["client"]
+
+    # Add agent response
+    messages.append({"role": "user", "content": req.message})
+
+    # Generate next client message
+    resp = client_ai.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages + [{"role": "system", "content": "אם השיחה הגיעה לסיום טבעי (הסוכן אמר שיחזור, או כל הפרטים נאספו) — תגיד תודה/ביי ותסיים. אחרת המשך לשאול כלקוח."}],
+        temperature=0.9,
+    )
+    client_msg = resp.choices[0].message.content.strip()
+    messages.append({"role": "assistant", "content": client_msg})
+
+    # Detect end
+    end_phrases = ["יום טוב", "תודה רבה", "להתראות", "ביי", "bye", "thank you", "have a great day", "תודה!"]
+    is_done = any(phrase in client_msg.lower() for phrase in end_phrases) and len([m for m in messages if m["role"] == "user"]) >= 3
+
+    if is_done:
+        # Save training conversation
+        transcript = []
+        for m in messages[1:]:
+            role = "client" if m["role"] == "assistant" else "agent"
+            transcript.append({"role": role, "content": m["content"]})
+        ratings.save_feedback(sid, "training", "שיחת אימון", transcript)
+        del _train_sessions[sid]
+        return ChatResponse(
+            session_id=sid, reply=client_msg + "\n\n✅ השיחה נשמרה ללמידה!",
+            stage="handoff", level="High", score=1, handoff_to_human=True,
+        )
 
     return ChatResponse(
-        session_id=sid,
-        reply=turn.reply,
-        stage=turn.stage,
-        level=score.level,
-        score=score.score,
-        handoff_to_human=turn.handoff_to_human,
-        sehel_lead_id=lead_id,
+        session_id=sid, reply=client_msg, stage="engagement",
+        level="Medium", score=0.5, handoff_to_human=False,
     )
 
 
