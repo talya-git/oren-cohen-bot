@@ -207,24 +207,30 @@ def train_respond(req: dict) -> dict:
 
     messages.append({"role": "user", "content": agent_response})
 
-    # Check if conversation should end (after 6-8 exchanges)
-    turns = len([m for m in messages if m["role"] == "user"])
-    if turns >= 6:
+    # Check if conversation should end naturally
+    resp = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages + [{"role": "system", "content": "אם השיחה הגיעה לסיום טבעי (הסוכן אמר שיחזור, הלקוח אמר תודה/ביי, או שכל הפרטים נאספו) — תגיד 'תודה רבה, יום טוב!' ותסיים. אחרת תמשיך לשאול כלקוח."}],
+        temperature=0.9
+    )
+    client_msg = resp.choices[0].message.content.strip()
+    messages.append({"role": "assistant", "content": client_msg})
+    _train_sessions[sid] = messages
+
+    # Detect end of conversation
+    end_phrases = ["יום טוב", "תודה רבה", "להתראות", "ביי", "bye", "thank you", "have a great day"]
+    is_done = any(phrase in client_msg.lower() for phrase in end_phrases) and len([m for m in messages if m["role"] == "user"]) >= 3
+
+    if is_done:
         # Save the training conversation
         transcript = []
-        for m in messages[1:]:  # skip system
+        for m in messages[1:]:
             role = "client" if m["role"] == "assistant" else "agent"
             transcript.append({"role": role, "content": m["content"]})
         ratings.save_feedback(sid, "training", "שיחת אימון", transcript)
         del _train_sessions[sid]
         return {"done": True}
 
-    resp = client.chat.completions.create(
-        model="gpt-4o-mini", messages=messages, temperature=0.9
-    )
-    client_msg = resp.choices[0].message.content.strip()
-    messages.append({"role": "assistant", "content": client_msg})
-    _train_sessions[sid] = messages
     return {"done": False, "client_message": client_msg}
 
 
