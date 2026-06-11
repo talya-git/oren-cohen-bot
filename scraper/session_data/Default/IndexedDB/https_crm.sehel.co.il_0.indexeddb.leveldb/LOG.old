@@ -1,0 +1,14 @@
+2026/06/11-10:52:39.850 6dac Reusing MANIFEST C:\Users\Dell\oren-cohen-bot\oren-cohen-bot\scraper\session_data\Default\IndexedDB\https_crm.sehel.co.il_0.indexeddb.leveldb/MANIFEST-000001
+2026/06/11-10:52:39.851 6dac Recovering log #18
+2026/06/11-10:52:39.851 6dac Reusing old log C:\Users\Dell\oren-cohen-bot\oren-cohen-bot\scraper\session_data\Default\IndexedDB\https_crm.sehel.co.il_0.indexeddb.leveldb/000018.log 
+2026/06/11-10:52:39.851 6dac Delete type=2 #16
+2026/06/11-10:52:39.892 71dc Level-0 table #23: started
+2026/06/11-10:52:39.908 71dc Level-0 table #23: 667 bytes OK
+2026/06/11-10:52:39.909 71dc Delete type=0 #18
+2026/06/11-10:52:39.910 73b0 Manual compaction at level-0 from '\x00\x07\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x08\x00\x00\x00' @ 0 : 0; will stop at '\x00\x07\x00\x00\x05' @ 154 : 1
+2026/06/11-10:52:39.910 73b0 Compacting 1@0 + 1@1 files
+2026/06/11-10:52:39.930 73b0 Generated table #24@0: 38 keys, 1196 bytes
+2026/06/11-10:52:39.930 73b0 Compacted 1@0 + 1@1 files => 1196 bytes
+2026/06/11-10:52:39.931 73b0 compacted to: files[ 0 1 1 0 0 0 0 ]
+2026/06/11-10:52:39.932 73b0 Delete type=2 #23
+2026/06/11-10:52:39.932 73b0 Manual compaction at level-0 from '\x00\x07\x00\x00\x05' @ 154 : 1 .. '\x00\x08\x00\x00\x00' @ 0 : 0; will stop at (end)
