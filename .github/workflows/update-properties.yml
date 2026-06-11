@@ -2,8 +2,8 @@ name: Update Properties from Sehel
 
 on:
   schedule:
-    - cron: '*/30 * * * *'  # כל 30 דקות
-  workflow_dispatch:  # אפשר להריץ ידנית מ-GitHub
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
 
 jobs:
   scrape:
@@ -25,9 +25,6 @@ jobs:
 
       - name: Run scraper
         run: python scraper/scrape_sehel.py
-        env:
-          SEHEL_USER: ${{ secrets.SEHEL_USER }}
-          SEHEL_PASS: ${{ secrets.SEHEL_PASS }}
 
       - name: Push updated data
         run: |
