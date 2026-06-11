@@ -20,6 +20,7 @@ USERNAME = os.getenv("SEHEL_USER", "tsalyato@orencohengroup.com")
 PASSWORD = os.getenv("SEHEL_PASS", "YBpB23rM")
 DOWNLOAD_DIR = Path(__file__).resolve().parent / "downloads"
 PROPERTIES_FILE = Path(__file__).resolve().parent.parent / "data" / "properties.json"
+SESSION_DIR = Path(__file__).resolve().parent / "session_data"
 
 
 def login(page):
@@ -180,19 +181,35 @@ def main():
         os.remove(f)
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        context = browser.new_context(
-            accept_downloads=True,
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
-        )
-        page = context.new_page()
+        # אם יש session שמור — משתמשים בו (בלי 2FA)
+        if SESSION_DIR.exists():
+            print("   משתמש ב-session שמור...")
+            browser = p.chromium.launch_persistent_context(
+                user_data_dir=str(SESSION_DIR),
+                headless=True,
+                accept_downloads=True,
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+            )
+            page = browser.pages[0] if browser.pages else browser.new_page()
+            page.goto(SEHEL_URL, timeout=60000)
+            page.wait_for_load_state("domcontentloaded")
+            time.sleep(5)
 
-        # התחברות
-        login(page)
-
-        # screenshot לדיבאג — לראות איך הדף נראה אחרי לוגין
-        page.screenshot(path=str(DOWNLOAD_DIR / "after_login.png"))
-        print("   URL אחרי לוגין:", page.url)
+            # בודק אם אנחנו מחוברים (לא בדף לוגין)
+            if "/login" in page.url:
+                print("   Session פג תוקף — מנסה להתחבר עם סיסמא...")
+                login(page)
+            else:
+                print("   ✓ מחובר (בלי 2FA)")
+        else:
+            # אין session — לוגין רגיל
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(
+                accept_downloads=True,
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+            )
+            page = context.new_page()
+            login(page)
 
         # === מלאי פרויקטים ===
         print("\n[2] נכנס למלאי פרויקטים...")
