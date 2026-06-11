@@ -219,7 +219,7 @@ def main():
             time.sleep(5)
 
             # בודק אם אנחנו מחוברים (לא בדף לוגין)
-            if "/login" in page.url:
+            if "/login" in page.url and "projects" not in page.url and "listing" not in page.url:
                 print("   Session פג תוקף — מנסה להתחבר עם סיסמא...")
                 login(page)
             else:
@@ -236,15 +236,7 @@ def main():
 
         # === מלאי פרויקטים ===
         print("\n[2] נכנס למלאי פרויקטים...")
-        # מנסה כמה selectors
-        try:
-            page.click('text=מלאי פרויקטים', timeout=10000)
-        except:
-            try:
-                page.click('a >> text=מלאי', timeout=10000)
-            except:
-                # ניסיון ישיר דרך URL
-                page.goto(SEHEL_URL + '/projects-inventory', timeout=30000)
+        page.goto(SEHEL_URL + '/projects/app/listing', timeout=30000)
         page.wait_for_load_state("domcontentloaded")
         time.sleep(3)
 
@@ -252,19 +244,7 @@ def main():
 
         # === מלאי יד 2 ===
         print("\n[3] נכנס למלאי דירות יד 2...")
-        # חוזר לדף הבית קודם
-        page.goto(SEHEL_URL)
-        page.wait_for_load_state("domcontentloaded")
-        time.sleep(3)
-
-        # בתפריט העליון - "מלאי דירות יד 2"
-        try:
-            page.click('text=מלאי דירות יד', timeout=10000)
-        except:
-            try:
-                page.click('a >> text=יד 2', timeout=10000)
-            except:
-                page.goto(SEHEL_URL + '/yad2-inventory', timeout=30000)
+        page.goto(SEHEL_URL + '/projects/app/yad2', timeout=30000)
         page.wait_for_load_state("domcontentloaded")
         time.sleep(3)
 
