@@ -35,9 +35,10 @@ def _load(bin_id: str) -> list:
 def _save(bin_id: str, data: list) -> None:
     """שומר נתונים ל-JSONBin."""
     if not JSONBIN_KEY or not bin_id:
+        print(f"[SAVE] No key or bin_id: key={bool(JSONBIN_KEY)}, bin={bin_id}")
         return
     try:
-        httpx.put(
+        resp = httpx.put(
             f"{JSONBIN_API}/b/{bin_id}",
             headers={
                 "X-Master-Key": JSONBIN_KEY,
@@ -46,8 +47,9 @@ def _save(bin_id: str, data: list) -> None:
             json=data,
             timeout=15,
         )
-    except:
-        pass
+        print(f"[SAVE] bin={bin_id} status={resp.status_code} items={len(data)}")
+    except Exception as e:
+        print(f"[SAVE] ERROR: {e}")
 
 
 def save_rating(session_id: str, color: str, profile: dict, transcript: list) -> None:
