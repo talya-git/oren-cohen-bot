@@ -153,6 +153,24 @@ def api_ratings() -> list:
     return ratings.get_all_ratings()
 
 
+@app.delete("/api/ratings/{index}")
+def delete_rating(index: int) -> dict:
+    all_ratings = ratings.get_all_ratings()
+    if 0 <= index < len(all_ratings):
+        all_ratings.pop(index)
+        ratings._save(ratings.RATINGS_BIN, all_ratings)
+    return {"status": "deleted"}
+
+
 @app.get("/api/feedback")
 def api_feedback() -> list:
     return ratings.get_all_feedback()
+
+
+@app.delete("/api/feedback/{index}")
+def delete_feedback(index: int) -> dict:
+    all_feedback = ratings.get_all_feedback()
+    if 0 <= index < len(all_feedback):
+        all_feedback.pop(index)
+        ratings._save(ratings.FEEDBACK_BIN, all_feedback)
+    return {"status": "deleted"}

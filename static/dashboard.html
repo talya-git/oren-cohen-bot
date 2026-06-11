@@ -56,11 +56,14 @@
       const data = await res.json();
       const list = document.getElementById("ratings-list");
       if (!data.length) { document.getElementById("no-ratings").classList.remove("hidden"); return; }
-      list.innerHTML = data.reverse().map(r => `
+      list.innerHTML = data.reverse().map((r, idx) => `
         <div class="border rounded-xl p-4 ${colorBg[r.color] || 'bg-white border-gray-200'}">
           <div class="flex items-center justify-between mb-2">
             <span class="text-lg">${colorMap[r.color] || ''} ${r.level}</span>
-            <span class="text-xs text-gray-400">${new Date(r.timestamp).toLocaleString("he-IL")}</span>
+            <div class="flex items-center gap-3">
+              <span class="text-xs text-gray-400">${new Date(r.timestamp).toLocaleString("he-IL")}</span>
+              <button onclick="deleteRating(${data.length - 1 - idx})" class="text-xs text-red-400 hover:text-red-600">✖ מחק</button>
+            </div>
           </div>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-gray-600">
             ${r.profile.contact_name ? `<div><b>שם:</b> ${r.profile.contact_name}</div>` : ''}
@@ -87,11 +90,14 @@
       const data = await res.json();
       const list = document.getElementById("feedback-list");
       if (!data.length) { document.getElementById("no-feedback").classList.remove("hidden"); return; }
-      list.innerHTML = data.reverse().map(f => `
+      list.innerHTML = data.reverse().map((f, idx) => `
         <div class="border rounded-xl p-4 ${f.rating === 'good' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
           <div class="flex items-center justify-between mb-1">
             <span class="text-base">${f.rating === 'good' ? '👍 שיחה טובה' : '👎 שיחה לא טובה'}</span>
-            <span class="text-xs text-gray-400">${new Date(f.timestamp).toLocaleString("he-IL")}</span>
+            <div class="flex items-center gap-3">
+              <span class="text-xs text-gray-400">${new Date(f.timestamp).toLocaleString("he-IL")}</span>
+              <button onclick="deleteFeedback(${data.length - 1 - idx})" class="text-xs text-red-400 hover:text-red-600">✖ מחק</button>
+            </div>
           </div>
           ${f.notes ? `<p class="text-sm text-gray-600 mt-1">הערות: ${f.notes}</p>` : ''}
           ${f.transcript && f.transcript.length ? `
@@ -104,6 +110,18 @@
           ` : ''}
         </div>
       `).join('');
+    }
+
+    async function deleteRating(index) {
+      if (!confirm('בטוח שרוצה למחוק?')) return;
+      await fetch('/api/ratings/' + index, { method: 'DELETE' });
+      location.reload();
+    }
+
+    async function deleteFeedback(index) {
+      if (!confirm('בטוח שרוצה למחוק?')) return;
+      await fetch('/api/feedback/' + index, { method: 'DELETE' });
+      location.reload();
     }
 
     loadRatings();
