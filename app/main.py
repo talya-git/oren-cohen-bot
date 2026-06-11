@@ -56,7 +56,7 @@ class ChatResponse(BaseModel):
 @app.post("/chat", response_model=ChatResponse)
 def chat(req: ChatRequest) -> ChatResponse:
     """Training mode: bot plays as client, user is the agent."""
-    if req.session_id and req.session_id in _sessions:
+    if req.session_id and req.session_id in _train_sessions:
         sid = req.session_id
     else:
         sid = str(uuid4())
