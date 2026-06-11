@@ -98,8 +98,8 @@ def chat(req: ChatRequest) -> ChatResponse:
         # Generate first client message
         resp = client_ai.chat.completions.create(
             model="gpt-4o-mini",
-            messages=_train_sessions[sid]["messages"],
-            temperature=0.9,
+            messages=_train_sessions[sid]["messages"] + [{"role": "system", "content": "תבחר תרחיש אקראי ומגוון. תהיה אחד מאלה: משקיע אמריקאי שמחפש וילה, זוג צעיר שמחפש דירה ראשונה, מתווך שמציע נכס למכירה, אישה שמחפשת שכירות לטווח ארוך, אדם שראה מודעה על פרויקט ספציפי, מתווך ששואל על שכירות, אדם שרוצה למכור נכס שלו, מישהו ששואל על מחירים בלי הקדמה, מישהו ששואל על השכרה לסוכות, מישהו ששואל על פרויקט באנגלית, אדם ששולח רק היי בלי הקשר, אדם שכועס על הסוכן. תבחר אחד אקראית ותפתח איתו."}],
+            temperature=1.0,
         )
         first_msg = resp.choices[0].message.content.strip()
         _train_sessions[sid]["messages"].append({"role": "assistant", "content": first_msg})
