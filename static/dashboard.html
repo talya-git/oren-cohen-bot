@@ -74,12 +74,9 @@
             ${r.profile.intent ? `<div><b>כוונה:</b> ${r.profile.intent}</div>` : ''}
           </div>
           ${r.transcript && r.transcript.length ? `
-            <details class="mt-3">
-              <summary class="text-xs text-gray-400 cursor-pointer">הצג שיחה</summary>
-              <div class="mt-2 space-y-1 text-xs bg-white/50 rounded-lg p-3 max-h-48 overflow-y-auto">
-                ${r.transcript.map(m => `<div><b>${m.role === 'user' ? 'לקוח' : 'דניאל'}:</b> ${m.content}</div>`).join('')}
-              </div>
-            </details>
+            <div class="mt-3 space-y-1 text-xs bg-white/50 rounded-lg p-3 max-h-64 overflow-y-auto">
+              ${r.transcript.map(m => `<div class="mb-1"><b>${m.role === 'user' || m.role === 'client' ? '🧑 לקוח' : '👔 סוכן'}:</b> ${m.content}</div>`).join('')}
+            </div>
           ` : ''}
         </div>
       `).join('');
@@ -91,18 +88,18 @@
       const list = document.getElementById("feedback-list");
       if (!data.length) { document.getElementById("no-feedback").classList.remove("hidden"); return; }
       list.innerHTML = data.reverse().map((f, idx) => `
-        <div class="border rounded-xl p-4 ${f.rating === 'good' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
+        <div class="border rounded-xl p-4 ${f.rating === 'good' ? 'bg-green-50 border-green-200' : f.rating === 'training' ? 'bg-blue-50 border-blue-200' : 'bg-red-50 border-red-200'}">
           <div class="flex items-center justify-between mb-1">
-            <span class="text-base">${f.rating === 'good' ? '👍 שיחה טובה' : '👎 שיחה לא טובה'}</span>
+            <span class="text-base">${f.rating === 'good' ? '👍 שיחה טובה' : f.rating === 'training' ? '🎯 שיחת אימון' : '👎 שיחה לא טובה'}</span>
             <div class="flex items-center gap-3">
               <span class="text-xs text-gray-400">${new Date(f.timestamp).toLocaleString("he-IL")}</span>
               <button onclick="deleteFeedback(${data.length - 1 - idx})" class="text-xs text-red-400 hover:text-red-600">✖ מחק</button>
             </div>
           </div>
-          ${f.notes ? `<p class="text-sm text-gray-600 mt-1">הערות: ${f.notes}</p>` : ''}
+          ${f.notes ? `<p class="text-sm text-gray-700 mt-1 font-medium">📝 ${f.notes}</p>` : ''}
           ${f.transcript && f.transcript.length ? `
             <div class="mt-3 space-y-1 text-xs bg-white/50 rounded-lg p-3 max-h-64 overflow-y-auto">
-              ${f.transcript.map(m => `<div class="mb-1"><b>${m.role === 'client' ? '🧑 לקוח' : '👔 סוכן'}:</b> ${m.content}</div>`).join('')}
+              ${f.transcript.map(m => `<div class="mb-1"><b>${m.role === 'client' || m.role === 'user' ? '🧑 לקוח' : '👔 סוכן'}:</b> ${m.content}</div>`).join('')}
             </div>
           ` : ''}
         </div>
