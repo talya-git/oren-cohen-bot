@@ -67,30 +67,19 @@ def chat(req: ChatRequest) -> ChatResponse:
             api_key=os.getenv("OPENAI_API_KEY"),
             http_client=hx.Client(verify=False),
         )
-        system = """אתה לקוח שמתעניין בנדל"ן בירושלים. אתה פונה לחברת אורן כהן גרופ.
+        system = """אתה לקוח שפונה לחברת נדל"ן בירושלים. כתוב קצר (משפט-שניים מקסימום).
 
-תתנהג כמו לקוח אמיתי — בנאלי, טבעי, לא מושלם. לקוחות אמיתיים:
-- כותבים קצר, לפעמים עם שגיאות כתיב
-- לא תמיד ברורים במה שהם רוצים
-- שואלים שאלות פשוטות ויומיומיות
-- לפעמים עונים בחצי משפט
-- לפעמים שולחים רק "היי" או "שלום"
-- לפעמים שואלים על מחיר ישר בלי הקדמה
-- לפעמים כועסים או חסרי סבלנות
-- לפעמים מדברים באנגלית (משקיעים מחו"ל)
+אתה לקוח רגיל שלא אכפת לו למסור פרטים. שואלים אותך שאלה - אתה עונה מיד. בלי היסוסים.
 
-כללים חשובים:
-- משפט-שניים מקסימום בכל הודעה
-- אם הסוכן שואל שאלות — תענה, אבל לא תמיד בצורה מלאה
-- יכול להיות בעברית או באנגלית
-- המשך בהתאם לתשובות הסוכן
-
-חשוב מאד!!! לגבי השארת פרטים:
-- אל תשאיר פרטים (שם, טלפון) בקלות. אתה לקוח חשדני.
-- אם הסוכן מבקש פרטים — אל תתן מיד. תגיד "למה?" או "אני רק רוצה לשמוע פרטים" או "אני אחשוב על זה".
-- רק אם הסוכן שכנע אותך בצורה נעימה וטבעית (לא בכפייה ולא בדרישה) — רק אז תשאיר פרטים.
-- אם הסוכן אומר "תשאיר פרטים" בצורה יבשה — תגיד "סבבה תודה ביי" בלי להשאיר.
-- אם הסוכן שכנע בצורה נעימה והסביר למה זה חשוב — אז כן, תשאיר פרטים ותסיים."""
+כללים:
+- שואלים שם? "יוסי כהן". נקודה.
+- שואלים טלפון? "052-3456789". נקודה.
+- שואלים תקציב? "עד 3 מיליון". נקודה.
+- שואלים אזור? "רחביה". נקודה.
+- שואלים חדרים? "4 חדרים". נקודה.
+- שואלים מתי רוצה להיכנס? "בחודשים הקרובים". נקודה.
+- אל תתנדב מידע שלא שאלו.
+- יכול להיות בעברית או באנגלית."""
         _train_sessions[sid] = {
             "messages": [{"role": "system", "content": system}],
             "client": client_ai,
@@ -99,7 +88,7 @@ def chat(req: ChatRequest) -> ChatResponse:
         resp = client_ai.chat.completions.create(
             model="gpt-4o-mini",
             messages=_train_sessions[sid]["messages"] + [{"role": "system", "content": "תבחר תרחיש אקראי ומגוון. תהיה אחד מאלה: משקיע אמריקאי שמחפש וילה, זוג צעיר שמחפש דירה ראשונה, מתווך שמציע נכס למכירה, אישה שמחפשת שכירות לטווח ארוך, אדם שראה מודעה על פרויקט ספציפי, מתווך ששואל על שכירות, אדם שרוצה למכור נכס שלו, מישהו ששואל על מחירים בלי הקדמה, מישהו ששואל על השכרה לסוכות, מישהו ששואל על פרויקט באנגלית, אדם ששולח רק היי בלי הקשר, אדם שכועס על הסוכן. תבחר אחד אקראית ותפתח איתו."}],
-            temperature=1.0,
+            temperature=0.7,
         )
         first_msg = resp.choices[0].message.content.strip()
         _train_sessions[sid]["messages"].append({"role": "assistant", "content": first_msg})
@@ -141,8 +130,6 @@ def chat(req: ChatRequest) -> ChatResponse:
         for m in messages[1:]:
             role = "client" if m["role"] == "assistant" else "agent"
             transcript.append({"role": role, "content": m["content"]})
-        # שומר גם ברייטינג וגם בפידבק — כדי שהבוט ילמד מכל השיחות
-        ratings.save_rating(sid, "green", {}, transcript)
         ratings.save_feedback(sid, "training", "שיחת אימון", transcript)
         del _train_sessions[sid]
         return ChatResponse(
@@ -242,6 +229,22 @@ def train_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "train.html")
 
 
+@app.post("/train/end")
+def train_end(req: dict) -> dict:
+    """סיום ושמירת שיחת אימון ידנית (כפתור שיחה חדשה)."""
+    sid = req.get("session_id", "")
+    messages = _train_sessions.get(sid, [])
+    if not messages:
+        return {"status": "no_session"}
+    transcript = []
+    for m in messages[1:]:
+        role = "client" if m["role"] == "assistant" else "agent"
+        transcript.append({"role": role, "content": m["content"]})
+    ratings.save_feedback(sid, "training", "שיחת אימון (סיום ידני)", transcript)
+    del _train_sessions[sid]
+    return {"status": "saved"}
+
+
 @app.post("/train/start")
 def train_start() -> dict:
     """מתחיל שיחת אימון — הבוט משחק לקוח."""
@@ -252,45 +255,23 @@ def train_start() -> dict:
         http_client=httpx.Client(verify=False),
     )
     sid = str(uuid4())
-    system = """אתה לקוח שמתעניין בנדל"ן בירושלים. אתה פונה לחברת אורן כהן גרופ.
+    system = """אתה לקוח שפונה לחברת נדל"ן בירושלים. כתוב קצר (משפט-שניים מקסימום).
 
-תתנהג כמו לקוח אמיתי — בנאלי, טבעי, לא מושלם. לקוחות אמיתיים:
-- כותבים קצר, לפעמים עם שגיאות כתיב
-- לא תמיד ברורים במה שהם רוצים
-- שואלים שאלות פשוטות ויומיומיות
-- לפעמים עונים בחצי משפט
-- לפעמים שולחים רק "היי" או "שלום"
-- לפעמים שואלים על מחיר ישר בלי הקדמה
-- לפעמים כועסים או חסרי סבלנות
-- לפעמים מדברים באנגלית (משקיעים מחו"ל)
-
-דוגמאות לפניות אמיתיות:
-- "היי ראיתי את המודעה שלכם"
-- "Hi I'm looking for a 3 bedroom apartment in city center"
-- "אשמח לפרטים על הדירה ברחביה"
-- "מה המחיר?"
-- "יש לכם משהו עד 5 מליון?"
-- "Im looking for a very huge villa 6-7 bedrooms for sukkot"
-- "שלום, מחפש דירה להשכרה 4 חדרים"
-- "Hi, I want to hear more details about the project in German Colony"
-- "האם נשארו דירות 5 חדרים בפרויקט?"
-- "יש לכם משהו למכירה באזור בקעה?"
-- "בוקר טוב"
-- "הי מעוניינת לשמוע על הדירה ברחוב ברק"
-- "Good morning, do you have any long term rentals available"
+אתה לקוח רגיל שלא אכפת לו למסור פרטים. שואלים אותך שאלה - אתה עונה מיד. בלי היסוסים.
 
 כללים:
-- פתח עם הודעה ראשונה קצרה וטבעית כלקוח
-- המשך בהתאם לתשובות הסוכן
-- אל תהיה מושלם — תהיה אנושי
-- משפט-שניים מקסימום בכל הודעה
-- אם הסוכן שואל שאלות — תענה, אבל לא תמיד בצורה מלאה
-- אם הסוכן אומר שיחזור אליך — תגיד תודה ותסיים
-- יכול להיות בעברית או באנגלית"""
+- שואלים שם? "יוסי כהן". נקודה.
+- שואלים טלפון? "052-3456789". נקודה.
+- שואלים תקציב? "עד 3 מיליון". נקודה.
+- שואלים אזור? "רחביה". נקודה.
+- שואלים חדרים? "4 חדרים". נקודה.
+- שואלים מתי רוצה להיכנס? "בחודשים הקרובים". נקודה.
+- אל תתנדב מידע שלא שאלו.
+- יכול להיות בעברית או באנגלית."""
 
     messages = [{"role": "system", "content": system}]
     resp = client.chat.completions.create(
-        model="gpt-4o-mini", messages=messages, temperature=0.9
+        model="gpt-4o-mini", messages=messages, temperature=0.7
     )
     client_msg = resp.choices[0].message.content.strip()
     messages.append({"role": "assistant", "content": client_msg})
@@ -319,8 +300,8 @@ def train_respond(req: dict) -> dict:
     # Check if conversation should end naturally
     resp = client.chat.completions.create(
         model="gpt-4o-mini",
-        messages=messages + [{"role": "system", "content": "אם השיחה הגיעה לסיום טבעי (הסוכן אמר שיחזור, הלקוח אמר תודה/ביי, או שכל הפרטים נאספו) — תגיד 'תודה רבה, יום טוב!' ותסיים. אחרת תמשיך לשאול כלקוח."}],
-        temperature=0.9
+        messages=messages + [{"role": "system", "content": "תזכורת: אתה לקוח שלא אכפת לו למסור פרטים. אם הסוכן אומר 'תשאיר פרטים' - תגיד מיד 'בטח, אני יוסי, 052-3456789'. אם הסוכן אומר שיחזור אליך - תגיד 'תודה, יום טוב'. לעולם אל תגיד 'למה?' או 'אני רק רוצה לשמוע' או 'אני אחשוב'."}],
+        temperature=0.5
     )
     client_msg = resp.choices[0].message.content.strip()
     messages.append({"role": "assistant", "content": client_msg})
@@ -338,7 +319,7 @@ def train_respond(req: dict) -> dict:
             transcript.append({"role": role, "content": m["content"]})
         ratings.save_feedback(sid, "training", "שיחת אימון", transcript)
         del _train_sessions[sid]
-        return {"done": True}
+        return {"done": True, "client_message": client_msg}
 
     return {"done": False, "client_message": client_msg}
 

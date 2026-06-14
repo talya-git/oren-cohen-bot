@@ -1,3 +1,5 @@
-2026/06/11-10:54:04.212 52f8 Reusing MANIFEST C:\Users\Dell\oren-cohen-bot\oren-cohen-bot\scraper\session_data\Default\Site Characteristics Database/MANIFEST-000001
-2026/06/11-10:54:04.213 52f8 Recovering log #3
-2026/06/11-10:54:04.213 52f8 Reusing old log C:\Users\Dell\oren-cohen-bot\oren-cohen-bot\scraper\session_data\Default\Site Characteristics Database/000003.log 
+2026/06/14-09:43:06.694 5af4 Log #3: 10 ops saved to Table #4 OK
+2026/06/14-09:43:06.711 5af4 Archiving C:\Users\STD2568\Desktop\oren-cohen-bot\scraper\session_data\Default\Site Characteristics Database/000003.log: OK
+2026/06/14-09:43:06.711 5af4 Table #4: 10 entries OK
+2026/06/14-09:43:06.735 5af4 Archiving C:\Users\STD2568\Desktop\oren-cohen-bot\scraper\session_data\Default\Site Characteristics Database/MANIFEST-000001: OK
+2026/06/14-09:43:06.785 5af4 **** Repaired leveldb C:\Users\STD2568\Desktop\oren-cohen-bot\scraper\session_data\Default\Site Characteristics Database; recovered 1 files; 353 bytes. Some data may have been lost. ****

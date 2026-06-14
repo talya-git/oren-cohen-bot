@@ -204,30 +204,42 @@ def main():
         os.remove(f)
 
     with sync_playwright() as p:
-        # אם יש session שמור — משתמשים בו (בלי 2FA)
-        state_file = SESSION_DIR / "state.json"
-        if state_file.exists():
-            print("   משתמש ב-session שמור...")
-            browser = p.chromium.launch(headless=True)
-            context = browser.new_context(
-                storage_state=str(state_file),
-                accept_downloads=True,
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-            )
-            page = context.new_page()
-            page.goto(SEHEL_URL + '/projects/app/listing', timeout=60000)
+        # persistent context - שומר cookies כמו דפדפן אמיתי (האתר לא יבקש 2FA)
+        print("   פותח דפדפן עם פרופיל שמור...")
+        context = p.chromium.launch_persistent_context(
+            user_data_dir=str(SESSION_DIR),
+            headless=True,
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+            accept_downloads=True,
+        )
+        page = context.new_page()
+        page.goto(SEHEL_URL + '/projects/app/listing', timeout=60000)
+        page.wait_for_load_state("domcontentloaded")
+        time.sleep(5)
+
+        if "/login" in page.url:
+            # צריך להתחבר - ממלא פרטים
+            print("   מתחבר...")
+            page.fill('input[name="username"]', USERNAME)
+            page.fill('input[name="password"]', PASSWORD)
+            time.sleep(1)
+            page.click('button[type="submit"]')
             page.wait_for_load_state("domcontentloaded")
             time.sleep(5)
 
             if "/login" in page.url:
-                print("   Session פג תוקף — צריך להריץ save_state.py מחדש")
-                browser.close()
+                print("   ⚠ האתר מבקש אימות נוסף.")
+                print("   הריצי: python scraper/login_with_2fa.py --setup")
+                page.screenshot(path=str(DOWNLOAD_DIR / "login_issue.png"))
+                context.close()
                 return
-            else:
-                print("   ✓ מחובר (בלי 2FA)")
-        else:
-            print("   אין session שמור — הריצי קודם: python scraper/save_state.py")
-            return
+
+            # ניווט מחדש אחרי login
+            page.goto(SEHEL_URL + '/projects/app/listing', timeout=60000)
+            page.wait_for_load_state("domcontentloaded")
+            time.sleep(5)
+
+        print("   ✓ מחובר!")
 
         # === מלאי פרויקטים ===
         print("\n[2] נכנס למלאי פרויקטים...")
@@ -244,7 +256,7 @@ def main():
 
         yad2_files = export_all_pages(page, "yad2")
 
-        browser.close()
+        context.close()
 
     # עיבוד כל האקסלים
     print("\n[4] מעבד קבצים...")
