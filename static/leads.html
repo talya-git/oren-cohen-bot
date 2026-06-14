@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>מערכת לידים — אורן כהן גרופ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Noto Sans Hebrew', sans-serif; }
+    .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); }
+    .gradient-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%); }
+    .card-hover { transition: all 0.2s; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+    .rating-hot { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .rating-warm { background: linear-gradient(135deg, #f97316, #ea580c); }
+    .rating-cold { background: linear-gradient(135deg, #22c55e, #16a34a); }
+    .badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+  </style>
+</head>
+<body class="gradient-bg min-h-screen">
+
+  <!-- Login Screen -->
+  <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
+    <div class="glass rounded-3xl p-8 w-full max-w-sm shadow-2xl">
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-2xl flex items-center justify-center">
+          <span class="text-2xl">🏠</span>
+        </div>
+        <h1 class="text-xl font-bold text-gray-800">מערכת לידים</h1>
+        <p class="text-sm text-gray-500">אורן כהן גרופ</p>
+      </div>
+      <div id="login-form">
+        <select id="login-name" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm mb-3 outline-none focus:ring-2 focus:ring-emerald-400">
+          <option value="">בחר שם...</option>
+          <option value="מנהל">מנהל</option>
+          <option value="אריה">אריה</option>
+          <option value="דב">דב</option>
+          <option value="רבקה">רבקה</option>
+          <option value="מוישי">מוישי</option>
+          <option value="מיכאל">מיכאל</option>
+          <option value="אהרון">אהרון</option>
+          <option value="ליסה">ליסה</option>
+        </select>
+        <input id="login-pass" type="password" placeholder="סיסמה" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm mb-3 outline-none focus:ring-2 focus:ring-emerald-400" />
+        <button onclick="login()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl py-3 text-sm font-medium hover:opacity-90 transition">כניסה</button>
+        <p id="login-error" class="text-red-500 text-xs mt-2 text-center hidden"></p>
+      </div>
+      <div id="setup-form" class="hidden">
+        <p class="text-sm text-gray-600 mb-3 text-center">כניסה ראשונה — הגדר סיסמה</p>
+        <input id="new-pass" type="password" placeholder="בחר סיסמה" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm mb-3 outline-none focus:ring-2 focus:ring-emerald-400" />
+        <button onclick="setPassword()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl py-3 text-sm font-medium hover:opacity-90 transition">שמור וכנס</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="app" class="hidden min-h-screen">
+    <!-- Top Bar -->
+    <header class="glass sticky top-0 z-20 border-b border-white/20 px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-xl flex items-center justify-center">
+          <span class="text-lg">🏠</span>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-white">מערכת לידים</h1>
+          <p class="text-xs text-gray-300" id="user-info"></p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="lead-count" class="badge bg-emerald-500 text-white"></span>
+        <button onclick="logout()" class="text-xs text-gray-300 hover:text-white transition">התנתק</button>
+      </div>
+    </header>
+
+    <!-- Filters (Manager only) -->
+    <div id="filters" class="px-6 py-3 flex flex-wrap gap-2">
+      <button onclick="filterLeads('all')" class="filter-btn active badge bg-white/20 text-white">הכל</button>
+      <button onclick="filterLeads('hot')" class="filter-btn badge bg-red-500/20 text-red-300">🔴 חם</button>
+      <button onclick="filterLeads('warm')" class="filter-btn badge bg-orange-500/20 text-orange-300">🟠 בינוני</button>
+      <button onclick="filterLeads('cold')" class="filter-btn badge bg-green-500/20 text-green-300">🟢 קר</button>
+      <button onclick="filterLeads('new')" class="filter-btn badge bg-blue-500/20 text-blue-300">חדש</button>
+      <button onclick="filterLeads('assigned')" class="filter-btn badge bg-purple-500/20 text-purple-300">שויך</button>
+    </div>
+
+    <!-- Leads Grid -->
+    <div id="leads-grid" class="px-6 py-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3"></div>
+    <p id="no-leads" class="text-center text-gray-400 py-12 hidden">אין לידים עדיין</p>
+  </div>
+
+  <!-- Assign Modal -->
+  <div id="assign-modal" class="hidden fixed inset-0 z-50 bg-black/60 flex items-center justify-center backdrop-blur-sm">
+    <div class="glass rounded-2xl p-6 w-full max-w-sm mx-4 shadow-2xl">
+      <h3 class="text-lg font-bold text-gray-800 mb-4">שייך לסוכן</h3>
+      <div id="agents-list" class="space-y-2"></div>
+      <button onclick="closeAssignModal()" class="mt-4 w-full text-sm text-gray-500 hover:text-gray-700">ביטול</button>
+    </div>
+  </div>
+
+  <!-- Lead Detail Modal -->
+  <div id="detail-modal" class="hidden fixed inset-0 z-50 bg-black/60 flex items-center justify-center backdrop-blur-sm overflow-y-auto">
+    <div class="glass rounded-2xl p-6 w-full max-w-lg mx-4 my-8 shadow-2xl">
+      <div id="detail-content"></div>
+      <button onclick="closeDetailModal()" class="mt-4 w-full text-sm text-gray-500 hover:text-gray-700">סגור</button>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+    let allLeads = [];
+    let agents = [];
+    let currentFilter = 'all';
+
+    // === AUTH ===
+    async function login() {
+      const name = document.getElementById('login-name').value;
+      const pass = document.getElementById('login-pass').value;
+      const errEl = document.getElementById('login-error');
+      errEl.classList.add('hidden');
+
+      if (!name) { errEl.textContent = 'בחר שם'; errEl.classList.remove('hidden'); return; }
+
+      // Check if first login
+      try {
+        const check = await fetch('/api/leads/check-user', {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({name})
+        });
+        const data = await check.json();
+        if (!data.has_password) {
+          document.getElementById('login-form').classList.add('hidden');
+          document.getElementById('setup-form').classList.remove('hidden');
+          return;
+        }
+      } catch(e) {}
+
+      if (!pass) { errEl.textContent = 'הכנס סיסמה'; errEl.classList.remove('hidden'); return; }
+
+      try {
+        const res = await fetch('/api/leads/login', {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({name, password: pass})
+        });
+        if (!res.ok) { errEl.textContent = 'סיסמה שגויה'; errEl.classList.remove('hidden'); return; }
+        const data = await res.json();
+        currentUser = data.user;
+        localStorage.setItem('leads_user', JSON.stringify(currentUser));
+        showApp();
+      } catch(e) {
+        errEl.textContent = 'שגיאת חיבור'; errEl.classList.remove('hidden');
+      }
+    }
+
+    async function setPassword() {
+      const name = document.getElementById('login-name').value;
+      const pass = document.getElementById('new-pass').value;
+      if (!pass || pass.length < 3) { alert('סיסמה חייבת להיות לפחות 3 תווים'); return; }
+      await fetch('/api/leads/set-password', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({name, password: pass})
+      });
+      document.getElementById('login-pass').value = pass;
+      document.getElementById('setup-form').classList.add('hidden');
+      document.getElementById('login-form').classList.remove('hidden');
+      login();
+    }
+
+    function logout() {
+      localStorage.removeItem('leads_user');
+      currentUser = null;
+      location.reload();
+    }
+
+    // === APP ===
+    function showApp() {
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+      document.getElementById('user-info').textContent = `${currentUser.name} (${currentUser.role === 'manager' ? 'מנהל' : 'סוכן'})`;
+      if (currentUser.role !== 'manager') {
+        document.getElementById('filters').classList.add('hidden');
+      }
+      loadLeads();
+      loadAgents();
+    }
+
+    async function loadLeads() {
+      const url = currentUser.role === 'manager' ? '/api/leads/all' : `/api/leads/agent/${currentUser.id}`;
+      const res = await fetch(url);
+      allLeads = await res.json();
+      renderLeads();
+    }
+
+    async function loadAgents() {
+      const res = await fetch('/api/leads/agents');
+      agents = await res.json();
+    }
+
+    function filterLeads(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active', 'ring-2', 'ring-white'));
+      event.target.classList.add('active', 'ring-2', 'ring-white');
+      renderLeads();
+    }
+
+    function renderLeads() {
+      let filtered = allLeads;
+      if (currentFilter === 'hot') filtered = allLeads.filter(l => l.rating === 'hot');
+      else if (currentFilter === 'warm') filtered = allLeads.filter(l => l.rating === 'warm');
+      else if (currentFilter === 'cold') filtered = allLeads.filter(l => l.rating === 'cold');
+      else if (currentFilter === 'new') filtered = allLeads.filter(l => l.status === 'new');
+      else if (currentFilter === 'assigned') filtered = allLeads.filter(l => l.status === 'assigned');
+
+      document.getElementById('lead-count').textContent = `${filtered.length} לידים`;
+      const grid = document.getElementById('leads-grid');
+
+      if (!filtered.length) {
+        grid.innerHTML = '';
+        document.getElementById('no-leads').classList.remove('hidden');
+        return;
+      }
+      document.getElementById('no-leads').classList.add('hidden');
+
+      grid.innerHTML = filtered.map(lead => {
+        const ratingColors = { hot: 'border-red-400 bg-red-50', warm: 'border-orange-400 bg-orange-50', cold: 'border-green-400 bg-green-50', none: 'border-gray-200 bg-white' };
+        const ratingLabels = { hot: '🔴 חם', warm: '🟠 בינוני', cold: '🟢 קר', none: '⚪ לא דורג' };
+        const color = ratingColors[lead.rating] || ratingColors.none;
+        const label = ratingLabels[lead.rating] || ratingLabels.none;
+        const date = new Date(lead.created_at).toLocaleString('he-IL', {day:'2-digit',month:'2-digit', hour:'2-digit',minute:'2-digit'});
+
+        return `
+          <div class="card-hover border-2 ${color} rounded-2xl p-4 cursor-pointer" onclick="showDetail(${lead.id})">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-sm font-bold text-gray-800">${lead.contact_name || 'ללא שם'}</span>
+              <span class="badge ${lead.rating === 'hot' ? 'rating-hot text-white' : lead.rating === 'warm' ? 'rating-warm text-white' : lead.rating === 'cold' ? 'rating-cold text-white' : 'bg-gray-200 text-gray-600'}">${label}</span>
+            </div>
+            <div class="space-y-1 text-xs text-gray-600">
+              ${lead.phone ? `<div>📱 ${lead.phone}</div>` : ''}
+              ${lead.area ? `<div>📍 ${lead.area}</div>` : ''}
+              ${lead.rooms ? `<div>🏠 ${lead.rooms} חדרים</div>` : ''}
+              ${lead.budget ? `<div>💰 ${lead.budget}</div>` : ''}
+              ${lead.intent ? `<div>🎯 ${lead.intent}</div>` : ''}
+            </div>
+            <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+              <span class="text-[10px] text-gray-400">${date}</span>
+              ${lead.agent_name ? `<span class="badge bg-purple-100 text-purple-700">👤 ${lead.agent_name}</span>` : `<span class="badge bg-gray-100 text-gray-500">חדש</span>`}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // === Detail Modal ===
+    function showDetail(id) {
+      const lead = allLeads.find(l => l.id === id);
+      if (!lead) return;
+      const transcript = lead.transcript ? JSON.parse(lead.transcript) : [];
+      const isManager = currentUser.role === 'manager';
+
+      document.getElementById('detail-content').innerHTML = `
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-gray-800">${lead.contact_name || 'ללא שם'}</h2>
+          ${lead.phone ? `<a href="tel:${lead.phone}" class="text-emerald-600 text-sm font-medium">📱 ${lead.phone}</a>` : ''}
+        </div>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          ${lead.area ? `<div class="bg-gray-50 rounded-lg p-2 text-xs"><b>אזור:</b> ${lead.area}</div>` : ''}
+          ${lead.rooms ? `<div class="bg-gray-50 rounded-lg p-2 text-xs"><b>חדרים:</b> ${lead.rooms}</div>` : ''}
+          ${lead.budget ? `<div class="bg-gray-50 rounded-lg p-2 text-xs"><b>תקציב:</b> ${lead.budget}</div>` : ''}
+          ${lead.intent ? `<div class="bg-gray-50 rounded-lg p-2 text-xs"><b>סוג:</b> ${lead.intent}</div>` : ''}
+          ${lead.financing ? `<div class="bg-gray-50 rounded-lg p-2 text-xs"><b>מימון:</b> ${lead.financing}</div>` : ''}
+          ${lead.timeline ? `<div class="bg-gray-50 rounded-lg p-2 text-xs"><b>תזמון:</b> ${lead.timeline}</div>` : ''}
+          ${lead.property_type ? `<div class="bg-gray-50 rounded-lg p-2 text-xs"><b>סוג נכס:</b> ${lead.property_type}</div>` : ''}
+          ${lead.floor ? `<div class="bg-gray-50 rounded-lg p-2 text-xs"><b>קומה:</b> ${lead.floor}</div>` : ''}
+        </div>
+
+        ${isManager ? `
+        <div class="flex gap-2 mb-4">
+          <button onclick="rateLead(${lead.id},'hot')" class="flex-1 py-2 rounded-lg text-xs font-medium ${lead.rating==='hot'?'rating-hot text-white':'bg-red-50 text-red-700'} hover:opacity-80">🔴 חם</button>
+          <button onclick="rateLead(${lead.id},'warm')" class="flex-1 py-2 rounded-lg text-xs font-medium ${lead.rating==='warm'?'rating-warm text-white':'bg-orange-50 text-orange-700'} hover:opacity-80">🟠 בינוני</button>
+          <button onclick="rateLead(${lead.id},'cold')" class="flex-1 py-2 rounded-lg text-xs font-medium ${lead.rating==='cold'?'rating-cold text-white':'bg-green-50 text-green-700'} hover:opacity-80">🟢 קר</button>
+        </div>
+        <button onclick="openAssignModal(${lead.id})" class="w-full bg-purple-50 text-purple-700 rounded-lg py-2 text-xs font-medium hover:bg-purple-100 mb-4">👤 שייך לסוכן</button>
+        ` : ''}
+
+        ${transcript.length ? `
+        <div class="border-t pt-3 mt-3">
+          <h4 class="text-xs font-bold text-gray-500 mb-2">תמליל שיחה</h4>
+          <div class="space-y-1 max-h-48 overflow-y-auto text-xs">
+            ${transcript.map(m => `<div><b>${m.role === 'user' || m.role === 'client' ? '🧑 לקוח' : '👔 סוכן'}:</b> ${m.content}</div>`).join('')}
+          </div>
+        </div>
+        ` : ''}
+
+        ${isManager ? `<button onclick="deleteLead(${lead.id})" class="mt-4 w-full text-xs text-red-400 hover:text-red-600">🗑 מחק ליד</button>` : ''}
+      `;
+      document.getElementById('detail-modal').classList.remove('hidden');
+    }
+
+    function closeDetailModal() { document.getElementById('detail-modal').classList.add('hidden'); }
+
+    // === Assign ===
+    let assigningLeadId = null;
+    function openAssignModal(leadId) {
+      assigningLeadId = leadId;
+      document.getElementById('agents-list').innerHTML = agents.map(a => `
+        <button onclick="assignToAgent(${a.id})" class="w-full text-right px-4 py-3 rounded-xl hover:bg-emerald-50 transition text-sm font-medium text-gray-700">👤 ${a.name}</button>
+      `).join('');
+      document.getElementById('assign-modal').classList.remove('hidden');
+    }
+
+    function closeAssignModal() { document.getElementById('assign-modal').classList.add('hidden'); }
+
+    async function assignToAgent(agentId) {
+      await fetch('/api/leads/assign', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({lead_id: assigningLeadId, agent_id: agentId})
+      });
+      closeAssignModal();
+      closeDetailModal();
+      loadLeads();
+    }
+
+    // === Actions ===
+    async function rateLead(id, rating) {
+      await fetch(`/api/leads/${id}`, {
+        method: 'PUT', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({rating})
+      });
+      loadLeads();
+      closeDetailModal();
+    }
+
+    async function deleteLead(id) {
+      if (!confirm('למחוק את הליד?')) return;
+      await fetch(`/api/leads/${id}`, {method: 'DELETE'});
+      closeDetailModal();
+      loadLeads();
+    }
+
+    // === Init ===
+    const saved = localStorage.getItem('leads_user');
+    if (saved) {
+      currentUser = JSON.parse(saved);
+      showApp();
+    }
+  </script>
+</body>
+</html>

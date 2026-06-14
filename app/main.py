@@ -17,8 +17,11 @@ from . import sehel
 from . import ratings
 from .engine import Conversation
 from .prompts import GREETING
+from .leads_api import router as leads_router
+from . import database as db
 
 app = FastAPI(title="Oren Cohen Group — Lead Bot")
+app.include_router(leads_router)
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
@@ -214,6 +217,12 @@ def save_feedback(req: FeedbackRequest) -> dict:
     transcript = convo.messages if convo else []
     ratings.save_feedback(req.session_id, req.rating, req.notes, transcript)
     return {"status": "saved"}
+
+
+@app.get("/leads")
+def leads_page() -> FileResponse:
+    """מערכת לידים."""
+    return FileResponse(STATIC_DIR / "leads.html")
 
 
 @app.get("/dashboard")
