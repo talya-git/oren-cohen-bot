@@ -58,6 +58,12 @@ def chat(req: ChatRequest) -> ChatResponse:
     """Training mode: bot plays as client, user is the agent."""
     if req.session_id and req.session_id in _train_sessions:
         sid = req.session_id
+    elif req.session_id and req.session_id not in _train_sessions:
+        # session ישן שפג תוקף (restart/sleep)
+        return ChatResponse(
+            session_id=req.session_id, reply="השיחה הקודמת נסגרה. לחצי 'שיחה חדשה' להתחיל.",
+            stage="handoff", level="Low", score=0, handoff_to_human=False,
+        )
     else:
         sid = str(uuid4())
         # Create training session - bot as client
