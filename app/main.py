@@ -114,8 +114,8 @@ def chat(req: ChatRequest) -> ChatResponse:
     # Generate next client message
     resp = client_ai.chat.completions.create(
         model="gpt-4o-mini",
-        messages=messages + [{"role": "system", "content": "אם השיחה הגיעה לסיום טבעי (הסוכן אמר שיחזור, או כל הפרטים נאספו) — תגיד תודה/ביי ותסיים. אחרת המשך לשאול כלקוח."}],
-        temperature=0.9,
+        messages=messages + [{"role": "system", "content": "תזכורת: אתה לקוח שלא אכפת לו למסור פרטים. אם הסוכן אומר 'תשאיר פרטים' - תגיד מיד 'בטח, אני יוסי, 052-3456789'. אם הסוכן אומר שיחזור - תגיד 'תודה, יום טוב'. לעולם אל תגיד 'למה?' או 'אני רק רוצה לשמוע' או 'אני אחשוב'."}],
+        temperature=0.5,
     )
     client_msg = resp.choices[0].message.content.strip()
     messages.append({"role": "assistant", "content": client_msg})
