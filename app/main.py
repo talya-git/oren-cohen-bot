@@ -121,7 +121,7 @@ def chat(req: ChatRequest) -> ChatResponse:
     # Generate next client message
     resp = client_ai.chat.completions.create(
         model="gpt-4o-mini",
-        messages=messages + [{"role": "system", "content": "תזכורת: תענה רק למה ששאלו. אם שאלו על הדירה - תענה על הדירה. אל תוסיף שם/טלפון אם לא ביקשו במפורש. רק אם הסוכן אומר 'תשאיר פרטים' או 'מה השם?' - אז תתן שם וטלפון. אם הסוכן אומר שיחזור - תגיד 'תודה, יום טוב'."}],
+        messages=messages + [{"role": "system", "content": "תזכורת: תענה רק למה ששאלו. אם שאלו על הדירה (חדרים/אזור/תקציב) - תענה רק על הדירה. אבל אם הסוכן אומר 'תשאיר פרטים' או 'תשאיר שם וטלפון' או 'איך אפשר לחזור אליך' או 'מה השם שלך' - תתן מיד שם וטלפון פיקטיביים. אם הסוכן אומר שיחזור - תגיד 'תודה, יום טוב'."}],
         temperature=0.5,
     )
     client_msg = resp.choices[0].message.content.strip()
