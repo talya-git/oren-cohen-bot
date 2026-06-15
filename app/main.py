@@ -280,6 +280,20 @@ def _extract_profile_from_transcript(messages: list) -> dict:
             profile["area"] = area
             break
 
+    # כוונה
+    if any(kw in client_msgs for kw in ['שכירות', 'להשכרה', 'להשכיר', 'לשכור']):
+        profile["intent"] = 'שכירות'
+    elif any(kw in client_msgs for kw in ['קניה', 'לקנות', 'לקנייה', 'לרכוש']):
+        profile["intent"] = 'קניה'
+    elif any(kw in client_msgs for kw in ['השקעה', 'להשקיע', 'השקעה']):
+        profile["intent"] = 'השקעה'
+    elif 'rent' in client_msgs.lower():
+        profile["intent"] = 'שכירות'
+    elif 'buy' in client_msgs.lower():
+        profile["intent"] = 'קניה'
+    elif 'invest' in client_msgs.lower():
+        profile["intent"] = 'השקעה'
+
     # תוספות (amenities) - רק אם הלקוח ביקש במפורש
     amenities = []
     amenity_keywords = {
