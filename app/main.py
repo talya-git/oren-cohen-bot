@@ -288,6 +288,37 @@ def _extract_profile_from_transcript(messages: list) -> dict:
     elif 'השקעה' in client_msgs or 'invest' in client_msgs.lower():
         profile["intent"] = 'השקעה'
 
+    # תוספות (amenities)
+    amenities = []
+    amenity_keywords = {
+        'מרפסת': ['מרפסת', 'מרפס', 'balcony'],
+        'מחסן': ['מחסן', 'storage'],
+        'חניה': ['חניה', 'חניון', 'parking'],
+        'ממד': ['ממד', 'ממ"ד', 'מרחב מוגן'],
+        'מעלית': ['מעלית', 'elevator'],
+        'גישה לנכים': ['גישה לנכים', 'נגיש'],
+        'נוף': ['נוף', 'view'],
+    }
+    for amenity, keywords in amenity_keywords.items():
+        if any(kw in client_msgs.lower() for kw in keywords):
+            amenities.append(amenity)
+    if amenities:
+        import json as json_mod
+        profile["amenities"] = json_mod.dumps(amenities, ensure_ascii=False)
+
+    # קרבה ל (nearBy)
+    nearby = []
+    nearby_keywords = {
+        'בית כנסת': ['בית כנסת', 'בתי כנסיות', 'ביהכ"נ', 'synagogue'],
+        'סופרים': ['סופר', 'סופרים', 'מרכול', 'supermarket'],
+    }
+    for place, keywords in nearby_keywords.items():
+        if any(kw in client_msgs.lower() for kw in keywords):
+            nearby.append(place)
+    if nearby:
+        import json as json_mod
+        profile["nearBy"] = json_mod.dumps(nearby, ensure_ascii=False)
+
     return profile
 
 
@@ -336,9 +367,9 @@ def create_lead_from_chat(req: CreateLeadRequest) -> dict:
         "financing": profile.get("financing"),
         "timeline": profile.get("timeline"),
         "intent": profile.get("intent"),
-        "amenities": None,
-        "airDirections": None,
-        "nearBy": None,
+        "amenities": profile.get("amenities"),
+        "airDirections": profile.get("airDirections"),
+        "nearBy": profile.get("nearBy"),
         "transcript": json_lib.dumps(transcript, ensure_ascii=False) if transcript else None,
     }
 
