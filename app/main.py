@@ -225,6 +225,82 @@ def leads_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "leads.html")
 
 
+class CreateLeadRequest(BaseModel):
+    session_id: str
+    rating: str = "none"
+
+
+@app.post("/create-lead")
+def create_lead_from_chat(req: CreateLeadRequest) -> dict:
+    """שולח ליד למערכת הלידים עם הנתונים מהשיחה."""
+    import httpx
+    import json as json_lib
+
+    # משיג את הפרופיל מה-engine
+    convo = _sessions.get(req.session_id)
+    profile = convo.profile.model_dump() if convo else {}
+    transcript = convo.messages if convo else []
+
+    # ממפה rating color לפורמט של ה-API
+    rating_map = {"red": "hot", "orange": "warm", "green": "cold"}
+    rating = rating_map.get(req.rating, "none")
+
+    # בונה את ה-payload
+    lead_data = {
+        "contactName": profile.get("contact_name"),
+        "phone": profile.get("phone"),
+        "budget": str(profile.get("budget_ils", "")) if profile.get("budget_ils") else None,
+        "area": profile.get("area"),
+        "rooms": str(profile.get("rooms", "")) if profile.get("rooms") else None,
+        "propertyType": None,
+        "floor": None,
+        "financing": profile.get("financing"),
+        "timeline": profile.get("timeline"),
+        "intent": profile.get("intent"),
+        "amenities": None,
+        "airDirections": None,
+        "nearBy": None,
+        "transcript": json_lib.dumps(transcript, ensure_ascii=False) if transcript else None,
+    }
+
+    # שולח ל-API של הלידים
+    leads_api_url = os.getenv("LEADS_API_URL", "https://localhost:7177")
+    try:
+        # קודם מתחבר כמנהל כדי לקבל token
+        login_res = httpx.post(
+            f"{leads_api_url}/api/auth/login",
+            json={"name": "מנהל", "password": "1234"},
+            verify=False, timeout=10
+        )
+        if login_res.status_code != 200:
+            return {"status": "error", "detail": "login failed"}
+        token = login_res.json()["token"]
+
+        # יוצר ליד
+        create_res = httpx.post(
+            f"{leads_api_url}/api/leads",
+            json=lead_data,
+            headers={"Authorization": f"Bearer {token}"},
+            verify=False, timeout=10
+        )
+
+        if create_res.status_code in (200, 201):
+            lead_id = create_res.json().get("id")
+            # מעדכן דירוג
+            if rating != "none" and lead_id:
+                httpx.put(
+                    f"{leads_api_url}/api/leads/{lead_id}",
+                    json={"rating": rating},
+                    headers={"Authorization": f"Bearer {token}"},
+                    verify=False, timeout=10
+                )
+            return {"status": "ok", "lead_id": lead_id}
+        else:
+            return {"status": "error", "detail": create_res.text}
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
+
+
 @app.get("/dashboard")
 def dashboard() -> FileResponse:
     """דף דשבורד לצפייה בדירוגים ופידבק."""

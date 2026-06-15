@@ -409,6 +409,13 @@
         body: JSON.stringify({ session_id: sessionId, color: color }),
       });
 
+      // Send lead to leads management system
+      fetch("/create-lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId, rating: color }),
+      });
+
       const labels = { red: "ליד חם 🔴", orange: "ליד בינוני 🟠", green: "ליד קר 🟢" };
       const overlay = document.getElementById("rating-overlay");
       overlay.querySelector(".bg-white").innerHTML = `<div class="text-wa-teal text-lg font-medium py-4">✓ ${labels[color]} — נשמר</div>`;
