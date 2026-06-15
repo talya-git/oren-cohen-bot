@@ -230,16 +230,95 @@ class CreateLeadRequest(BaseModel):
     rating: str = "none"
 
 
+def _extract_profile_from_transcript(messages: list) -> dict:
+    """מחלץ שם, טלפון, תקציב, אזור, חדרים מהודעות הלקוח (רול assistant)."""
+    import re
+    profile = {}
+    client_msgs = " ".join([m["content"] for m in messages if m.get("role") == "assistant"])
+
+    # טלפון
+    phone_match = re.search(r'0[5-9]\d[- ]?\d{3}[- ]?\d{4}', client_msgs)
+    if phone_match:
+        profile["phone"] = phone_match.group()
+
+    # שם - מחפש אחרי "אני" או "שמי"
+    name_patterns = [
+        r'אני ([\u05d0-\u05ea]+ [\u05d0-\u05ea]+)',
+        r'שמי ([\u05d0-\u05ea]+ [\u05d0-\u05ea]+)',
+        r'שמי ([\u05d0-\u05ea]+)',
+        r'אני ([\u05d0-\u05ea]+)',
+        r'([A-Z][a-z]+ [A-Z][a-z]+)',
+    ]
+    for pat in name_patterns:
+        name_match = re.search(pat, client_msgs)
+        if name_match:
+            profile["contact_name"] = name_match.group(1)
+            break
+
+    # תקציב
+    budget_match = re.search(r'(\d[\d,.]+)\s*(מיליון|million|M)', client_msgs)
+    if budget_match:
+        profile["budget_ils"] = budget_match.group(0)
+    budget_match2 = re.search(r'עד\s*(\d[\d,.]+)', client_msgs)
+    if not profile.get("budget_ils") and budget_match2:
+        profile["budget_ils"] = budget_match2.group(0)
+
+    # חדרים
+    rooms_match = re.search(r'(\d)\s*חדרים', client_msgs)
+    if rooms_match:
+        profile["rooms"] = rooms_match.group(1)
+    rooms_match2 = re.search(r'(\d)\s*rooms|bedroom', client_msgs, re.IGNORECASE)
+    if not profile.get("rooms") and rooms_match2:
+        profile["rooms"] = rooms_match2.group(1)
+
+    # אזור
+    areas = ['רחביה', 'ארנונה', 'בקעה', 'טלביה', 'מושבה גרמנית', 'מרכז העיר',
+            'German Colony', 'Rehavia', 'Talbiya', 'Arnona', 'Baka',
+            'קטמון', 'נחלאות', 'גילו', 'עיר גנים', 'פסגת זאב']
+    for area in areas:
+        if area.lower() in client_msgs.lower():
+            profile["area"] = area
+            break
+
+    # כוונה
+    if 'שכירות' in client_msgs or 'rent' in client_msgs.lower():
+        profile["intent"] = 'שכירות'
+    elif 'קניה' in client_msgs or 'לקנות' in client_msgs or 'buy' in client_msgs.lower():
+        profile["intent"] = 'קניה'
+    elif 'השקעה' in client_msgs or 'invest' in client_msgs.lower():
+        profile["intent"] = 'השקעה'
+
+    return profile
+
+
 @app.post("/create-lead")
 def create_lead_from_chat(req: CreateLeadRequest) -> dict:
     """שולח ליד למערכת הלידים עם הנתונים מהשיחה."""
     import httpx
     import json as json_lib
 
-    # משיג את הפרופיל מה-engine
-    convo = _sessions.get(req.session_id)
-    profile = convo.profile.model_dump() if convo else {}
-    transcript = convo.messages if convo else []
+    # משיג את התמליל מה-train session
+    session = _train_sessions.get(req.session_id)
+    if not session:
+        # גם מ-_sessions (שיחה אמיתית)
+        convo = _sessions.get(req.session_id)
+        if convo:
+            profile = convo.profile.model_dump()
+            transcript = convo.messages
+        else:
+            return {"status": "error", "detail": "session not found"}
+    else:
+        # train session - חילוץ תמליל
+        if isinstance(session, dict):
+            messages = session.get("messages", [])
+        else:
+            messages = session
+        transcript = []
+        for m in messages[1:]:
+            role = "client" if m["role"] == "assistant" else "agent"
+            transcript.append({"role": role, "content": m["content"]})
+        # חילוץ פרטים מהתמליל (הלקוח = assistant = client)
+        profile = _extract_profile_from_transcript(messages)
 
     # ממפה rating color לפורמט של ה-API
     rating_map = {"red": "hot", "orange": "warm", "green": "cold"}
