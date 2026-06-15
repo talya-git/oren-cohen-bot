@@ -1,9 +1,10 @@
 name: Update Properties from Sehel
 
+# DISABLED - scraping runs from local machine (run_persistent.py)
+# GitHub Actions can't login to Sehel due to 2FA
+
 on:
-  schedule:
-    - cron: '*/30 * * * *'
-  workflow_dispatch:
+  workflow_dispatch:  # only manual trigger
 
 permissions:
   contents: write
@@ -12,30 +13,5 @@ jobs:
   scrape:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install dependencies
-        run: |
-          pip install playwright openpyxl
-          playwright install chromium
-          playwright install-deps
-
-      - name: Run scraper
-        run: python scraper/scrape_sehel.py
-
-      - name: Push updated data
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "actions@github.com"
-          git add data/properties.json
-          git diff --staged --quiet || git commit -m "Auto-update properties from Sehel"
-          git pull origin main --rebase
-          git push origin main
+      - name: Info
+        run: echo "This workflow is disabled. Scraping runs from local machine."
