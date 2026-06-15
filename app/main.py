@@ -280,40 +280,32 @@ def _extract_profile_from_transcript(messages: list) -> dict:
             profile["area"] = area
             break
 
-    # כוונה
-    if 'שכירות' in client_msgs or 'rent' in client_msgs.lower():
-        profile["intent"] = 'שכירות'
-    elif 'קניה' in client_msgs or 'לקנות' in client_msgs or 'buy' in client_msgs.lower():
-        profile["intent"] = 'קניה'
-    elif 'השקעה' in client_msgs or 'invest' in client_msgs.lower():
-        profile["intent"] = 'השקעה'
-
-    # תוספות (amenities)
+    # תוספות (amenities) - רק אם הלקוח ביקש במפורש
     amenities = []
     amenity_keywords = {
-        'מרפסת': ['מרפסת', 'מרפס', 'balcony'],
-        'מחסן': ['מחסן', 'storage'],
-        'חניה': ['חניה', 'חניון', 'parking'],
-        'ממד': ['ממד', 'ממ"ד', 'מרחב מוגן'],
-        'מעלית': ['מעלית', 'elevator'],
-        'גישה לנכים': ['גישה לנכים', 'נגיש'],
-        'נוף': ['נוף', 'view'],
+        'מרפסת': ['רוצה מרפסת', 'חשוב לי מרפסת', 'מרפסת זה חשוב', 'מרפסת חובה', 'צריך מרפסת', 'עם מרפסת'],
+        'מחסן': ['רוצה מחסן', 'חשוב לי מחסן', 'מחסן חשוב', 'צריך מחסן'],
+        'חניה': ['רוצה חניה', 'חשוב לי חניה', 'חניה חשוב', 'צריך חניה', 'עם חניה'],
+        'ממד': ['רוצה ממד', 'חשוב לי ממד', 'ממד חשוב', 'צריך ממד'],
+        'מעלית': ['רוצה מעלית', 'חשוב לי מעלית', 'צריך מעלית'],
+        'גישה לנכים': ['רוצה גישה לנכים', 'נגישות'],
+        'נוף': ['רוצה נוף', 'חשוב לי נוף', 'נוף חשוב', 'צריך נוף', 'עם נוף'],
     }
     for amenity, keywords in amenity_keywords.items():
-        if any(kw in client_msgs.lower() for kw in keywords):
+        if any(kw in client_msgs for kw in keywords):
             amenities.append(amenity)
     if amenities:
         import json as json_mod
         profile["amenities"] = json_mod.dumps(amenities, ensure_ascii=False)
 
-    # קרבה ל (nearBy)
+    # קרבה ל (nearBy) - רק אם הלקוח ביקש במפורש
     nearby = []
     nearby_keywords = {
-        'בית כנסת': ['בית כנסת', 'בתי כנסיות', 'ביהכ"נ', 'synagogue'],
-        'סופרים': ['סופר', 'סופרים', 'מרכול', 'supermarket'],
+        'בית כנסת': ['רוצה קרוב לבית כנסת', 'חשוב לי בית כנסת', 'קרוב לבתי כנסיות', 'ליד בית כנסת'],
+        'סופרים': ['רוצה קרוב לסופר', 'חשוב לי סופר', 'קרוב לסופרים', 'ליד סופר', 'קרבה לסופרים'],
     }
     for place, keywords in nearby_keywords.items():
-        if any(kw in client_msgs.lower() for kw in keywords):
+        if any(kw in client_msgs for kw in keywords):
             nearby.append(place)
     if nearby:
         import json as json_mod
