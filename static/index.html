@@ -375,6 +375,14 @@
     function endChat() { showRating(); }
 
     function newChat() {
+      // Save current conversation before starting new one
+      if (sessionId) {
+        fetch("/feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ session_id: sessionId, rating: "training", notes: "שיחה חדשה (שמירה אוטומטית)" }),
+        });
+      }
       sessionId = null;
       chat.innerHTML = "";
       input.value = "";
