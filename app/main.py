@@ -89,7 +89,13 @@ def chat(req: ChatRequest) -> ChatResponse:
                       "- 5%: Slightly hesitant once, then cooperates.\n"
                       "- 5%: Very difficult, needs convincing.\n\n"
                       "Rules: Answer only what's asked. Give name/phone only when explicitly requested. "
-                      "Invent diverse names, phones, budgets, areas. ALWAYS respond in English only.")
+                      "Invent diverse names, phones, budgets, areas. ALWAYS respond in English only.\n\n"
+                      "REALISTIC BUDGETS (use these!):\n"
+                      "- Talbieh/Rehavia/German Colony/Mamilla: 6.5M-12M+ ILS for 4 rooms\n"
+                      "- Baka/Old Katamon/Arnona/Beit HaKerem: 4.2M-5.8M ILS for 4 rooms\n"
+                      "- Givat Masua/Kiryat Shmuel/Ramat Sharett/new Gilo: 3.2M-4.2M ILS for 4 rooms\n"
+                      "- Neve Yaakov/Pisgat Zeev/Ramot/old Gilo: 2.3M-3M ILS for 4 rooms\n"
+                      "Pick a budget that matches the area you choose.")
             scenario = ("Pick a random scenario: American investor looking for a villa, "
                         "expat looking for a rental, tourist wanting a penthouse, someone who saw an ad. "
                         "Respond to the agent's greeting in English naturally.")
@@ -100,7 +106,13 @@ def chat(req: ChatRequest) -> ChatResponse:
                       "- 5%: מהסס קצת. פעם אחת שואל למה, אחרי הסבר - נותן.\n"
                       "- 5%: נוקשה מאד. צריך שכנוע רציני.\n\n"
                       "כללים: תענה רק למה ששואלים. שם וטלפון רק כשמבקשים במפורש. "
-                      "תמציא שמות/טלפונים/תקציבים/אזורים מגוונים. תענה בעברית בלבד.")
+                      "תמציא שמות/טלפונים/תקציבים/אזורים מגוונים. תענה בעברית בלבד.\n\n"
+                      "תקציבים ריאליסטיים (השתמש בזה!):\n"
+                      "- טלביה/רחביה/מושבה גרמנית/ממילא: 6.5-12+ מיליון ל-4 חדרים\n"
+                      "- בקעה/קטמון הישנה/ארנונה/בית הכרם: 4.2-5.8 מיליון ל-4 חדרים\n"
+                      "- גבעת משואה/קרית שמואל/רמת שרת/גילה חדש: 3.2-4.2 מיליון ל-4 חדרים\n"
+                      "- נווה יעקב/פסגת זאב/רמות/גילה ישן: 2.3-3 מיליון ל-4 חדרים\n"
+                      "תבחר תקציב שמתאים לאזור שבחרת.")
             scenario = ("תבחר תרחיש אקראי: מחפש דירה לקניה, מחפש שכירות, משקיע, "
                         "ראה מודעה על פרויקט, רוצה למכור נכס. תענה לסוכן בקצרה.")
 
