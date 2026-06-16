@@ -1,2 +1,3 @@
-2026/06/14-09:43:07.435 5570 Creating DB C:\Users\STD2568\Desktop\oren-cohen-bot\scraper\session_data\Default\Local Storage\leveldb since it was missing.
-2026/06/14-09:43:07.504 5570 Reusing MANIFEST C:\Users\STD2568\Desktop\oren-cohen-bot\scraper\session_data\Default\Local Storage\leveldb/MANIFEST-000001
+2026/06/16-09:16:32.233 767c Reusing MANIFEST C:\Users\Dell\oren-cohen-bot\oren-cohen-bot\scraper\session_data\Default\Local Storage\leveldb/MANIFEST-000001
+2026/06/16-09:16:32.247 767c Recovering log #3
+2026/06/16-09:16:32.250 767c Reusing old log C:\Users\Dell\oren-cohen-bot\oren-cohen-bot\scraper\session_data\Default\Local Storage\leveldb/000003.log 

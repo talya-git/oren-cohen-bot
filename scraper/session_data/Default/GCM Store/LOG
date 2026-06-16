@@ -1,2 +1,3 @@
-2026/06/14-09:43:17.010 4258 Creating DB C:\Users\STD2568\Desktop\oren-cohen-bot\scraper\session_data\Default\GCM Store since it was missing.
-2026/06/14-09:43:18.539 4258 Reusing MANIFEST C:\Users\STD2568\Desktop\oren-cohen-bot\scraper\session_data\Default\GCM Store/MANIFEST-000001
+2026/06/16-09:16:36.715 6868 Reusing MANIFEST C:\Users\Dell\oren-cohen-bot\oren-cohen-bot\scraper\session_data\Default\GCM Store/MANIFEST-000001
+2026/06/16-09:16:36.734 6868 Recovering log #3
+2026/06/16-09:16:36.735 6868 Reusing old log C:\Users\Dell\oren-cohen-bot\oren-cohen-bot\scraper\session_data\Default\GCM Store/000003.log 

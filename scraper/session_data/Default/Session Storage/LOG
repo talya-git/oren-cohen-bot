@@ -1,2 +1,3 @@
-2026/06/14-09:43:07.930 5570 Creating DB C:\Users\STD2568\Desktop\oren-cohen-bot\scraper\session_data\Default\Session Storage since it was missing.
-2026/06/14-09:43:07.983 5570 Reusing MANIFEST C:\Users\STD2568\Desktop\oren-cohen-bot\scraper\session_data\Default\Session Storage/MANIFEST-000001
+2026/06/16-09:16:34.158 767c Reusing MANIFEST C:\Users\Dell\oren-cohen-bot\oren-cohen-bot\scraper\session_data\Default\Session Storage/MANIFEST-000001
+2026/06/16-09:16:34.169 767c Recovering log #3
+2026/06/16-09:16:34.171 767c Reusing old log C:\Users\Dell\oren-cohen-bot\oren-cohen-bot\scraper\session_data\Default\Session Storage/000003.log 

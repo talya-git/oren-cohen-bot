@@ -45,7 +45,13 @@ class Conversation:
             "extracted חייב לכלול: budget_ils, timeline, financing, intent, "
             "has_property_to_sell, area, rooms, engagement, contact_name, phone.\n"
             "אם פרט לא ידוע השאר null או unknown.\n"
-            "אל תוסיף טקסט מחוץ ל-JSON."
+            "אל תוסיף טקסט מחוץ ל-JSON.\n"
+            "\n--- LANGUAGE RULES (CRITICAL) ---\n"
+            "1. DETECT the language of the client's FIRST message and ALL subsequent messages.\n"
+            "2. If the client writes in English — reply ONLY in English. Professional, elegant, no typos.\n"
+            "3. If the client writes in Hebrew — reply ONLY in Hebrew. Proper Hebrew, no errors.\n"
+            "4. NEVER mix languages. NEVER respond in Hebrew to an English message or vice versa.\n"
+            "5. English replies must sound like a top-tier international real estate advisor: polished, concise, confident.\n"
         )
 
         self.messages.append({"role": "system", "content": system})
