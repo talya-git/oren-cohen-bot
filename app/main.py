@@ -76,28 +76,43 @@ def chat(req: ChatRequest) -> ChatResponse:
             api_key=os.getenv("OPENAI_API_KEY"),
             http_client=hx.Client(verify=False),
         )
-        system = """אתה לקוח שפונה לחברת נדל"ן בירושלים. כתוב קצר וטבעי (משפט-שניים מקסימום).
 
-סוג הלקוח שלך נקבע אקראית בתחילת השיחה:
-- 90% מהפעמים: לקוח רגיל שלא אכפת לו למסור פרטים. תקציב/אזור/חדרים - עונה מיד. שם וטלפון - נותן רק כשמבקשים במפורש.
-- 5% מהפעמים: לקוח שמהסס קצת. פעם אחת אומר "למה אתה צריך את זה?" או "אני אשמח קודם לשמוע פרטים" אבל אחרי שהסוכן מסביר - נותן.
-- 5% מהפעמים: לקוח מאד נוקשה. "אני לא משאיר פרטים לאף אחד" / "זה לא עניינך" / "תפסיק להתקשר" / "הדירות שלכם יקרות". צריך שכנוע מאד רציני.
+        # Detect language from agent's first message
+        eng_chars = sum(1 for c in req.message if 'a' <= c.lower() <= 'z')
+        is_eng_first = eng_chars > len(req.message.strip()) * 0.4
 
-כללים קריטיים:
-- תענה רק למה ששואלים אותך. אל תוסיף מידע שלא ביקשו.
-- אם שואלים על הדירה (חדרים/אזור/תקציב) - תענה רק על הדירה. אל תוסיף שם וטלפון אם לא ביקשו.
-- שם וטלפון תמסור רק כשהסוכן מבקש במפורש "תשאיר פרטים" או "מה השם שלך?" או "איך אפשר לחזור אליך?".
-- תמציא שמות מגוונים, טלפונים מגוונים, תקציבים מגוונים, אזורים מגוונים.
-- תרחישים מגוונים: קניה/שכירות/השקעה/מכירה.
-- יכול להיות בעברית או באנגלית."""
+        if is_eng_first:
+            system = ("You are a client contacting a real estate company in Jerusalem. "
+                      "Write short and natural (1-2 sentences max). You MUST write ONLY in English.\n\n"
+                      "Client types (random):\n"
+                      "- 90%: Normal client, answers immediately. Name/phone only when asked.\n"
+                      "- 5%: Slightly hesitant once, then cooperates.\n"
+                      "- 5%: Very difficult, needs convincing.\n\n"
+                      "Rules: Answer only what's asked. Give name/phone only when explicitly requested. "
+                      "Invent diverse names, phones, budgets, areas. ALWAYS respond in English only.")
+            scenario = ("Pick a random scenario: American investor looking for a villa, "
+                        "expat looking for a rental, tourist wanting a penthouse, someone who saw an ad. "
+                        "Respond to the agent's greeting in English naturally.")
+        else:
+            system = ("אתה לקוח שפונה לחברת נדל\"ן בירושלים. כתוב קצר וטבעי (משפט-שניים מקסימום).\n\n"
+                      "סוג הלקוח שלך נקבע אקראית:\n"
+                      "- 90%: לקוח רגיל. תקציב/אזור/חדרים - עונה מיד. שם וטלפון - רק כשמבקשים.\n"
+                      "- 5%: מהסס קצת. פעם אחת שואל למה, אחרי הסבר - נותן.\n"
+                      "- 5%: נוקשה מאד. צריך שכנוע רציני.\n\n"
+                      "כללים: תענה רק למה ששואלים. שם וטלפון רק כשמבקשים במפורש. "
+                      "תמציא שמות/טלפונים/תקציבים/אזורים מגוונים. תענה בעברית בלבד.")
+            scenario = ("תבחר תרחיש אקראי: מחפש דירה לקניה, מחפש שכירות, משקיע, "
+                        "ראה מודעה על פרויקט, רוצה למכור נכס. תענה לסוכן בקצרה.")
+
         _train_sessions[sid] = {
             "messages": [{"role": "system", "content": system}],
             "client": client_ai,
         }
-        # Generate first client message
+        # Agent's message is the greeting - add it then generate client response
+        _train_sessions[sid]["messages"].append({"role": "user", "content": req.message})
         resp = client_ai.chat.completions.create(
             model="gpt-4o-mini",
-            messages=_train_sessions[sid]["messages"] + [{"role": "system", "content": "תבחר תרחיש אקראי ומגוון. תהיה אחד מאלה: משקיע אמריקאי שמחפש וילה (באנגלית!), זוג צעיר שמחפש דירה ראשונה, מתווך שמציע נכס למכירה, אישה שמחפשת שכירות לטווח ארוך, אדם שראה מודעה על פרויקט ספציפי, מתווך ששואל על שכירות, אדם שרוצה למכור נכס שלו, מישהו ששואל על מחירים בלי הקדמה, מישהו ששואל על השכרה לסוכות, לקוח אנגלופון שמחפש penthouse (באנגלית!), אדם ששולח רק היי בלי הקשר, אדם שכועס על הסוכן. תבחר אחד אקראית ותפתח איתו. אם בחרת לקוח אנגלופון - כתוב רק באנגלית."}],
+            messages=_train_sessions[sid]["messages"] + [{"role": "system", "content": scenario}],
             temperature=0.7,
         )
         first_msg = resp.choices[0].message.content.strip()
@@ -125,7 +140,10 @@ def chat(req: ChatRequest) -> ChatResponse:
     eng_chars = sum(1 for c in req.message if 'a' <= c.lower() <= 'z')
     is_eng = eng_chars > len(req.message.strip()) * 0.4
     if is_eng:
-        reminder = "CRITICAL: The agent is writing in ENGLISH. You MUST respond ONLY in English. Do NOT use Hebrew. Be a natural English-speaking client."
+        reminder = ("CRITICAL LANGUAGE SWITCH: The agent is writing in ENGLISH. "
+                    "From now on you MUST respond ONLY in English. You are now an English-speaking client. "
+                    "Do NOT use any Hebrew words. Respond naturally as an English speaker. "
+                    "If you previously spoke Hebrew, switch to English immediately — you are bilingual.")
     else:
         reminder = "תזכורת: תענה רק למה ששאלו. אם שאלו על הדירה - תענה על הדירה בלבד. אבל אם הסוכן מבקש פרטים ליצירת קשר (כמו 'תשאיר פרטים', 'תשאיר שם וטלפון', 'איך לחזור אליך', 'מה השם שלך', 'נחזור אליך') - תתן מיד שם וטלפון פיקטיביים. אם הסוכן ביקש פרטים ליצירת קשר יותר מפעם אחת - תבין שהוא צריך את זה ותתן שם וטלפון. אם הסוכן אומר שיחזור - תגיד 'בטח, אני דוד 053-7654321'. לא לסיים בלי להשאיר פרטים אם הסוכן ביקש."
 
