@@ -18,7 +18,7 @@ client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),
     http_client=httpx.Client(verify=False),
 )
-MODEL = "gpt-4o-mini"
+MODEL = "gpt-4o"
 
 
 class Conversation:
