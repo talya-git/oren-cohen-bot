@@ -56,8 +56,17 @@ class Conversation:
 
         self.messages.append({"role": "system", "content": system})
 
+    @staticmethod
+    def _is_english(text: str) -> bool:
+        eng_chars = sum(1 for c in text if 'a' <= c.lower() <= 'z')
+        return eng_chars > len(text.strip()) * 0.4
+
     def send(self, user_message: str) -> tuple[BotTurn, LeadScore]:
-        self.messages.append({"role": "user", "content": user_message})
+        if self._is_english(user_message):
+            content = f"[RESPOND IN ENGLISH ONLY]\n{user_message}"
+        else:
+            content = user_message
+        self.messages.append({"role": "user", "content": content})
 
         response = client.chat.completions.create(
             model=MODEL,
