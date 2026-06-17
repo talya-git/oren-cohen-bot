@@ -320,9 +320,13 @@
       addDateSep();
       const d = document.createElement("div");
       const isOut = type === "out";
+      // Detect if text is English
+      const engChars = (text.match(/[a-zA-Z]/g) || []).length;
+      const isEng = engChars > text.trim().length * 0.4;
       d.className = `relative max-w-[80%] sm:max-w-[55%] md:max-w-[45%] px-2.5 py-1.5 rounded-lg text-sm leading-[19px] whitespace-pre-wrap break-words shadow-sm mb-0.5 ${isOut ? "self-end bg-wa-green text-wa-text rounded-tl-none msg-tail-out" : "self-start bg-wa-bubble text-wa-text rounded-tr-none msg-tail-in"}`;
+      if (isEng) d.setAttribute("dir", "ltr");
       const checks = isOut ? '<svg class="w-4 h-[11px] fill-wa-check inline" viewBox="0 0 16 11"><path d="M11.07 0L5.96 5.11 4.47 3.63 3.06 5.04l2.9 2.9 6.52-6.52L11.07 0zM7.54 5.11L6.13 6.52l1.41 1.41 1.41-1.41-1.41-1.41zM1.41 5.04L0 6.45l2.9 2.9 1.41-1.41-2.9-2.9z"/></svg>' : "";
-      d.innerHTML = `${text}<span class="inline-flex items-center gap-1 float-left ml-1 pt-1"><span class="text-[11px] text-wa-meta whitespace-nowrap">${getTime()}</span>${checks}</span>`;
+      d.innerHTML = `${text}<span class="inline-flex items-center gap-1 float-${isEng ? 'right' : 'left'} ${isEng ? 'mr-1' : 'ml-1'} pt-1"><span class="text-[11px] text-wa-meta whitespace-nowrap">${getTime()}</span>${checks}</span>`;
       chat.appendChild(d);
       chat.scrollTop = chat.scrollHeight;
     }
