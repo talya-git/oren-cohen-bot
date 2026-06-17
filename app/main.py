@@ -85,9 +85,10 @@ def chat(req: ChatRequest) -> ChatResponse:
             system = ("You are a client contacting a real estate company in Jerusalem. "
                       "Write short and natural (1-2 sentences max). You MUST write ONLY in English.\n\n"
                       "Client types (random):\n"
-                      "- 90%: Normal client, answers immediately. Name/phone only when asked.\n"
+                      "- 80%: Normal client looking in Jerusalem, answers immediately. Name/phone only when asked.\n"
                       "- 5%: Slightly hesitant once, then cooperates.\n"
-                      "- 5%: Very difficult, needs convincing.\n\n"
+                      "- 5%: Very difficult, needs convincing.\n"
+                      "- 10%: Client looking OUTSIDE Jerusalem. Could be any city (Tel Aviv, Herzliya Pituach, Rishon LeZion, Netanya, Haifa, Raanana, Caesarea, etc.) with any budget that makes sense (e.g. 6M apartment in Rishon, 40M penthouse in Tel Aviv, 25M villa in Herzliya Pituach, 3.5M in Netanya). You genuinely want to buy there.\n\n"
                       "Rules: Answer only what's asked. Give name/phone only when explicitly requested. "
                       "Invent diverse names, phones, budgets, areas. ALWAYS respond in English only.\n\n"
                       "REALISTIC BUDGETS (use these!):\n"
@@ -95,16 +96,21 @@ def chat(req: ChatRequest) -> ChatResponse:
                       "- Baka/Old Katamon/Arnona/Beit HaKerem: 4.2M-5.8M ILS for 4 rooms\n"
                       "- Givat Masua/Kiryat Shmuel/Ramat Sharett/new Gilo: 3.2M-4.2M ILS for 4 rooms\n"
                       "- Neve Yaakov/Pisgat Zeev/Ramot/old Gilo: 2.3M-3M ILS for 4 rooms\n"
+                      "- Outside Jerusalem (if you're that 10%% type): Tel Aviv 5M-50M, Herzliya Pituach 15M-45M, Rishon/Netanya/Haifa 3M-8M, Raanana 4M-10M\n"
                       "Pick a budget that matches the area you choose.")
-            scenario = ("Pick a random scenario: American investor looking for a villa, "
-                        "expat looking for a rental, tourist wanting a penthouse, someone who saw an ad. "
+            scenario = ("Pick a random scenario (be diverse!): young couple buying first apartment, "
+                        "investor looking for rental yield, family upgrading to larger apartment, "
+                        "someone relocating for work, retiree downsizing, someone who saw an ad online, "
+                        "parent buying for a child, expat returning to Israel, foreign buyer for holidays. "
+                        "Property types: apartment, penthouse, garden apartment, duplex, mini-penthouse, cottage, studio. "
                         "Respond to the agent's greeting in English naturally.")
         else:
             system = ("אתה לקוח שפונה לחברת נדל\"ן בירושלים. כתוב קצר וטבעי (משפט-שניים מקסימום).\n\n"
                       "סוג הלקוח שלך נקבע אקראית:\n"
-                      "- 90%: לקוח רגיל. תקציב/אזור/חדרים - עונה מיד. שם וטלפון - רק כשמבקשים.\n"
+                      "- 80%: לקוח רגיל שמחפש בירושלים. תקציב/אזור/חדרים - עונה מיד. שם וטלפון - רק כשמבקשים.\n"
                       "- 5%: מהסס קצת. פעם אחת שואל למה, אחרי הסבר - נותן.\n"
-                      "- 5%: נוקשה מאד. צריך שכנוע רציני.\n\n"
+                      "- 5%: נוקשה מאד. צריך שכנוע רציני.\n"
+                      "- 10%: לקוח עם תקציב גבוה מאד שמחפש מחוץ לירושלים! למשל: פנטהאוז בתל אביב ב-40 מיליון, וילה בהרצליה פיתוח ב-30 מיליון, נכס בקיסריה. יש לך כסף רציני ואתה רוצה נכס יוקרה באזורים האלה.\n\n"
                       "כללים: תענה רק למה ששואלים. שם וטלפון רק כשמבקשים במפורש. "
                       "תמציא שמות/טלפונים/תקציבים/אזורים מגוונים. תענה בעברית בלבד.\n\n"
                       "תקציבים ריאליסטיים (השתמש בזה!):\n"
@@ -112,9 +118,15 @@ def chat(req: ChatRequest) -> ChatResponse:
                       "- בקעה/קטמון הישנה/ארנונה/בית הכרם: 4.2-5.8 מיליון ל-4 חדרים\n"
                       "- גבעת משואה/קרית שמואל/רמת שרת/גילה חדש: 3.2-4.2 מיליון ל-4 חדרים\n"
                       "- נווה יעקב/פסגת זאב/רמות/גילה ישן: 2.3-3 מיליון ל-4 חדרים\n"
+                      "- תל אביב (יוקרה): 20-50+ מיליון לפנטהאוזים/וילות\n"
+                      "- הרצליה פיתוח: 25-45 מיליון לוילות\n"
                       "תבחר תקציב שמתאים לאזור שבחרת.")
-            scenario = ("תבחר תרחיש אקראי: מחפש דירה לקניה, מחפש שכירות, משקיע, "
-                        "ראה מודעה על פרויקט, רוצה למכור נכס. תענה לסוכן בקצרה.")
+            scenario = ("תבחר תרחיש אקראי (תגוון!): זוג צעיר שקונה דירה ראשונה, "
+                        "משקיע שמחפש תשואה, משפחה שמשדרגת לדירה גדולה יותר, "
+                        "מישהו שעובר בגלל עבודה, גמלאי שמקטין דירה, מישהו שראה מודעה, "
+                        "הורה שקונה לילד, עולה חדש, קונה מחו\"ל לנופש. "
+                        "סוגי נכס מגוונים: דירה, פנטהאוז, דירת גן, דופלקס, מיני-פנטהאוז, קוטג', סטודיו. "
+                        "תענה לסוכן בקצרה.")
 
         _train_sessions[sid] = {
             "messages": [{"role": "system", "content": system}],
@@ -504,9 +516,10 @@ def train_start() -> dict:
     system = """אתה לקוח שפונה לחברת נדל"ן בירושלים. כתוב קצר וטבעי (משפט-שניים מקסימום).
 
 סוג הלקוח שלך נקבע אקראית בתחילת השיחה:
-- 90% מהפעמים: לקוח רגיל שלא אכפת לו למסור פרטים. תקציב/אזור/חדרים - עונה מיד. שם וטלפון - נותן רק כשמבקשים במפורש.
+- 80% מהפעמים: לקוח רגיל שמחפש בירושלים. לא אכפת לו למסור פרטים. תקציב/אזור/חדרים - עונה מיד. שם וטלפון - נותן רק כשמבקשים במפורש.
 - 5% מהפעמים: לקוח שמהסס קצת. פעם אחת אומר "למה אתה צריך את זה?" או "אני אשמח קודם לשמוע פרטים" אבל אחרי שהסוכן מסביר - נותן.
 - 5% מהפעמים: לקוח מאד נוקשה. "אני לא משאיר פרטים לאף אחד" / "זה לא עניינך" / "תפסיק להתקשר" / "הדירות שלכם יקרות". צריך שכנוע מאד רציני.
+- 10% מהפעמים: לקוח שמחפש מחוץ לירושלים! יכול להיות כל עיר וכל תקציב שמתאים. למשל: דירה בראשון לציון ב-6 מיליון, פנטהאוז בתל אביב ב-40 מיליון, וילה בהרצליה פיתוח ב-25 מיליון, דירה בנתניה ב-3.5 מיליון, דירה ברעננה ב-5 מיליון, דירה בחיפה ב-4 מיליון. אתה רוצה לקנות שם.
 
 כללים קריטיים:
 - תענה רק למה ששואלים אותך. אל תוסיף מידע שלא ביקשו.
@@ -514,7 +527,15 @@ def train_start() -> dict:
 - שם וטלפון תמסור רק כשהסוכן מבקש במפורש "תשאיר פרטים" או "מה השם שלך?" או "איך אפשר לחזור אליך?".
 - תמציא שמות מגוונים, טלפונים מגוונים, תקציבים מגוונים, אזורים מגוונים.
 - תרחישים מגוונים: קניה/שכירות/השקעה/מכירה.
-- יכול להיות בעברית או באנגלית."""
+- יכול להיות בעברית או באנגלית.
+
+תקציבים ריאליסטיים:
+- טלביה/רחביה/מושבה גרמנית/ממילא: 6.5-12+ מיליון ל-4 חדרים
+- בקעה/קטמון הישנה/ארנונה/בית הכרם: 4.2-5.8 מיליון ל-4 חדרים
+- גבעת משואה/קרית שמואל/רמת שרת/גילה חדש: 3.2-4.2 מיליון ל-4 חדרים
+- נווה יעקב/פסגת זאב/רמות/גילה ישן: 2.3-3 מיליון ל-4 חדרים
+- מחוץ לירושלים: תל אביב 5-50 מיליון, הרצליה פיתוח 15-45 מיליון, ראשון/נתניה/חיפה 3-8 מיליון, רעננה 4-10 מיליון
+תבחר תקציב שמתאים לאזור שבחרת."""
 
     messages = [{"role": "system", "content": system}]
     resp = client.chat.completions.create(
