@@ -284,7 +284,7 @@ def _extract_profile_from_transcript(messages: list) -> dict:
     """מחלץ שם, טלפון, תקציב, אזור, חדרים מהודעות הלקוח (רול assistant)."""
     import re
     profile = {}
-    client_msgs = " ".join([m["content"] for m in messages if m.get("role") == "assistant"])
+    client_msgs = " ".join([m["content"] for m in messages if m.get("role") in ("assistant", "user")])
 
     # טלפון
     phone_match = re.search(r'0[5-9]\d[- ]?\d{3}[- ]?\d{4}', client_msgs)
