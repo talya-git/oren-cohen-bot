@@ -394,13 +394,26 @@ def _extract_profile_from_transcript(messages: list) -> dict:
     nearby_keywords = {
         'בית כנסת': ['בית כנסת', 'בתי כנסיות'],
         'סופרים': ['סופר', 'סופרים'],
-        'מרכז': ['מרכז', 'שירותים', 'קרוב למרכז'],
+        'מרכז': ['מרכז', 'קרוב למרכז'],
         'בית ספר': ['בית ספר', 'בתי ספר'],
-        'תחבורה': ['תחבורה', 'אוטובוס', 'רכבת'],
+        'תחבורה ציבורית': ['תחבורה', 'אוטובוס', 'רכבת'],
+        'גני ילדים': ['גני ילדים', 'גן ילדים', 'מעון', 'גנים'],
+        'פארק': ['פארק', 'גן ציבורי'],
+        'שירותים': ['שירותים'],
     }
     for place, keywords in nearby_keywords.items():
         if any(kw in client_msgs for kw in keywords):
             nearby.append(place)
+    # חילוץ חופשי - אם הלקוח אמר "קרבה ל" או "קרוב ל"
+    import re as re3
+    nearby_free = re3.findall(r'קרבה ל([\u05d0-\u05ea\s]+)', client_msgs)
+    nearby_free += re3.findall(r'קרוב ל([\u05d0-\u05ea\s]+)', client_msgs)
+    nearby_free += re3.findall(r'close to ([A-Za-z\s]+)', client_msgs, re3.IGNORECASE)
+    nearby_free += re3.findall(r'near ([A-Za-z\s]+)', client_msgs, re3.IGNORECASE)
+    for nf in nearby_free:
+        cleaned = nf.strip().rstrip('.,!?')
+        if cleaned and len(cleaned) >= 2 and cleaned not in nearby:
+            nearby.append(cleaned)
     if nearby:
         import json as json_mod
         profile["nearBy"] = json_mod.dumps(nearby, ensure_ascii=False)
