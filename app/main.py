@@ -309,9 +309,12 @@ def _extract_profile_from_transcript(messages: list) -> dict:
     budget_match = re.search(r'(\d[\d,.]+)\s*(מיליון|million|M)', client_msgs)
     if budget_match:
         profile["budget_ils"] = budget_match.group(0)
-    budget_match2 = re.search(r'עד\s*(\d[\d,.]+)', client_msgs)
+    budget_match2 = re.search(r'עד\s*\S*\s*(\d[\d,.]+)', client_msgs)
     if not profile.get("budget_ils") and budget_match2:
         profile["budget_ils"] = budget_match2.group(0)
+    budget_match3 = re.search(r'תקציב[^\d]*(\d[\d,.]+\s*(?:מיליון|million|M)?)', client_msgs)
+    if not profile.get("budget_ils") and budget_match3:
+        profile["budget_ils"] = budget_match3.group(1)
 
     # חדרים
     rooms_match = re.search(r'(\d)\s*חדרים', client_msgs)
@@ -344,16 +347,16 @@ def _extract_profile_from_transcript(messages: list) -> dict:
     elif 'invest' in client_msgs.lower():
         profile["intent"] = 'השקעה'
 
-    # תוספות (amenities) - רק אם הלקוח ביקש במפורש
+    # תוספות (amenities)
     amenities = []
     amenity_keywords = {
-        'מרפסת': ['רוצה מרפסת', 'חשוב לי מרפסת', 'מרפסת זה חשוב', 'מרפסת חובה', 'צריך מרפסת', 'עם מרפסת'],
-        'מחסן': ['רוצה מחסן', 'חשוב לי מחסן', 'מחסן חשוב', 'צריך מחסן'],
-        'חניה': ['רוצה חניה', 'חשוב לי חניה', 'חניה חשוב', 'צריך חניה', 'עם חניה'],
-        'ממד': ['רוצה ממד', 'חשוב לי ממד', 'ממד חשוב', 'צריך ממד'],
-        'מעלית': ['רוצה מעלית', 'חשוב לי מעלית', 'צריך מעלית'],
-        'גישה לנכים': ['רוצה גישה לנכים', 'נגישות'],
-        'נוף': ['רוצה נוף', 'חשוב לי נוף', 'נוף חשוב', 'צריך נוף', 'עם נוף'],
+        'מרפסת': ['מרפסת'],
+        'מחסן': ['מחסן'],
+        'חניה': ['חניה'],
+        'ממד': ['ממד'],
+        'מעלית': ['מעלית'],
+        'גישה לנכים': ['גישה לנכים', 'נגישות'],
+        'נוף': ['נוף'],
     }
     for amenity, keywords in amenity_keywords.items():
         if any(kw in client_msgs for kw in keywords):
@@ -362,11 +365,14 @@ def _extract_profile_from_transcript(messages: list) -> dict:
         import json as json_mod
         profile["amenities"] = json_mod.dumps(amenities, ensure_ascii=False)
 
-    # קרבה ל (nearBy) - רק אם הלקוח ביקש במפורש
+    # קרבה ל (nearBy)
     nearby = []
     nearby_keywords = {
-        'בית כנסת': ['רוצה קרוב לבית כנסת', 'חשוב לי בית כנסת', 'קרוב לבתי כנסיות', 'ליד בית כנסת'],
-        'סופרים': ['רוצה קרוב לסופר', 'חשוב לי סופר', 'קרוב לסופרים', 'ליד סופר', 'קרבה לסופרים'],
+        'בית כנסת': ['בית כנסת', 'בתי כנסיות'],
+        'סופרים': ['סופר', 'סופרים'],
+        'מרכז': ['מרכז', 'שירותים', 'קרוב למרכז'],
+        'בית ספר': ['בית ספר', 'בתי ספר'],
+        'תחבורה': ['תחבורה', 'אוטובוס', 'רכבת'],
     }
     for place, keywords in nearby_keywords.items():
         if any(kw in client_msgs for kw in keywords):
