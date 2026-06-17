@@ -324,14 +324,38 @@ def _extract_profile_from_transcript(messages: list) -> dict:
     if not profile.get("rooms") and rooms_match2:
         profile["rooms"] = rooms_match2.group(1)
 
-    # אזור
-    areas = ['רחביה', 'ארנונה', 'בקעה', 'טלביה', 'מושבה גרמנית', 'מרכז העיר',
+    # אזור - חילוץ כל מיקום שמוזכר
+    import re as re2
+    area_patterns = [
+        r'באזור\s+([\u05d0-\u05ea\s\-]+)',
+        r'בשכונת\s+([\u05d0-\u05ea\s\-]+)',
+        r'בשכונה\s+([\u05d0-\u05ea\s\-]+)',
+        r'\u05d1([\u05d0-\u05ea]{3,}[\s\u05d0-\u05ea]*)',
+        r'in\s+([A-Za-z\s\-]+?)(?:\s*,|\s*\.|\s*$|\s+area|\s+neighborhood)',
+        r'area[:\s]+([A-Za-z\s\-]+)',
+    ]
+    areas_known = ['רחביה', 'ארנונה', 'בקעה', 'טלביה', 'מושבה גרמנית', 'מרכז העיר',
+            'קטמון', 'נחלאות', 'גילו', 'עיר גנים', 'פסגת זאב',
+            'בית הכרם', 'ממילא', 'ימין משה', 'רמות', 'נווה יעקב',
+            'גבעת משואה', 'קרית שמואל', 'רמת שרת', 'בית וגן', 'קרית יובל',
+            'תל אביב', 'הרצליה', 'נתניה', 'חיפה', 'רעננה', 'ראשון לציון',
             'German Colony', 'Rehavia', 'Talbiya', 'Arnona', 'Baka',
-            'קטמון', 'נחלאות', 'גילו', 'עיר גנים', 'פסגת זאב']
-    for area in areas:
+            'Beit HaKerem', 'Mamilla', 'Ramot', 'Neve Yaakov', 'Pisgat Zeev',
+            'Tel Aviv', 'Herzliya', 'Netanya', 'Haifa', 'Raanana']
+    # קודם כל תבדוק אזורים מוכרים
+    for area in areas_known:
         if area.lower() in client_msgs.lower():
             profile["area"] = area
             break
+    # אם לא נמצא - נסה לחלץ מהטקסט
+    if not profile.get("area"):
+        for pat in area_patterns:
+            m = re2.search(pat, client_msgs)
+            if m:
+                extracted_area = m.group(1).strip().rstrip('.,!?')
+                if len(extracted_area) >= 3 and extracted_area not in ['אני', 'שלום', 'היי']:
+                    profile["area"] = extracted_area
+                    break
 
     # כוונה
     if any(kw in client_msgs for kw in ['שכירות', 'להשכרה', 'להשכיר', 'לשכור']):
