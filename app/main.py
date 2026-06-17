@@ -191,7 +191,7 @@ def chat(req: ChatRequest) -> ChatResponse:
             role = "client" if m["role"] == "assistant" else "agent"
             transcript.append({"role": role, "content": m["content"]})
         ratings.save_feedback(sid, "training", "שיחת אימון", transcript)
-        del _train_sessions[sid]
+        # Don't delete session yet - /create-lead needs it
         return ChatResponse(
             session_id=sid, reply=client_msg + "\n\n✅ השיחה נשמרה ללמידה!",
             stage="handoff", level="High", score=1, handoff_to_human=True,
