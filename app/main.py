@@ -225,6 +225,41 @@ def _maybe_push_to_sehel(
     return result.get("leadId") if not dry else "DRY_RUN"
 
 
+# === Agent Bot Mode (bot as agent, user as client) ===
+_agent_sessions: dict[str, Conversation] = {}
+
+
+class AgentChatRequest(BaseModel):
+    session_id: str | None = None
+    message: str
+
+
+@app.post("/agent-chat")
+def agent_chat(req: AgentChatRequest) -> dict:
+    """Bot as agent — uses the ReAct prompts."""
+    if req.session_id and req.session_id in _agent_sessions:
+        sid = req.session_id
+    else:
+        sid = str(uuid4())
+        _agent_sessions[sid] = Conversation()
+
+    convo = _agent_sessions[sid]
+    turn, score = convo.send(req.message)
+    return {
+        "session_id": sid,
+        "reply": turn.reply,
+        "stage": turn.stage,
+        "level": score.level,
+        "score": score.score,
+        "handoff_to_human": turn.handoff_to_human,
+    }
+
+
+@app.get("/agent")
+def agent_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "agent.html")
+
+
 @app.get("/greeting")
 def greeting() -> dict:
     return {"reply": GREETING}

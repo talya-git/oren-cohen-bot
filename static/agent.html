@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>דניאל — בוט סוכן</title>
+  <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: { extend: { fontFamily: { sans: ['Noto Sans Hebrew', 'sans-serif'] } } }
+    }
+  </script>
+  <style>
+    body { background: #efeae2; }
+    .msg-out { background: #d9fdd3; }
+    .msg-in { background: #fff; }
+    .typing-dot { animation: bounce 1.4s infinite; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%,60%,100%{transform:translateY(0);opacity:.5} 30%{transform:translateY(-4px);opacity:1} }
+    #chat::-webkit-scrollbar { width: 6px; }
+    #chat::-webkit-scrollbar-thumb { background: #c5c5c5; border-radius: 3px; }
+  </style>
+</head>
+<body class="h-[100dvh] flex flex-col font-sans">
+
+  <!-- Header -->
+  <header class="bg-[#f0f2f5] border-b px-4 py-2.5 flex items-center gap-3 shrink-0">
+    <div class="w-10 h-10 rounded-full overflow-hidden bg-[#1a2c25] ring-2 ring-white/20">
+      <img src="/static/img/logo.png" alt="logo" class="w-full h-full object-cover" />
+    </div>
+    <div class="flex-1">
+      <h1 class="text-[16px] font-medium text-[#111b21]">דניאל · סוכן (בוט)</h1>
+      <p class="text-[13px] text-[#667781]">מצב בדיקה — אתה הלקוח</p>
+    </div>
+    <button onclick="newChat()" class="bg-[#00a884] text-white text-xs rounded-full px-4 py-1.5 font-medium hover:opacity-90">שיחה חדשה</button>
+  </header>
+
+  <!-- Chat -->
+  <div id="chat" class="flex-1 overflow-y-auto px-4 md:px-16 py-4 flex flex-col gap-1"></div>
+
+  <!-- Input -->
+  <footer class="bg-[#f0f2f5] border-t px-4 py-2 flex items-end gap-2 shrink-0">
+    <div class="flex-1 bg-white rounded-lg border px-3 py-2">
+      <textarea id="input" rows="1" placeholder="כתוב כלקוח..." class="w-full bg-transparent text-[15px] outline-none resize-none leading-5 max-h-[100px]"></textarea>
+    </div>
+    <button onclick="send()" class="w-10 h-10 rounded-full flex items-center justify-center hover:scale-105 transition">
+      <svg class="w-6 h-6 fill-[#54656f] hover:fill-[#00a884]" viewBox="0 0 24 24"><path d="M1.101 21.757L23.8 12.028 1.101 2.3l.011 7.912 13.623 1.816-13.623 1.817-.011 7.912z"/></svg>
+    </button>
+  </footer>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("input");
+    let sessionId = null;
+
+    function getTime() {
+      return new Date().toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function addMsg(text, type) {
+      const d = document.createElement("div");
+      const isOut = type === "out";
+      d.className = `max-w-[75%] md:max-w-[50%] px-3 py-1.5 rounded-lg text-sm leading-5 whitespace-pre-wrap break-words shadow-sm ${isOut ? "self-end msg-out" : "self-start msg-in"}`;
+      d.innerHTML = `${text}<span class="text-[11px] text-[#667781] float-${isOut ? 'left ml-2' : 'left ml-2'} pt-1">${getTime()}</span>`;
+      chat.appendChild(d);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function showTyping() {
+      const d = document.createElement("div");
+      d.id = "typing";
+      d.className = "self-start bg-white px-4 py-2.5 rounded-lg shadow-sm flex gap-1";
+      d.innerHTML = '<span class="typing-dot w-2 h-2 bg-gray-400 rounded-full"></span><span class="typing-dot w-2 h-2 bg-gray-400 rounded-full"></span><span class="typing-dot w-2 h-2 bg-gray-400 rounded-full"></span>';
+      chat.appendChild(d);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function hideTyping() {
+      const el = document.getElementById("typing");
+      if (el) el.remove();
+    }
+
+    async function send() {
+      const text = input.value.trim();
+      if (!text) return;
+      addMsg(text, "out");
+      input.value = "";
+      input.style.height = "auto";
+      showTyping();
+      try {
+        const res = await fetch("/agent-chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ session_id: sessionId, message: text }),
+        });
+        const data = await res.json();
+        sessionId = data.session_id;
+        hideTyping();
+        addMsg(data.reply, "in");
+      } catch (e) {
+        hideTyping();
+        addMsg("שגיאה בחיבור", "in");
+      }
+    }
+
+    function newChat() {
+      sessionId = null;
+      chat.innerHTML = "";
+      addMsg("היי, דניאל מאורן כהן גרופ. במה אוכל לעזור?", "in");
+    }
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+    });
+    input.addEventListener("input", () => {
+      input.style.height = "auto";
+      input.style.height = Math.min(input.scrollHeight, 100) + "px";
+    });
+
+    // Initial greeting
+    addMsg("היי, דניאל מאורן כהן גרופ. במה אוכל לעזור?", "in");
+  </script>
+</body>
+</html>
