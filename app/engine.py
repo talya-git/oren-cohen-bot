@@ -104,6 +104,22 @@ class Conversation:
                 ext["financing"] = "unknown"
             if ext.get("engagement") not in (None, "high", "medium", "low"):
                 ext["engagement"] = "medium"
+            # תיקון שדות שהמודל מחזיר כ-"unknown" אבל צריכים להיות None
+            if ext.get("budget_ils") == "unknown" or ext.get("budget_ils") == "null":
+                ext["budget_ils"] = None
+            if ext.get("rooms") == "unknown" or ext.get("rooms") == "null":
+                ext["rooms"] = None
+            if isinstance(ext.get("budget_ils"), str):
+                # ניסיון להמיר מחרוזת מספרית
+                try:
+                    ext["budget_ils"] = int(ext["budget_ils"].replace(",", ""))
+                except (ValueError, AttributeError):
+                    ext["budget_ils"] = None
+            if isinstance(ext.get("rooms"), str):
+                try:
+                    ext["rooms"] = int(ext["rooms"])
+                except (ValueError, AttributeError):
+                    ext["rooms"] = None
             data["extracted"] = ext
             # תיקון stage - המודל לפעמים מחזיר ערכים שלא ברשימה
             valid_stages = ("greeting", "intent", "qualification", "engagement", "cta", "handoff")
