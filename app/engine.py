@@ -7,7 +7,7 @@ import httpx
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from .prompts import GOLDEN_EXAMPLES, SYSTEM_PROMPT, PROPERTIES_CONTEXT, LESSONS_CONTEXT, get_fresh_lessons
+from .prompts import GOLDEN_EXAMPLES, PROPERTIES_CONTEXT, get_fresh_lessons, get_system_prompt
 from .schemas import BotTurn, ExtractedParams
 from .scoring import score_lead, LeadScore
 
@@ -25,12 +25,14 @@ class Conversation:
     def __init__(self):
         self.profile = ExtractedParams()
         self.messages: list[dict] = []
+        self._language = "he"  # default, updated on first message
+        self._system_built = False
 
-        # בניית system instruction עם דוגמאות זהב ומאגר נכסים
-        system = SYSTEM_PROMPT
+    def _build_system(self, language: str) -> str:
+        """Build system prompt with context for the detected language."""
+        system = get_system_prompt(language)
         if PROPERTIES_CONTEXT:
             system += PROPERTIES_CONTEXT
-        # טוען לקחים עדכניים בכל שיחה חדשה
         fresh_lessons = get_fresh_lessons()
         if fresh_lessons:
             system += fresh_lessons
@@ -38,23 +40,14 @@ class Conversation:
             system += "\n\n## דוגמאות מאושרות (few-shot)\n"
             for ex in GOLDEN_EXAMPLES[:5]:
                 system += f"\nלקוח: {ex.get('user','')}\nדניאל: {ex.get('assistant','')}\n"
-
         system += (
-            "\n\n--- הנחיות פלט ---\n"
-            "החזר JSON תקני בלבד עם השדות: reply, stage, extracted, handoff_to_human, notes.\n"
-            "extracted חייב לכלול: budget_ils, timeline, financing, intent, "
+            "\n\n--- Output format ---\n"
+            "Return valid JSON only: {reply, stage, extracted, handoff_to_human, notes}\n"
+            "extracted fields: budget_ils, timeline, financing, intent, "
             "has_property_to_sell, area, rooms, engagement, contact_name, phone.\n"
-            "אם פרט לא ידוע השאר null או unknown.\n"
-            "אל תוסיף טקסט מחוץ ל-JSON.\n"
-            "\n--- LANGUAGE RULES (CRITICAL) ---\n"
-            "1. DETECT the language of the client's FIRST message and ALL subsequent messages.\n"
-            "2. If the client writes in English — reply ONLY in English. Professional, elegant, no typos.\n"
-            "3. If the client writes in Hebrew — reply ONLY in Hebrew. Proper Hebrew, no errors.\n"
-            "4. NEVER mix languages. NEVER respond in Hebrew to an English message or vice versa.\n"
-            "5. English replies must sound like a top-tier international real estate advisor: polished, concise, confident.\n"
+            "Unknown fields → null or \"unknown\". No text outside the JSON.\n"
         )
-
-        self.messages.append({"role": "system", "content": system})
+        return system
 
     @staticmethod
     def _is_english(text: str) -> bool:
@@ -62,11 +55,14 @@ class Conversation:
         return eng_chars > len(text.strip()) * 0.4
 
     def send(self, user_message: str) -> tuple[BotTurn, LeadScore]:
-        if self._is_english(user_message):
-            content = f"[RESPOND IN ENGLISH ONLY]\n{user_message}"
-        else:
-            content = user_message
-        self.messages.append({"role": "user", "content": content})
+        # Detect language and build system prompt on first message
+        if not self._system_built:
+            self._language = "en" if self._is_english(user_message) else "he"
+            system = self._build_system(self._language)
+            self.messages.insert(0, {"role": "system", "content": system})
+            self._system_built = True
+
+        self.messages.append({"role": "user", "content": user_message})
 
         response = client.chat.completions.create(
             model=MODEL,
