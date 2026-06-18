@@ -128,10 +128,16 @@ class Conversation:
             turn = BotTurn(**data)
         except (json.JSONDecodeError, Exception):
             # fallback — חילוץ הטקסט שלפני ה-JSON כתשובה
-            clean_reply = raw.split("{")[0].strip() if "{" in raw else raw
-            clean_reply = clean_reply.split("```")[0].strip()
+            # try to extract just the reply field from the raw JSON even if full parse failed
+            import re as _re
+            reply_match = _re.search(r'"reply"\s*:\s*"((?:[^"\\]|\\.)*)"', raw)
+            if reply_match:
+                clean_reply = reply_match.group(1).replace('\\n', '\n').replace('\\"', '"')
+            else:
+                clean_reply = raw.split("{")[0].strip() if "{" in raw else raw
+                clean_reply = clean_reply.split("```")[0].strip()
             if not clean_reply:
-                clean_reply = "מה אוכל לעזור לך?"
+                clean_reply = "כן יש לנו מגוון נכסים, תוכל למקד אותי קצת מה אתה מחפש?"
             turn = BotTurn(
                 reply=clean_reply,
                 stage="engagement",
