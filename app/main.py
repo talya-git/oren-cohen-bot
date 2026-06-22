@@ -30,6 +30,7 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 
 @app.get("/")
+@app.head("/")
 def home() -> FileResponse:
     """עמוד הצ'אט בדפדפן."""
     return FileResponse(STATIC_DIR / "index.html")
