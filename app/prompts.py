@@ -9,8 +9,8 @@ from pathlib import Path
 
 _PROMPTS_DIR = Path(__file__).resolve().parent / "prompts"
 
-SYSTEM_PROMPT_HE = (_PROMPTS_DIR / "prompt_he.txt").read_text(encoding="utf-8")
-SYSTEM_PROMPT_EN = (_PROMPTS_DIR / "prompt_en.txt").read_text(encoding="utf-8")
+SYSTEM_PROMPT_HE = (_PROMPTS_DIR / "prompt_he.md").read_text(encoding="utf-8")
+SYSTEM_PROMPT_EN = (_PROMPTS_DIR / "prompt_en.md").read_text(encoding="utf-8")
 SYSTEM_PROMPT = SYSTEM_PROMPT_HE  # default
 
 
