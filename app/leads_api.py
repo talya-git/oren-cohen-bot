@@ -3,9 +3,13 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
+from uuid import uuid4
 from . import database as db
 
 router = APIRouter(prefix="/api/leads", tags=["leads"])
+
+# session_id -> Conversation (shared with main.py via import)
+_inbound_sessions: dict = {}
 
 
 class LoginRequest(BaseModel):
@@ -100,3 +104,127 @@ def delete_lead(lead_id: int):
 @router.get("/agents")
 def get_agents():
     return db.get_all_agents()
+
+
+# === Inbound Lead (from CSV / CRM / WhatsApp batch) ===
+
+class InboundLeadRequest(BaseModel):
+    phone: str
+    name: Optional[str] = None
+    email: Optional[str] = None
+    source: str = "reengagement"  # reengagement / facebook / google / yad2
+    first_message: Optional[str] = None  # הודעה ראשונה מותאמת אישית (אופציונלי)
+
+
+class InboundLeadResponse(BaseModel):
+    session_id: str
+    greeting: str  # ההודעה שצריך לשלוח ללקוח ב-WhatsApp
+    lead_id: int
+
+
+@router.post("/inbound", response_model=InboundLeadResponse)
+def inbound_lead(req: InboundLeadRequest) -> InboundLeadResponse:
+    """
+    מקבל ליד נכנס (מ-CSV / CRM / AWS batch) ומכין שיחה עם הבוט.
+
+    הזרימה:
+    1. שומר את הליד ב-DB
+    2. פותח Conversation חדש עם הפרופיל הידוע
+    3. מחזיר session_id + greeting לשליחה ב-WhatsApp
+
+    תגובות הלקוח נכנסות אחר כך דרך POST /agent-chat עם אותו session_id.
+    """
+    from .engine import Conversation
+    from .prompts import GREETING
+
+    # 1. שמירה ב-DB
+    lead_id = db.create_lead({
+        "contact_name": req.name,
+        "phone": req.phone,
+        "intent": "unknown",
+        "notes": f"source:{req.source}",
+    })
+
+    # 2. פתיחת שיחה עם פרופיל ידוע מראש
+    convo = Conversation()
+    if req.name:
+        convo.profile.contact_name = req.name
+    if req.phone:
+        convo.profile.phone = req.phone
+
+    # 3. בניית הודעת פתיחה
+    if req.first_message:
+        greeting = req.first_message
+    elif req.name:
+        greeting = f"שלום {req.name.split()[0]}, אני דניאל ממשרד אורן כהן גרופ. "\
+                   "נשמח לעדכן אותך על נכסים חדשים שיכולים לעניין אותך. "\
+                   "האם תרצה לשמוע פרטים?"
+    else:
+        greeting = GREETING
+
+    sid = str(uuid4())
+    _inbound_sessions[sid] = {"convo": convo, "lead_id": lead_id}
+
+    return InboundLeadResponse(session_id=sid, greeting=greeting, lead_id=lead_id)
+
+
+@router.post("/inbound/{session_id}/message")
+def inbound_message(session_id: str, req: dict) -> dict:
+    """
+    מקבל תגובה נכנסת מהלקוח (Webhook מ-WhatsApp) וממשיך את השיחה.
+
+    גוף הבקשה: { "message": "טקסט מהלקוח" }
+    מחזיר: { "reply": "...", "stage": "...", "level": "...", "handoff": bool }
+    """
+    session = _inbound_sessions.get(session_id)
+    if not session:
+        raise HTTPException(404, "session not found")
+
+    message = req.get("message", "").strip()
+    if not message:
+        raise HTTPException(400, "message is required")
+
+    convo = session["convo"]
+    lead_id = session["lead_id"]
+
+    turn, score = convo.send(message)
+
+    # עדכון ה-DB עם מה שחולץ
+    update_data = {}
+    if convo.profile.contact_name:
+        update_data["contact_name"] = convo.profile.contact_name
+    if convo.profile.phone:
+        update_data["phone"] = convo.profile.phone
+    if convo.profile.budget_ils:
+        update_data["budget"] = str(convo.profile.budget_ils)
+    if convo.profile.area:
+        update_data["area"] = convo.profile.area
+    if convo.profile.rooms:
+        update_data["rooms"] = str(convo.profile.rooms)
+    if convo.profile.intent and convo.profile.intent != "unknown":
+        update_data["intent"] = convo.profile.intent
+    if convo.profile.timeline and convo.profile.timeline != "unknown":
+        update_data["timeline"] = convo.profile.timeline
+    if convo.profile.financing and convo.profile.financing != "unknown":
+        update_data["financing"] = convo.profile.financing
+
+    # דירוג לפי score
+    rating_map = {"High": "hot", "Medium": "warm", "Low": "cold"}
+    update_data["rating"] = rating_map.get(score.level, "none")
+    update_data["status"] = "handoff" if turn.handoff_to_human else "in_progress"
+
+    if update_data:
+        db.update_lead(lead_id, update_data)
+
+    # ניקוי session אם השיחה הסתיימה
+    if turn.handoff_to_human:
+        _inbound_sessions.pop(session_id, None)
+
+    return {
+        "reply": turn.reply,
+        "stage": turn.stage,
+        "level": score.level,
+        "score": score.score,
+        "handoff": turn.handoff_to_human,
+        "lead_id": lead_id,
+    }
