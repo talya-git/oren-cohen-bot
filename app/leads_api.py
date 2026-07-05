@@ -106,6 +106,22 @@ def get_agents():
     return db.get_all_agents()
 
 
+@router.get("/stats/reengagement")
+def reengagement_stats():
+    all_leads = db.get_all_leads()
+    reen = [l for l in all_leads if (l.get("notes") or "").startswith("source:reengagement")]
+    return {"total": len(reen), "leads": reen}
+
+
+@router.delete("/reengagement/all")
+def delete_all_reengagement():
+    all_leads = db.get_all_leads()
+    reen = [l for l in all_leads if (l.get("notes") or "").startswith("source:reengagement")]
+    for l in reen:
+        db.delete_lead(l["id"])
+    return {"deleted": len(reen)}
+
+
 # === Inbound Lead (from CSV / CRM / WhatsApp batch) ===
 
 class InboundLeadRequest(BaseModel):
