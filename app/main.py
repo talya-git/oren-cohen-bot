@@ -9,6 +9,7 @@ from uuid import uuid4
 import os
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -18,10 +19,18 @@ from . import ratings
 from .engine import Conversation
 from .prompts import GREETING
 from .leads_api import router as leads_router
+from .whatsapp import router as whatsapp_router
 from . import database as db
 
 app = FastAPI(title="Oren Cohen Group — Lead Bot")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://crm.sehel.co.il"],
+    allow_methods=["POST", "GET", "OPTIONS"],
+    allow_headers=["Content-Type"],
+)
 app.include_router(leads_router)
+app.include_router(whatsapp_router)
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
