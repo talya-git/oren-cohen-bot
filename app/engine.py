@@ -16,8 +16,9 @@ load_dotenv()
 # OpenAI API
 client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),
-    http_client=httpx.Client(verify=False),
+    http_client=httpx.Client(verify=False, timeout=60.0),
 )
+
 MODEL = "gpt-4o"
 
 
@@ -27,6 +28,39 @@ class Conversation:
         self.messages: list[dict] = []
         self._language = "he"  # default, updated on first message
         self._system_built = False
+
+    @classmethod
+    def from_session(cls, session: dict) -> "Conversation":
+        """טוען שיחה קיימת מ-session record."""
+        convo = cls()
+        convo.profile = ExtractedParams(**(session.get("profile") or {}))
+        convo._system_built = True  # מונע בניית system כפולה
+
+        # בנה system prompt + הנחיה לזרימת המשך
+        system = get_system_prompt("he")
+        if PROPERTIES_CONTEXT:
+            system += PROPERTIES_CONTEXT
+        fresh_lessons = get_fresh_lessons()
+        if fresh_lessons:
+            system += fresh_lessons
+        system += (
+            "\n\n--- Output format ---\n"
+            "Return valid JSON only: {reply, stage, extracted, handoff_to_human, notes}\n"
+            "extracted fields: budget_ils, timeline, financing, intent, "
+            "has_property_to_sell, area, city, neighborhood, property_type, rooms, engagement, contact_name, phone.\n"
+            "city: עיר מבוקשת. neighborhood: שכונה ספציפית. property_type: דירה/פנטאוז/דירת גן/וילה/דופלקס etc.\n"
+            "Unknown fields \u2192 null or \"unknown\". No text outside the JSON.\n"
+        )
+        system += (
+            "\n\n## זרימת שיחת המשך (חשוב!)\n"
+            "זוהי שיחת המשך עם ליד קיים. הפתיחה שלך חייבת להיות:\n"
+            "\"היי, זה דניאל מאורן כהן גרופ. ראיתי שבעבר התעניינת בקניית דירה בירושלים — זה עדיין רלוונטי עבורך?\"\n"
+            "אם הלקוח מאשר עניין — שאל: \"תזכיר לי, באיזה אזור דיברנו? או שכרגע כבר לא משנה לך אזור?\"\n"
+            "לאחר מכן המשך לפי סדר השאלות הרגיל: חדרים, דרישות, לוח זמנים, תקציב (אחרון), פרטי קשר.\n"
+            "אל תסכם את השיחה הקודמת ואל תציין מה כבר ידוע — שאל מחדש בצורה טבעית.\n"
+        )
+        convo.messages.append({"role": "system", "content": system})
+        return convo
 
     def _build_system(self, language: str) -> str:
         """Build system prompt with context for the detected language."""
@@ -44,8 +78,9 @@ class Conversation:
             "\n\n--- Output format ---\n"
             "Return valid JSON only: {reply, stage, extracted, handoff_to_human, notes}\n"
             "extracted fields: budget_ils, timeline, financing, intent, "
-            "has_property_to_sell, area, rooms, engagement, contact_name, phone.\n"
-            "Unknown fields → null or \"unknown\". No text outside the JSON.\n"
+            "has_property_to_sell, area, city, neighborhood, property_type, rooms, engagement, contact_name, phone.\n"
+            "city: עיר מבוקשת. neighborhood: שכונה ספציפית. property_type: דירה/פנטאוז/דירת גן/וילה/דופלקס etc.\n"
+            "Unknown fields \u2192 null or \"unknown\". No text outside the JSON.\n"
         )
         return system
 

@@ -24,6 +24,9 @@ class ExtractedParams(BaseModel):
     intent: Optional[Intent] = "unknown"
     has_property_to_sell: Optional[bool] = None
     area: Optional[str] = None
+    city: Optional[str] = None
+    neighborhood: Optional[str] = None
+    property_type: Optional[str] = None
     rooms: Optional[int] = None
     engagement: Optional[Engagement] = "medium"
     contact_name: Optional[str] = None

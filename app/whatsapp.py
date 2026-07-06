@@ -141,6 +141,7 @@ async def whatsapp_webhook(request: Request):
         _wa_sessions[phone] = conv
 
     turn, score = _wa_sessions[phone].send(user_msg)
+    time.sleep(7)
     send_message(phone, turn.reply)
 
     if turn.handoff_to_human:

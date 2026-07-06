@@ -7,21 +7,45 @@
 יוכל לדרג את רמת הליד בצבע ב-review_cli.py.
 """
 
+import sys
+
 from . import feedback, prompts
 from .engine import Conversation
 from .scoring import score_lead
 
 
 def main() -> None:
-    convo = Conversation()
-    print("=" * 60)
-    print("אורן כהן גרופ — דניאל (בוט סיווג לידים, דמו טרמינל)")
-    print("הקלד 'יציאה' כדי לסיים ולשמור את השיחה לדירוג.")
-    print("=" * 60)
-    print(f"\n💬 דניאל: {prompts.GREETING}\n")
+    session_id = None
+    args = sys.argv[1:]
+    if "--session" in args:
+        idx = args.index("--session")
+        if idx + 1 < len(args):
+            session_id = args[idx + 1]
 
-    # ברכת הפתיחה היא חלק מהשיחה — נשמרת ב-transcript לדירוג
-    transcript: list[dict] = [{"role": "assistant", "content": prompts.GREETING}]
+    convo = Conversation()
+    transcript: list[dict] = []
+
+    if session_id:
+        all_sessions = feedback._load_raw()
+        match = next((s for s in all_sessions if s["id"].startswith(session_id)), None)
+        if not match:
+            print(f"Session '{session_id}' לא נמצא.")
+            return
+        convo = Conversation.from_session(match)
+        transcript = list(match.get("transcript", []))
+        print("=" * 60)
+        print(f"ממשיך שיחה קיימת | {match['id'][:8]} | {match['bot_level']}")
+        print("=" * 60)
+        opening = "היי, זה דניאל מאורן כהן גרופ. ראיתי שבעבר התעניינת בקניית דירה בירושלים — זה עדיין רלוונטי עבורך?"
+        print(f"\n💬 דניאל: {opening}\n")
+        transcript = [{"role": "assistant", "content": opening}]
+    else:
+        print("=" * 60)
+        print("אורן כהן גרופ — דניאל (בוט סיווג לידים, דמו טרמינל)")
+        print("הקלד 'יציאה' כדי לסיים ולשמור את השיחה לדירוג.")
+        print("=" * 60)
+        print(f"\n💬 דניאל: {prompts.GREETING}\n")
+        transcript = [{"role": "assistant", "content": prompts.GREETING}]
 
     while True:
         try:

@@ -219,17 +219,21 @@ def _maybe_push_to_sehel(
     if sid in _pushed:
         return None
     if not (handoff or level == "High"):
-        return None
+        return None  # לא מתעניין — נשמר ב-sessions בלבד
     if not convo.profile.phone:
-        return None  # שכל דורש טלפון
+        return None
 
-    # אם אין project_id ואין webhook — dry-run (לא שולח בפועל)
+    language = getattr(convo, "_language", "he")
     dry = not (sehel.PROJECT_ID or sehel.WEBHOOK_URL)
     try:
-        payload = sehel.build_payload(convo.profile, level, score, media_source=media_source)
+        payload = sehel.build_payload(
+            convo.profile, level, score,
+            language=language,
+            media_source=media_source,
+        )
         result = sehel.push_lead(payload, dry_run=dry)
     except Exception:
-        return None  # כשל בשכל לא ישבור את השיחה
+        return None
 
     _pushed.add(sid)
     return result.get("leadId") if not dry else "DRY_RUN"

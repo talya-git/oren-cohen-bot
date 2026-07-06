@@ -22,6 +22,45 @@ SEHEL_URL = os.getenv("SEHEL_URL", "https://leads.sehel.co.il")
 PROJECT_ID = os.getenv("SEHEL_PROJECT_ID")
 WEBHOOK_URL = os.getenv("SEHEL_WEBHOOK_URL")  # אופציונלי — מסלול Make/Zapier
 
+# ניתוב סוכנים לפי שפה
+AGENT_HE = "aaron@orencohengroup.com"   # עברית → אהרון
+AGENT_EN = "lisa@orencohengroup.com"    # אנגלית → ליסה (דוב בעתיד)
+
+# מיפוי שם פרויקט → project_id בשכל
+PROJECT_MAP: dict[str, str] = {
+    "ניתאי": "25049cf2-3546-438d-8654-d67a53a98a80",
+    "סוקולוב": "d409ce62-c761-4570-beaf-f27bb6f84397",
+    "סוקולוב 6": "d409ce62-c761-4570-beaf-f27bb6f84397",
+    "טלביה פארק": "d409ce62-c761-4570-beaf-f27bb6f84397",
+    "קרן היסוד": "bf030ff9-871a-4faf-a00c-93ead0aca9ab",
+    "מאיר שחם": "514ce548-2ae3-4cf8-bd9a-1297ad4c25e8",
+    "לינקולן": "cec6af9a-8987-4eb8-93f6-c0a7f9ee97d9",
+    "אינדפנדס": "e567b50c-05b1-42da-b7ca-82aad861f157",
+    "הנגיד": "7934f290-8d17-4622-a934-a04698569591",
+    "שמואל הנגיד": "7934f290-8d17-4622-a934-a04698569591",
+    "נוף הנגיד": "7934f290-8d17-4622-a934-a04698569591",
+    "שמואל הנגיד רזידנס": "1a98e044-c291-4ce4-a374-c77257103903",
+    "רזידנס": "1a98e044-c291-4ce4-a374-c77257103903",
+    "תיבת האוצרות": "bddffc55-30b2-449d-b437-3acaaf7a983d",
+    "בית הערבה": "c5d6647b-94a6-43dd-b628-2618bb6eac73",
+    "עדן": "8f68faaf-9751-4230-b20a-e73bb0c39ae1",
+    "יפו 184": "5f4cf862-9cf5-4867-889f-c36fed80be97",
+    "יפו": "5f4cf862-9cf5-4867-889f-c36fed80be97",
+    "השלושה": "9d52b0a5-616d-480f-9234-2056f821a8b6",
+}
+DEFAULT_PROJECT_ID = "fa149402-5c50-49f4-ba4e-bc94440f6806"  # אורן כהן יד 2 (ברירת מחדל)
+
+
+def _resolve_project_id(area: str | None) -> str:
+    """מחזיר project_id לפי שם הפרויקט/אזור שהוזכר בשיחה."""
+    if not area:
+        return DEFAULT_PROJECT_ID
+    area_lower = area.lower()
+    for key, pid in PROJECT_MAP.items():
+        if key in area_lower or area_lower in key:
+            return pid
+    return DEFAULT_PROJECT_ID
+
 # תוויות עבריות קריאות לסוכן ב-CRM
 _INTENT_HE = {
     "buy": "קנייה",
@@ -48,12 +87,12 @@ _COLOR_HE = {"red": "אדום", "orange": "כתום", "green": "ירוק"}
 
 
 def _build_comment(p: ExtractedParams, level: str, score: float, agent_color: str | None) -> str:
+    city_area = " | ".join(filter(None, [p.city, p.neighborhood, p.area]))
     lines = [
         f"סוכן וירטואלי (דניאל) | דירוג אוטומטי: {level} ({score})",
-        f"תקציב: {p.budget_ils or '—'} | לו\"ז: {_TIMELINE_HE.get(p.timeline, '—')}"
-        f" | מימון: {_FINANCING_HE.get(p.financing, '—')}",
-        f"כוונה: {_INTENT_HE.get(p.intent, '—')} | אזור: {p.area or '—'}"
-        f" | חדרים: {p.rooms or '—'}",
+        f"כוונה: {_INTENT_HE.get(p.intent, '—')} | סוג נכס: {p.property_type or '—'} | חדרים: {p.rooms or '—'}",
+        f"אזור: {city_area or '—'}",
+        f"תקציב: {f'{p.budget_ils:,}' if p.budget_ils else '—'} ש"ח | לו"ז: {_TIMELINE_HE.get(p.timeline, '—')} | מימון: {_FINANCING_HE.get(p.financing, '—')}",
     ]
     if agent_color:
         lines.append(f"דירוג סוכן: {_COLOR_HE.get(agent_color, agent_color)}")
@@ -65,20 +104,25 @@ def build_payload(
     level: str,
     score: float,
     *,
+    language: str = "he",
     media_source: str = "Facebook",
     agent_color: str | None = None,
     project_id: str | None = None,
 ) -> dict:
     """ממפה את הליד שלנו למבנה ששכל מצפה לו. מעלה ValueError אם חסר טלפון."""
     if not profile.phone:
-        raise ValueError("חסר טלפון — שכל דורש lead_phone. נדרש לאסוף טלפון לפני הזרקה.")
+        raise ValueError("חסר טלפון — שכל דורש lead_phone.")
+
+    agent = AGENT_HE if language == "he" else AGENT_EN
+    resolved_pid = project_id or PROJECT_ID or _resolve_project_id(profile.area)
 
     payload: dict = {
-        "project_id": project_id or PROJECT_ID,
+        "project_id": resolved_pid,
         "lead_phone": profile.phone,
         "media_source": media_source,
         "lead_comment": _build_comment(profile, level, score, agent_color),
-        "tags": [_LEVEL_TAG.get(level, level)],
+        "tags[]": [_LEVEL_TAG.get(level, level)],
+        "agentUsername": agent,
     }
     if profile.contact_name:
         payload["lead_name"] = profile.contact_name
