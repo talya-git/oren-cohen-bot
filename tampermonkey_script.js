@@ -34,14 +34,21 @@
                     <button id="wa-pilot-close" style="background:none;border:none;font-size:20px;cursor:pointer;">✕</button>
                 </div>
 
+                <p style="color:#666;font-size:13px;margin-bottom:8px;">🔍 חפש לפי שם או טלפון והוסף לרשימה:</p>
+                <div style="display:flex;gap:8px;margin-bottom:16px;">
+                    <input id="wa-pilot-search" type="text" placeholder="יוסי כהן או 0501234567"
+                        style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;direction:rtl;" />
+                    <button id="wa-pilot-search-btn" style="padding:8px 14px;background:#007bff;
+                        color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">חפש</button>
+                </div>
+                <div id="wa-pilot-search-results" style="display:none;margin-bottom:12px;max-height:150px;
+                    overflow-y:auto;border:1px solid #ddd;border-radius:8px;"></div>
+
                 <p style="color:#666;font-size:13px;margin-bottom:8px;">
-                    הדבק רשימה — כל שורה: <strong>טלפון,שם,פרויקט</strong> (עד 100 שורות)
-                </p>
-                <p style="color:#888;font-size:12px;margin-bottom:12px;">
-                    דוגמה: 0501234567,יוסי כהן,רזידנס
+                    או הדבק רשימה — כל שורה: <strong>טלפון,שם,פרויקט</strong> (עד 100 שורות)
                 </p>
 
-                <textarea id="wa-pilot-input" style="width:100%;height:180px;border:1px solid #ddd;
+                <textarea id="wa-pilot-input" style="width:100%;height:140px;border:1px solid #ddd;
                     border-radius:8px;padding:10px;font-size:13px;direction:ltr;resize:vertical;
                     box-sizing:border-box;" placeholder="0501234567,יוסי כהן,רזידנס&#10;0509876543,דנה לוי,&#10;..."></textarea>
 
@@ -77,8 +84,66 @@
         document.getElementById('wa-pilot-close').onclick = () => overlay.remove();
         overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
 
+        document.getElementById('wa-pilot-search-btn').onclick = searchLead;
+        document.getElementById('wa-pilot-search').addEventListener('keydown', e => {
+            if (e.key === 'Enter') searchLead();
+        });
         document.getElementById('wa-pilot-preview-btn').onclick = showPreview;
         document.getElementById('wa-pilot-send-btn').onclick = sendBulk;
+    }
+
+    async function searchLead() {
+        const query = document.getElementById('wa-pilot-search').value.trim();
+        if (!query) return;
+
+        const btn = document.getElementById('wa-pilot-search-btn');
+        const resultsDiv = document.getElementById('wa-pilot-search-results');
+        btn.textContent = '...';
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/api/clientsServerSide', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `draw=1&start=0&length=20&search[value]=${encodeURIComponent(query)}`
+            });
+            const data = await res.json();
+            const leads = data.data || [];
+
+            if (!leads.length) {
+                resultsDiv.style.display = 'block';
+                resultsDiv.innerHTML = '<div style="padding:10px;color:#666;font-size:13px;">לא נמצאו תוצאות</div>';
+                return;
+            }
+
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = leads.map(l => {
+                const name = l.name1 || l.clientName || '';
+                const phone = l.phone1 || '';
+                const div = document.createElement('div');
+                div.innerHTML = l.projectNameHtml || '';
+                const project = div.querySelector('.label')?.innerText?.trim() || '';
+                return `<div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f0f0;
+                    font-size:13px;hover:background:#f8f9fa;"
+                    onclick="document.getElementById('wa-pilot-input').value += 
+                        (document.getElementById('wa-pilot-input').value ? '\\n' : '') +
+                        '${phone},${name},${project}';
+                    document.getElementById('wa-pilot-search-results').style.display='none';
+                    document.getElementById('wa-pilot-search').value='';"
+                    onmouseover="this.style.background='#f0f7ff'"
+                    onmouseout="this.style.background=''"
+                >
+                    📱 ${phone} &nbsp;|&nbsp; ${name} &nbsp;|&nbsp; <span style="color:#666">${project || 'יד 2'}</span>
+                </div>`;
+            }).join('');
+
+        } catch(e) {
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `<div style="padding:10px;color:red;font-size:13px;">שגיאה: ${e.message}</div>`;
+        }
+
+        btn.textContent = 'חפש';
+        btn.disabled = false;
     }
 
     function parseLines() {
