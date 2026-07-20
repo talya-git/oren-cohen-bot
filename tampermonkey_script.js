@@ -102,18 +102,57 @@
         btn.disabled = true;
 
         try {
-            const params = new URLSearchParams({
-                draw: 1, start: 0, length: 20,
-                'search[value]': query,
-                'search[regex]': 'false',
-                'columns[1][data]': 'nameHtml', 'columns[1][searchable]': 'true',
-                'columns[4][data]': 'phoneHtml', 'columns[4][searchable]': 'true',
-                'columns[5][data]': 'phone1', 'columns[5][searchable]': 'false',
-                'columns[2][data]': 'name1', 'columns[2][searchable]': 'false',
-                'columns[15][data]': 'projectNameHtml', 'columns[15][searchable]': 'false',
-                'columns[23][data]': 'clientId', 'columns[23][searchable]': 'false',
-                'order[0][column]': 19, 'order[0][dir]': 'desc',
+            const cols = ['index','nameHtml','name1','name2','phoneHtml','phone1','phone2','email1','email2',
+                'needsCity','needsRooms','needsBudget','stageHtml','stage','lastEventDate','projectNameHtml',
+                'objectionHtml','tagsHtml','createDate','updateDate','timelineHtml','mediaHtml',
+                'spamPermitStatus','clientId','cardButtonHtml'];
+            const searchable = ['nameHtml','phoneHtml','objectionHtml'];
+            const orderable = ['index','nameHtml','name1','name2','phone1','phone2','email1','email2',
+                'needsCity','needsRooms','needsBudget','stageHtml','stage','lastEventDate','projectNameHtml',
+                'objectionHtml','tagsHtml','createDate','updateDate','mediaHtml','spamPermitStatus','clientId'];
+
+            const params = new URLSearchParams();
+            params.append('draw', '1');
+            cols.forEach((col, i) => {
+                params.append(`columns[${i}][data]`, col);
+                params.append(`columns[${i}][name]`, '');
+                params.append(`columns[${i}][searchable]`, searchable.includes(col) ? 'true' : 'false');
+                params.append(`columns[${i}][orderable]`, orderable.includes(col) ? 'true' : 'false');
+                params.append(`columns[${i}][search][value]`, '');
+                params.append(`columns[${i}][search][regex]`, 'false');
             });
+            params.append('order[0][column]', '19');
+            params.append('order[0][dir]', 'desc');
+            params.append('start', '0');
+            params.append('length', '20');
+            params.append('search[value]', '');
+            params.append('search[regex]', 'false');
+            params.append('inwork', '');
+            params.append('projects', '');
+            params.append('needsRealtorCityIds', '');
+            params.append('needsRealtorNeighborhoodIds', '');
+            params.append('appTypes', '');
+            params.append('dealType', ' ');
+            params.append('ignoreObjection', '0');
+            params.append('objections', '');
+            params.append('ignoreStage', '0');
+            params.append('noFollowUp', '0');
+            params.append('clStage', '');
+            params.append('ignoreTags', '0');
+            params.append('tags', '');
+            params.append('fromRooms', '');
+            params.append('toRooms', '');
+            params.append('events', '');
+            params.append('agentFilter', '');
+            params.append('ignoreMedia', '0');
+            params.append('mediaList', '');
+            params.append('priceSliderValues', '');
+            params.append('search[value]', query);
+            params.append('date-from', '');
+            params.append('date-to', '');
+            params.append('update-date-from', '');
+            params.append('update-date-to', '');
+
             const res = await fetch('/api/clientsServerSide', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -123,7 +162,7 @@
             let data;
             try { data = JSON.parse(text); } catch(e) {
                 resultsDiv.style.display = 'block';
-                resultsDiv.innerHTML = '<div style="padding:10px;color:#666;font-size:13px;">לא נמצאו תוצאות</div>';
+                resultsDiv.innerHTML = '<div style="padding:10px;color:red;font-size:13px;">שגיאת פרסור</div>';
                 btn.textContent = 'חפש'; btn.disabled = false;
                 return;
             }
