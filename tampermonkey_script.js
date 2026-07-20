@@ -305,6 +305,55 @@
         `;
     }
 
+    async function enrichLeadsFromSehel(leads) {
+        const results = [];
+        for (const lead of leads) {
+            if (lead.project_name) { results.push(lead); continue; }
+            try {
+                const params = new URLSearchParams();
+                params.append('draw', '1');
+                ['index','nameHtml','name1','name2','phoneHtml','phone1','phone2','email1','email2',
+                 'needsCity','needsRooms','needsBudget','stageHtml','stage','lastEventDate','projectNameHtml',
+                 'objectionHtml','tagsHtml','createDate','updateDate','timelineHtml','mediaHtml',
+                 'spamPermitStatus','clientId','cardButtonHtml'].forEach((col, i) => {
+                    params.append(`columns[${i}][data]`, col);
+                    params.append(`columns[${i}][name]`, '');
+                    params.append(`columns[${i}][searchable]`, ['nameHtml','phoneHtml','objectionHtml'].includes(col) ? 'true' : 'false');
+                    params.append(`columns[${i}][orderable]`, 'true');
+                    params.append(`columns[${i}][search][value]`, '');
+                    params.append(`columns[${i}][search][regex]`, 'false');
+                });
+                params.append('order[0][column]', '19'); params.append('order[0][dir]', 'desc');
+                params.append('start', '0'); params.append('length', '5');
+                params.append('search[value]', ''); params.append('search[regex]', 'false');
+                ['inwork','projects','needsRealtorCityIds','needsRealtorNeighborhoodIds','appTypes',
+                 'objections','clStage','tags','fromRooms','toRooms','events','agentFilter','mediaList','priceSliderValues',
+                 'date-from','date-to','update-date-from','update-date-to'].forEach(k => params.append(k, ''));
+                params.append('dealType', ' '); params.append('ignoreObjection', '0');
+                params.append('ignoreStage', '0'); params.append('noFollowUp', '0');
+                params.append('ignoreTags', '0'); params.append('ignoreMedia', '0');
+                params.append('search[value]', lead.phone.replace('+972', '0').replace('+', ''));
+
+                const res = await fetch('/api/clientsServerSide', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: params.toString()
+                });
+                const data = JSON.parse(await res.text());
+                const found = (data.data || [])[0];
+                if (found) {
+                    const div = document.createElement('div');
+                    div.innerHTML = found.projectNameHtml || '';
+                    const project = div.querySelector('.label')?.innerText?.trim() || '';
+                    if (!lead.name) lead.name = found.name1 || lead.name;
+                    lead.project_name = project;
+                }
+            } catch(e) {}
+            results.push(lead);
+        }
+        return results;
+    }
+
     async function sendBulk() {
         const leads = parseLines();
         if (!leads.length) {
@@ -324,13 +373,17 @@
         status.style.display = 'none';
 
         try {
-            progressText.textContent = `שולח ${leads.length} הודעות...`;
+            progressText.textContent = 'מחפש פרטים בשכל...';
+            bar.style.width = '15%';
+            const enriched = await enrichLeadsFromSehel(leads);
+
+            progressText.textContent = `שולח ${enriched.length} הודעות...`;
             bar.style.width = '30%';
 
             const res = await fetch(`${BOT_URL}/api/whatsapp/bulk-reengagement`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ leads })
+                body: JSON.stringify({ leads: enriched })
             });
 
             bar.style.width = '100%';
