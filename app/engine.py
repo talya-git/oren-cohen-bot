@@ -93,6 +93,22 @@ class Conversation:
                     f"'בעבר התעניינת בפרויקט {self._project_name}. "
                     f"נשארו לנו עוד כמה דירות שם — תרצה לחזור לשמוע על הפרויקט הזה או שאתה זורם על עוד פרויקטים שלנו?'"
                 )
+        else:
+            if language == "en":
+                system += (
+                    "\n\n## Previous Interest\n"
+                    "This client previously inquired about buying a property in Jerusalem. "
+                    "If they ask what they were interested in, say: "
+                    "'You previously showed interest in buying a property in Jerusalem. "
+                    "Is that still relevant for you?'"
+                )
+            else:
+                system += (
+                    "\n\n## עניין קודם\n"
+                    "הלקוח התעניין בעבר ברכישת נכס בירושלים. "
+                    "אם הלקוח שואל על מה התעניין, אמור: "
+                    "'בעבר התעניינת ברכישת נכס בירושלים. האם זה עדיין רלוונטי עבורך?'"
+                )
         system += (
             "\n\n--- Output format ---\n"
             "Return valid JSON only: {reply, stage, extracted, handoff_to_human, notes}\n"
