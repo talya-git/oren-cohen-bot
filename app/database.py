@@ -258,5 +258,9 @@ def delete_lead(lead_id: int):
     conn.close()
 
 
+def is_conversation_done(phone: str) -> bool:
+    return False  # בזיכרון בלבד — ראה _wa_done ב-whatsapp.py
+
+
 # Initialize on import
 init_db()

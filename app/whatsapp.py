@@ -251,5 +251,16 @@ async def whatsapp_webhook(request: Request):
     return {"status": "ok"}
 
 
+@router.post("/reset-session")
+async def reset_session(request: Request):
+    """מאפס session של טלפון — לבדיקות."""
+    data = await request.json()
+    phone = str(data.get("phone", "")).replace("+", "").replace(" ", "")
+    _wa_sessions.pop(phone, None)
+    _wa_done.discard(phone)
+    _wa_seen_sids.clear()
+    return {"status": "reset", "phone": phone}
+
+
 if __name__ == "__main__":
     send_test()
