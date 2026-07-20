@@ -1,14 +1,15 @@
-"""שליחת הודעות WhatsApp דרך UltraMsg."""
+"""שליחת הודעות WhatsApp דרך Twilio."""
 
 import asyncio
+import os
 import time
 import requests
 
 from . import sehel
 
-INSTANCE_ID = "instance183747"
-TOKEN = "3mfx8x4sw1bv4496"
-BASE_URL = f"https://api.ultramsg.com/{INSTANCE_ID}/messages/chat"
+TWILIO_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
+TWILIO_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
+TWILIO_FROM = os.getenv("TWILIO_WHATSAPP_FROM", "whatsapp:+14155238886")
 
 TEST_PHONES = [
     "+972526239608",
@@ -20,12 +21,12 @@ NO_RESPONSE_HOURS = 24
 
 
 def send_message(phone: str, message: str) -> dict:
-    resp = requests.post(BASE_URL, data={
-        "token": TOKEN,
-        "to": phone,
-        "body": message,
-        "priority": 10,
-    }, verify=False)
+    to = f"whatsapp:{phone}" if not phone.startswith("whatsapp:") else phone
+    resp = requests.post(
+        f"https://api.twilio.com/2010-04-01/Accounts/{TWILIO_SID}/Messages.json",
+        data={"From": TWILIO_FROM, "To": to, "Body": message},
+        auth=(TWILIO_SID, TWILIO_TOKEN),
+    )
     return resp.json()
 
 
