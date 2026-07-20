@@ -102,12 +102,31 @@
         btn.disabled = true;
 
         try {
+            const params = new URLSearchParams({
+                draw: 1, start: 0, length: 20,
+                'search[value]': query,
+                'search[regex]': 'false',
+                'columns[1][data]': 'nameHtml', 'columns[1][searchable]': 'true',
+                'columns[4][data]': 'phoneHtml', 'columns[4][searchable]': 'true',
+                'columns[5][data]': 'phone1', 'columns[5][searchable]': 'false',
+                'columns[2][data]': 'name1', 'columns[2][searchable]': 'false',
+                'columns[15][data]': 'projectNameHtml', 'columns[15][searchable]': 'false',
+                'columns[23][data]': 'clientId', 'columns[23][searchable]': 'false',
+                'order[0][column]': 19, 'order[0][dir]': 'desc',
+            });
             const res = await fetch('/api/clientsServerSide', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `draw=1&start=0&length=20&search[value]=${encodeURIComponent(query)}`
+                body: params.toString()
             });
-            const data = await res.json();
+            const text = await res.text();
+            let data;
+            try { data = JSON.parse(text); } catch(e) {
+                resultsDiv.style.display = 'block';
+                resultsDiv.innerHTML = '<div style="padding:10px;color:#666;font-size:13px;">לא נמצאו תוצאות</div>';
+                btn.textContent = 'חפש'; btn.disabled = false;
+                return;
+            }
             const leads = data.data || [];
 
             if (!leads.length) {
