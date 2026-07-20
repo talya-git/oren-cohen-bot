@@ -22,9 +22,10 @@ SEHEL_URL = os.getenv("SEHEL_URL", "https://leads.sehel.co.il")
 PROJECT_ID = os.getenv("SEHEL_PROJECT_ID")
 WEBHOOK_URL = os.getenv("SEHEL_WEBHOOK_URL")  # אופציונלי — מסלול Make/Zapier
 
-# ניתוב סוכנים לפי שפה
+# ניתוב סוכנים
 AGENT_HE = "aaron@orencohengroup.com"   # עברית → אהרון
-AGENT_EN = "lisa@orencohengroup.com"    # אנגלית → ליסה (דוב בעתיד)
+AGENT_EN = "lisa@orencohengroup.com"    # אנגלית → ליסה
+AGENT_YAD2 = "office@orencohengroup.com"  # יד 2 → בועז
 
 # מיפוי שם פרויקט → project_id בשכל
 PROJECT_MAP: dict[str, str] = {
@@ -61,6 +62,14 @@ def _resolve_project_id(area: str | None) -> str:
             return pid
     return DEFAULT_PROJECT_ID
 
+
+def _is_projects_division(project_name: str | None, agent_name: str = "") -> bool:
+    """מחזיר True אם הליד שייך למחלקת פרויקטים (פרויקט ספציפי מהרשימה)."""
+    if not project_name:
+        return False
+    name_lower = project_name.lower()
+    return any(key in name_lower or name_lower in key for key in PROJECT_MAP)
+
 # תוויות עבריות קריאות לסוכן ב-CRM
 _INTENT_HE = {
     "buy": "קנייה",
@@ -86,7 +95,13 @@ _LEVEL_TAG = {"High": "ליד חם", "Medium": "ליד בינוני", "Low": "ל
 _COLOR_HE = {"red": "אדום", "orange": "כתום", "green": "ירוק"}
 
 
-def _build_comment(p: ExtractedParams, level: str, score: float, agent_color: str | None) -> str:
+def _build_comment(
+    p: ExtractedParams,
+    level: str,
+    score: float,
+    agent_color: str | None,
+    transcript: list[dict] | None = None,
+) -> str:
     city_area = " | ".join(filter(None, [p.city, p.neighborhood, p.area]))
     lines = [
         f"סוכן וירטואלי (דניאל) | דירוג אוטומטי: {level} ({score})",
@@ -96,6 +111,22 @@ def _build_comment(p: ExtractedParams, level: str, score: float, agent_color: st
     ]
     if agent_color:
         lines.append(f"דירוג סוכן: {_COLOR_HE.get(agent_color, agent_color)}")
+    if transcript:
+        lines.append("\n--- תמליל שיחה ---")
+        for msg in transcript:
+            role = msg.get("role", "")
+            content = msg.get("content", "")
+            if role == "assistant":
+                # חלץ רק את ה-reply מה-JSON של הבוט
+                try:
+                    import json as _json
+                    parsed = _json.loads(content)
+                    content = parsed.get("reply", content)
+                except Exception:
+                    pass
+            if role in ("user", "assistant") and content and not content.startswith("[הקשר:"):
+                prefix = "לקוח" if role == "user" else "דניאל"
+                lines.append(f"{prefix}: {content}")
     return "\n".join(lines)
 
 
@@ -108,20 +139,37 @@ def build_payload(
     media_source: str = "Facebook",
     agent_color: str | None = None,
     project_id: str | None = None,
+    is_projects: bool | None = None,
+    transcript: list[dict] | None = None,
+    no_response: bool = False,
 ) -> dict:
     """ממפה את הליד שלנו למבנה ששכל מצפה לו. מעלה ValueError אם חסר טלפון."""
     if not profile.phone:
         raise ValueError("חסר טלפון — שכל דורש lead_phone.")
 
-    agent = AGENT_HE if language == "he" else AGENT_EN
-    resolved_pid = project_id or PROJECT_ID or _resolve_project_id(profile.area)
+    # קביעת מחלקה: אם is_projects לא הועבר — נסיק לפי האזור
+    if is_projects is None:
+        is_projects = _is_projects_division(profile.area)
+
+    if is_projects:
+        agent = AGENT_HE if language == "he" else AGENT_EN
+        resolved_pid = project_id or PROJECT_ID or _resolve_project_id(profile.area)
+    else:
+        agent = AGENT_YAD2
+        resolved_pid = DEFAULT_PROJECT_ID
+
+    tags = [_LEVEL_TAG.get(level, level)]
+    if not is_projects:
+        tags.append("מתעניין בנכס יד 2")
+    if no_response:
+        tags.append("אין מענה")
 
     payload: dict = {
         "project_id": resolved_pid,
         "lead_phone": profile.phone,
         "media_source": media_source,
-        "lead_comment": _build_comment(profile, level, score, agent_color),
-        "tags[]": [_LEVEL_TAG.get(level, level)],
+        "lead_comment": _build_comment(profile, level, score, agent_color, transcript),
+        "tags[]": tags,
         "agentUsername": agent,
     }
     if profile.contact_name:
