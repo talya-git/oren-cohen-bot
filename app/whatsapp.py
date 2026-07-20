@@ -49,6 +49,7 @@ _wa_no_response_tasks: dict[str, asyncio.Task] = {}
 _wa_original_project: dict[str, str] = {}
 _wa_is_projects: dict[str, bool] = {}
 _wa_is_reengagement: dict[str, bool] = {}
+_wa_pilot_log: list[dict] = []  # לוג פיילוט בזיכרון
 
 
 def _detect_language(phone: str, name: str | None) -> str:
@@ -118,6 +119,18 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
     convo.messages.append({"role": "assistant", "content": greeting})
     print(f"[GREETING] phone={normalized} name={name!r} lang={lang} project={pname_for_convo!r}")
     send_message(f"+{normalized}", greeting)
+
+    # רשום ללוג פיילוט
+    _wa_pilot_log.append({
+        "phone": f"+{normalized}",
+        "name": name or "",
+        "project": pname_for_convo or "",
+        "sent": True,
+        "replied": False,
+        "handoff": False,
+        "score": None,
+        "notes": "",
+    })
 
 
 async def _no_response_timer(phone: str):
@@ -231,6 +244,16 @@ async def whatsapp_webhook(request: Request):
 
     convo = _wa_sessions[phone]
     turn, score = convo.send(text)
+
+    # עדכון לוג פיילוט
+    log_entry = next((e for e in _wa_pilot_log if e["phone"] == f"+{phone}"), None)
+    if log_entry:
+        log_entry["replied"] = True
+        if turn.handoff_to_human:
+            log_entry["handoff"] = True
+            log_entry["score"] = score.level
+            log_entry["notes"] = turn.notes or ""
+
     time.sleep(7)
     send_message(f"+{phone}", turn.reply)
 
@@ -252,6 +275,19 @@ async def whatsapp_webhook(request: Request):
         del _wa_sessions[phone]
 
     return {"status": "ok"}
+
+
+@router.get("/pilot-results")
+async def pilot_results():
+    """מחזיר את לוג הפיילוט הנוכחי."""
+    return {"results": _wa_pilot_log}
+
+
+@router.post("/pilot-clear")
+async def pilot_clear():
+    """מנקה את לוג הפיילוט."""
+    _wa_pilot_log.clear()
+    return {"status": "cleared"}
 
 
 @router.post("/bulk-reengagement")

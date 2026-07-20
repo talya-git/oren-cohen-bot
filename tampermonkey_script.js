@@ -76,6 +76,21 @@
                     </div>
                     <p id="wa-pilot-progress-text" style="text-align:center;font-size:12px;color:#666;margin-top:4px;"></p>
                 </div>
+
+                <div style="margin-top:16px;border-top:1px solid #eee;padding-top:12px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <strong style="font-size:13px;">📊 תוצאות פיילוט</strong>
+                        <div style="display:flex;gap:6px;">
+                            <button id="wa-pilot-refresh" style="padding:4px 10px;background:#007bff;color:#fff;
+                                border:none;border-radius:6px;cursor:pointer;font-size:12px;">🔄 רענן</button>
+                            <button id="wa-pilot-clear" style="padding:4px 10px;background:#dc3545;color:#fff;
+                                border:none;border-radius:6px;cursor:pointer;font-size:12px;">🗑 נקה</button>
+                        </div>
+                    </div>
+                    <div id="wa-pilot-results-table" style="font-size:12px;max-height:200px;overflow-y:auto;">
+                        <p style="color:#999;text-align:center;">לחץ רענן לטעינת תוצאות</p>
+                    </div>
+                </div>
             </div>
         `;
 
@@ -90,6 +105,52 @@
         });
         document.getElementById('wa-pilot-preview-btn').onclick = showPreview;
         document.getElementById('wa-pilot-send-btn').onclick = sendBulk;
+        document.getElementById('wa-pilot-refresh').onclick = refreshResults;
+        document.getElementById('wa-pilot-clear').onclick = async () => {
+            await fetch(`${BOT_URL}/api/whatsapp/pilot-clear`, { method: 'POST' });
+            refreshResults();
+        };
+    }
+
+    async function refreshResults() {
+        const table = document.getElementById('wa-pilot-results-table');
+        if (!table) return;
+        try {
+            const res = await fetch(`${BOT_URL}/api/whatsapp/pilot-results`);
+            const data = await res.json();
+            const results = data.results || [];
+            if (!results.length) {
+                table.innerHTML = '<p style="color:#999;text-align:center;">אין נתונים עדיין</p>';
+                return;
+            }
+            const scoreColor = s => s === 'High' ? '#28a745' : s === 'Medium' ? '#fd7e14' : s === 'Low' ? '#dc3545' : '#999';
+            table.innerHTML = `
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:#f8f9fa;">
+                            <th style="padding:6px;text-align:right;border-bottom:1px solid #dee2e6;">טלפון</th>
+                            <th style="padding:6px;text-align:right;border-bottom:1px solid #dee2e6;">שם</th>
+                            <th style="padding:6px;text-align:center;border-bottom:1px solid #dee2e6;">ענה?</th>
+                            <th style="padding:6px;text-align:center;border-bottom:1px solid #dee2e6;">העברה?</th>
+                            <th style="padding:6px;text-align:center;border-bottom:1px solid #dee2e6;">סיווג</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${results.map(r => `
+                            <tr style="border-bottom:1px solid #f0f0f0;">
+                                <td style="padding:5px 6px;font-size:11px;">${r.phone}</td>
+                                <td style="padding:5px 6px;">${r.name || '—'}</td>
+                                <td style="padding:5px 6px;text-align:center;">${r.replied ? '✅' : '⏳'}</td>
+                                <td style="padding:5px 6px;text-align:center;">${r.handoff ? '✅' : '—'}</td>
+                                <td style="padding:5px 6px;text-align:center;color:${scoreColor(r.score)};font-weight:bold;">${r.score || '—'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        } catch(e) {
+            table.innerHTML = `<p style="color:red;font-size:12px;">שגיאה: ${e.message}</p>`;
+        }
     }
 
     async function searchLead() {
