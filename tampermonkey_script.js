@@ -10,6 +10,7 @@
     'use strict';
 
     const BOT_URL = 'https://oren-cohen-bot.onrender.com';
+    const SIMULATE = true; // ← שנה ל-false לשליחה אמיתית
     const sleep = ms => new Promise(r => setTimeout(r, ms));
 
     // ─── פופאפ פיילוט WhatsApp ───────────────────────────────────────────────
@@ -443,6 +444,12 @@
                     div.innerHTML = lead.projectNameHtml || "";
                     const projectName = div.querySelector(".label")?.innerText?.trim() || "";
                     const agentName = div.querySelector(".routedAgent")?.innerText?.trim() || "";
+
+                    if (SIMULATE) {
+                        console.log(`[SIMULATE] → ${lead.phone1} | ${lead.name1} | ${projectName}`);
+                        success++;
+                        return;
+                    }
 
                     const res = await fetch(`${BOT_URL}/api/whatsapp/start-reengagement`, {
                         method: 'POST',
