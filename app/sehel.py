@@ -107,7 +107,11 @@ def _build_comment(
         f"סוכן וירטואלי (דניאל) | דירוג אוטומטי: {level} ({score})",
         f"כוונה: {_INTENT_HE.get(p.intent, '—')} | סוג נכס: {p.property_type or '—'} | חדרים: {p.rooms or '—'}",
         f"אזור: {city_area or '—'}",
-        f"תקציב: {f'{p.budget_ils:,}' if p.budget_ils else '—'} ש"ח | לו"ז: {_TIMELINE_HE.get(p.timeline, '—')} | מימון: {_FINANCING_HE.get(p.financing, '—')}",
+        "תקציב: {} ש\"ח | לו\"ז: {} | מימון: {}".format(
+            f"{p.budget_ils:,}" if p.budget_ils else "—",
+            _TIMELINE_HE.get(p.timeline, "—"),
+            _FINANCING_HE.get(p.financing, "—"),
+        ),
     ]
     if agent_color:
         lines.append(f"דירוג סוכן: {_COLOR_HE.get(agent_color, agent_color)}")
