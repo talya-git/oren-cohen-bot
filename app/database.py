@@ -4,7 +4,7 @@ import json
 import os
 from datetime import datetime, timezone
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = (os.getenv("DATABASE_URL") or "").strip() or None
 
 if DATABASE_URL:
     import psycopg2
