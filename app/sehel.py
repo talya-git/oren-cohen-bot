@@ -102,33 +102,22 @@ def _build_comment(
     agent_color: str | None,
     transcript: list[dict] | None = None,
 ) -> str:
-    city_area = " | ".join(filter(None, [p.city, p.neighborhood, p.area]))
-    lines = [
-        f"סוכן וירטואלי (דניאל) | דירוג אוטומטי: {level} ({score})",
-        f"כוונה: {_INTENT_HE.get(p.intent, '—')} | סוג נכס: {p.property_type or '—'} | חדרים: {p.rooms or '—'}",
-        f"אזור: {city_area or '—'}",
-        "תקציב: {} ש\"ח | לו\"ז: {} | מימון: {}".format(
-            f"{p.budget_ils:,}" if p.budget_ils else "—",
-            _TIMELINE_HE.get(p.timeline, "—"),
-            _FINANCING_HE.get(p.financing, "—"),
-        ),
-    ]
-    if agent_color:
-        lines.append(f"דירוג סוכן: {_COLOR_HE.get(agent_color, agent_color)}")
+    lines = []
     if transcript:
-        lines.append("\n--- תמליל שיחה ---")
         for msg in transcript:
             role = msg.get("role", "")
             content = msg.get("content", "")
             if role == "assistant":
-                # חלץ רק את ה-reply מה-JSON של הבוט
                 try:
-                    import json as _json
-                    parsed = _json.loads(content)
-                    content = parsed.get("reply", content)
+                    import json as _json, re as _re
+                    clean = _re.sub(r'```(?:json)?', '', content).strip()
+                    parsed = _json.loads(clean)
+                    content = parsed.get("reply", "").strip()
                 except Exception:
-                    pass
-            if role in ("user", "assistant") and content and not content.startswith("[הקשר:"):
+                    import re as _re2
+                    m = _re2.search(r'"reply"\s*:\s*"((?:[^"\\]|\\.)*)"', content)
+                    content = m.group(1).replace('\\n', '\n') if m else ""
+            if role in ("user", "assistant") and content and not content.startswith("["):
                 prefix = "לקוח" if role == "user" else "דניאל"
                 lines.append(f"{prefix}: {content}")
     return "\n".join(lines)
