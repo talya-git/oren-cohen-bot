@@ -90,13 +90,18 @@
             .slice(0, 100)
             .map(line => {
                 const parts = line.split(',');
+                let phone = (parts[0] || '').trim().replace(/[\s\-]/g, '');
+                // נרמול לפורמט +972
+                if (phone.startsWith('05')) phone = '+972' + phone.slice(1);
+                else if (phone.startsWith('972')) phone = '+' + phone;
+                else if (!phone.startsWith('+')) phone = '+' + phone;
                 return {
-                    phone: (parts[0] || '').trim(),
+                    phone,
                     name: (parts[1] || '').trim() || null,
                     project_name: (parts[2] || '').trim(),
                 };
             })
-            .filter(l => l.phone.length >= 9);
+            .filter(l => l.phone.length >= 10);
     }
 
     function showPreview() {

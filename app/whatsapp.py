@@ -64,6 +64,9 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
     from .engine import Conversation
 
     normalized = phone.lstrip("+")
+    # נרמול מספר ישראלי
+    if normalized.startswith("05"):
+        normalized = "972" + normalized[1:]
     if name:
         try:
             fixed = name.encode("latin1").decode("utf-8")
