@@ -705,3 +705,9 @@ def delete_feedback(index: int) -> dict:
         all_feedback.pop(index)
         ratings._save(ratings.FEEDBACK_BIN, all_feedback)
     return {"status": "deleted"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port)
