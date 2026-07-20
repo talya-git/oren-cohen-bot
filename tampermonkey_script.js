@@ -132,7 +132,6 @@
                             <th style="padding:6px;text-align:right;border-bottom:1px solid #dee2e6;">שם</th>
                             <th style="padding:6px;text-align:center;border-bottom:1px solid #dee2e6;">ענה?</th>
                             <th style="padding:6px;text-align:center;border-bottom:1px solid #dee2e6;">העברה?</th>
-                            <th style="padding:6px;text-align:center;border-bottom:1px solid #dee2e6;">סיווג</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -142,7 +141,6 @@
                                 <td style="padding:5px 6px;">${r.name || '—'}</td>
                                 <td style="padding:5px 6px;text-align:center;">${r.replied ? '✅' : '⏳'}</td>
                                 <td style="padding:5px 6px;text-align:center;">${r.handoff ? '✅' : '—'}</td>
-                                <td style="padding:5px 6px;text-align:center;color:${scoreColor(r.score)};font-weight:bold;">${r.score || '—'}</td>
                             </tr>
                         `).join('')}
                     </tbody>
