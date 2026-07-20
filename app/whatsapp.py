@@ -169,20 +169,19 @@ def _save_followup(phone: str, weeks: int, reason: str) -> None:
 async def whatsapp_webhook(request: Request):
     from .engine import Conversation
     from . import database as _db
-    from .scoring import score_lead
 
-    data = await request.json()
-    msg = data.get("data") or data
-    phone = msg.get("from", "").replace("@c.us", "").replace("+", "")
-    text = msg.get("body", "").strip()
-    msg_sid = str(msg.get("id", ""))
+    # Twilio שולח form data
+    form = await request.form()
+    phone = str(form.get("From", "")).replace("whatsapp:", "").replace("+", "")
+    text = str(form.get("Body", "")).strip()
+    msg_sid = str(form.get("MessageSid", ""))
 
     if msg_sid and msg_sid in _wa_seen_sids:
         return {"status": "duplicate"}
     if msg_sid:
         _wa_seen_sids.add(msg_sid)
 
-    if not phone or not text or msg.get("fromMe"):
+    if not phone or not text:
         return {"status": "ignored"}
 
     # שיחה שכבר הסתיימה
