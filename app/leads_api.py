@@ -130,6 +130,7 @@ class InboundLeadRequest(BaseModel):
     email: Optional[str] = None
     source: str = "reengagement"  # reengagement / facebook / google / yad2
     first_message: Optional[str] = None  # הודעה ראשונה מותאמת אישית (אופציונלי)
+    project_name: Optional[str] = None  # שם הפרויקט שהלקוח התעניין בו בעבר
 
 
 class InboundLeadResponse(BaseModel):

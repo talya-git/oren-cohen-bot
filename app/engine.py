@@ -23,10 +23,11 @@ MODEL = "gpt-4o"
 
 
 class Conversation:
-    def __init__(self):
+    def __init__(self, language: str = "he", project_name: str | None = None):
         self.profile = ExtractedParams()
         self.messages: list[dict] = []
-        self._language = "he"  # default, updated on first message
+        self._language = language
+        self._project_name = project_name  # שם הפרויקט מהשכל (לזכירה ללקוח)
         self._system_built = False
 
     @classmethod
@@ -74,6 +75,24 @@ class Conversation:
             system += "\n\n## דוגמאות מאושרות (few-shot)\n"
             for ex in GOLDEN_EXAMPLES[:5]:
                 system += f"\nלקוח: {ex.get('user','')}\nדניאל: {ex.get('assistant','')}\n"
+        if self._project_name:
+            if language == "en":
+                system += (
+                    f"\n\n## Previous Interest\n"
+                    f"This client previously inquired about the '{self._project_name}' project. "
+                    f"If they ask what they were interested in, remind them: "
+                    f"'You previously showed interest in the {self._project_name} project. "
+                    f"We still have a few apartments available there — would you like to hear more about it, "
+                    f"or are you open to exploring our other projects as well?'"
+                )
+            else:
+                system += (
+                    f"\n\n## עניין קודם\n"
+                    f"הלקוח התעניין בעבר בפרויקט '{self._project_name}'. "
+                    f"אם הלקוח שואל על מה התעניין, הזכר לו: "
+                    f"'בעבר התעניינת בפרויקט {self._project_name}. "
+                    f"נשארו לנו עוד כמה דירות שם — תרצה לחזור לשמוע על הפרויקט הזה או שאתה זורם על עוד פרויקטים שלנו?'"
+                )
         system += (
             "\n\n--- Output format ---\n"
             "Return valid JSON only: {reply, stage, extracted, handoff_to_human, notes}\n"
