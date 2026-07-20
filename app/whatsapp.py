@@ -251,6 +251,18 @@ async def whatsapp_webhook(request: Request):
     return {"status": "ok"}
 
 
+@router.post("/start-reengagement")
+async def start_reengagement_endpoint(request: Request):
+    """מפעיל start_reengagement מרחוק — לבדיקות ולשליחה ידנית."""
+    data = await request.json()
+    phone = str(data.get("phone", ""))
+    name = data.get("name")
+    project_name = data.get("project_name", "")
+    agent_name = data.get("agent_name", "")
+    start_reengagement(phone, name, project_name, agent_name)
+    return {"status": "sent", "phone": phone}
+
+
 @router.post("/reset-session")
 async def reset_session(request: Request):
     """מאפס session של טלפון — לבדיקות."""
