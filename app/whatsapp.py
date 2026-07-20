@@ -251,6 +251,31 @@ async def whatsapp_webhook(request: Request):
     return {"status": "ok"}
 
 
+@router.post("/bulk-reengagement")
+async def bulk_reengagement(request: Request):
+    """שולח re-engagement לרשימת לידים — מקסימום 100."""
+    data = await request.json()
+    leads = data.get("leads", [])[:100]
+    results = []
+    for lead in leads:
+        phone = str(lead.get("phone", "")).strip()
+        name = lead.get("name", "") or None
+        project_name = lead.get("project_name", "") or ""
+        agent_name = lead.get("agent_name", "") or ""
+        if not phone:
+            results.append({"phone": phone, "status": "skipped", "reason": "no_phone"})
+            continue
+        try:
+            start_reengagement(phone, name, project_name, agent_name)
+            results.append({"phone": phone, "status": "sent"})
+        except Exception as e:
+            results.append({"phone": phone, "status": "error", "reason": str(e)})
+        time.sleep(2)
+    sent = sum(1 for r in results if r["status"] == "sent")
+    failed = sum(1 for r in results if r["status"] == "error")
+    return {"sent": sent, "failed": failed, "results": results}
+
+
 @router.post("/start-reengagement")
 async def start_reengagement_endpoint(request: Request):
     """מפעיל start_reengagement מרחוק — לבדיקות ולשליחה ידנית."""
