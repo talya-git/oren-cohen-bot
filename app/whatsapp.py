@@ -288,7 +288,8 @@ async def whatsapp_webhook(request: Request):
 @router.post("/test-report")
 async def test_report():
     """בדיקת שליחת מייל — endpoint זמני."""
-    from .mailer import send_report
+    from .mailer import send_report, RESEND_API_KEY
+    print(f"[TEST] RESEND_API_KEY={'SET:'+RESEND_API_KEY[:8] if RESEND_API_KEY else 'EMPTY'}")
     send_report(
         to_email="orencohengroup2020@gmail.com",
         agent_label="טסט",
@@ -302,7 +303,7 @@ async def test_report():
     return {"status": "sent"}
 
 
-
+@router.post("/notify-agent")
 async def notify_agent(request: Request):
     """נקרא מה-Tampermonkey אחרי שליחת batch — יוצר batch ב-DB ושולח הודעת אישור לסוכן."""
     from . import database as _db
@@ -329,8 +330,7 @@ async def notify_agent(request: Request):
 
     return {"status": "ok", "batch_id": batch_id}
 
-
-
+@router.get("/sent-phones")
 async def sent_phones(agent_email: str):
     from . import database as _db
     phones = _db.get_sent_phones(agent_email)
