@@ -561,12 +561,14 @@
         btn.textContent = '⏳ שולח...';
 
         let success = 0, skipped = 0, failed = 0;
+        const sentPhones = [];
         for (const cb of checkboxes) {
             const lead = wl_leads[parseInt(cb.dataset.idx)];
             if (!lead) continue;
             const div = document.createElement('div');
             div.innerHTML = lead.projectNameHtml || '';
             const project = div.querySelector('.label')?.innerText?.trim() || '';
+            const phone = normalizePhone(lead.phone1);
             try {
                 const res = await fetch(`${BOT_URL}/api/whatsapp/start-reengagement`, {
                     method: 'POST',
@@ -579,17 +581,32 @@
                     })
                 });
                 const r = await res.json();
-                if (r.status === 'skipped') skipped++; else success++;
-                wl_sentPhones.add(normalizePhone(lead.phone1));
+                if (r.status === 'skipped') skipped++;
+                else { success++; sentPhones.push(phone); }
+                wl_sentPhones.add(phone);
             } catch(e) { failed++; }
             await sleep(500);
         }
 
+        // יצירת batch ושליחת הודעת אישור לסוכן
+        if (sentPhones.length) {
+            try {
+                await fetch(`${BOT_URL}/api/whatsapp/notify-agent`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        agent_email: wl_agent.email,
+                        agent_label: wl_agent.label,
+                        phones: sentPhones,
+                    })
+                });
+            } catch(e) {}
+        }
+
         const statusEl = document.getElementById('wl-status');
-        if (statusEl) statusEl.textContent = `✅ נשלח: ${success} | דולג: ${skipped} | נכשל: ${failed}`;
+        if (statusEl) statusEl.textContent = `✅ נשלח: ${success} | דולג: ${skipped} | נכשל: ${failed} — תקבל דוח במייל תוך 24 שעות`;
         btn.disabled = false;
         btn.textContent = '📤 שלח מסומנים';
-        // רענן את הרשימה
         wl_offset += 100;
         await loadWlPage();
     }

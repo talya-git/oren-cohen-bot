@@ -120,6 +120,11 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
     print(f"[GREETING] phone={normalized} name={name!r} lang={lang} project={pname_for_convo!r}")
     send_message(f"+{normalized}", greeting)
 
+    # שמירה ב-DB
+    from . import database as _db
+    agent_email = _wa_is_projects.get(normalized) and "aaron@orencohengroup.com" or "office@orencohengroup.com"
+    _db.mark_reengagement_sent(f"+{normalized}", name or "", agent_email)
+
     # רשום ללוג פיילוט
     _wa_pilot_log.append({
         "phone": f"+{normalized}",
@@ -254,6 +259,9 @@ async def whatsapp_webhook(request: Request):
             log_entry["score"] = score.level
             log_entry["notes"] = turn.notes or ""
 
+    # עדכון replied ב-DB
+    _db.update_reengagement_replied(f"+{phone}", True)
+
     time.sleep(7)
     send_message(f"+{phone}", turn.reply)
 
@@ -275,6 +283,47 @@ async def whatsapp_webhook(request: Request):
         del _wa_sessions[phone]
 
     return {"status": "ok"}
+
+
+@router.post("/notify-agent")
+async def notify_agent(request: Request):
+    """נקרא מה-Tampermonkey אחרי שליחת batch — יוצר batch ב-DB ושולח הודעת אישור לסוכן."""
+    from . import database as _db
+    data = await request.json()
+    agent_email = data.get("agent_email", "")
+    agent_label = data.get("agent_label", "")
+    phones = data.get("phones", [])  # רשימת הטלפונים שנשלחו
+
+    if not agent_email:
+        return {"status": "error", "reason": "no agent_email"}
+
+    batch_id = _db.create_reengagement_batch(agent_email, agent_label)
+
+    # עדכון batch_id לכל הרשומות שנשלחו זה עתה
+    conn = _db.get_db()
+    cur = conn.cursor()
+    for phone in phones:
+        cur.execute(
+            f"UPDATE reengagement_sent SET batch_id={_db.PH} WHERE phone={_db.PH} AND batch_id IS NULL",
+            (batch_id, phone)
+        )
+    conn.commit()
+    conn.close()
+
+    return {"status": "ok", "batch_id": batch_id}
+
+
+
+async def sent_phones(agent_email: str):
+    from . import database as _db
+    phones = _db.get_sent_phones(agent_email)
+    return {"phones": list(phones)}
+
+
+@router.get("/reengagement-results")
+async def reengagement_results(agent_email: str):
+    from . import database as _db
+    return {"results": _db.get_reengagement_results(agent_email)}
 
 
 @router.get("/pilot-results")

@@ -86,6 +86,27 @@ def init_db():
                 updated_at TIMESTAMPTZ DEFAULT NOW()
             )
         """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS reengagement_batches (
+                id SERIAL PRIMARY KEY,
+                agent_email TEXT NOT NULL,
+                agent_label TEXT,
+                report_sent BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMPTZ DEFAULT NOW()
+            )
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS reengagement_sent (
+                id SERIAL PRIMARY KEY,
+                batch_id INTEGER REFERENCES reengagement_batches(id),
+                phone TEXT NOT NULL,
+                client_name TEXT,
+                agent_email TEXT NOT NULL,
+                replied BOOLEAN DEFAULT FALSE,
+                transcript TEXT,
+                sent_at TIMESTAMPTZ DEFAULT NOW()
+            )
+        """)
     else:
         cur.executescript("""
             CREATE TABLE IF NOT EXISTS users (
@@ -115,6 +136,23 @@ def init_db():
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP,
                 updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (assigned_to) REFERENCES users(id)
+            );
+            CREATE TABLE IF NOT EXISTS reengagement_batches (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                agent_email TEXT NOT NULL,
+                agent_label TEXT,
+                report_sent INTEGER DEFAULT 0,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE TABLE IF NOT EXISTS reengagement_sent (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                batch_id INTEGER REFERENCES reengagement_batches(id),
+                phone TEXT NOT NULL,
+                client_name TEXT,
+                agent_email TEXT NOT NULL,
+                replied INTEGER DEFAULT 0,
+                transcript TEXT,
+                sent_at TEXT DEFAULT CURRENT_TIMESTAMP
             );
         """)
 
@@ -260,6 +298,116 @@ def delete_lead(lead_id: int):
 
 def is_conversation_done(phone: str) -> bool:
     return False  # בזיכרון בלבד — ראה _wa_done ב-whatsapp.py
+
+
+def create_reengagement_batch(agent_email: str, agent_label: str) -> int:
+    conn = get_db()
+    cur = conn.cursor()
+    now = datetime.now(timezone.utc).isoformat()
+    if DATABASE_URL:
+        cur.execute(
+            "INSERT INTO reengagement_batches (agent_email, agent_label, created_at) VALUES (%s,%s,%s) RETURNING id",
+            (agent_email, agent_label, now)
+        )
+        batch_id = cur.fetchone()[0]
+    else:
+        cur.execute(
+            "INSERT INTO reengagement_batches (agent_email, agent_label, created_at) VALUES (?,?,?)",
+            (agent_email, agent_label, now)
+        )
+        batch_id = cur.lastrowid
+    conn.commit()
+    conn.close()
+    return batch_id
+
+
+def get_pending_batches() -> list:
+    """מחזיר batches שעברו 24 שעות ועדיין לא נשלח להם דוח."""
+    conn = get_db()
+    cur = conn.cursor()
+    if DATABASE_URL:
+        cur.execute("""
+            SELECT * FROM reengagement_batches
+            WHERE report_sent = FALSE
+            AND created_at < NOW() - INTERVAL '24 hours'
+        """)
+    else:
+        cur.execute("""
+            SELECT * FROM reengagement_batches
+            WHERE report_sent = 0
+            AND created_at < datetime('now', '-24 hours')
+        """)
+    rows = _fetchall(cur)
+    conn.close()
+    return rows
+
+
+def mark_batch_report_sent(batch_id: int) -> None:
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(f"UPDATE reengagement_batches SET report_sent={PH} WHERE id={PH}", (True if DATABASE_URL else 1, batch_id))
+    conn.commit()
+    conn.close()
+
+
+def get_batch_leads(batch_id: int) -> list:
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(f"SELECT * FROM reengagement_sent WHERE batch_id={PH}", (batch_id,))
+    rows = _fetchall(cur)
+    conn.close()
+    return rows
+
+
+def mark_reengagement_sent(phone: str, client_name: str, agent_email: str, batch_id: int | None = None) -> None:
+    conn = get_db()
+    cur = conn.cursor()
+    now = datetime.now(timezone.utc).isoformat()
+    if DATABASE_URL:
+        cur.execute(
+            "INSERT INTO reengagement_sent (phone, client_name, agent_email, batch_id, sent_at) VALUES (%s,%s,%s,%s,%s) "
+            "ON CONFLICT DO NOTHING",
+            (phone, client_name, agent_email, batch_id, now)
+        )
+    else:
+        cur.execute(
+            "INSERT OR IGNORE INTO reengagement_sent (phone, client_name, agent_email, batch_id, sent_at) VALUES (?,?,?,?,?)",
+            (phone, client_name, agent_email, batch_id, now)
+        )
+    conn.commit()
+    conn.close()
+
+
+def update_reengagement_replied(phone: str, replied: bool, transcript: str = "") -> None:
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(
+        f"UPDATE reengagement_sent SET replied={PH}, transcript={PH} WHERE phone={PH}",
+        (replied, transcript, phone)
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_sent_phones(agent_email: str) -> set:
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(f"SELECT phone FROM reengagement_sent WHERE agent_email={PH}", (agent_email,))
+    phones = {row["phone"] for row in _fetchall(cur)}
+    conn.close()
+    return phones
+
+
+def get_reengagement_results(agent_email: str) -> list:
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(
+        f"SELECT * FROM reengagement_sent WHERE agent_email={PH} ORDER BY sent_at DESC",
+        (agent_email,)
+    )
+    results = _fetchall(cur)
+    conn.close()
+    return results
 
 
 # Initialize on import

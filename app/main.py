@@ -32,6 +32,36 @@ app.add_middleware(
 app.include_router(leads_router)
 app.include_router(whatsapp_router)
 
+
+@app.on_event("startup")
+async def start_report_scheduler():
+    import asyncio
+    async def _scheduler():
+        while True:
+            await asyncio.sleep(3600)  # בדיקה כל שעה
+            try:
+                from . import database as _db
+                from .mailer import send_report
+                for batch in _db.get_pending_batches():
+                    leads = _db.get_batch_leads(batch["id"])
+                    send_report(
+                        to_email=batch["agent_email"],
+                        agent_label=batch["agent_label"] or batch["agent_email"],
+                        leads=[{
+                            "name": l.get("client_name"),
+                            "phone": l.get("phone"),
+                            "sent": True,
+                            "replied": bool(l.get("replied")),
+                            "transcript": l.get("transcript") or "",
+                            "sent_at": l.get("sent_at"),
+                        } for l in leads]
+                    )
+                    _db.mark_batch_report_sent(batch["id"])
+                    print(f"[REPORT] sent to {batch['agent_email']} batch={batch['id']}")
+            except Exception as e:
+                print(f"[REPORT ERROR] {e}")
+    asyncio.create_task(_scheduler())
+
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
 # Serve static files (logo, etc.)
