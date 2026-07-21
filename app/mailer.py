@@ -5,7 +5,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-GMAIL_USER = os.getenv("GMAIL_USER", "office@orencohengroup.com")
+GMAIL_USER = os.getenv("GMAIL_USER", "orencohengroup2020@gmail.com")
 GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD", "")
 
 
