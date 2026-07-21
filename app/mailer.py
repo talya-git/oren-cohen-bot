@@ -1,20 +1,18 @@
-"""שליחת מיילים דרך Brevo API."""
+"""שליחת מיילים דרך Mailjet API."""
 
 import os
 import urllib.request
 import urllib.error
 import json
+import base64
 
-BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
+MAILJET_API_KEY = os.getenv("MAILJET_API_KEY", "")
+MAILJET_SECRET_KEY = os.getenv("MAILJET_SECRET_KEY", "")
 FROM_EMAIL = os.getenv("FROM_EMAIL", "orencohengroup2020@gmail.com")
 FROM_NAME = "בוט אורן כהן גרופ"
 
 
 def send_report(to_email: str, agent_label: str, leads: list[dict]) -> None:
-    """
-    שולח דוח הערת לידים לסוכן.
-    leads: [{ name, phone, sent, replied, transcript, sent_at }]
-    """
     subject = f"דוח הערת לידים שלך — {agent_label}"
 
     rows = ""
@@ -22,7 +20,6 @@ def send_report(to_email: str, agent_label: str, leads: list[dict]) -> None:
         sent_icon = "✅" if l.get("sent") else "❌"
         replied_icon = "✅" if l.get("replied") else "❌"
         transcript = (l.get("transcript") or "").strip() or "—"
-        # חיתוך תמליל ארוך
         if len(transcript) > 800:
             transcript = transcript[:800] + "..."
         transcript_html = transcript.replace("\n", "<br>")
@@ -55,19 +52,21 @@ def send_report(to_email: str, agent_label: str, leads: list[dict]) -> None:
     """
 
     payload = json.dumps({
-        "sender": {"name": FROM_NAME, "email": FROM_EMAIL},
-        "to": [{"email": to_email}],
-        "subject": subject,
-        "htmlContent": html,
+        "Messages": [{
+            "From": {"Email": FROM_EMAIL, "Name": FROM_NAME},
+            "To": [{"Email": to_email}],
+            "Subject": subject,
+            "HTMLPart": html,
+        }]
     }).encode()
 
+    credentials = base64.b64encode(f"{MAILJET_API_KEY}:{MAILJET_SECRET_KEY}".encode()).decode()
     req = urllib.request.Request(
-        "https://api.brevo.com/v3/smtp/email",
+        "https://api.mailjet.com/v3.1/send",
         data=payload,
         headers={
-            "api-key": BREVO_API_KEY,
+            "Authorization": f"Basic {credentials}",
             "Content-Type": "application/json",
-            "Accept": "application/json",
         },
         method="POST",
     )
@@ -76,5 +75,5 @@ def send_report(to_email: str, agent_label: str, leads: list[dict]) -> None:
             return json.loads(resp.read())
     except urllib.error.HTTPError as e:
         body = e.read().decode()
-        print(f"[BREVO ERROR] {e.code}: {body}")
+        print(f"[MAILJET ERROR] {e.code}: {body}")
         raise
