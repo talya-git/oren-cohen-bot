@@ -288,8 +288,8 @@ async def whatsapp_webhook(request: Request):
 @router.post("/test-report")
 async def test_report():
     """בדיקת שליחת מייל — endpoint זמני."""
-    from .mailer import send_report, RESEND_API_KEY
-    print(f"[TEST] RESEND_API_KEY={'SET:'+RESEND_API_KEY[:8] if RESEND_API_KEY else 'EMPTY'}")
+    from .mailer import send_report, BREVO_API_KEY
+    print(f"[TEST] BREVO_API_KEY={'SET:'+BREVO_API_KEY[:8] if BREVO_API_KEY else 'EMPTY'}")
     send_report(
         to_email="orencohengroup2020@gmail.com",
         agent_label="טסט",

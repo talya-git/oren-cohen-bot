@@ -1,12 +1,13 @@
-"""שליחת מיילים דרך Resend API."""
+"""שליחת מיילים דרך Brevo API."""
 
 import os
 import urllib.request
 import urllib.error
 import json
 
-RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
-FROM_EMAIL = os.getenv("FROM_EMAIL", "onboarding@resend.dev")  # החלף לדומיין מאומת
+BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
+FROM_EMAIL = os.getenv("FROM_EMAIL", "orencohengroup2020@gmail.com")
+FROM_NAME = "בוט אורן כהן גרופ"
 
 
 def send_report(to_email: str, agent_label: str, leads: list[dict]) -> None:
@@ -54,20 +55,26 @@ def send_report(to_email: str, agent_label: str, leads: list[dict]) -> None:
     """
 
     payload = json.dumps({
-        "from": f"בוט אורן כהן גרופ <{FROM_EMAIL}>",
-        "to": [to_email],
+        "sender": {"name": FROM_NAME, "email": FROM_EMAIL},
+        "to": [{"email": to_email}],
         "subject": subject,
-        "html": html,
+        "htmlContent": html,
     }).encode()
 
     req = urllib.request.Request(
-        "https://api.resend.com/emails",
+        "https://api.brevo.com/v3/smtp/email",
         data=payload,
         headers={
-            "Authorization": f"Bearer {RESEND_API_KEY}",
+            "api-key": BREVO_API_KEY,
             "Content-Type": "application/json",
+            "Accept": "application/json",
         },
         method="POST",
     )
-    with urllib.request.urlopen(req) as resp:
-        return json.loads(resp.read())
+    try:
+        with urllib.request.urlopen(req) as resp:
+            return json.loads(resp.read())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        print(f"[BREVO ERROR] {e.code}: {body}")
+        raise
