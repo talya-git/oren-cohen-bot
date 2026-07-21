@@ -1,12 +1,12 @@
-"""שליחת מיילים דרך Gmail SMTP."""
+"""שליחת מיילים דרך Resend API."""
 
 import os
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+import urllib.request
+import urllib.error
+import json
 
-GMAIL_USER = os.getenv("GMAIL_USER", "orencohengroup2020@gmail.com")
-GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD", "")
+RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
+FROM_EMAIL = os.getenv("FROM_EMAIL", "onboarding@resend.dev")  # החלף לדומיין מאומת
 
 
 def send_report(to_email: str, agent_label: str, leads: list[dict]) -> None:
@@ -53,12 +53,21 @@ def send_report(to_email: str, agent_label: str, leads: list[dict]) -> None:
     </body></html>
     """
 
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"] = GMAIL_USER
-    msg["To"] = to_email
-    msg.attach(MIMEText(html, "html", "utf-8"))
+    payload = json.dumps({
+        "from": f"בוט אורן כהן גרופ <{FROM_EMAIL}>",
+        "to": [to_email],
+        "subject": subject,
+        "html": html,
+    }).encode()
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
-        smtp.login(GMAIL_USER, GMAIL_APP_PASSWORD)
-        smtp.sendmail(GMAIL_USER, to_email, msg.as_string())
+    req = urllib.request.Request(
+        "https://api.resend.com/emails",
+        data=payload,
+        headers={
+            "Authorization": f"Bearer {RESEND_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(req) as resp:
+        return json.loads(resp.read())
