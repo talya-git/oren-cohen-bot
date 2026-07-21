@@ -410,10 +410,51 @@
         btn.textContent = '🚀 שלח הכל';
     }
 
-    // ─── הערת לידים ישנים (קוד מקורי) ──────────────────────────────────────
+    // ─── הערת לידים — ממשק חדש ──────────────────────────────────────────────
+
+    const AGENTS = [
+        { label: 'ינון',    email: 'yaniv@orencohengroup.com' },
+        { label: 'משה',     email: 'moshe@orencohengroup.com' },
+        { label: 'מירי',    email: 'miri@orencohengroup.com' },
+        { label: 'מיכאל',  email: 'michael@orencohengroup.com' },
+        { label: 'רבקה',   email: 'rivka@orencohengroup.com' },
+        { label: 'אוריאל', email: 'uriel400@orencohengroup.com' },
+        { label: 'אלחנן',  email: 'elchanan@orencohengroup.com' },
+        { label: 'אורן',   email: 'oren@orencohengroup.com' },
+        { label: 'אריה',   email: 'aryeh@orencohengroup.com' },
+        { label: 'בועז',   email: 'office@orencohengroup.com' },
+        { label: 'חנה',    email: 'hannah@orencohengroup.com' },
+        { label: 'אהרון',  email: 'aaron@orencohengroup.com' },
+        { label: 'ליסה',   email: 'lisa@orencohengroup.com' },
+        { label: 'דב',     email: 'dovr@orencohengroup.com' },
+    ];
+
+    // state
+    let wl_agent = null;       // { label, email }
+    let wl_offset = 0;         // דף נוכחי
+    let wl_leads = [];         // הלידים המוצגים כרגע
+    let wl_sentPhones = new Set();
+
+    async function fetchSentPhones() {
+        try {
+            const res = await fetch(`${BOT_URL}/api/whatsapp/sent-phones`);
+            const data = await res.json();
+            wl_sentPhones = new Set(data.phones || []);
+        } catch(e) { wl_sentPhones = new Set(); }
+    }
+
+    function normalizePhone(p) {
+        if (!p) return '';
+        p = p.trim().replace(/[\s\-]/g, '');
+        if (p.startsWith('05')) return '+972' + p.slice(1);
+        if (p.startsWith('972')) return '+' + p;
+        if (!p.startsWith('+')) return '+' + p;
+        return p;
+    }
 
     function parseSehelDate(str) {
         if (!str) return null;
+        // DD.MM.YYYY or DD.MM.YY
         const m = str.trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})$/);
         if (!m) return null;
         let y = parseInt(m[3]);
@@ -421,113 +462,228 @@
         return new Date(y, parseInt(m[2]) - 1, parseInt(m[1]));
     }
 
-    async function getLastNoteDate(clientId) {
-        await fetch(`/client/${clientId}`, { credentials: 'include' });
-        await sleep(300);
-        const res = await fetch('/api/getSystemMessageHtml.php', {
-            credentials: 'include',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        });
-        if (!res.ok) return null;
-        const html = await res.text();
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-        const firstDay = doc.querySelector('li.tl-day');
-        return firstDay ? parseSehelDate(firstDay.textContent.trim()) : null;
-    }
-
-    async function wakeUpLeads() {
-        alert("מתחיל בתהליך... נא לא לסגור את הדפדפן.");
-
-        let allLeads = [];
-        let start = 0;
-        const pageSize = 500;
-
-        while (true) {
-            const response = await fetch('/api/clientsServerSide', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `draw=1&start=${start}&length=${pageSize}`
-            });
-            const data = await response.json();
-            const page = data.data || [];
-            allLeads = allLeads.concat(page);
-            if (page.length < pageSize) break;
-            start += pageSize;
-        }
+    // טוען עמוד של 20 לידים לפי סוכן, מסנן 6 חודשים + לא נשלח
+    async function loadWlPage() {
+        const tbody = document.getElementById('wl-tbody');
+        const statusEl = document.getElementById('wl-status');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:12px;color:#666;">טוען...</td></tr>';
 
         const SIX_MONTHS_AGO = new Date();
         SIX_MONTHS_AGO.setMonth(SIX_MONTHS_AGO.getMonth() - 6);
 
-        alert(`נמצאו ${allLeads.length} לידים. בודק הערות...`);
+        const cols = ['index','nameHtml','name1','name2','phoneHtml','phone1','phone2','email1','email2',
+            'needsCity','needsRooms','needsBudget','stageHtml','stage','lastEventDate','projectNameHtml',
+            'objectionHtml','tagsHtml','createDate','updateDate','timelineHtml','mediaHtml',
+            'spamPermitStatus','clientId','cardButtonHtml'];
 
-        const toWakeUp = [];
+        const params = new URLSearchParams();
+        params.append('draw', '1');
+        cols.forEach((col, i) => {
+            params.append(`columns[${i}][data]`, col);
+            params.append(`columns[${i}][name]`, '');
+            params.append(`columns[${i}][searchable]`, ['nameHtml','phoneHtml','objectionHtml'].includes(col) ? 'true' : 'false');
+            params.append(`columns[${i}][orderable]`, 'true');
+            params.append(`columns[${i}][search][value]`, '');
+            params.append(`columns[${i}][search][regex]`, 'false');
+        });
+        params.append('order[0][column]', '19'); params.append('order[0][dir]', 'asc'); // ישנים קודם
+        params.append('start', String(wl_offset));
+        params.append('length', '100'); // טוענים 100 כדי לסנן ל-20
+        params.append('search[value]', ''); params.append('search[regex]', 'false');
+        ['inwork','projects','needsRealtorCityIds','needsRealtorNeighborhoodIds','appTypes',
+         'objections','clStage','tags','fromRooms','toRooms','events','mediaList','priceSliderValues',
+         'date-from','date-to','update-date-from','update-date-to'].forEach(k => params.append(k, ''));
+        params.append('dealType', ' '); params.append('ignoreObjection', '0');
+        params.append('ignoreStage', '0'); params.append('noFollowUp', '0');
+        params.append('ignoreTags', '0'); params.append('ignoreMedia', '0');
+        params.append('agentFilter[]', wl_agent.email);
 
-        for (let i = 0; i < allLeads.length; i++) {
-            const lead = allLeads[i];
-            const clientId = lead.clientId || lead.id;
-
-            let lastDate = await getLastNoteDate(clientId);
-
-            if (!lastDate) {
-                const parts = (lead.createDate || '').split(' ')[0].split('-');
-                if (parts.length === 3) lastDate = new Date(+parts[2], +parts[1] - 1, +parts[0]);
-            }
-
-            if (lastDate && lastDate < SIX_MONTHS_AGO) {
-                toWakeUp.push({ ...lead, _lastDate: lastDate });
-            }
-
-            if ((i + 1) % 20 === 0) {
-                console.log(`[הערת לידים] ${i + 1}/${allLeads.length} — להעיר: ${toWakeUp.length}`);
-            }
-
-            await sleep(200);
+        let raw = [];
+        try {
+            const res = await fetch('/api/clientsServerSide', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params.toString()
+            });
+            const data = await res.json();
+            raw = data.data || [];
+        } catch(e) {
+            tbody.innerHTML = `<tr><td colspan="4" style="color:red;padding:12px;">${e.message}</td></tr>`;
+            return;
         }
 
-        alert(`נמצאו ${toWakeUp.length} לידים ללא קשר מעל 6 חודשים. מתחיל העברה...`);
+        // סינון: updateDate > 6 חודשים + לא נשלח
+        const filtered = raw.filter(lead => {
+            const phone = normalizePhone(lead.phone1);
+            if (wl_sentPhones.has(phone)) return false;
+            const parts = (lead.updateDate || lead.createDate || '').split(' ')[0].split('-');
+            let d = null;
+            if (parts.length === 3) d = new Date(+parts[2], +parts[1] - 1, +parts[0]);
+            return d && d < SIX_MONTHS_AGO;
+        }).slice(0, 20);
 
-        let success = 0, failed = 0, skipped = 0;
-        const BATCH = 20;
+        wl_leads = filtered;
 
-        for (let i = 0; i < toWakeUp.length; i += BATCH) {
-            const batch = toWakeUp.slice(i, i + BATCH);
-            await Promise.all(batch.map(async lead => {
-                try {
-                    const div = document.createElement("div");
-                    div.innerHTML = lead.projectNameHtml || "";
-                    const projectName = div.querySelector(".label")?.innerText?.trim() || "";
-                    const agentName = div.querySelector(".routedAgent")?.innerText?.trim() || "";
+        if (statusEl) statusEl.textContent = `נמצאו ${filtered.length} לידים (עמוד ${Math.floor(wl_offset/100)+1})`;
 
-                    if (SIMULATE) {
-                        console.log(`[SIMULATE] → ${lead.phone1} | ${lead.name1} | ${projectName}`);
-                        success++;
-                        return;
-                    }
-
-                    const res = await fetch(`${BOT_URL}/api/whatsapp/start-reengagement`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            phone: lead.phone1,
-                            name: lead.name1,
-                            project_name: projectName,
-                            agent_name: agentName,
-                        })
-                    });
-                    const result = await res.json();
-                    if (result.status === "skipped") skipped++;
-                    else success++;
-                } catch (e) {
-                    failed++;
-                }
-            }));
-
-            if (i + BATCH < toWakeUp.length) {
-                await sleep(3 * 60 * 1000);
-            }
+        if (!filtered.length) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:12px;color:#666;">אין לידים נוספים</td></tr>';
+            return;
         }
 
-        alert(`סיום!\nהועברו: ${success}\nדולגו: ${skipped}\nנכשלו: ${failed}`);
+        tbody.innerHTML = filtered.map((lead, idx) => {
+            const phone = normalizePhone(lead.phone1);
+            const name = lead.name1 || '—';
+            const div = document.createElement('div');
+            div.innerHTML = lead.projectNameHtml || '';
+            const project = div.querySelector('.label')?.innerText?.trim() || 'יד 2';
+            const parts = (lead.updateDate || lead.createDate || '').split(' ')[0].split('-');
+            const dateStr = parts.length === 3 ? `${parts[0]}.${parts[1]}.${parts[2]}` : '—';
+            return `
+                <tr style="border-bottom:1px solid #f0f0f0;">
+                    <td style="padding:6px;text-align:center;">
+                        <input type="checkbox" class="wl-cb" data-idx="${idx}" checked>
+                    </td>
+                    <td style="padding:6px;font-size:13px;">${name}<br><span style="color:#888;font-size:11px;">${phone}</span></td>
+                    <td style="padding:6px;font-size:12px;color:#555;">${project}</td>
+                    <td style="padding:6px;font-size:11px;color:#999;">${dateStr}</td>
+                </tr>`;
+        }).join('');
+    }
+
+    async function sendWlSelected() {
+        const checkboxes = document.querySelectorAll('.wl-cb:checked');
+        if (!checkboxes.length) { alert('לא נבחרו לידים'); return; }
+
+        const btn = document.getElementById('wl-send-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ שולח...';
+
+        let success = 0, skipped = 0, failed = 0;
+        for (const cb of checkboxes) {
+            const lead = wl_leads[parseInt(cb.dataset.idx)];
+            if (!lead) continue;
+            const div = document.createElement('div');
+            div.innerHTML = lead.projectNameHtml || '';
+            const project = div.querySelector('.label')?.innerText?.trim() || '';
+            try {
+                const res = await fetch(`${BOT_URL}/api/whatsapp/start-reengagement`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phone: lead.phone1,
+                        name: lead.name1,
+                        project_name: project,
+                        agent_email: wl_agent.email,
+                    })
+                });
+                const r = await res.json();
+                if (r.status === 'skipped') skipped++; else success++;
+                wl_sentPhones.add(normalizePhone(lead.phone1));
+            } catch(e) { failed++; }
+            await sleep(500);
+        }
+
+        const statusEl = document.getElementById('wl-status');
+        if (statusEl) statusEl.textContent = `✅ נשלח: ${success} | דולג: ${skipped} | נכשל: ${failed}`;
+        btn.disabled = false;
+        btn.textContent = '📤 שלח מסומנים';
+        // רענן את הרשימה
+        wl_offset += 100;
+        await loadWlPage();
+    }
+
+    function createWakeUpPopup() {
+        if (document.getElementById('wl-overlay')) return;
+
+        const overlay = document.createElement('div');
+        overlay.id = 'wl-overlay';
+        overlay.style.cssText = `position:fixed;top:0;left:0;width:100%;height:100%;
+            background:rgba(0,0,0,0.5);z-index:99999;display:flex;
+            align-items:center;justify-content:center;`;
+
+        overlay.innerHTML = `
+            <div style="background:#fff;border-radius:12px;padding:24px;width:560px;
+                        max-height:85vh;overflow-y:auto;direction:rtl;font-family:Arial,sans-serif;
+                        box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <h3 style="margin:0;font-size:18px;">🔔 הערת לידים ישנים</h3>
+                    <button id="wl-close" style="background:none;border:none;font-size:20px;cursor:pointer;">✕</button>
+                </div>
+
+                <!-- בחירת סוכן -->
+                <p style="font-size:13px;color:#555;margin-bottom:8px;">בחר סוכן:</p>
+                <div id="wl-agents" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;">
+                    ${AGENTS.map(a => `
+                        <button class="wl-agent-btn" data-email="${a.email}"
+                            style="padding:6px 12px;border:1px solid #ddd;border-radius:20px;
+                                   background:#f8f9fa;cursor:pointer;font-size:13px;">
+                            ${a.label}
+                        </button>`).join('')}
+                </div>
+
+                <!-- טבלת לידים -->
+                <div id="wl-table-wrap" style="display:none;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <span id="wl-status" style="font-size:13px;color:#555;"></span>
+                        <label style="font-size:12px;cursor:pointer;">
+                            <input type="checkbox" id="wl-select-all" checked> בחר הכל
+                        </label>
+                    </div>
+                    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                        <thead>
+                            <tr style="background:#f8f9fa;">
+                                <th style="padding:6px;width:32px;"></th>
+                                <th style="padding:6px;text-align:right;">שם / טלפון</th>
+                                <th style="padding:6px;text-align:right;">פרויקט</th>
+                                <th style="padding:6px;text-align:right;">עדכון</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wl-tbody"></tbody>
+                    </table>
+                    <div style="display:flex;gap:8px;margin-top:12px;">
+                        <button id="wl-send-btn" style="flex:1;padding:10px;background:#25D366;
+                            color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:bold;">
+                            📤 שלח מסומנים
+                        </button>
+                        <button id="wl-next-btn" style="flex:1;padding:10px;background:#007bff;
+                            color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;">
+                            ⏭ 20 הבאים
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        document.getElementById('wl-close').onclick = () => overlay.remove();
+        overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+
+        document.getElementById('wl-select-all').addEventListener('change', function() {
+            document.querySelectorAll('.wl-cb').forEach(cb => cb.checked = this.checked);
+        });
+
+        document.querySelectorAll('.wl-agent-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                document.querySelectorAll('.wl-agent-btn').forEach(b => {
+                    b.style.background = '#f8f9fa'; b.style.borderColor = '#ddd'; b.style.color = '#000';
+                });
+                btn.style.background = '#25D366'; btn.style.borderColor = '#25D366'; btn.style.color = '#fff';
+                wl_agent = AGENTS.find(a => a.email === btn.dataset.email);
+                wl_offset = 0;
+                document.getElementById('wl-table-wrap').style.display = 'block';
+                await fetchSentPhones();
+                await loadWlPage();
+            });
+        });
+
+        document.getElementById('wl-send-btn').onclick = sendWlSelected;
+        document.getElementById('wl-next-btn').onclick = async () => {
+            wl_offset += 100;
+            await loadWlPage();
+        };
     }
 
     // ─── כפתורים בניווט ──────────────────────────────────────────────────────
@@ -544,7 +700,7 @@
                 <span>הערת לידים</span>
             </a>`;
         projectsLink.closest("li").insertAdjacentElement("afterend", li1);
-        document.getElementById("wakeUpNavBtn").addEventListener("click", wakeUpLeads);
+        document.getElementById("wakeUpNavBtn").addEventListener("click", createWakeUpPopup);
 
         // כפתור פיילוט WhatsApp
         const li2 = document.createElement("li");
