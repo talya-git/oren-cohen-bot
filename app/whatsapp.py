@@ -285,24 +285,6 @@ async def whatsapp_webhook(request: Request):
     return {"status": "ok"}
 
 
-@router.post("/test-report")
-async def test_report():
-    """בדיקת שליחת מייל — endpoint זמני."""
-    from .mailer import send_report, MAILJET_API_KEY
-    print(f"[TEST] MAILJET_API_KEY={'SET:'+MAILJET_API_KEY[:8] if MAILJET_API_KEY else 'EMPTY'}")
-    send_report(
-        to_email="orencohengroup2020@gmail.com",
-        agent_label="טסט",
-        leads=[
-            {"name": "יוסי כהן", "phone": "+972501234567", "sent": True, "replied": True,
-             "transcript": "דניאל: היי יוסי, כאן דניאל מאורן כהן גרופ...\nיוסי: כן, מעוניין לשמוע", "sent_at": "2024-01-01"},
-            {"name": "דנה לוי", "phone": "+972509876543", "sent": True, "replied": False,
-             "transcript": "", "sent_at": "2024-01-01"},
-        ]
-    )
-    return {"status": "sent"}
-
-
 @router.post("/notify-agent")
 async def notify_agent(request: Request):
     """נקרא מה-Tampermonkey אחרי שליחת batch — יוצר batch ב-DB ושולח הודעת אישור לסוכן."""
