@@ -259,8 +259,14 @@ async def whatsapp_webhook(request: Request):
             log_entry["score"] = score.level
             log_entry["notes"] = turn.notes or ""
 
-    # עדכון replied ב-DB
-    _db.update_reengagement_replied(f"+{phone}", True)
+    # עדכון replied ב-DB עם תמליל
+    import json as _json
+    transcript_text = "\n".join(
+        f"{'דניאל' if m['role'] == 'assistant' else 'לקוח'}: {m['content']}"
+        for m in convo.messages
+        if m.get('role') in ('assistant', 'user') and not m['content'].startswith('[')
+    )
+    _db.update_reengagement_replied(f"+{phone}", True, transcript_text)
 
     time.sleep(7)
     send_message(f"+{phone}", turn.reply)
