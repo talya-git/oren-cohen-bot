@@ -53,10 +53,8 @@ _wa_pilot_log: list[dict] = []  # לוג פיילוט בזיכרון
 
 
 def _detect_language(phone: str, name: str | None) -> str:
-    if phone.lstrip("+").startswith("972"):
-        if name and any("\u05d0" <= c <= "\u05ea" for c in name):
-            return "he"
-        return "en"
+    if phone.lstrip("+").startswith("972") or phone.startswith("05"):
+        return "he"
     return "en"
 
 
@@ -76,8 +74,15 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
         except (UnicodeEncodeError, UnicodeDecodeError):
             pass
 
+    if name:
+        try:
+            fixed = name.encode("latin1").decode("utf-8")
+            if any("\u05d0" <= c <= "\u05ea" for c in fixed):
+                name = fixed
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            pass
+
     lang = _detect_language(phone, name)
-    is_projects = sehel._is_projects_division(project_name, agent_name)
     # project_name רלוונטי רק אם הוא פרויקט ספציפי מהרשימה
     pname_for_convo = project_name if is_projects else None
     convo = Conversation(language=lang, project_name=pname_for_convo)
