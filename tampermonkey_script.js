@@ -489,7 +489,7 @@
         });
         params.append('order[0][column]', '19'); params.append('order[0][dir]', 'asc'); // ישנים קודם
         params.append('start', String(wl_offset));
-        params.append('length', '100'); // טוענים 100 כדי לסנן ל-20
+        params.append('length', '500'); // טוענים 500 כדי לסנן ל-20
         params.append('search[value]', ''); params.append('search[regex]', 'false');
         ['inwork','projects','needsRealtorCityIds','needsRealtorNeighborhoodIds','appTypes',
          'objections','clStage','tags','fromRooms','toRooms','events','mediaList','priceSliderValues',
@@ -514,6 +514,17 @@
         }
 
         // סינון: לא נשלח בלבד (ללא סינון תאריך לבדיקה)
+        // קוד מקורי עם סינון 6 חודשים:
+        // const SIX_MONTHS_AGO = new Date();
+        // SIX_MONTHS_AGO.setMonth(SIX_MONTHS_AGO.getMonth() - 6);
+        // const filtered = raw.filter(lead => {
+        //     const phone = normalizePhone(lead.phone1);
+        //     if (wl_sentPhones.has(phone)) return false;
+        //     const parts = (lead.updateDate || lead.createDate || '').split(' ')[0].split('-');
+        //     let d = null;
+        //     if (parts.length === 3) d = new Date(+parts[2], +parts[1] - 1, +parts[0]);
+        //     return d && d < SIX_MONTHS_AGO;
+        // }).slice(0, 20);
         const filtered = raw.filter(lead => {
             const phone = normalizePhone(lead.phone1);
             return !wl_sentPhones.has(phone);
