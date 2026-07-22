@@ -513,14 +513,10 @@
             return;
         }
 
-        // סינון: updateDate > 6 חודשים + לא נשלח
+        // סינון: לא נשלח בלבד (ללא סינון תאריך לבדיקה)
         const filtered = raw.filter(lead => {
             const phone = normalizePhone(lead.phone1);
-            if (wl_sentPhones.has(phone)) return false;
-            const parts = (lead.updateDate || lead.createDate || '').split(' ')[0].split('-');
-            let d = null;
-            if (parts.length === 3) d = new Date(+parts[2], +parts[1] - 1, +parts[0]);
-            return d && d < SIX_MONTHS_AGO;
+            return !wl_sentPhones.has(phone);
         }).slice(0, 20);
 
         wl_leads = filtered;
