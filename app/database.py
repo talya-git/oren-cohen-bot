@@ -329,13 +329,13 @@ def get_pending_batches() -> list:
         cur.execute("""
             SELECT * FROM reengagement_batches
             WHERE report_sent = FALSE
-            AND created_at < NOW() - INTERVAL '24 hours'
+            AND created_at < NOW() - INTERVAL '10 minutes'
         """)
     else:
         cur.execute("""
             SELECT * FROM reengagement_batches
             WHERE report_sent = 0
-            AND created_at < datetime('now', '-24 hours')
+            AND created_at < datetime('now', '-10 minutes')
         """)
     rows = _fetchall(cur)
     conn.close()

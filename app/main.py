@@ -38,7 +38,7 @@ async def start_report_scheduler():
     import asyncio
     async def _scheduler():
         while True:
-            await asyncio.sleep(3600)  # בדיקה כל שעה
+            await asyncio.sleep(600)  # 10 דקות לבדיקה
             try:
                 from . import database as _db
                 from .mailer import send_report
