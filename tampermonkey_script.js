@@ -615,8 +615,11 @@
             } catch(e) {}
         }
 
-        const statusEl = document.getElementById('wl-status');
-        if (statusEl) statusEl.textContent = `✅ נשלח: ${success} | דולג: ${skipped} | נכשל: ${failed} — תקבל דוח במייל תוך 24 שעות`;
+        const statusEl = document.getElementById('wl-send-status');
+        if (statusEl) {
+            statusEl.style.display = 'block';
+            statusEl.textContent = `✅ נשלח: ${success} | דולג: ${skipped} | נכשל: ${failed} — תקבל דוח במייל תוך 24 שעות`;
+        }
         btn.disabled = false;
         btn.textContent = '📤 שלח מסומנים';
         wl_offset += 100;
@@ -651,6 +654,10 @@
                             ${a.label}
                         </button>`).join('')}
                 </div>
+
+                <!-- סטטוס שליחה -->
+                <div id="wl-send-status" style="display:none;margin-top:10px;padding:10px;border-radius:8px;
+                    background:#d4edda;color:#155724;font-size:13px;text-align:center;"></div>
 
                 <!-- טבלת לידים -->
                 <div id="wl-table-wrap" style="display:none;">
