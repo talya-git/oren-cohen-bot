@@ -576,13 +576,14 @@
             div.innerHTML = lead.projectNameHtml || '';
             const project = div.querySelector('.label')?.innerText?.trim() || '';
             const phone = normalizePhone(lead.phone1);
+        const noName = document.getElementById('wl-no-name')?.checked;
             try {
                 const res = await fetch(`${BOT_URL}/api/whatsapp/start-reengagement`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         phone: lead.phone1,
-                        name: lead.name1,
+                        name: noName ? null : lead.name1,
                         project_name: project,
                         agent_email: wl_agent.email,
                     })
@@ -651,9 +652,14 @@
                 <div id="wl-table-wrap" style="display:none;">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                         <span id="wl-status" style="font-size:13px;color:#555;"></span>
-                        <label style="font-size:12px;cursor:pointer;">
-                            <input type="checkbox" id="wl-select-all" checked> בחר הכל
-                        </label>
+                        <div style="display:flex;gap:12px;align-items:center;">
+                            <label style="font-size:12px;cursor:pointer;">
+                                <input type="checkbox" id="wl-no-name"> שלח ללא שם
+                            </label>
+                            <label style="font-size:12px;cursor:pointer;">
+                                <input type="checkbox" id="wl-select-all" checked> בחר הכל
+                            </label>
+                        </div>
                     </div>
                     <table style="width:100%;border-collapse:collapse;font-size:13px;">
                         <thead>
