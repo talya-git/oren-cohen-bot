@@ -555,6 +555,9 @@
                     <td style="padding:6px;font-size:13px;">${name}<br><span style="color:#888;font-size:11px;">${phone}</span></td>
                     <td style="padding:6px;font-size:12px;color:#555;">${project}</td>
                     <td style="padding:6px;font-size:11px;color:#999;">${dateStr}</td>
+                    <td style="padding:6px;text-align:center;">
+                        <input type="checkbox" class="wl-with-name" data-idx="${idx}" ${name !== '—' ? 'checked' : ''}>
+                    </td>
                 </tr>`;
         }).join('');
     }
@@ -578,12 +581,13 @@
             const phone = normalizePhone(lead.phone1);
         const noName = document.getElementById('wl-no-name')?.checked;
             try {
+                const withName = document.querySelector(`.wl-with-name[data-idx="${cb.dataset.idx}"]`)?.checked;
                 const res = await fetch(`${BOT_URL}/api/whatsapp/start-reengagement`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         phone: lead.phone1,
-                        name: noName ? null : lead.name1,
+                        name: withName ? lead.name1 : null,
                         project_name: project,
                         agent_email: wl_agent.email,
                     })
@@ -652,14 +656,9 @@
                 <div id="wl-table-wrap" style="display:none;">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                         <span id="wl-status" style="font-size:13px;color:#555;"></span>
-                        <div style="display:flex;gap:12px;align-items:center;">
-                            <label style="font-size:12px;cursor:pointer;">
-                                <input type="checkbox" id="wl-no-name"> שלח ללא שם
-                            </label>
-                            <label style="font-size:12px;cursor:pointer;">
-                                <input type="checkbox" id="wl-select-all" checked> בחר הכל
-                            </label>
-                        </div>
+                        <label style="font-size:12px;cursor:pointer;">
+                            <input type="checkbox" id="wl-select-all" checked> בחר הכל
+                        </label>
                     </div>
                     <table style="width:100%;border-collapse:collapse;font-size:13px;">
                         <thead>
@@ -668,6 +667,7 @@
                                 <th style="padding:6px;text-align:right;">שם / טלפון</th>
                                 <th style="padding:6px;text-align:right;">פרויקט</th>
                                 <th style="padding:6px;text-align:right;">עדכון</th>
+                                <th style="padding:6px;text-align:center;">עם שם</th>
                             </tr>
                         </thead>
                         <tbody id="wl-tbody"></tbody>
