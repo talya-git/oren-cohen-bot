@@ -437,7 +437,7 @@
 
     async function fetchSentPhones() {
         try {
-            const res = await fetch(`${BOT_URL}/api/whatsapp/sent-phones`);
+            const res = await fetch(`${BOT_URL}/api/whatsapp/sent-phones?agent_email=${encodeURIComponent(wl_agent.email)}`);
             const data = await res.json();
             wl_sentPhones = new Set(data.phones || []);
         } catch(e) { wl_sentPhones = new Set(); }
