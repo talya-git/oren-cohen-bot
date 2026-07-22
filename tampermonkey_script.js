@@ -469,8 +469,8 @@
         if (!tbody) return;
         tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:12px;color:#666;">טוען...</td></tr>';
 
-        const SIX_MONTHS_AGO = new Date();
-        SIX_MONTHS_AGO.setMonth(SIX_MONTHS_AGO.getMonth() - 6);
+        const SIX_MONTHS_AGO = new Date(); // בדיקה — מציג הכל
+        // SIX_MONTHS_AGO.setMonth(SIX_MONTHS_AGO.getMonth() - 6);
 
         const cols = ['index','nameHtml','name1','name2','phoneHtml','phone1','phone2','email1','email2',
             'needsCity','needsRooms','needsBudget','stageHtml','stage','lastEventDate','projectNameHtml',
