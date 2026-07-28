@@ -282,6 +282,10 @@ async def whatsapp_webhook(request: Request):
             return {"status": "snoozed_1w"}
         conv = Conversation()
         conv.messages.append({
+            "role": "assistant",
+            "content": '{"reply": "' + greeting_text + '", "stage": "intent", "extracted": {}, "handoff_to_human": false, "notes": ""}'
+        })
+        conv.messages.append({
             "role": "user",
             "content": f"[הקשר: הלקוח קיבל הודעת פתיחה מדניאל ועונה שהוא מעוניין. תגובתו: '{text}'. אל תאמר 'שלום וברכה'. שאל ישירות את שאלה מספר 1: לוח הזמנים לכניסה לנכס.]"
         })
