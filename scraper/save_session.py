@@ -38,8 +38,12 @@ def main():
 
         input("\n✋ אחרי שהתחברת בהצלחה — לחצי Enter כאן...")
 
-        # שומר cookies
+        # שומר cookies לקובץ JSON נפרד
+        import json
         cookies = browser.cookies()
+        cookies_file = SESSION_DIR / "cookies.json"
+        with open(cookies_file, "w") as f:
+            json.dump(cookies, f)
         print(f"\n✓ נשמרו {len(cookies)} cookies")
         print(f"✓ Session נשמר בתיקייה: {SESSION_DIR}")
         print("\nמעכשיו הסקריפט האוטומטי ירוץ בלי 2FA!")

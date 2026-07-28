@@ -45,6 +45,14 @@ def main():
         )
         page = browser.new_page()
 
+        # טוען cookies שמורים
+        import json
+        cookies_file = SESSION_DIR / "cookies.json"
+        if cookies_file.exists():
+            with open(cookies_file) as f:
+                cookies = json.load(f)
+            browser.add_cookies(cookies)
+
         print("מתחבר לשכל...")
         page.goto(SEHEL_URL)
         page.wait_for_load_state("networkidle")
