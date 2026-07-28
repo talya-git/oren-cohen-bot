@@ -35,8 +35,10 @@ def main():
     # התחברות
     print("מתחבר לשכל...")
     r = session.post(f"{SEHEL_URL}/login", data={"username": USERNAME, "password": PASSWORD})
-    if "logout" not in r.text and r.status_code != 200:
-        print("שגיאה בהתחברות")
+    print(f"  סטטוס התחברות: {r.status_code}")
+    if "logout" not in r.text:
+        print("שגיאה בהתחברות - בדוק שם משתמש וסיסמה")
+        print(f"  תשובת השרת: {r.text[:200]}")
         return
 
     # שליפת כל הלידים
@@ -49,6 +51,9 @@ def main():
         r = session.post(f"{SEHEL_URL}/api/clientsServerSide", data={
             "draw": 1, "start": start, "length": page_size
         })
+        if not r.text.strip():
+            print(f"  שגיאה: השרת החזיר תשובה ריקה (סטטוס {r.status_code})")
+            break
         data = r.json()
         page = data.get("data", [])
         all_leads.extend(page)
