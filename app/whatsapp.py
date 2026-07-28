@@ -283,11 +283,7 @@ async def whatsapp_webhook(request: Request):
         conv = Conversation()
         conv.messages.append({
             "role": "user",
-            "content": f"[הקשר: הלקוח קיבל הודעת re-engagement ועונה שהוא מעוניין. תגובתו: '{text}'. המשך ישירות לשאלת הצרכים.]"
-        })
-        conv.messages.append({
-            "role": "assistant",
-            "content": '{"reply": "", "stage": "intent", "extracted": {}, "handoff_to_human": false, "notes": "re-engagement context injected"}'
+            "content": f"[הקשר: הלקוח קיבל הודעת פתיחה מדניאל ועונה שהוא מעוניין. תגובתו: '{text}'. אל תאמר 'שלום וברכה'. שאל ישירות את שאלה מספר 1: לוח הזמנים לכניסה לנכס.]"
         })
         _wa_sessions[phone] = conv
 
