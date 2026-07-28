@@ -431,6 +431,14 @@ async def reset_session(request: Request):
     _wa_sessions.pop(phone, None)
     _wa_done.discard(phone)
     _wa_seen_sids.clear()
+    # מחיקת followup אם קיים
+    import json
+    from pathlib import Path
+    f = Path(__file__).resolve().parent.parent / "data" / "followups.json"
+    if f.exists():
+        records = json.loads(f.read_text(encoding="utf-8"))
+        records = [r for r in records if r.get("phone", "").replace("+", "") != phone]
+        f.write_text(json.dumps(records, ensure_ascii=False, indent=2), encoding="utf-8")
     return {"status": "reset", "phone": phone}
 
 
