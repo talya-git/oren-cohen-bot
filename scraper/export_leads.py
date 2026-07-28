@@ -11,6 +11,10 @@ from playwright.sync_api import sync_playwright
 
 SEHEL_URL = "https://crm.sehel.co.il"
 SESSION_DIR = Path(__file__).resolve().parent / "session_data"
+
+# fallback למיקום אלטרנטיבי
+if not SESSION_DIR.exists():
+    SESSION_DIR = Path(r"C:\Users\Dell\Desktop\oren-cohen-bot\scraper\session_data")
 OUTPUT_FILE = Path(__file__).resolve().parent / "leads_export.xlsx"
 
 
@@ -44,6 +48,7 @@ def main():
         print("מתחבר לשכל...")
         page.goto(SEHEL_URL)
         page.wait_for_load_state("networkidle")
+        print(f"  URL נוכחי: {page.url}")
 
         if "login" in page.url.lower():
             print("❌ Session פג תוקף. הרץ שוב: python scraper/save_session.py")
