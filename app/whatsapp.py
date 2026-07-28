@@ -55,19 +55,6 @@ def _detect_language(phone: str, name: str | None) -> str:
 
 
 def _check_whatsapp_allowed(normalized: str) -> str:
-    """
-    מחזיר:
-      'block'  — מספר שאין לו WhatsApp (514/516/310)
-      'check'  — מספר שצריך בדיקה (845)
-      'allow'  — שאר המספרים
-    """
-    # מספרים ישראליים: normalized מתחיל ב-972 ואז הספרות
-    local = normalized.lstrip("972") if normalized.startswith("972") else normalized
-    for prefix in ("514", "516", "310"):
-        if local.startswith(prefix):
-            return "block"
-    if local.startswith("845"):
-        return "check"
     return "allow"
 
 
