@@ -231,6 +231,8 @@ async def whatsapp_webhook(request: Request):
     except Exception:
         return {"status": "ignored"}
 
+    print(f"[WEBHOOK] body={body}")
+
     # פורמט GreenAPI
     sender_data = body.get("senderData", {})
     message_data = body.get("messageData", {})
