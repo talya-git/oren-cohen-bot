@@ -1,4 +1,4 @@
-"""שליחת הודעות WhatsApp דרך Twilio."""
+"""שליחת הודעות WhatsApp דרך GreenAPI."""
 
 import asyncio
 import os
@@ -7,24 +7,21 @@ import requests
 
 from . import sehel
 
-TWILIO_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
-TWILIO_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
-TWILIO_WHATSAPP_FROM = os.getenv("TWILIO_WHATSAPP_FROM", "whatsapp:+972765325261")
-TEST_PHONES = [
-    "+972526239608",
-    "+13055863760",
-    "+972504183337",
-]
+GREEN_API_URL = os.getenv("GREEN_API_URL", "https://7107.api.greenapi.com")
+GREEN_ID_INSTANCE = os.getenv("GREEN_ID_INSTANCE", "710722695126")
+GREEN_API_TOKEN = os.getenv("GREEN_API_TOKEN", "e65c04293bc94d15bb4e0499e9b38795d57701f7dd6b4384a7")
 
 NO_RESPONSE_HOURS = 24
 
 
 def send_message(phone: str, message: str) -> dict:
-    to = f"whatsapp:{phone}" if not phone.startswith("whatsapp:") else phone
+    # נרמול מספר — GreenAPI דורש פורמט בינלאומי ללא +
+    normalized = phone.lstrip("+").replace(" ", "").replace("-", "")
+    chat_id = f"{normalized}@c.us"
     resp = requests.post(
-        f"https://api.twilio.com/2010-04-01/Accounts/{TWILIO_SID}/Messages.json",
-        data={"From": TWILIO_FROM, "To": to, "Body": message},
-        auth=(TWILIO_SID, TWILIO_TOKEN),
+        f"{GREEN_API_URL}/waInstance{GREEN_ID_INSTANCE}/sendMessage/{GREEN_API_TOKEN}",
+        json={"chatId": chat_id, "message": message},
+        timeout=15,
     )
     return resp.json()
 
@@ -75,21 +72,18 @@ def _check_whatsapp_allowed(normalized: str) -> str:
 
 
 def _has_whatsapp(phone_e164: str) -> bool:
-    """בודק אם למספר יש WhatsApp דרך Twilio Lookup."""
-    if not TWILIO_SID or not TWILIO_TOKEN:
-        return True  # אם אין credentials — מניחים שיש
+    """בודק אם למספר יש WhatsApp דרך GreenAPI."""
     try:
-        r = requests.get(
-            f"https://lookups.twilio.com/v2/PhoneNumbers/{phone_e164}",
-            params={"Fields": "line_type_intelligence"},
-            auth=(TWILIO_SID, TWILIO_TOKEN),
+        normalized = phone_e164.lstrip("+")
+        chat_id = f"{normalized}@c.us"
+        r = requests.post(
+            f"{GREEN_API_URL}/waInstance{GREEN_ID_INSTANCE}/checkWhatsapp/{GREEN_API_TOKEN}",
+            json={"phoneNumber": normalized},
             timeout=5,
         )
-        data = r.json()
-        line = data.get("line_type_intelligence", {}) or {}
-        return line.get("type") not in ("landline", "voip", None)
+        return r.json().get("existsWhatsapp", True)
     except Exception:
-        return True  # במקרה של שגיאה — שולחים
+        return True
 
 
 def start_reengagement(phone: str, name: str | None, project_name: str, agent_name: str = "") -> None:
@@ -231,11 +225,19 @@ async def whatsapp_webhook(request: Request):
     from .engine import Conversation
     from . import database as _db
 
-    # Twilio שולח form data
-    form = await request.form()
-    phone = str(form.get("From", "")).replace("whatsapp:", "").replace("+", "")
-    text = str(form.get("Body", "")).strip()
-    msg_sid = str(form.get("MessageSid", ""))
+    # GreenAPI שולח JSON
+    try:
+        body = await request.json()
+    except Exception:
+        return {"status": "ignored"}
+
+    # פורמט GreenAPI
+    sender_data = body.get("senderData", {})
+    message_data = body.get("messageData", {})
+    phone_raw = sender_data.get("sender", "")  # e.g. "972501234567@c.us"
+    phone = phone_raw.replace("@c.us", "").replace("@g.us", "")
+    text = message_data.get("textMessageData", {}).get("textMessage", "").strip()
+    msg_sid = body.get("idMessage", "")
 
     if msg_sid and msg_sid in _wa_seen_sids:
         return {"status": "duplicate"}
