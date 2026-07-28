@@ -78,9 +78,11 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
     from .engine import Conversation
 
     normalized = phone.lstrip("+")
-    # נרמול מספר ישראלי
+    # נרמול מספר ישראלי בלבד
     if normalized.startswith("05"):
         normalized = "972" + normalized[1:]
+    elif normalized.startswith("5") and len(normalized) == 9:
+        normalized = "972" + normalized
 
     # בדיקת קידומת
     allowed = _check_whatsapp_allowed(normalized)
