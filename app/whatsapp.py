@@ -9,8 +9,7 @@ from . import sehel
 
 TWILIO_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
 TWILIO_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
-TWILIO_FROM = os.getenv("TWILIO_WHATSAPP_FROM", "whatsapp:+14155238886")
-
+TWILIO_WHATSAPP_FROM=whatsapp:+972765325261
 TEST_PHONES = [
     "+972526239608",
     "+13055863760",
@@ -58,6 +57,41 @@ def _detect_language(phone: str, name: str | None) -> str:
     return "en"
 
 
+def _check_whatsapp_allowed(normalized: str) -> str:
+    """
+    מחזיר:
+      'block'  — מספר שאין לו WhatsApp (514/516/310)
+      'check'  — מספר שצריך בדיקה (845)
+      'allow'  — שאר המספרים
+    """
+    # מספרים ישראליים: normalized מתחיל ב-972 ואז הספרות
+    local = normalized.lstrip("972") if normalized.startswith("972") else normalized
+    for prefix in ("514", "516", "310"):
+        if local.startswith(prefix):
+            return "block"
+    if local.startswith("845"):
+        return "check"
+    return "allow"
+
+
+def _has_whatsapp(phone_e164: str) -> bool:
+    """בודק אם למספר יש WhatsApp דרך Twilio Lookup."""
+    if not TWILIO_SID or not TWILIO_TOKEN:
+        return True  # אם אין credentials — מניחים שיש
+    try:
+        r = requests.get(
+            f"https://lookups.twilio.com/v2/PhoneNumbers/{phone_e164}",
+            params={"Fields": "line_type_intelligence"},
+            auth=(TWILIO_SID, TWILIO_TOKEN),
+            timeout=5,
+        )
+        data = r.json()
+        line = data.get("line_type_intelligence", {}) or {}
+        return line.get("type") not in ("landline", "voip", None)
+    except Exception:
+        return True  # במקרה של שגיאה — שולחים
+
+
 def start_reengagement(phone: str, name: str | None, project_name: str, agent_name: str = "") -> None:
     """שולח הודעת פתיחה ללקוח ישן ומאתחל session."""
     from .engine import Conversation
@@ -66,6 +100,15 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
     # נרמול מספר ישראלי
     if normalized.startswith("05"):
         normalized = "972" + normalized[1:]
+
+    # בדיקת קידומת
+    allowed = _check_whatsapp_allowed(normalized)
+    if allowed == "block":
+        print(f"[SKIP] {phone} — קידומת חסומה (514/516/310)")
+        return
+    if allowed == "check" and not _has_whatsapp(f"+{normalized}"):
+        print(f"[SKIP] {phone} — קידומת 845 ללא WhatsApp")
+        return
     if name:
         try:
             fixed = name.encode("latin1").decode("utf-8")
