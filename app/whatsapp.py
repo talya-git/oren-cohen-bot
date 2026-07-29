@@ -27,7 +27,9 @@ def send_message(phone: str, message: str) -> dict:
         },
         timeout=15,
     )
-    return resp.json()
+    result = resp.json()
+    print(f"[META SEND] phone={normalized} status={resp.status_code} result={result}")
+    return result
 
 
 def send_test():
