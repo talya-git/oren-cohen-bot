@@ -1,4 +1,4 @@
-"""שליחת הודעות WhatsApp דרך GreenAPI."""
+"""שליחת הודעות WhatsApp דרך Meta Cloud API."""
 
 import asyncio
 import os
@@ -7,20 +7,24 @@ import requests
 
 from . import sehel
 
-GREEN_API_URL = os.getenv("GREEN_API_URL", "https://7107.api.greenapi.com")
-GREEN_ID_INSTANCE = os.getenv("GREEN_ID_INSTANCE", "710722695126")
-GREEN_API_TOKEN = os.getenv("GREEN_API_TOKEN", "e65c04293bc94d15bb4e0499e9b38795d57701f7dd6b4384a7")
+META_PHONE_NUMBER_ID = os.getenv("META_PHONE_NUMBER_ID", "1149327658273677")
+META_ACCESS_TOKEN = os.getenv("META_ACCESS_TOKEN", "EAATbPHzKcw4BSMxwOGffOuYAOcZAKUMRbZCJREAgvTnCvjt4NKxFORGjXXBp2hR9cptzSw0KVlv5SlBMX2NCNmr0GdKlWzZCNsVp8NeeQhmeW18SYov8hFwo6zB2SJSRLszFVnXHRD6uwTSJX91fWU9UQihHOR4zXKAowgK0vZA9FlkOwIYaglMYVNDamx47IiCm3oHzFHVrIhZBXaIXvYLkEVaNFOfWDMQZDZD")
+META_API_VERSION = "v19.0"
 
 NO_RESPONSE_HOURS = 24
 
 
 def send_message(phone: str, message: str) -> dict:
-    # נרמול מספר — GreenAPI דורש פורמט בינלאומי ללא +
     normalized = phone.lstrip("+").replace(" ", "").replace("-", "")
-    chat_id = f"{normalized}@c.us"
     resp = requests.post(
-        f"{GREEN_API_URL}/waInstance{GREEN_ID_INSTANCE}/sendMessage/{GREEN_API_TOKEN}",
-        json={"chatId": chat_id, "message": message},
+        f"https://graph.facebook.com/{META_API_VERSION}/{META_PHONE_NUMBER_ID}/messages",
+        headers={"Authorization": f"Bearer {META_ACCESS_TOKEN}", "Content-Type": "application/json"},
+        json={
+            "messaging_product": "whatsapp",
+            "to": normalized,
+            "type": "text",
+            "text": {"body": message}
+        },
         timeout=15,
     )
     return resp.json()
@@ -59,18 +63,7 @@ def _check_whatsapp_allowed(normalized: str) -> str:
 
 
 def _has_whatsapp(phone_e164: str) -> bool:
-    """בודק אם למספר יש WhatsApp דרך GreenAPI."""
-    try:
-        normalized = phone_e164.lstrip("+")
-        chat_id = f"{normalized}@c.us"
-        r = requests.post(
-            f"{GREEN_API_URL}/waInstance{GREEN_ID_INSTANCE}/checkWhatsapp/{GREEN_API_TOKEN}",
-            json={"phoneNumber": normalized},
-            timeout=5,
-        )
-        return r.json().get("existsWhatsapp", True)
-    except Exception:
-        return True
+    return True
 
 
 def start_reengagement(phone: str, name: str | None, project_name: str, agent_name: str = "") -> None:
@@ -209,12 +202,20 @@ def _save_followup(phone: str, weeks: int, reason: str) -> None:
     f.write_text(json.dumps(records, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+@router.get("/webhook")
+async def whatsapp_webhook_verify(request: Request):
+    """Meta webhook verification."""
+    params = request.query_params
+    if params.get("hub.verify_token") == "oren_cohen_verify" and params.get("hub.challenge"):
+        return int(params["hub.challenge"])
+    return {"status": "invalid"}
+
+
 @router.post("/webhook")
 async def whatsapp_webhook(request: Request):
     from .engine import Conversation
     from . import database as _db
 
-    # GreenAPI שולח JSON
     try:
         body = await request.json()
     except Exception:
@@ -222,13 +223,16 @@ async def whatsapp_webhook(request: Request):
 
     print(f"[WEBHOOK] body={body}")
 
-    # פורמט GreenAPI
-    sender_data = body.get("senderData", {})
-    message_data = body.get("messageData", {})
-    phone_raw = sender_data.get("sender", "")  # e.g. "972501234567@c.us"
-    phone = phone_raw.replace("@c.us", "").replace("@g.us", "")
-    text = message_data.get("textMessageData", {}).get("textMessage", "").strip()
-    msg_sid = body.get("idMessage", "")
+    # פורמט Meta Cloud API
+    try:
+        entry = body["entry"][0]
+        change = entry["changes"][0]["value"]
+        msg = change["messages"][0]
+        phone = msg["from"]
+        text = msg["text"]["body"].strip()
+        msg_sid = msg["id"]
+    except (KeyError, IndexError):
+        return {"status": "ignored"}
 
     if msg_sid and msg_sid in _wa_seen_sids:
         return {"status": "duplicate"}
