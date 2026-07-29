@@ -556,7 +556,10 @@
                     <td style="padding:6px;font-size:12px;color:#555;">${project}</td>
                     <td style="padding:6px;font-size:11px;color:#999;">${dateStr}</td>
                     <td style="padding:6px;text-align:center;">
-                        <input type="checkbox" class="wl-with-name" data-idx="${idx}" ${name !== '—' ? 'checked' : ''}>
+                        <input type="text" class="wl-name-edit" data-idx="${idx}"
+                            value="${name !== '—' ? name : ''}"
+                            placeholder="ללא שם"
+                            style="width:90px;padding:3px 6px;border:1px solid #ddd;border-radius:4px;font-size:12px;direction:rtl;">
                     </td>
                 </tr>`;
         }).join('');
@@ -579,15 +582,15 @@
             div.innerHTML = lead.projectNameHtml || '';
             const project = div.querySelector('.label')?.innerText?.trim() || '';
             const phone = normalizePhone(lead.phone1);
-        const noName = document.getElementById('wl-no-name')?.checked;
             try {
-                const withName = document.querySelector(`.wl-with-name[data-idx="${cb.dataset.idx}"]`)?.checked;
+                const nameInput = document.querySelector(`.wl-name-edit[data-idx="${cb.dataset.idx}"]`);
+                const editedName = nameInput ? nameInput.value.trim() || null : lead.name1 || null;
                 const res = await fetch(`${BOT_URL}/api/whatsapp/start-reengagement`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         phone: lead.phone1,
-                        name: withName ? lead.name1 : null,
+                        name: editedName,
                         project_name: project,
                         agent_email: wl_agent.email,
                     })
@@ -674,7 +677,7 @@
                                 <th style="padding:6px;text-align:right;">שם / טלפון</th>
                                 <th style="padding:6px;text-align:right;">פרויקט</th>
                                 <th style="padding:6px;text-align:right;">עדכון</th>
-                                <th style="padding:6px;text-align:center;">עם שם</th>
+                                <th style="padding:6px;text-align:center;">שם לשליחה</th>
                             </tr>
                         </thead>
                         <tbody id="wl-tbody"></tbody>
