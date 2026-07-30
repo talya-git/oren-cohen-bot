@@ -7,8 +7,8 @@ import requests
 
 from . import sehel
 
-META_PHONE_NUMBER_ID = os.getenv("META_PHONE_NUMBER_ID", "1216461211550613")
-META_ACCESS_TOKEN = os.getenv("META_ACCESS_TOKEN", "EAATbPHzKcw4BSL5xbTs4KDVWrSgldLMi5T40u4eUXuE7zZAa7GgmZCkgCAeDOrbG08IrsS3TwYwXcpDUjrXBrdbXIohI0yZCmUpgednVJIReCfTVZCmmB83BnOn6248B7A02M1BepMmRtfZCOMYAfhevch85vp7voIZCCJslwZAvfk2Y932mbUgBewZC4DVm6eFp8svGRNYudtFU7yU2OUuWpElZBJv1EifNo")
+META_PHONE_NUMBER_ID = os.getenv("META_PHONE_NUMBER_ID", "1285155738009042")
+META_ACCESS_TOKEN = os.getenv("META_ACCESS_TOKEN", "EAATbPHzKcw4BSGnyZB4wZA32YZBi7AmRHW5M3ZAMyKW51mLLDKNUofy59bDz1ABQ3RZAkHHxIx6ZCNPgSCSloZArGdLm8yAQJFj3Neerf5CgrleabZC9huq9usJyhftZCSOdfp4vb0tzIIy1mHncehqh4OV7bbQbGKCVAcZCdZB9pQ6tS9xE7vRaueCLPEkGI6ZBzAZDZD")
 META_API_VERSION = "v19.0"
 
 NO_RESPONSE_HOURS = 24
@@ -32,13 +32,6 @@ def send_message(phone: str, message: str) -> dict:
     return result
 
 
-def send_test():
-    for phone in TEST_PHONES:
-        result = send_message(phone, "היי, אני דניאל ממשרד אורן כהן גרופ 😊")
-        print(f"{phone} → {result}")
-        time.sleep(2)
-
-
 # === FastAPI router ===
 from fastapi import APIRouter, Request
 
@@ -51,7 +44,7 @@ _wa_no_response_tasks: dict[str, asyncio.Task] = {}
 _wa_original_project: dict[str, str] = {}
 _wa_is_projects: dict[str, bool] = {}
 _wa_is_reengagement: dict[str, bool] = {}
-_wa_pilot_log: list[dict] = []  # לוג פיילוט בזיכרון
+_wa_pilot_log: list[dict] = []
 
 
 def _detect_language(phone: str, name: str | None) -> str:
@@ -73,19 +66,14 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
     from .engine import Conversation
 
     normalized = phone.lstrip("+")
-    # נרמול מספר ישראלי בלבד
     if normalized.startswith("05"):
         normalized = "972" + normalized[1:]
     elif normalized.startswith("5") and len(normalized) == 9:
         normalized = "972" + normalized
 
-    # בדיקת קידומת
     allowed = _check_whatsapp_allowed(normalized)
     if allowed == "block":
-        print(f"[SKIP] {phone} — קידומת חסומה (514/516/310)")
-        return
-    if allowed == "check" and not _has_whatsapp(f"+{normalized}"):
-        print(f"[SKIP] {phone} — קידומת 845 ללא WhatsApp")
+        print(f"[SKIP] {phone} — קידומת חסומה")
         return
     if name:
         try:
@@ -138,12 +126,10 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
     print(f"[GREETING] phone={normalized} name={name!r} lang={lang} project={pname_for_convo!r}")
     send_message(f"+{normalized}", greeting)
 
-    # שמירה ב-DB
     from . import database as _db
     agent_email = _wa_is_projects.get(normalized) and "aaron@orencohengroup.com" or "office@orencohengroup.com"
     _db.mark_reengagement_sent(f"+{normalized}", name or "", agent_email)
 
-    # רשום ללוג פיילוט
     _wa_pilot_log.append({
         "phone": f"+{normalized}",
         "name": name or "",
@@ -176,7 +162,6 @@ async def _no_response_timer(phone: str):
         pass
 
 
-# ביטויים לזיהוי כוונה
 _NOT_RELEVANT = ["לא רלוונטי", "לא מעוניין", "לא רלוונט", "לא מתעניין", "לא צריך", "לא רוצה", "not relevant", "not interested"]
 _SNOOZE_WEEK = ["עסוק", "אחר כך", "אחרי", "יחשוב", "אחשוב", "לא עכשיו", "busy", "later", "will think", "not now"]
 
@@ -244,7 +229,6 @@ async def whatsapp_webhook(request: Request):
     if not phone or not text:
         return {"status": "ignored"}
 
-    # שיחה שכבר הסתיימה
     if phone in _wa_done or _db.is_conversation_done(phone):
         import openai as _oai
         try:
@@ -264,7 +248,6 @@ async def whatsapp_webhook(request: Request):
         send_message(f"+{phone}", reply)
         return {"status": "done_reply"}
 
-    # אם אין session — תשובה להודעת re-engagement
     if phone not in _wa_sessions:
         intent = _classify_response(text)
         if intent == "not_relevant":
@@ -277,10 +260,6 @@ async def whatsapp_webhook(request: Request):
             return {"status": "snoozed_1w"}
         conv = Conversation()
         conv.messages.append({
-            "role": "assistant",
-            "content": '{"reply": "' + greeting_text + '", "stage": "intent", "extracted": {}, "handoff_to_human": false, "notes": ""}'
-        })
-        conv.messages.append({
             "role": "user",
             "content": f"[הקשר: הלקוח קיבל הודעת פתיחה מדניאל ועונה שהוא מעוניין. תגובתו: '{text}'. אל תאמר 'שלום וברכה'. שאל ישירות את שאלה מספר 1: לוח הזמנים לכניסה לנכס.]"
         })
@@ -289,7 +268,6 @@ async def whatsapp_webhook(request: Request):
     convo = _wa_sessions[phone]
     turn, score = convo.send(text)
 
-    # עדכון לוג פיילוט
     log_entry = next((e for e in _wa_pilot_log if e["phone"] == f"+{phone}"), None)
     if log_entry:
         log_entry["replied"] = True
@@ -298,7 +276,6 @@ async def whatsapp_webhook(request: Request):
             log_entry["score"] = score.level
             log_entry["notes"] = turn.notes or ""
 
-    # עדכון replied ב-DB עם תמליל
     import json as _json
     transcript_text = "\n".join(
         f"{'דניאל' if m['role'] == 'assistant' else 'לקוח'}: {m['content']}"
@@ -332,19 +309,17 @@ async def whatsapp_webhook(request: Request):
 
 @router.post("/notify-agent")
 async def notify_agent(request: Request):
-    """נקרא מה-Tampermonkey אחרי שליחת batch — יוצר batch ב-DB ושולח הודעת אישור לסוכן."""
     from . import database as _db
     data = await request.json()
     agent_email = data.get("agent_email", "")
     agent_label = data.get("agent_label", "")
-    phones = data.get("phones", [])  # רשימת הטלפונים שנשלחו
+    phones = data.get("phones", [])
 
     if not agent_email:
         return {"status": "error", "reason": "no agent_email"}
 
     batch_id = _db.create_reengagement_batch(agent_email, agent_label)
 
-    # עדכון batch_id לכל הרשומות שנשלחו זה עתה
     conn = _db.get_db()
     cur = conn.cursor()
     for phone in phones:
@@ -356,6 +331,7 @@ async def notify_agent(request: Request):
     conn.close()
 
     return {"status": "ok", "batch_id": batch_id}
+
 
 @router.get("/sent-phones")
 async def sent_phones(agent_email: str):
@@ -372,20 +348,17 @@ async def reengagement_results(agent_email: str):
 
 @router.get("/pilot-results")
 async def pilot_results():
-    """מחזיר את לוג הפיילוט הנוכחי."""
     return {"results": _wa_pilot_log}
 
 
 @router.post("/pilot-clear")
 async def pilot_clear():
-    """מנקה את לוג הפיילוט."""
     _wa_pilot_log.clear()
     return {"status": "cleared"}
 
 
 @router.post("/bulk-reengagement")
 async def bulk_reengagement(request: Request):
-    """שולח re-engagement לרשימת לידים — מקסימום 100."""
     data = await request.json()
     leads = data.get("leads", [])[:100]
     results = []
@@ -410,7 +383,6 @@ async def bulk_reengagement(request: Request):
 
 @router.post("/start-reengagement")
 async def start_reengagement_endpoint(request: Request):
-    """מפעיל start_reengagement מרחוק — לבדיקות ולשליחה ידנית."""
     data = await request.json()
     phone = str(data.get("phone", ""))
     name = data.get("name")
@@ -422,13 +394,11 @@ async def start_reengagement_endpoint(request: Request):
 
 @router.post("/reset-session")
 async def reset_session(request: Request):
-    """מאפס session של טלפון — לבדיקות."""
     data = await request.json()
     phone = str(data.get("phone", "")).replace("+", "").replace(" ", "")
     _wa_sessions.pop(phone, None)
     _wa_done.discard(phone)
     _wa_seen_sids.clear()
-    # מחיקת followup אם קיים
     import json
     from pathlib import Path
     f = Path(__file__).resolve().parent.parent / "data" / "followups.json"
@@ -437,7 +407,3 @@ async def reset_session(request: Request):
         records = [r for r in records if r.get("phone", "").replace("+", "") != phone]
         f.write_text(json.dumps(records, ensure_ascii=False, indent=2), encoding="utf-8")
     return {"status": "reset", "phone": phone}
-
-
-if __name__ == "__main__":
-    send_test()
