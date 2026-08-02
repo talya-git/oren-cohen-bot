@@ -32,6 +32,32 @@ def send_message(phone: str, message: str) -> dict:
     return result
 
 
+def send_template_reengagement(phone: str, name: str | None) -> dict:
+    """שולח template reengagement_he — עובד גם אחרי 24 שעות."""
+    normalized = phone.lstrip("+").replace(" ", "").replace("-", "")
+    components = []
+    if name:
+        components = [{"type": "body", "parameters": [{"type": "text", "text": name}]}]
+    resp = requests.post(
+        f"https://graph.facebook.com/{META_API_VERSION}/{META_PHONE_NUMBER_ID}/messages",
+        headers={"Authorization": f"Bearer {META_ACCESS_TOKEN}", "Content-Type": "application/json"},
+        json={
+            "messaging_product": "whatsapp",
+            "to": normalized,
+            "type": "template",
+            "template": {
+                "name": "reengagement_he",
+                "language": {"code": "he"},
+                "components": components,
+            },
+        },
+        timeout=15,
+    )
+    result = resp.json()
+    print(f"[META TEMPLATE] phone={normalized} status={resp.status_code} result={result}")
+    return result
+
+
 # === FastAPI router ===
 from fastapi import APIRouter, Request
 
@@ -83,6 +109,10 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
         except (UnicodeEncodeError, UnicodeDecodeError):
             pass
 
+    # אם השם עדיין מכיל תווים לא תקינים — נשמיט אותו
+    if name and not any(c.isalpha() for c in name):
+        name = None
+
     lang = _detect_language(phone, name)
     is_projects = sehel._is_projects_division(project_name, agent_name)
     pname_for_convo = project_name if is_projects else None
@@ -124,7 +154,7 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
 
     convo.messages.append({"role": "assistant", "content": greeting})
     print(f"[GREETING] phone={normalized} name={name!r} lang={lang} project={pname_for_convo!r}")
-    send_message(f"+{normalized}", greeting)
+    send_template_reengagement(f"+{normalized}", name)
 
     from . import database as _db
     agent_email = _wa_is_projects.get(normalized) and "aaron@orencohengroup.com" or "office@orencohengroup.com"
