@@ -46,9 +46,9 @@ def send_template_reengagement(phone: str, name: str | None) -> dict:
             "to": normalized,
             "type": "template",
             "template": {
-                "name": "hello_world",
-                "language": {"code": "en_US"},
-                "components": [],
+                "name": "reengagement_he",
+                "language": {"code": "he"},
+                "components": components,
             },
         },
         timeout=15,
