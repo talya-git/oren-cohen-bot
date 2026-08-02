@@ -47,7 +47,7 @@ def send_template_reengagement(phone: str, name: str | None) -> dict:
             "type": "template",
             "template": {
                 "name": "reengagement_he",
-                "language": {"code": "he"},
+                "language": {"code": "he_IL"},
                 "components": components,
             },
         },
