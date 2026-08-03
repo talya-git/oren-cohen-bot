@@ -40,7 +40,7 @@
                     <input id="wa-pilot-search" type="text" placeholder="יוסי כהן או 0501234567"
                         style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;direction:rtl;" />
                     <button id="wa-pilot-search-btn" style="padding:8px 14px;background:#007bff;
-                        color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">חפש</button>
+                        color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">חפש / Search</button>
                 </div>
                 <div id="wa-pilot-search-results" style="display:none;margin-bottom:12px;max-height:150px;
                     overflow-y:auto;border:1px solid #ddd;border-radius:8px;"></div>
@@ -59,11 +59,11 @@
                 <div style="display:flex;gap:8px;margin-top:16px;">
                     <button id="wa-pilot-preview-btn" style="flex:1;padding:10px;background:#6c757d;
                         color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;">
-                        👁 תצוגה מקדימה
+                        👁 תצוגה מקדימה / Preview
                     </button>
                     <button id="wa-pilot-send-btn" style="flex:1;padding:10px;background:#25D366;
                         color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:bold;">
-                        🚀 שלח הכל
+                        🚀 שלח הכל / Send All
                     </button>
                 </div>
 
@@ -83,9 +83,9 @@
                         <strong style="font-size:13px;">📊 תוצאות פיילוט</strong>
                         <div style="display:flex;gap:6px;">
                             <button id="wa-pilot-refresh" style="padding:4px 10px;background:#007bff;color:#fff;
-                                border:none;border-radius:6px;cursor:pointer;font-size:12px;">🔄 רענן</button>
+                                border:none;border-radius:6px;cursor:pointer;font-size:12px;">🔄 רענן / Refresh</button>
                             <button id="wa-pilot-clear" style="padding:4px 10px;background:#dc3545;color:#fff;
-                                border:none;border-radius:6px;cursor:pointer;font-size:12px;">🗑 נקה</button>
+                                border:none;border-radius:6px;cursor:pointer;font-size:12px;">🗑 נקה / Clear</button>
                         </div>
                     </div>
                     <div id="wa-pilot-results-table" style="font-size:12px;max-height:200px;overflow-y:auto;">
@@ -374,16 +374,16 @@
         const progressText = document.getElementById('wa-pilot-progress-text');
 
         btn.disabled = true;
-        btn.textContent = '⏳ שולח...';
+        btn.textContent = '⏳ שולח... / Sending...';
         progress.style.display = 'block';
         status.style.display = 'none';
 
         try {
-            progressText.textContent = 'מחפש פרטים בשכל...';
+            progressText.textContent = 'מחפש פרטים בשכל... / Fetching data...';
             bar.style.width = '15%';
             const enriched = await enrichLeadsFromSehel(leads);
 
-            progressText.textContent = `שולח ${enriched.length} הודעות...`;
+            progressText.textContent = `שולח ${enriched.length} הודעות... / Sending ${enriched.length} messages...`;
             bar.style.width = '30%';
 
             const res = await fetch(`${BOT_URL}/api/whatsapp/bulk-reengagement`, {
@@ -409,7 +409,7 @@
                     ${failedList.map(f => `<div style="padding:2px 0;">❌ ${f.phone} — ${f.reason || 'שגיאה לא ידועה'}</div>`).join('')}
                 </div>` : ''}
             `;
-            progressText.textContent = 'הושלם!';
+            progressText.textContent = 'הושלם! / Done!';
 
         } catch (e) {
             status.style.display = 'block';
@@ -419,7 +419,7 @@
         }
 
         btn.disabled = false;
-        btn.textContent = '🚀 שלח הכל';
+        btn.textContent = '🚀 שלח הכל / Send All';
     }
 
     // ─── הערת לידים — ממשק חדש ──────────────────────────────────────────────
@@ -655,7 +655,7 @@
             `;
         }
         btn.disabled = false;
-        btn.textContent = '📤 שלח מסומנים';
+        btn.textContent = '📤 שלח מסומנים / Send Selected';
         wl_offset += 100;
         await loadWlPage();
     }
@@ -716,11 +716,11 @@
                     <div style="display:flex;gap:8px;margin-top:12px;">
                         <button id="wl-send-btn" style="flex:1;padding:10px;background:#25D366;
                             color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:bold;">
-                            📤 שלח מסומנים
+                            📤 שלח מסומנים / Send Selected
                         </button>
                         <button id="wl-next-btn" style="flex:1;padding:10px;background:#007bff;
                             color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;">
-                            ⏭ 20 הבאים
+                            ⏭ 20 הבאים / Next 20
                         </button>
                     </div>
                 </div>
@@ -768,7 +768,7 @@
         li1.innerHTML = `
             <a href="javascript:void(0)" id="wakeUpNavBtn">
                 <i class="fa-regular fa-bell"></i>
-                <span>הערת לידים</span>
+                <span>הערת לידים / Wake Up Leads</span>
             </a>`;
         projectsLink.closest("li").insertAdjacentElement("afterend", li1);
         document.getElementById("wakeUpNavBtn").addEventListener("click", createWakeUpPopup);
@@ -778,7 +778,7 @@
         li2.innerHTML = `
             <a href="javascript:void(0)" id="waPilotNavBtn">
                 <i class="fa-brands fa-whatsapp"></i>
-                <span>פיילוט WhatsApp</span>
+                <span>פיילוט WhatsApp / Pilot</span>
             </a>`;
         li1.insertAdjacentElement("afterend", li2);
         document.getElementById("waPilotNavBtn").addEventListener("click", createPilotPopup);
