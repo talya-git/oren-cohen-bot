@@ -537,9 +537,12 @@
         //     if (parts.length === 3) d = new Date(+parts[2], +parts[1] - 1, +parts[0]);
         //     return d && d < SIX_MONTHS_AGO;
         // }).slice(0, 20);
+        const seenPhones = new Set();
         const filtered = raw.filter(lead => {
             const phone = normalizePhone(lead.phone1);
-            return !wl_sentPhones.has(phone);
+            if (!phone || wl_sentPhones.has(phone) || seenPhones.has(phone)) return false;
+            seenPhones.add(phone);
+            return true;
         }).slice(0, 20);
 
         wl_leads = filtered;
