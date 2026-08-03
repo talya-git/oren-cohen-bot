@@ -442,10 +442,11 @@
     ];
 
     // state
-    let wl_agent = null;       // { label, email }
-    let wl_offset = 0;         // דף נוכחי
-    let wl_leads = [];         // הלידים המוצגים כרגע
+    let wl_agent = null;
+    let wl_offset = 0;
+    let wl_leads = [];
     let wl_sentPhones = new Set();
+    let wl_unchecked = new Set(); // טלפונים שהמשתמש ביטל את הסימון שלהם
 
     async function fetchSentPhones() {
         try {
@@ -562,10 +563,11 @@
             const project = div.querySelector('.label')?.innerText?.trim() || 'יד 2';
             const parts = (lead.updateDate || lead.createDate || '').split(' ')[0].split('-');
             const dateStr = parts.length === 3 ? `${parts[0]}.${parts[1]}.${parts[2]}` : '—';
+            const isChecked = !wl_unchecked.has(phone);
             return `
                 <tr style="border-bottom:1px solid #f0f0f0;">
                     <td style="padding:6px;text-align:center;">
-                        <input type="checkbox" class="wl-cb" data-idx="${idx}" checked>
+                        <input type="checkbox" class="wl-cb" data-idx="${idx}" data-phone="${phone}" ${isChecked ? 'checked' : ''}>
                     </td>
                     <td style="padding:6px;font-size:13px;">${name}<br><span style="color:#888;font-size:11px;">${phone}</span></td>
                     <td style="padding:6px;font-size:12px;color:#555;">${project}</td>
@@ -578,6 +580,15 @@
                     </td>
                 </tr>`;
         }).join('');
+
+        // שמירת סימונים בין עמודים
+        document.querySelectorAll('.wl-cb').forEach(cb => {
+            cb.addEventListener('change', () => {
+                const phone = cb.dataset.phone;
+                if (cb.checked) wl_unchecked.delete(phone);
+                else wl_unchecked.add(phone);
+            });
+        });
     }
 
     async function sendWlSelected() {
@@ -751,6 +762,7 @@
                 btn.style.background = '#25D366'; btn.style.borderColor = '#25D366'; btn.style.color = '#fff';
                 wl_agent = AGENTS.find(a => a.email === btn.dataset.email);
                 wl_offset = 0;
+                wl_unchecked = new Set();
                 document.getElementById('wl-table-wrap').style.display = 'block';
                 await fetchSentPhones();
                 await loadWlPage();
