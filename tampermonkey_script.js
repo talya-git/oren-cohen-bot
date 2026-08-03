@@ -509,7 +509,7 @@
         params.append('dealType', ' '); params.append('ignoreObjection', '0');
         params.append('ignoreStage', '0'); params.append('noFollowUp', '0');
         params.append('ignoreTags', '0'); params.append('ignoreMedia', '0');
-        params.append('agentFilter[]', wl_agent.email);
+        params.append('agentFilter[0]', wl_agent.email);
 
         let raw = [];
         try {
