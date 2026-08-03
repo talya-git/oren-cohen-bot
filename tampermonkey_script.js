@@ -705,10 +705,10 @@
                         <thead>
                             <tr style="background:#f8f9fa;">
                                 <th style="padding:6px;width:32px;"></th>
-                                <th style="padding:6px;text-align:right;">שם / טלפון</th>
-                                <th style="padding:6px;text-align:right;">פרויקט</th>
-                                <th style="padding:6px;text-align:right;">עדכון</th>
-                                <th style="padding:6px;text-align:center;">שם לשליחה</th>
+                                <th style="padding:6px;text-align:right;">שם / Name</th>
+                                <th style="padding:6px;text-align:right;">פרויקט / Project</th>
+                                <th style="padding:6px;text-align:right;">עדכון / Updated</th>
+                                <th style="padding:6px;text-align:center;">שם לשליחה / Send Name</th>
                             </tr>
                         </thead>
                         <tbody id="wl-tbody"></tbody>
@@ -768,7 +768,7 @@
         li1.innerHTML = `
             <a href="javascript:void(0)" id="wakeUpNavBtn">
                 <i class="fa-regular fa-bell"></i>
-                <span>הערת לידים / Wake Up Leads</span>
+                <span>הערת לידים</span>
             </a>`;
         projectsLink.closest("li").insertAdjacentElement("afterend", li1);
         document.getElementById("wakeUpNavBtn").addEventListener("click", createWakeUpPopup);
@@ -778,7 +778,7 @@
         li2.innerHTML = `
             <a href="javascript:void(0)" id="waPilotNavBtn">
                 <i class="fa-brands fa-whatsapp"></i>
-                <span>פיילוט WhatsApp / Pilot</span>
+                <span>פיילוט WhatsApp</span>
             </a>`;
         li1.insertAdjacentElement("afterend", li2);
         document.getElementById("waPilotNavBtn").addEventListener("click", createPilotPopup);
