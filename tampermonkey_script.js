@@ -589,6 +589,19 @@
                 else wl_unchecked.add(phone);
             });
         });
+
+        const selectAll = document.getElementById('wl-select-all');
+        if (selectAll) {
+            selectAll.replaceWith(selectAll.cloneNode(true));
+            document.getElementById('wl-select-all').addEventListener('change', function() {
+                document.querySelectorAll('.wl-cb').forEach(cb => {
+                    cb.checked = this.checked;
+                    const phone = cb.dataset.phone;
+                    if (this.checked) wl_unchecked.delete(phone);
+                    else wl_unchecked.add(phone);
+                });
+            });
+        }
     }
 
     async function sendWlSelected() {
@@ -749,15 +762,6 @@
 
         document.getElementById('wl-close').onclick = () => overlay.remove();
         overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
-
-        document.getElementById('wl-select-all').addEventListener('change', function() {
-            document.querySelectorAll('.wl-cb').forEach(cb => {
-                cb.checked = this.checked;
-                const phone = cb.dataset.phone;
-                if (this.checked) wl_unchecked.delete(phone);
-                else wl_unchecked.add(phone);
-            });
-        });
 
         document.querySelectorAll('.wl-agent-btn').forEach(btn => {
             btn.addEventListener('click', async () => {
