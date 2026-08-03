@@ -129,19 +129,25 @@
                 <table style="width:100%;border-collapse:collapse;">
                     <thead>
                         <tr style="background:#f8f9fa;">
-                            <th style="padding:6px;text-align:right;border-bottom:1px solid #dee2e6;">טלפון</th>
-                            <th style="padding:6px;text-align:right;border-bottom:1px solid #dee2e6;">שם</th>
-                            <th style="padding:6px;text-align:center;border-bottom:1px solid #dee2e6;">ענה?</th>
-                            <th style="padding:6px;text-align:center;border-bottom:1px solid #dee2e6;">העברה?</th>
+                            <th style="padding:6px 8px;text-align:right;border-bottom:2px solid #dee2e6;font-size:12px;">טלפון</th>
+                            <th style="padding:6px 8px;text-align:right;border-bottom:2px solid #dee2e6;font-size:12px;">שם</th>
+                            <th style="padding:6px 8px;text-align:center;border-bottom:2px solid #dee2e6;font-size:12px;">נשלח</th>
+                            <th style="padding:6px 8px;text-align:center;border-bottom:2px solid #dee2e6;font-size:12px;">ענה</th>
+                            <th style="padding:6px 8px;text-align:center;border-bottom:2px solid #dee2e6;font-size:12px;">הועבר</th>
+                            <th style="padding:6px 8px;text-align:center;border-bottom:2px solid #dee2e6;font-size:12px;">ציון</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${results.map(r => `
                             <tr style="border-bottom:1px solid #f0f0f0;">
-                                <td style="padding:5px 6px;font-size:11px;">${r.phone}</td>
-                                <td style="padding:5px 6px;">${r.name || '—'}</td>
-                                <td style="padding:5px 6px;text-align:center;">${r.replied ? '✅' : '⏳'}</td>
-                                <td style="padding:5px 6px;text-align:center;">${r.handoff ? '✅' : '—'}</td>
+                                <td style="padding:6px 8px;font-size:11px;color:#555;">${r.phone}</td>
+                                <td style="padding:6px 8px;font-size:12px;">${r.name || '—'}</td>
+                                <td style="padding:6px 8px;text-align:center;font-size:13px;">${r.sent ? '✅' : '❌'}</td>
+                                <td style="padding:6px 8px;text-align:center;font-size:13px;">${r.replied ? '✅' : '⏳'}</td>
+                                <td style="padding:6px 8px;text-align:center;font-size:13px;">${r.handoff ? '✅' : '—'}</td>
+                                <td style="padding:6px 8px;text-align:center;">
+                                    ${r.score ? `<span style="color:${scoreColor(r.score)};font-weight:bold;font-size:12px;">${r.score}</span>` : '—'}
+                                </td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -392,10 +398,16 @@
             status.style.display = 'block';
             status.style.background = result.failed === 0 ? '#d4edda' : '#fff3cd';
             status.style.color = result.failed === 0 ? '#155724' : '#856404';
+            const failedList = (result.results || []).filter(r => r.status === 'error');
             status.innerHTML = `
-                ✅ נשלח: <strong>${result.sent}</strong> &nbsp;|&nbsp;
-                ❌ נכשל: <strong>${result.failed}</strong>
-                ${result.failed > 0 ? '<br><small>בדוק את הלוגים ב-Render</small>' : ''}
+                <div style="display:flex;gap:16px;justify-content:center;font-size:14px;font-weight:bold;margin-bottom:${failedList.length ? '10px' : '0'}">
+                    <span>✅ נשלח: ${result.sent}</span>
+                    ${result.failed ? `<span>❌ נכשל: ${result.failed}</span>` : ''}
+                </div>
+                ${failedList.length ? `
+                <div style="font-size:12px;border-top:1px solid rgba(0,0,0,0.1);padding-top:8px;">
+                    ${failedList.map(f => `<div style="padding:2px 0;">❌ ${f.phone} — ${f.reason || 'שגיאה לא ידועה'}</div>`).join('')}
+                </div>` : ''}
             `;
             progressText.textContent = 'הושלם!';
 
@@ -575,6 +587,7 @@
 
         let success = 0, skipped = 0, failed = 0;
         const sentPhones = [];
+        const failedDetails = [];
         for (const cb of checkboxes) {
             const lead = wl_leads[parseInt(cb.dataset.idx)];
             if (!lead) continue;
@@ -582,9 +595,9 @@
             div.innerHTML = lead.projectNameHtml || '';
             const project = div.querySelector('.label')?.innerText?.trim() || '';
             const phone = normalizePhone(lead.phone1);
+            const nameInput = document.querySelector(`.wl-name-edit[data-idx="${cb.dataset.idx}"]`);
+            const editedName = nameInput ? nameInput.value.trim() || null : lead.name1 || null;
             try {
-                const nameInput = document.querySelector(`.wl-name-edit[data-idx="${cb.dataset.idx}"]`);
-                const editedName = nameInput ? nameInput.value.trim() || null : lead.name1 || null;
                 const res = await fetch(`${BOT_URL}/api/whatsapp/start-reengagement`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -599,11 +612,13 @@
                 if (r.status === 'skipped') skipped++;
                 else { success++; sentPhones.push(phone); }
                 wl_sentPhones.add(phone);
-            } catch(e) { failed++; }
+            } catch(e) {
+                failed++;
+                failedDetails.push({ phone, name: editedName || '—', error: e.message });
+            }
             await sleep(500);
         }
 
-        // יצירת batch ושליחת הודעת אישור לסוכן
         if (sentPhones.length) {
             try {
                 await fetch(`${BOT_URL}/api/whatsapp/notify-agent`, {
@@ -621,7 +636,23 @@
         const statusEl = document.getElementById('wl-send-status');
         if (statusEl) {
             statusEl.style.display = 'block';
-            statusEl.textContent = `✅ נשלח: ${success} | דולג: ${skipped} | נכשל: ${failed} — תקבל דוח במייל תוך 24 שעות`;
+            const allOk = failed === 0;
+            statusEl.style.background = allOk ? '#d4edda' : '#fff3cd';
+            statusEl.style.color = allOk ? '#155724' : '#856404';
+            statusEl.style.borderRadius = '8px';
+            statusEl.style.padding = '12px';
+            statusEl.innerHTML = `
+                <div style="display:flex;gap:16px;justify-content:center;font-size:14px;font-weight:bold;margin-bottom:${failedDetails.length ? '10px' : '0'}">
+                    <span>✅ נשלח: ${success}</span>
+                    ${skipped ? `<span>⏭ דולג: ${skipped}</span>` : ''}
+                    ${failed ? `<span>❌ נכשל: ${failed}</span>` : ''}
+                </div>
+                ${failedDetails.length ? `
+                <div style="font-size:12px;border-top:1px solid rgba(0,0,0,0.1);padding-top:8px;">
+                    ${failedDetails.map(f => `<div style="padding:2px 0;">❌ ${f.name} (${f.phone}) — ${f.error}</div>`).join('')}
+                </div>` : ''}
+                ${success ? '<div style="font-size:12px;margin-top:6px;opacity:0.8;">תקבל דוח במייל תוך 24 שעות</div>' : ''}
+            `;
         }
         btn.disabled = false;
         btn.textContent = '📤 שלח מסומנים';
