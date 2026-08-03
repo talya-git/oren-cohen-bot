@@ -413,6 +413,12 @@ async def bulk_reengagement(request: Request):
         time.sleep(2)
     sent = sum(1 for r in results if r["status"] == "sent")
     failed = sum(1 for r in results if r["status"] == "error")
+    try:
+        from .mailer import send_bulk_report
+        agent_label = leads[0].get("agent_name", "") or leads[0].get("agent_email", "") if leads else ""
+        send_bulk_report(agent_label or "לא ידוע", results)
+    except Exception as e:
+        print(f"[ADMIN REPORT ERROR] {e}")
     return {"sent": sent, "failed": failed, "results": results}
 
 

@@ -12,6 +12,9 @@ FROM_EMAIL = os.getenv("FROM_EMAIL", "orencohengroup2020@gmail.com")
 FROM_NAME = "בוט אורן כהן גרופ"
 
 
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "talyatoledano10@gmail.com")
+
+
 def send_report(to_email: str, agent_label: str, leads: list[dict]) -> None:
     subject = f"דוח הערת לידים שלך — {agent_label}"
 
@@ -77,3 +80,60 @@ def send_report(to_email: str, agent_label: str, leads: list[dict]) -> None:
         body = e.read().decode()
         print(f"[MAILJET ERROR] {e.code}: {body}")
         raise
+
+
+def send_bulk_report(agent_label: str, results: list[dict]) -> None:
+    """שולח דוח שליחה מיידי לאדמין עם סיכום מה עבד ומה לא."""
+    sent = [r for r in results if r["status"] == "sent"]
+    failed = [r for r in results if r["status"] == "error"]
+
+    rows = ""
+    for r in results:
+        ok = r["status"] == "sent"
+        icon = "✅" if ok else "❌"
+        reason = r.get("reason", "") if not ok else ""
+        rows += f"""
+        <tr>
+          <td style="padding:8px;border:1px solid #ddd;">{r.get('phone','')}</td>
+          <td style="padding:8px;border:1px solid #ddd;text-align:center;">{icon}</td>
+          <td style="padding:8px;border:1px solid #ddd;color:#c00;font-size:12px;">{reason}</td>
+        </tr>"""
+
+    html = f"""
+    <html><body dir="rtl" style="font-family:Arial,sans-serif;font-size:14px;">
+      <h2>דוח שליחת WhatsApp — {agent_label}</h2>
+      <p>✅ נשלח: <strong>{len(sent)}</strong> &nbsp;|&nbsp; ❌ נכשל: <strong>{len(failed)}</strong></p>
+      <table style="border-collapse:collapse;width:100%;">
+        <thead>
+          <tr style="background:#f0f0f0;">
+            <th style="padding:8px;border:1px solid #ddd;">טלפון</th>
+            <th style="padding:8px;border:1px solid #ddd;">סטטוס</th>
+            <th style="padding:8px;border:1px solid #ddd;">סיבה</th>
+          </tr>
+        </thead>
+        <tbody>{rows}</tbody>
+      </table>
+    </body></html>
+    """
+
+    payload = json.dumps({
+        "Messages": [{
+            "From": {"Email": FROM_EMAIL, "Name": FROM_NAME},
+            "To": [{"Email": ADMIN_EMAIL}],
+            "Subject": f"דוח שליחת WhatsApp — {agent_label} ({len(sent)}✅ {len(failed)}❌)",
+            "HTMLPart": html,
+        }]
+    }).encode()
+
+    credentials = base64.b64encode(f"{MAILJET_API_KEY}:{MAILJET_SECRET_KEY}".encode()).decode()
+    req = urllib.request.Request(
+        "https://api.mailjet.com/v3.1/send",
+        data=payload,
+        headers={"Authorization": f"Basic {credentials}", "Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req) as resp:
+            print(f"[ADMIN REPORT] sent to {ADMIN_EMAIL}")
+    except Exception as e:
+        print(f"[ADMIN REPORT ERROR] {e}")
