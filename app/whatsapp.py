@@ -8,17 +8,20 @@ import requests
 from . import sehel
 
 META_PHONE_NUMBER_ID = os.getenv("META_PHONE_NUMBER_ID", "1285155738009042")
-META_ACCESS_TOKEN = os.getenv("META_ACCESS_TOKEN", "EAATbPHzKcw4BSGnyZB4wZA32YZBi7AmRHW5M3ZAMyKW51mLLDKNUofy59bDz1ABQ3RZAkHHxIx6ZCNPgSCSloZArGdLm8yAQJFj3Neerf5CgrleabZC9huq9usJyhftZCSOdfp4vb0tzIIy1mHncehqh4OV7bbQbGKCVAcZCdZB9pQ6tS9xE7vRaueCLPEkGI6ZBzAZDZD")
 META_API_VERSION = "v19.0"
 
 NO_RESPONSE_HOURS = 24
+
+
+def _token() -> str:
+    return os.getenv("META_ACCESS_TOKEN", "")
 
 
 def send_message(phone: str, message: str) -> dict:
     normalized = phone.lstrip("+").replace(" ", "").replace("-", "")
     resp = requests.post(
         f"https://graph.facebook.com/{META_API_VERSION}/{META_PHONE_NUMBER_ID}/messages",
-        headers={"Authorization": f"Bearer {META_ACCESS_TOKEN}", "Content-Type": "application/json"},
+        headers={"Authorization": f"Bearer {_token()}", "Content-Type": "application/json"},
         json={
             "messaging_product": "whatsapp",
             "to": normalized,
@@ -32,29 +35,31 @@ def send_message(phone: str, message: str) -> dict:
     return result
 
 
-def send_template_reengagement(phone: str, name: str | None) -> dict:
-    """שולח template reengagement_he — עובד גם אחרי 24 שעות."""
+def send_template_reengagement(phone: str, name: str | None, lang: str = "he") -> dict:
+    """שולח template reengagement — עובד גם אחרי 24 שעות."""
     normalized = phone.lstrip("+").replace(" ", "").replace("-", "")
     components = []
     if name:
         components = [{"type": "body", "parameters": [{"type": "text", "text": name}]}]
+    template_name = "reengagement_he" if lang == "he" else "reengagement_en"
+    lang_code = "he" if lang == "he" else "en_US"
     resp = requests.post(
         f"https://graph.facebook.com/{META_API_VERSION}/{META_PHONE_NUMBER_ID}/messages",
-        headers={"Authorization": f"Bearer {META_ACCESS_TOKEN}", "Content-Type": "application/json"},
+        headers={"Authorization": f"Bearer {_token()}", "Content-Type": "application/json"},
         json={
             "messaging_product": "whatsapp",
             "to": normalized,
             "type": "template",
             "template": {
-                "name": "reengagement_he",
-                "language": {"code": "he"},
+                "name": template_name,
+                "language": {"code": lang_code},
                 "components": components,
             },
         },
         timeout=15,
     )
     result = resp.json()
-    print(f"[META TEMPLATE] phone={normalized} status={resp.status_code} result={result}")
+    print(f"[META TEMPLATE] phone={normalized} lang={lang} status={resp.status_code} result={result}")
     return result
 
 
@@ -154,7 +159,7 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
 
     convo.messages.append({"role": "assistant", "content": greeting})
     print(f"[GREETING] phone={normalized} name={name!r} lang={lang} project={pname_for_convo!r}")
-    send_template_reengagement(f"+{normalized}", name)
+    send_template_reengagement(f"+{normalized}", name, lang)
 
     from . import database as _db
     agent_email = _wa_is_projects.get(normalized) and "aaron@orencohengroup.com" or "office@orencohengroup.com"
