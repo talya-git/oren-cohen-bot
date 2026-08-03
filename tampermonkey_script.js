@@ -717,6 +717,10 @@
                         <tbody id="wl-tbody"></tbody>
                     </table>
                     <div style="display:flex;gap:8px;margin-top:12px;">
+                        <button id="wl-prev-btn" style="flex:1;padding:10px;background:#6c757d;
+                            color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;">
+                            ⏮ 20 הקודמים / Prev 20
+                        </button>
                         <button id="wl-send-btn" style="flex:1;padding:10px;background:#25D366;
                             color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:bold;">
                             📤 שלח מסומנים / Send Selected
@@ -754,6 +758,10 @@
         });
 
         document.getElementById('wl-send-btn').onclick = sendWlSelected;
+        document.getElementById('wl-prev-btn').onclick = async () => {
+            wl_offset = Math.max(0, wl_offset - 100);
+            await loadWlPage();
+        };
         document.getElementById('wl-next-btn').onclick = async () => {
             wl_offset += 100;
             await loadWlPage();
