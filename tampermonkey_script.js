@@ -751,7 +751,12 @@
         overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
 
         document.getElementById('wl-select-all').addEventListener('change', function() {
-            document.querySelectorAll('.wl-cb').forEach(cb => cb.checked = this.checked);
+            document.querySelectorAll('.wl-cb').forEach(cb => {
+                cb.checked = this.checked;
+                const phone = cb.dataset.phone;
+                if (this.checked) wl_unchecked.delete(phone);
+                else wl_unchecked.add(phone);
+            });
         });
 
         document.querySelectorAll('.wl-agent-btn').forEach(btn => {
