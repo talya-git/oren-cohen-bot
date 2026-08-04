@@ -105,6 +105,9 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
         normalized = "972" + normalized[1:]
     elif normalized.startswith("5") and len(normalized) == 9:
         normalized = "972" + normalized
+    # מספר אמריקאי ללא קידומת מדינה (10 ספרות, מתחיל בקידומת אזורית)
+    elif len(normalized) == 10 and normalized[0] in "23456789" and not normalized.startswith("972"):
+        normalized = "1" + normalized
 
     allowed = _check_whatsapp_allowed(normalized)
     if allowed == "block":
@@ -441,7 +444,20 @@ async def start_reengagement_endpoint(request: Request):
     name = data.get("name")
     project_name = data.get("project_name", "")
     agent_name = data.get("agent_name", "")
-    start_reengagement(phone, name, project_name, agent_name)
+    try:
+        start_reengagement(phone, name, project_name, agent_name)
+        status = "sent"
+        reason = ""
+    except Exception as e:
+        status = "error"
+        reason = str(e)
+    try:
+        from .mailer import send_bulk_report
+        send_bulk_report(agent_name or name or phone, [{"phone": phone, "status": status, "reason": reason}])
+    except Exception as e:
+        print(f"[ADMIN REPORT ERROR] {e}")
+    if status == "error":
+        return {"status": "error", "phone": phone, "reason": reason}
     return {"status": "sent", "phone": phone}
 
 

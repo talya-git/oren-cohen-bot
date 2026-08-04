@@ -134,6 +134,10 @@ def send_bulk_report(agent_label: str, results: list[dict]) -> None:
     )
     try:
         with urllib.request.urlopen(req) as resp:
-            print(f"[ADMIN REPORT] sent to {ADMIN_EMAIL}")
+            body = resp.read().decode()
+            print(f"[ADMIN REPORT] sent to {ADMIN_EMAIL} | response={body[:200]}")
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        print(f"[ADMIN REPORT ERROR] HTTP {e.code}: {body}")
     except Exception as e:
         print(f"[ADMIN REPORT ERROR] {e}")
