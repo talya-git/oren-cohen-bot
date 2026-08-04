@@ -114,7 +114,7 @@ def send_report(to_email: str, agent_label: str, leads: list[dict]) -> None:
         raise
 
 
-def send_bulk_report(agent_label: str, results: list[dict]) -> None:
+def send_bulk_report(agent_label: str, results: list[dict], agent_email: str | None = None) -> None:
     """שולח דוח שליחה מיידי לאדמין עם סיכום מה עבד ומה לא."""
     sent = [r for r in results if r["status"] == "sent"]
     failed = [r for r in results if r["status"] == "error"]
@@ -148,10 +148,14 @@ def send_bulk_report(agent_label: str, results: list[dict]) -> None:
     </body></html>
     """
 
+    to_list = [{"Email": ADMIN_EMAIL}]
+    if agent_email and agent_email != ADMIN_EMAIL:
+        to_list.append({"Email": agent_email})
+
     payload = json.dumps({
         "Messages": [{
             "From": {"Email": FROM_EMAIL, "Name": FROM_NAME},
-            "To": [{"Email": ADMIN_EMAIL}],
+            "To": to_list,
             "Subject": f"דוח שליחת WhatsApp — {agent_label} ({len(sent)}✅ {len(failed)}❌)",
             "HTMLPart": html,
         }]
@@ -167,7 +171,7 @@ def send_bulk_report(agent_label: str, results: list[dict]) -> None:
     try:
         with urllib.request.urlopen(req) as resp:
             body = resp.read().decode()
-            print(f"[ADMIN REPORT] sent to {ADMIN_EMAIL} | response={body[:200]}")
+            print(f"[ADMIN REPORT] sent to {[t['Email'] for t in to_list]} | response={body[:200]}")
     except urllib.error.HTTPError as e:
         body = e.read().decode()
         print(f"[ADMIN REPORT ERROR] HTTP {e.code}: {body}")

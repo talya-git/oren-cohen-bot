@@ -109,9 +109,9 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
     elif len(normalized) == 10 and normalized[0] in "23456789" and not normalized.startswith("972"):
         normalized = "1" + normalized
 
-    allowed = _check_whatsapp_allowed(normalized)
-    if allowed == "block":
-        print(f"[SKIP] {phone} — קידומת חסומה")
+    from . import database as _db
+    if _db.get_sent_phones_set(f"+{normalized}"):
+        print(f"[SKIP DUPLICATE] {normalized} — כבר נשלח בעבר")
         return
     if name:
         try:

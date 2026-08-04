@@ -389,6 +389,16 @@ def update_reengagement_replied(phone: str, replied: bool, transcript: str = "")
     conn.close()
 
 
+def get_sent_phones_set(phone: str) -> bool:
+    """בודק אם מספר ספציפי כבר קיבל הודעה."""
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(f"SELECT 1 FROM reengagement_sent WHERE phone={PH} LIMIT 1", (phone,))
+    exists = _fetchone(cur) is not None
+    conn.close()
+    return exists
+
+
 def get_sent_phones(agent_email: str) -> set:
     conn = get_db()
     cur = conn.cursor()
