@@ -79,7 +79,11 @@ _wa_pilot_log: list[dict] = []
 
 
 def _detect_language(phone: str, name: str | None) -> str:
-    if phone.lstrip("+").startswith("972") or phone.startswith("05"):
+    normalized = phone.lstrip("+")
+    is_israeli = normalized.startswith("972") or normalized.startswith("05")
+    if is_israeli:
+        if name and any("a" <= c.lower() <= "z" for c in name):
+            return "en"
         return "he"
     return "en"
 
