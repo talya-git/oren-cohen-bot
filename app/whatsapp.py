@@ -42,7 +42,7 @@ def send_template_reengagement(phone: str, name: str | None, lang: str = "he") -
     if name:
         components = [{"type": "body", "parameters": [{"type": "text", "text": name}]}]
     template_name = "reengagement_he" if lang == "he" else "reengagement_en"
-    lang_code = "he" if lang == "he" else "en_US"
+    lang_code = "he" if lang == "he" else "en"
     resp = requests.post(
         f"https://graph.facebook.com/{META_API_VERSION}/{META_PHONE_NUMBER_ID}/messages",
         headers={"Authorization": f"Bearer {_token()}", "Content-Type": "application/json"},
