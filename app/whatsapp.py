@@ -444,7 +444,8 @@ async def start_reengagement_endpoint(request: Request):
     phone = str(data.get("phone", ""))
     name = data.get("name")
     project_name = data.get("project_name", "")
-    agent_name = data.get("agent_name", "")
+    agent_name = data.get("agent_name", "") or data.get("agent_label", "")
+    agent_email = data.get("agent_email", "") or None
     try:
         start_reengagement(phone, name, project_name, agent_name)
         status = "sent"
@@ -454,7 +455,8 @@ async def start_reengagement_endpoint(request: Request):
         reason = str(e)
     try:
         from .mailer import send_bulk_report
-        send_bulk_report(agent_name or name or phone, [{"phone": phone, "status": status, "reason": reason}], agent_email=agent_name if "@" in (agent_name or "") else None)
+        label = agent_name or agent_email or name or phone
+        send_bulk_report(label, [{"phone": phone, "status": status, "reason": reason}], agent_email=agent_email)
     except Exception as e:
         print(f"[ADMIN REPORT ERROR] {e}")
     if status == "error":
