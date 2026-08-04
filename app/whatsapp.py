@@ -163,7 +163,9 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
 
     convo.messages.append({"role": "assistant", "content": greeting})
     print(f"[GREETING] phone={normalized} name={name!r} lang={lang} project={pname_for_convo!r}")
-    send_template_reengagement(f"+{normalized}", name, lang)
+    result = send_template_reengagement(f"+{normalized}", name, lang)
+    if "error" in result:
+        raise Exception(result["error"].get("message", "Meta API error"))
 
     from . import database as _db
     agent_email = _wa_is_projects.get(normalized) and "aaron@orencohengroup.com" or "office@orencohengroup.com"
