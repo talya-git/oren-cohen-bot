@@ -377,8 +377,14 @@ async def notify_agent(request: Request):
 @router.get("/sent-phones")
 async def sent_phones(agent_email: str):
     from . import database as _db
-    phones = _db.get_sent_phones(agent_email)
-    return {"phones": list(phones)}
+    conn = _db.get_db()
+    cur = conn.cursor()
+    cur.execute(f"SELECT phone, sent_at FROM reengagement_sent WHERE agent_email={_db.PH}", (agent_email,))
+    rows = _db._fetchall(cur)
+    conn.close()
+    phones = [r["phone"] for r in rows]
+    phones_with_dates = [{"phone": r["phone"], "sent_at": r["sent_at"]} for r in rows]
+    return {"phones": phones, "phones_with_dates": phones_with_dates}
 
 
 @router.get("/reengagement-results")

@@ -446,14 +446,18 @@
     let wl_offset = 0;
     let wl_leads = [];
     let wl_sentPhones = new Set();
-    let wl_unchecked = new Set(); // טלפונים שהמשתמש ביטל את הסימון שלהם
+    let wl_sentDates = {};
+    let wl_unchecked = new Set();
 
     async function fetchSentPhones() {
         try {
             const res = await fetch(`${BOT_URL}/api/whatsapp/sent-phones?agent_email=${encodeURIComponent(wl_agent.email)}`);
             const data = await res.json();
             wl_sentPhones = new Set(data.phones || []);
-        } catch(e) { wl_sentPhones = new Set(); }
+            // שמירת תאריכי שליחה
+            wl_sentDates = {};
+            (data.phones_with_dates || []).forEach(p => { wl_sentDates[p.phone] = p.sent_at; });
+        } catch(e) { wl_sentPhones = new Set(); wl_sentDates = {}; }
     }
 
     function normalizePhone(p) {
@@ -608,6 +612,24 @@
         const checkboxes = document.querySelectorAll('.wl-cb:checked');
         if (!checkboxes.length) { alert('לא נבחרו לידים'); return; }
 
+        // בדיקת כפילויות
+        const duplicates = [];
+        for (const cb of checkboxes) {
+            const lead = wl_leads[parseInt(cb.dataset.idx)];
+            if (!lead) continue;
+            const phone = normalizePhone(lead.phone1);
+            if (wl_sentPhones.has(phone)) {
+                const sentAt = wl_sentDates[phone] ? new Date(wl_sentDates[phone]).toLocaleDateString('he-IL') : 'לא ידוע';
+                duplicates.push(`${lead.name1 || phone} (${phone}) — נשלח ב-${sentAt}`);
+            }
+        }
+
+        if (duplicates.length) {
+            const confirm = window.confirm(
+                `⚠️ שימו לב!\n\nהמספרים הבאים כבר קיבלו הודעה בעבר:\n${duplicates.join('\n')}\n\nהאם אתה בטוח שברצונך לשלוח שוב?`
+            );
+            if (!confirm) return;
+        }
         const btn = document.getElementById('wl-send-btn');
         btn.disabled = true;
         btn.textContent = '⏳ שולח...';
