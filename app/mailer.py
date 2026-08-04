@@ -16,8 +16,12 @@ ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "talyatoledano10@gmail.com")
 
 
 def send_report(to_email: str, agent_label: str, leads: list[dict]) -> None:
+    import io
+    import openpyxl
+
     subject = f"דוח הערת לידים שלך — {agent_label}"
 
+    # בניית HTML
     rows = ""
     for l in leads:
         sent_icon = "✅" if l.get("sent") else "❌"
@@ -54,12 +58,41 @@ def send_report(to_email: str, agent_label: str, leads: list[dict]) -> None:
     </body></html>
     """
 
+    # בניית אקסל
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "לידים"
+    ws.append(["שם", "טלפון", "נשלח", "ענה", "תמליל שיחה"])
+    for l in leads:
+        transcript = (l.get("transcript") or "").strip()
+        if len(transcript) > 2000:
+            transcript = transcript[:2000] + "..."
+        ws.append([
+            l.get("name") or "",
+            l.get("phone") or "",
+            "כן" if l.get("sent") else "לא",
+            "כן" if l.get("replied") else "לא",
+            transcript,
+        ])
+    excel_buf = io.BytesIO()
+    wb.save(excel_buf)
+    excel_b64 = base64.b64encode(excel_buf.getvalue()).decode()
+
+    to_list = [{"Email": to_email}]
+    if ADMIN_EMAIL and ADMIN_EMAIL != to_email:
+        to_list.append({"Email": ADMIN_EMAIL})
+
     payload = json.dumps({
         "Messages": [{
             "From": {"Email": FROM_EMAIL, "Name": FROM_NAME},
-            "To": [{"Email": to_email}],
+            "To": to_list,
             "Subject": subject,
             "HTMLPart": html,
+            "Attachments": [{
+                "ContentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "Filename": f"leads_{agent_label}.xlsx",
+                "Base64Content": excel_b64,
+            }],
         }]
     }).encode()
 
@@ -67,15 +100,14 @@ def send_report(to_email: str, agent_label: str, leads: list[dict]) -> None:
     req = urllib.request.Request(
         "https://api.mailjet.com/v3.1/send",
         data=payload,
-        headers={
-            "Authorization": f"Basic {credentials}",
-            "Content-Type": "application/json",
-        },
+        headers={"Authorization": f"Basic {credentials}", "Content-Type": "application/json"},
         method="POST",
     )
     try:
         with urllib.request.urlopen(req) as resp:
-            return json.loads(resp.read())
+            body = resp.read().decode()
+            print(f"[REPORT] sent to {[t['Email'] for t in to_list]} | response={body[:200]}")
+            return json.loads(body)
     except urllib.error.HTTPError as e:
         body = e.read().decode()
         print(f"[MAILJET ERROR] {e.code}: {body}")
