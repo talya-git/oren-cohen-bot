@@ -173,7 +173,8 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
 
     from . import database as _db
     agent_email = _wa_is_projects.get(normalized) and "aaron@orencohengroup.com" or "office@orencohengroup.com"
-    _db.mark_reengagement_sent(f"+{normalized}", name or "", agent_email)
+    initial_transcript = f"דניאל: {greeting}"
+    _db.mark_reengagement_sent(f"+{normalized}", name or "", agent_email, transcript=initial_transcript)
 
     _wa_pilot_log.append({
         "phone": f"+{normalized}",
