@@ -106,6 +106,15 @@ def get_agents():
     return db.get_all_agents()
 
 
+@router.post("/agents/add")
+def add_agent(req: dict):
+    name = req.get("name", "").strip()
+    if not name:
+        raise HTTPException(400, "name required")
+    db.ensure_agent(name)
+    return {"status": "ok", "name": name}
+
+
 @router.get("/stats/reengagement")
 def reengagement_stats():
     all_leads = db.get_all_leads()

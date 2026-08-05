@@ -167,7 +167,6 @@ def init_db():
         ("אהרון", None, "agent"),
         ("ליסה", None, "agent"),
         ("בועז", None, "agent"),
-        ("בועז", None, "agent"),
     ]:
         try:
             cur.execute(
@@ -180,6 +179,23 @@ def init_db():
             pass
 
     conn.commit()
+    conn.close()
+
+
+def ensure_agent(name: str):
+    """מוסיף סוכן אם לא קיים."""
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            f"INSERT INTO users (name, role) VALUES ({PH},{PH}) ON CONFLICT (name) DO NOTHING"
+            if DATABASE_URL else
+            f"INSERT OR IGNORE INTO users (name, role) VALUES ({PH},{PH})",
+            (name, "agent")
+        )
+        conn.commit()
+    except Exception:
+        pass
     conn.close()
 
 
