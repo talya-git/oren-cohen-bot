@@ -323,7 +323,7 @@ function refreshModal(phone) {
         (trimmed.startsWith('"') && !trimmed.includes(':') && trimmed.endsWith(',')) ||
         trimmed === '{' || trimmed === '},' || trimmed === '}') return '';
 
-    const isAgent = line.startsWith('דניאל:') || line.startsWith('Bot:') || line.startsWith('Daniel:');
+    const isAgent = line.startsWith('דניאל:') || line.startsWith('Bot:') || line.startsWith('Daniel:') || line.startsWith('היי') || line.startsWith('Hi') || line.startsWith('כאן דניאל');
     const cls = isAgent ? 'msg-agent' : 'msg-client';
     const bcls = isAgent ? 'bubble-agent' : 'bubble-client';
     const label = isAgent ? 'דניאל (בוט)' : 'לקוח';

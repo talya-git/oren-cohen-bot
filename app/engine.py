@@ -134,6 +134,24 @@ class Conversation:
 
         self.messages.append({"role": "user", "content": user_message})
 
+        # זיהוי מפורש של "לא מעוניין" — סגירת שיחה מיידית
+        not_interested = [
+            "לא רלוונטי", "לא מעוניין", "לא מתעניין", "לא צריך", "לא רוצה",
+            "לא כרגע", "לא עכשיו", "לא עכש",
+            "not interested", "not relevant", "no thanks", "no thank you", "not now", "not at the moment",
+            "לא תודה", "לא, תודה", "לא מעניין"
+        ]
+        if any(p in user_message.lower() for p in not_interested):
+            closing = "תודה על העדכון! אם בעתיד תתעניין, אשמח לעמוד לרשותך 😊"
+            if self._language == "en":
+                closing = "Thank you for letting me know! If you're ever interested in the future, feel free to reach out 😊"
+            turn = BotTurn(
+                reply=closing, stage="end",
+                extracted=ExtractedParams(), handoff_to_human=True, notes="not_interested"
+            )
+            self.messages.append({"role": "assistant", "content": closing})
+            return turn, score_lead(self.profile)
+
         response = client.chat.completions.create(
             model=MODEL,
             messages=self.messages,
