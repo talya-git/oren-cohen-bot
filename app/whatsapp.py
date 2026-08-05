@@ -321,11 +321,25 @@ async def whatsapp_webhook(request: Request):
             log_entry["notes"] = turn.notes or ""
 
     import json as _json
-    transcript_text = "\n".join(
-        f"{'דניאל' if m['role'] == 'assistant' else 'לקוח'}: {m['content']}"
-        for m in convo.messages
-        if m.get('role') in ('assistant', 'user') and not m['content'].startswith('[')
-    )
+    transcript_lines = []
+    for m in convo.messages:
+        if m.get('role') not in ('assistant', 'user'):
+            continue
+        content = m['content']
+        if content.startswith('['):
+            continue
+        # נסה לפרסר JSON ולחלץ רק את ה-reply
+        try:
+            parsed = _json.loads(content)
+            if isinstance(parsed, (list, tuple)):
+                content = str(parsed[0]) if parsed else ''
+            elif isinstance(parsed, dict):
+                content = parsed.get('reply') or parsed.get('message') or str(parsed)
+        except Exception:
+            pass
+        role_label = 'דניאל' if m['role'] == 'assistant' else 'לקוח'
+        transcript_lines.append(f"{role_label}: {content}")
+    transcript_text = "\n".join(transcript_lines)
     _db.update_reengagement_replied(f"+{phone}", True, transcript_text)
 
     time.sleep(7)

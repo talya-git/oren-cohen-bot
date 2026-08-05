@@ -314,11 +314,23 @@ function refreshModal(phone) {
   const body = document.getElementById('modal-body');
   const lines = c.transcript.split('\n').filter(l => l.trim());
   body.innerHTML = lines.map(line => {
-    const isAgent = line.startsWith('דניאל:') || line.startsWith('Bot:');
+    // דלג שורות JSON גולמיות
+    const trimmed = line.trim();
+    if (trimmed.startsWith('{') || trimmed.startsWith('}') || trimmed === 'null,' ||
+        trimmed === 'false,' || trimmed === 'true,' ||
+        (trimmed.startsWith('"') && !trimmed.includes(':') && trimmed.endsWith(',')) ||
+        trimmed === '{' || trimmed === '},' || trimmed === '}') return '';
+
+    const isAgent = line.startsWith('דניאל:') || line.startsWith('Bot:') || line.startsWith('Daniel:');
     const cls = isAgent ? 'msg-agent' : 'msg-client';
     const bcls = isAgent ? 'bubble-agent' : 'bubble-client';
     const label = isAgent ? 'דניאל (בוט)' : 'לקוח';
-    const text = line.replace(/^[^:]+:\s*/, '');
+    // חילוץ הטקסט מתוך JSON string אם צריך
+    let text = line.replace(/^[^:]+:\s*/, '').trim();
+    // אם זה JSON string עם גרשיים - נקה אותם
+    if (text.startsWith('"') && text.endsWith('",')) text = text.slice(1, -2);
+    else if (text.startsWith('"') && text.endsWith('"')) text = text.slice(1, -1);
+    if (!text) return '';
     return `<div class="msg ${cls}">
       <div class="msg-label">${label}</div>
       <div class="bubble ${bcls}">${text}</div>
