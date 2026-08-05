@@ -461,6 +461,7 @@ async def all_conversations():
             'transcript': r['transcript'] or '',
             'sent_at': r['sent_at'],
             'project_name': '',
+            'error': r.get('error') or '',
         })
     return {'conversations': conversations}
 
@@ -493,6 +494,9 @@ async def bulk_reengagement(request: Request):
             start_reengagement(phone, name, project_name, agent_name)
             results.append({"phone": phone, "status": "sent"})
         except Exception as e:
+            # שמירת שיחות שנכשלו גם ב-DB
+            from . import database as _db
+            _db.mark_reengagement_sent(f"+{phone}", name or "", "", error=str(e))
             results.append({"phone": phone, "status": "error", "reason": str(e)})
         time.sleep(2)
     sent = sum(1 for r in results if r["status"] == "sent")

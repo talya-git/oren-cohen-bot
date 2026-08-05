@@ -104,6 +104,7 @@ def init_db():
                 agent_email TEXT NOT NULL,
                 replied BOOLEAN DEFAULT FALSE,
                 transcript TEXT,
+                error TEXT DEFAULT '',
                 sent_at TIMESTAMPTZ DEFAULT NOW()
             )
         """)
@@ -377,20 +378,20 @@ def get_batch_leads(batch_id: int) -> list:
     return rows
 
 
-def mark_reengagement_sent(phone: str, client_name: str, agent_email: str, batch_id: int | None = None) -> None:
+def mark_reengagement_sent(phone: str, client_name: str, agent_email: str, batch_id: int | None = None, error: str = "") -> None:
     conn = get_db()
     cur = conn.cursor()
     now = datetime.now(timezone.utc).isoformat()
     if DATABASE_URL:
         cur.execute(
-            "INSERT INTO reengagement_sent (phone, client_name, agent_email, batch_id, sent_at) VALUES (%s,%s,%s,%s,%s) "
+            "INSERT INTO reengagement_sent (phone, client_name, agent_email, batch_id, sent_at, error) VALUES (%s,%s,%s,%s,%s,%s) "
             "ON CONFLICT DO NOTHING",
-            (phone, client_name, agent_email, batch_id, now)
+            (phone, client_name, agent_email, batch_id, now, error)
         )
     else:
         cur.execute(
-            "INSERT OR IGNORE INTO reengagement_sent (phone, client_name, agent_email, batch_id, sent_at) VALUES (?,?,?,?,?)",
-            (phone, client_name, agent_email, batch_id, now)
+            "INSERT OR IGNORE INTO reengagement_sent (phone, client_name, agent_email, batch_id, sent_at, error) VALUES (?,?,?,?,?,?)",
+            (phone, client_name, agent_email, batch_id, now, error)
         )
     conn.commit()
     conn.close()

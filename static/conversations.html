@@ -65,6 +65,7 @@
   .s-replied  { background: #dcfce7; color: #166534; }
   .s-handoff  { background: #fee2e2; color: #991b1b; }
   .s-sent     { background: #e0e7ff; color: #4338ca; }
+  .s-error    { background: #fee2e2; color: #7f1d1d; }
 
   .btn-transcript {
     padding: 5px 12px;
@@ -243,6 +244,7 @@ function populateAgents() {
 }
 
 function getStatus(c) {
+  if (c.error) return { label: '❌ ' + c.error.substring(0,40), cls: 's-error' };
   if (c.handoff) return { label: 'הועבר לסוכן', cls: 's-handoff' };
   if (c.replied) return { label: 'ענה ✓', cls: 's-replied' };
   return { label: 'ממתין...', cls: 's-pending' };
