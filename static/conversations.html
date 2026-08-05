@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מרכז שיחות | אורן כהן גרופ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #f0f2f5; color: #222; }
+
+  .header {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: #fff;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .header h1 { font-size: 20px; }
+  .header .live { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #4ade80; }
+  .live-dot { width: 8px; height: 8px; background: #4ade80; border-radius: 50%; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .filters {
+    background: #fff;
+    padding: 12px 24px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+    flex-wrap: wrap;
+  }
+  .filters select, .filters input {
+    padding: 7px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 13px;
+    outline: none;
+  }
+  .filters select:focus, .filters input:focus { border-color: #6366f1; }
+  .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+  .badge-total { background: #e0e7ff; color: #4338ca; }
+  .badge-replied { background: #dcfce7; color: #166534; }
+  .badge-pending { background: #fef9c3; color: #854d0e; }
+  .badge-handoff { background: #fee2e2; color: #991b1b; }
+
+  .main { padding: 20px 24px; }
+
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  thead { background: #1a1a2e; color: #fff; }
+  th { padding: 12px 14px; text-align: right; font-size: 13px; font-weight: 600; }
+  td { padding: 11px 14px; font-size: 13px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+  tr:hover td { background: #f8faff; }
+  tr:last-child td { border-bottom: none; }
+
+  .status-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: bold;
+  }
+  .s-pending  { background: #fef9c3; color: #854d0e; }
+  .s-replied  { background: #dcfce7; color: #166534; }
+  .s-handoff  { background: #fee2e2; color: #991b1b; }
+  .s-sent     { background: #e0e7ff; color: #4338ca; }
+
+  .btn-transcript {
+    padding: 5px 12px;
+    background: #6366f1;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .btn-transcript:hover { background: #4f46e5; }
+  .btn-transcript.empty { background: #e5e7eb; color: #9ca3af; cursor: default; }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: 14px;
+    width: 560px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  }
+  .modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-header h3 { font-size: 16px; }
+  .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #6b7280; }
+  .modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+
+  .msg { margin-bottom: 12px; }
+  .msg-agent { text-align: left; }
+  .msg-client { text-align: right; }
+  .bubble {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    max-width: 80%;
+    line-height: 1.5;
+  }
+  .bubble-agent  { background: #e0e7ff; color: #1e1b4b; border-radius: 12px 12px 12px 2px; }
+  .bubble-client { background: #dcfce7; color: #14532d; border-radius: 12px 12px 2px 12px; }
+  .msg-label { font-size: 10px; color: #9ca3af; margin-bottom: 3px; }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: #9ca3af; }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+
+  .new-badge {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    margin-left: 6px;
+    animation: pulse 1s infinite;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏢 מרכז שיחות — אורן כהן גרופ</h1>
+  <div class="live">
+    <div class="live-dot"></div>
+    עדכון בזמן אמת
+  </div>
+</div>
+
+<div class="filters">
+  <select id="filter-agent">
+    <option value="">כל הסוכנים</option>
+  </select>
+  <select id="filter-status">
+    <option value="">כל הסטטוסים</option>
+    <option value="sent">נשלח - ממתין</option>
+    <option value="replied">ענה</option>
+    <option value="handoff">הועבר לסוכן</option>
+  </select>
+  <input id="filter-search" type="text" placeholder="חיפוש שם / טלפון...">
+  <span class="badge badge-total" id="b-total">סה"כ: 0</span>
+  <span class="badge badge-replied" id="b-replied">ענו: 0</span>
+  <span class="badge badge-pending" id="b-pending">ממתינים: 0</span>
+  <span class="badge badge-handoff" id="b-handoff">הועברו: 0</span>
+</div>
+
+<div class="main">
+  <table>
+    <thead>
+      <tr>
+        <th>לקוח</th>
+        <th>טלפון</th>
+        <th>סוכן</th>
+        <th>פרויקט</th>
+        <th>סטטוס</th>
+        <th>תאריך שליחה</th>
+        <th>תמליל</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div class="empty-state" id="empty" style="display:none">
+    <div class="icon">💬</div>
+    <p>אין שיחות להצגה</p>
+  </div>
+</div>
+
+<!-- Modal תמליל -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">תמליל שיחה</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+const API = '';
+let allData = [];
+let openPhone = null;
+let prevReplied = new Set();
+
+async function fetchData() {
+  try {
+    const res = await fetch(`${API}/api/conversations/all`);
+    if (!res.ok) return;
+    const data = await res.json();
+    allData = data.conversations || [];
+    updateBadges();
+    renderTable();
+    populateAgents();
+    checkNewReplies();
+    if (openPhone) refreshModal(openPhone);
+  } catch(e) {}
+}
+
+function checkNewReplies() {
+  allData.forEach(c => {
+    if (c.replied && !prevReplied.has(c.phone)) {
+      prevReplied.add(c.phone);
+    }
+  });
+}
+
+function updateBadges() {
+  const total = allData.length;
+  const replied = allData.filter(c => c.replied).length;
+  const handoff = allData.filter(c => c.handoff).length;
+  const pending = total - replied;
+  document.getElementById('b-total').textContent = `סה"כ: ${total}`;
+  document.getElementById('b-replied').textContent = `ענו: ${replied}`;
+  document.getElementById('b-pending').textContent = `ממתינים: ${pending}`;
+  document.getElementById('b-handoff').textContent = `הועברו: ${handoff}`;
+}
+
+function populateAgents() {
+  const sel = document.getElementById('filter-agent');
+  const current = sel.value;
+  const agents = [...new Set(allData.map(c => c.agent_label).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">כל הסוכנים</option>' +
+    agents.map(a => `<option value="${a}" ${a===current?'selected':''}>${a}</option>`).join('');
+}
+
+function getStatus(c) {
+  if (c.handoff) return { label: 'הועבר לסוכן', cls: 's-handoff' };
+  if (c.replied) return { label: 'ענה ✓', cls: 's-replied' };
+  return { label: 'ממתין...', cls: 's-pending' };
+}
+
+function formatDate(str) {
+  if (!str) return '—';
+  const d = new Date(str);
+  return d.toLocaleDateString('he-IL') + ' ' + d.toLocaleTimeString('he-IL', {hour:'2-digit',minute:'2-digit'});
+}
+
+function renderTable() {
+  const agentF = document.getElementById('filter-agent').value;
+  const statusF = document.getElementById('filter-status').value;
+  const searchF = document.getElementById('filter-search').value.toLowerCase();
+
+  let rows = allData.filter(c => {
+    if (agentF && c.agent_label !== agentF) return false;
+    if (statusF === 'sent' && (c.replied || c.handoff)) return false;
+    if (statusF === 'replied' && !c.replied) return false;
+    if (statusF === 'handoff' && !c.handoff) return false;
+    if (searchF && !((c.client_name||'').toLowerCase().includes(searchF) || (c.phone||'').includes(searchF))) return false;
+    return true;
+  });
+
+  const tbody = document.getElementById('tbody');
+  const empty = document.getElementById('empty');
+
+  if (!rows.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const isNew = phone => c.replied && !prevReplied.has(phone);
+
+  tbody.innerHTML = rows.map(c => {
+    const st = getStatus(c);
+    const hasTranscript = c.transcript && c.transcript.trim().length > 0;
+    const newDot = (c.replied && prevReplied.has(c.phone)) ? '' : (c.replied ? '<span class="new-badge"></span>' : '');
+    return `<tr>
+      <td><strong>${c.client_name || '—'}</strong>${newDot}</td>
+      <td style="direction:ltr;color:#6b7280">${c.phone || '—'}</td>
+      <td>${c.agent_label || '—'}</td>
+      <td style="color:#6b7280;font-size:12px">${c.project_name || 'יד 2'}</td>
+      <td><span class="status-badge ${st.cls}">${st.label}</span></td>
+      <td style="color:#6b7280;font-size:12px">${formatDate(c.sent_at)}</td>
+      <td>
+        <button class="btn-transcript ${hasTranscript?'':'empty'}"
+          onclick="${hasTranscript ? `openModal('${c.phone}','${(c.client_name||'').replace(/'/g,"\\'")}')` : 'void(0)'}">
+          ${hasTranscript ? '💬 צפה' : 'אין עדיין'}
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openModal(phone, name) {
+  openPhone = phone;
+  document.getElementById('modal-title').textContent = `תמליל שיחה — ${name}`;
+  refreshModal(phone);
+  document.getElementById('modal').classList.add('open');
+}
+
+function refreshModal(phone) {
+  const c = allData.find(x => x.phone === phone);
+  if (!c || !c.transcript) return;
+  const body = document.getElementById('modal-body');
+  const lines = c.transcript.split('\n').filter(l => l.trim());
+  body.innerHTML = lines.map(line => {
+    const isAgent = line.startsWith('דניאל:') || line.startsWith('Bot:');
+    const cls = isAgent ? 'msg-agent' : 'msg-client';
+    const bcls = isAgent ? 'bubble-agent' : 'bubble-client';
+    const label = isAgent ? 'דניאל (בוט)' : 'לקוח';
+    const text = line.replace(/^[^:]+:\s*/, '');
+    return `<div class="msg ${cls}">
+      <div class="msg-label">${label}</div>
+      <div class="bubble ${bcls}">${text}</div>
+    </div>`;
+  }).join('');
+  body.scrollTop = body.scrollHeight;
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  openPhone = null;
+}
+
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal')) closeModal();
+});
+
+['filter-agent','filter-status','filter-search'].forEach(id => {
+  document.getElementById(id).addEventListener('input', renderTable);
+  document.getElementById(id).addEventListener('change', renderTable);
+});
+
+fetchData();
+setInterval(fetchData, 5000);
+</script>
+</body>
+</html>

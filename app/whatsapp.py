@@ -396,6 +396,59 @@ async def reengagement_results(agent_email: str):
     return {"results": _db.get_reengagement_results(agent_email)}
 
 
+@router.get("/conversations/all")
+async def all_conversations():
+    """מחזיר את כל השיחות עם תמליל לדף הניהול."""
+    from . import database as _db
+    conn = _db.get_db()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT rs.phone, rs.client_name, rs.agent_email, rs.replied, rs.transcript, rs.sent_at,
+               rb.agent_label,
+               CASE WHEN rs.transcript LIKE '%יום טוב%' OR rs.transcript LIKE '%להתראות%'
+                    OR rs.transcript LIKE '%bye%' OR rs.transcript LIKE '%thank you%'
+                    THEN true ELSE false END as handoff
+        FROM reengagement_sent rs
+        LEFT JOIN reengagement_batches rb ON rs.batch_id = rb.id
+        ORDER BY rs.sent_at DESC
+    """)
+    rows = _db._fetchall(cur)
+    conn.close()
+
+    # מיפוי מייל לשם סוכן
+    email_to_label = {
+        'yaniv@orencohengroup.com': 'ינון',
+        'moshe@orencohengroup.com': 'משה',
+        'miri@orencohengroup.com': 'מירי',
+        'michael@orencohengroup.com': 'מיכאל',
+        'rivka@orencohengroup.com': 'רבקה',
+        'uriel400@orencohengroup.com': 'אוריאל',
+        'elchanan@orencohengroup.com': 'אלחנן',
+        'oren@orencohengroup.com': 'אורן',
+        'aryeh@orencohengroup.com': 'אריה',
+        'office@orencohengroup.com': 'בועז',
+        'hannah@orencohengroup.com': 'חנה',
+        'aaron@orencohengroup.com': 'אהרון',
+        'lisa@orencohengroup.com': 'ליסה',
+        'dovr@orencohengroup.com': 'דב',
+    }
+
+    conversations = []
+    for r in rows:
+        label = r.get('agent_label') or email_to_label.get(r.get('agent_email',''), r.get('agent_email',''))
+        conversations.append({
+            'phone': r['phone'],
+            'client_name': r['client_name'],
+            'agent_label': label,
+            'replied': bool(r['replied']),
+            'handoff': bool(r['handoff']),
+            'transcript': r['transcript'] or '',
+            'sent_at': r['sent_at'],
+            'project_name': '',
+        })
+    return {'conversations': conversations}
+
+
 @router.get("/pilot-results")
 async def pilot_results():
     return {"results": _wa_pilot_log}

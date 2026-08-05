@@ -68,6 +68,11 @@ STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 
+@app.get("/conversations")
+def conversations_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "conversations.html")
+
+
 @app.get("/")
 @app.head("/")
 def home() -> FileResponse:
