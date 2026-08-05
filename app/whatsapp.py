@@ -260,6 +260,23 @@ async def whatsapp_webhook(request: Request):
     try:
         entry = body["entry"][0]
         change = entry["changes"][0]["value"]
+        # טיפול בסטטוסים (sent/delivered/read/failed)
+        if "statuses" in change and "messages" not in change:
+            status_update = change["statuses"][0]
+            status = status_update.get("status")
+            recipient = status_update.get("recipient_id", "")
+            if status == "read" and recipient:
+                from . import database as _db
+                conn = _db.get_db()
+                cur = conn.cursor()
+                cur.execute(
+                    f"UPDATE reengagement_sent SET read_at=NOW() WHERE phone={_db.PH} AND read_at IS NULL",
+                    (f"+{recipient}",)
+                )
+                conn.commit()
+                conn.close()
+                print(f"[READ] {recipient}")
+            return {"status": "status_update"}
         msg = change["messages"][0]
         phone = msg["from"]
         text = msg["text"]["body"].strip()
@@ -304,11 +321,27 @@ async def whatsapp_webhook(request: Request):
             _save_followup(phone, weeks=1, reason="snooze")
             send_message(f"+{phone}", "בטח, אחזור אליך בשבוע הבא! 😊")
             return {"status": "snoozed_1w"}
+
+        # שחזור session מה-DB אם השרת נרדם
+        db_record = _db.get_reengagement_record(f"+{phone}")
         conv = Conversation()
-        conv.messages.append({
-            "role": "user",
-            "content": f"[הקשר: הלקוח קיבל הודעת פתיחה מדניאל ועונה שהוא מעוניין. תגובתו: '{text}'. אל תאמר 'שלום וברכה'. שאל ישירות את שאלה מספר 1: לוח הזמנים לכניסה לנכס.]"
-        })
+        if db_record and db_record.get("transcript"):
+            # שחזור ההיסטוריה מהתמליל
+            for line in db_record["transcript"].split("\n"):
+                line = line.strip()
+                if line.startswith("דניאל:") or line.startswith("Daniel:"):
+                    conv.messages.append({"role": "assistant", "content": line.split(":", 1)[1].strip()})
+                elif line.startswith("לקוח:") or line.startswith("Client:"):
+                    conv.messages.append({"role": "user", "content": line.split(":", 1)[1].strip()})
+            if db_record.get("client_name"):
+                conv.profile.contact_name = db_record["client_name"]
+            conv.profile.phone = f"+{phone}"
+            print(f"[SESSION RESTORED] {phone} — {len(conv.messages)} הודעות")
+        else:
+            conv.messages.append({
+                "role": "user",
+                "content": f"[הקשר: הלקוח קיבל הודעת פתיחה מדניאל ועונה שהוא מעוניין. תגובתו: '{text}'. אל תאמר 'שלום וברכה'. שאל ישירות את שאלה מספר 1: לוח הזמנים לכניסה לנכס.]"
+            })
         _wa_sessions[phone] = conv
 
     convo = _wa_sessions[phone]

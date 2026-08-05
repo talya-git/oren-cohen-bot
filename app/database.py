@@ -105,6 +105,7 @@ def init_db():
                 replied BOOLEAN DEFAULT FALSE,
                 transcript TEXT,
                 error TEXT DEFAULT '',
+                read_at TIMESTAMPTZ,
                 sent_at TIMESTAMPTZ DEFAULT NOW()
             )
         """)
@@ -433,6 +434,16 @@ def get_sent_phones(agent_email: str) -> set:
     phones = {row["phone"] for row in _fetchall(cur)}
     conn.close()
     return phones
+
+
+def get_reengagement_record(phone: str) -> dict | None:
+    """מחזיר רשומת reengagement לפי טלפון."""
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(f"SELECT * FROM reengagement_sent WHERE phone={PH} LIMIT 1", (phone,))
+    row = _fetchone(cur)
+    conn.close()
+    return row
 
 
 def get_reengagement_results(agent_email: str) -> list:
