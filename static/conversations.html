@@ -203,7 +203,7 @@ let prevReplied = new Set();
 
 async function fetchData() {
   try {
-    const res = await fetch(`${API}/api/conversations/all`);
+    const res = await fetch(`${API}/api/whatsapp/conversations/all`);
     if (!res.ok) return;
     const data = await res.json();
     allData = data.conversations || [];
