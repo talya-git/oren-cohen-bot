@@ -539,6 +539,13 @@ async def reset_session(request: Request):
     _wa_sessions.pop(phone, None)
     _wa_done.discard(phone)
     _wa_seen_sids.clear()
+    # מחיקת הרשומה מה-DB כדי לאפשר שליחה מחדש
+    from . import database as _db
+    conn = _db.get_db()
+    cur = conn.cursor()
+    cur.execute(f"DELETE FROM reengagement_sent WHERE phone={_db.PH}", (f"+{phone}",))
+    conn.commit()
+    conn.close()
     import json
     from pathlib import Path
     f = Path(__file__).resolve().parent.parent / "data" / "followups.json"
