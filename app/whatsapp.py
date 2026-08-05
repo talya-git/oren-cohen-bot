@@ -326,17 +326,18 @@ async def whatsapp_webhook(request: Request):
         if m.get('role') not in ('assistant', 'user'):
             continue
         content = m['content']
-        if content.startswith('['):
+        if content.startswith('[') or content.startswith('{'):
+            # נסה לפרסר JSON ולחלץ רק reply
+            try:
+                parsed = _json.loads(content)
+                if isinstance(parsed, dict):
+                    content = parsed.get('reply', '')
+                else:
+                    continue
+            except Exception:
+                continue
+        if not content or content.startswith('['):
             continue
-        # נסה לפרסר JSON ולחלץ רק את ה-reply
-        try:
-            parsed = _json.loads(content)
-            if isinstance(parsed, (list, tuple)):
-                content = str(parsed[0]) if parsed else ''
-            elif isinstance(parsed, dict):
-                content = parsed.get('reply') or parsed.get('message') or str(parsed)
-        except Exception:
-            pass
         role_label = 'דניאל' if m['role'] == 'assistant' else 'לקוח'
         transcript_lines.append(f"{role_label}: {content}")
     transcript_text = "\n".join(transcript_lines)
