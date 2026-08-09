@@ -450,8 +450,26 @@ def get_reengagement_record(phone: str) -> dict | None:
     return row
 
 
+_POSITIVE_SIGNALS = ["כן", "yes", "מעוניין", "interested", "רלוונטי", "relevant", "בטח", "sure", "אשמח", "glad", "כמובן", "of course", "יאללה", "ok", "אוקי"]
+_HANDOFF_SIGNALS = ["יום טוב", "להתראות", "bye", "thank you", "תודה רבה"]
+
+
+def _is_positive_conversation(transcript: str) -> bool:
+    """בודק שהלקוח ענה חיובי לפחות פעם אחת."""
+    if not transcript:
+        return False
+    t_lower = transcript.lower()
+    # מחפש שורות של לקוח בלבד
+    for line in transcript.split("\n"):
+        if line.startswith("לקוח:") or line.startswith("Client:"):
+            line_lower = line.lower()
+            if any(sig in line_lower for sig in _POSITIVE_SIGNALS):
+                return True
+    return False
+
+
 def get_stalled_conversations(hours: int = 2) -> list:
-    """מחזיר שיחות שהלקוח ענה אבל לא סיים — לא הועברו לסוכן ולא נשלחו לשכל."""
+    """מחזיר שיחות שהלקוח ענה חיובי אבל לא סיים — לא הועברו לסוכן ולא נשלחו לשכל."""
     conn = get_db()
     cur = conn.cursor()
     if DATABASE_URL:
@@ -478,7 +496,8 @@ def get_stalled_conversations(hours: int = 2) -> list:
         """, (f"-{hours}",))
     rows = _fetchall(cur)
     conn.close()
-    return rows
+    # סנן רק שיחות שבהן הלקוח ענה חיובי לפחות פעם אחת
+    return [r for r in rows if _is_positive_conversation(r.get("transcript", ""))]
 
 
 def mark_stalled_pushed(phone: str) -> None:
