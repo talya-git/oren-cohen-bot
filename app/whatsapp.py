@@ -377,7 +377,10 @@ async def whatsapp_webhook(request: Request):
         if m.get('role') not in ('assistant', 'user'):
             continue
         content = m['content']
-        if content.startswith('[') or content.startswith('{'):
+        # נקה backticks ו-JSON
+        import re as _re
+        content = _re.sub(r'```(?:json)?', '', content).strip()
+        if content.startswith('{'):
             # נסה לפרסר JSON ולחלץ רק reply
             try:
                 parsed = _json.loads(content)
