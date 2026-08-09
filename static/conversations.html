@@ -200,6 +200,14 @@
     <div class="icon">💬</div>
     <p>אין שיחות להצגה</p>
   </div>
+  <div id="pagination" style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;flex-wrap:wrap;gap:8px;">
+    <span id="page-info" style="font-size:13px;color:#6b7280;"></span>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button id="btn-prev" onclick="changePage(-1)" style="padding:6px 14px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;">→ הקודם</button>
+      <span id="page-num" style="font-size:13px;color:#374151;font-weight:600;"></span>
+      <button id="btn-next" onclick="changePage(1)" style="padding:6px 14px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;">הבא ←</button>
+    </div>
+  </div>
 </div>
 
 <!-- Modal תמליל -->
@@ -218,8 +226,9 @@ const API = '';
 let allData = [];
 let openPhone = null;
 let prevReplied = new Set();
-
 let firstLoad = true;
+let currentPage = 0;
+const PAGE_SIZE = 20;
 
 async function fetchData() {
   try {
@@ -312,19 +321,30 @@ function renderTable() {
     return true;
   });
 
+  const total = rows.length;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (currentPage >= totalPages) currentPage = totalPages - 1;
+  const start = currentPage * PAGE_SIZE;
+  const pageRows = rows.slice(start, start + PAGE_SIZE);
+
   const tbody = document.getElementById('tbody');
   const empty = document.getElementById('empty');
 
-  if (!rows.length) {
+  // עדכון מידע עמוד
+  document.getElementById('page-info').textContent =
+    total ? `מציג ${start + 1}–${Math.min(start + PAGE_SIZE, total)} מתוך ${total}` : '';
+  document.getElementById('page-num').textContent = total ? `עמוד ${currentPage + 1} מתוך ${totalPages}` : '';
+  document.getElementById('btn-prev').disabled = currentPage === 0;
+  document.getElementById('btn-next').disabled = currentPage >= totalPages - 1;
+
+  if (!pageRows.length) {
     tbody.innerHTML = '';
     empty.style.display = 'block';
     return;
   }
   empty.style.display = 'none';
 
-  const isNew = phone => c.replied && !prevReplied.has(phone);
-
-  tbody.innerHTML = rows.map(c => {
+  tbody.innerHTML = pageRows.map(c => {
     const st = getStatus(c);
     const hasTranscript = c.transcript && c.transcript.trim().length > 0;
     const newDot = (c.replied && prevReplied.has(c.phone)) ? '' : (c.replied ? '<span class="new-badge"></span>' : '');
@@ -393,9 +413,15 @@ document.getElementById('modal').addEventListener('click', e => {
 });
 
 ['filter-agent','filter-status','filter-search'].forEach(id => {
-  document.getElementById(id).addEventListener('input', renderTable);
-  document.getElementById(id).addEventListener('change', renderTable);
+  document.getElementById(id).addEventListener('input', () => { currentPage = 0; renderTable(); });
+  document.getElementById(id).addEventListener('change', () => { currentPage = 0; renderTable(); });
 });
+
+function changePage(dir) {
+  currentPage += dir;
+  renderTable();
+  window.scrollTo(0, 0);
+}
 
 fetchData();
 setInterval(fetchData, 5000);
