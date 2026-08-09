@@ -450,22 +450,26 @@ def get_reengagement_record(phone: str) -> dict | None:
     return row
 
 
-_POSITIVE_SIGNALS = ["כן", "yes", "מעוניין", "interested", "רלוונטי", "relevant", "בטח", "sure", "אשמח", "glad", "כמובן", "of course", "יאללה", "ok", "אוקי"]
+_POSITIVE_SIGNALS = ["כן", "yes", "מעוניין", "interested", "רלוונטי", "relevant", "בטח", "sure", "אשמח", "glad", "כמובן", "of course", "יאללה", "אוקי"]
+_NEGATIVE_SIGNALS = ["no thanks", "not interested", "not relevant", "לא רלוונטי", "לא מעוניין", "לא רלוונט", "לא צריך", "לא רוצה", "הסר", "remove", "stop", "unsubscribe"]
 _HANDOFF_SIGNALS = ["יום טוב", "להתראות", "bye", "thank you", "תודה רבה"]
 
 
 def _is_positive_conversation(transcript: str) -> bool:
-    """בודק שהלקוח ענה חיובי לפחות פעם אחת."""
+    """בודק שהלקוח ענה חיובי לפחות פעם אחת ולא שללי בהמשך."""
     if not transcript:
         return False
-    t_lower = transcript.lower()
-    # מחפש שורות של לקוח בלבד
+    found_positive = False
     for line in transcript.split("\n"):
-        if line.startswith("לקוח:") or line.startswith("Client:"):
-            line_lower = line.lower()
-            if any(sig in line_lower for sig in _POSITIVE_SIGNALS):
-                return True
-    return False
+        if not (line.startswith("לקוח:") or line.startswith("Client:")):
+            continue
+        line_lower = line.lower()
+        # אם יש סיגנל שלילי בשורה זו — דלג אותה
+        if any(sig in line_lower for sig in _NEGATIVE_SIGNALS):
+            continue
+        if any(sig in line_lower for sig in _POSITIVE_SIGNALS):
+            found_positive = True
+    return found_positive
 
 
 def get_stalled_conversations(hours: int = 2) -> list:
