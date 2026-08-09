@@ -54,6 +54,22 @@
   tr:hover td { background: #f8faff; }
   tr:last-child td { border-bottom: none; }
 
+  @media (max-width: 768px) {
+    .header { padding: 12px 16px; }
+    .header h1 { font-size: 15px; }
+    .filters { padding: 10px 12px; gap: 8px; }
+    .filters select, .filters input { font-size: 12px; padding: 6px 8px; width: 100%; }
+    .badge { font-size: 11px; padding: 3px 8px; }
+    .main { padding: 12px; }
+    table, thead, tbody, th, td, tr { display: block; }
+    thead { display: none; }
+    tr { background: #fff; border-radius: 10px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 12px; }
+    td { border: none; padding: 4px 0; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+    td::before { content: attr(data-label); font-weight: 600; color: #6b7280; font-size: 11px; flex-shrink: 0; margin-left: 8px; }
+    td[data-label=""]::before { display: none; }
+    .modal .modal-inner { width: 95vw; max-height: 85vh; }
+  }
+
   .status-badge {
     display: inline-block;
     padding: 3px 10px;
@@ -93,6 +109,7 @@
     background: #fff;
     border-radius: 14px;
     width: 560px;
+    max-width: 95vw;
     max-height: 80vh;
     display: flex;
     flex-direction: column;
@@ -312,13 +329,13 @@ function renderTable() {
     const hasTranscript = c.transcript && c.transcript.trim().length > 0;
     const newDot = (c.replied && prevReplied.has(c.phone)) ? '' : (c.replied ? '<span class="new-badge"></span>' : '');
     return `<tr>
-      <td><strong>${c.client_name || '—'}</strong>${newDot}</td>
-      <td style="direction:ltr;color:#6b7280">${c.phone || '—'}</td>
-      <td>${c.agent_label || '—'}</td>
-      <td style="color:#6b7280;font-size:12px">${c.project_name || 'יד 2'}</td>
-      <td><span class="status-badge ${st.cls}">${st.label}</span></td>
-      <td style="color:#6b7280;font-size:12px">${formatDate(c.sent_at)}</td>
-      <td>
+      <td data-label="לקוח"><strong>${c.client_name || '—'}</strong>${newDot}</td>
+      <td data-label="טלפון" style="direction:ltr;color:#6b7280">${c.phone || '—'}</td>
+      <td data-label="סוכן">${c.agent_label || '—'}</td>
+      <td data-label="פרויקט" style="color:#6b7280;font-size:12px">${c.project_name || 'יד 2'}</td>
+      <td data-label="סטטוס"><span class="status-badge ${st.cls}">${st.label}</span></td>
+      <td data-label="תאריך" style="color:#6b7280;font-size:12px">${formatDate(c.sent_at)}</td>
+      <td data-label="">
         <button class="btn-transcript ${hasTranscript?'':'empty'}"
           onclick="${hasTranscript ? `openModal('${c.phone}','${(c.client_name||'').replace(/'/g,"\\'")}')` : 'void(0)'}">
           ${hasTranscript ? '💬 צפה' : 'אין עדיין'}
