@@ -425,7 +425,7 @@
     // ─── הערת לידים — ממשק חדש ──────────────────────────────────────────────
 
     const AGENTS = [
-        { label: 'ינון',    email: 'yaniv@orencohengroup.com' },
+        { label: 'יניב',    email: 'yaniv@orencohengroup.com' },
         { label: 'משה',     email: 'moshe@orencohengroup.com' },
         { label: 'מירי',    email: 'miri@orencohengroup.com' },
         { label: 'מיכאל',  email: 'michael@orencohengroup.com' },
