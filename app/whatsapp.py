@@ -454,6 +454,7 @@ async def all_conversations():
     cur = conn.cursor()
     cur.execute("""
         SELECT rs.phone, rs.client_name, rs.agent_email, rs.replied, rs.transcript, rs.sent_at,
+               rs.error, rs.read_at,
                rb.agent_label,
                CASE WHEN rs.transcript LIKE '%יום טוב%' OR rs.transcript LIKE '%להתראות%'
                     OR rs.transcript LIKE '%bye%' OR rs.transcript LIKE '%thank you%'
