@@ -471,7 +471,7 @@ async def all_conversations():
 
     # מיפוי מייל לשם סוכן
     email_to_label = {
-        'yaniv@orencohengroup.com': 'ינון',
+        'yaniv@orencohengroup.com': 'יניב',
         'moshe@orencohengroup.com': 'משה',
         'miri@orencohengroup.com': 'מירי',
         'michael@orencohengroup.com': 'מיכאל',
