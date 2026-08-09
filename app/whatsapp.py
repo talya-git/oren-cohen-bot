@@ -96,7 +96,7 @@ def _has_whatsapp(phone_e164: str) -> bool:
     return True
 
 
-def start_reengagement(phone: str, name: str | None, project_name: str, agent_name: str = "") -> None:
+def start_reengagement(phone: str, name: str | None, project_name: str, agent_name: str = "", agent_email: str = "") -> None:
     """שולח הודעת פתיחה ללקוח ישן ומאתחל session."""
     from .engine import Conversation
 
@@ -172,9 +172,9 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
         raise Exception(error_msg)
 
     from . import database as _db
-    agent_email = _wa_is_projects.get(normalized) and "aaron@orencohengroup.com" or "office@orencohengroup.com"
+    final_agent_email = agent_email or ("aaron@orencohengroup.com" if is_projects else "office@orencohengroup.com")
     initial_transcript = f"דניאל: {greeting}"
-    _db.mark_reengagement_sent(f"+{normalized}", name or "", agent_email, transcript=initial_transcript)
+    _db.mark_reengagement_sent(f"+{normalized}", name or "", final_agent_email, transcript=initial_transcript)
 
     _wa_pilot_log.append({
         "phone": f"+{normalized}",
@@ -525,7 +525,7 @@ async def bulk_reengagement(request: Request):
             results.append({"phone": phone, "status": "skipped", "reason": "no_phone"})
             continue
         try:
-            start_reengagement(phone, name, project_name, agent_name)
+            start_reengagement(phone, name, project_name, agent_name, agent_email or "")
             results.append({"phone": phone, "status": "sent"})
         except Exception as e:
             # שמירת שיחות שנכשלו גם ב-DB
@@ -554,7 +554,7 @@ async def start_reengagement_endpoint(request: Request):
     agent_name = data.get("agent_name", "") or data.get("agent_label", "")
     agent_email = data.get("agent_email", "") or None
     try:
-        start_reengagement(phone, name, project_name, agent_name)
+        start_reengagement(phone, name, project_name, agent_name, agent_email or "")
         status = "sent"
         reason = ""
     except Exception as e:
