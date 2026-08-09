@@ -211,7 +211,7 @@ async def _no_response_timer(phone: str):
         pass
 
 
-_NOT_RELEVANT = ["לא רלוונטי", "לא מעוניין", "לא רלוונט", "לא מתעניין", "לא צריך", "לא רוצה", "not relevant", "not interested"]
+_NOT_RELEVANT = ["לא רלוונטי", "לא מעוניין", "לא רלוונט", "לא מתעניין", "לא צריך", "לא רוצה", "not relevant", "not interested", "הסר", "remove", "unsubscribe", "stop"]
 _SNOOZE_WEEK = ["עסוק", "אחר כך", "אחרי", "יחשוב", "אחשוב", "לא עכשיו", "busy", "later", "will think", "not now"]
 
 
@@ -326,7 +326,12 @@ async def whatsapp_webhook(request: Request):
         intent = _classify_response(text)
         if intent == "not_relevant":
             _save_followup(phone, weeks=26, reason="not_relevant")
-            send_message(f"+{phone}", "מובן, תודה על התשובה! אם בעתיד תתעניין — אנחנו כאן 😊")
+            msg_lower = text.lower()
+            if "הסר" in msg_lower or "remove" in msg_lower or "unsubscribe" in msg_lower or "stop" in msg_lower:
+                reply_msg = "אוקי, סליחה על ההטרדה! נשמח לעזור לך תמיד אם תצטרך 😊"
+            else:
+                reply_msg = "מובן, תודה על התשובה! אם בעתיד תתעניין — אנחנו כאן 😊"
+            send_message(f"+{phone}", reply_msg)
             return {"status": "snoozed_26w"}
         if intent == "snooze_week":
             _save_followup(phone, weeks=1, reason="snooze")
