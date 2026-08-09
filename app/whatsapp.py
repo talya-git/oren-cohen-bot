@@ -496,6 +496,7 @@ async def all_conversations():
             'sent_at': r['sent_at'],
             'project_name': '',
             'error': r.get('error') or '',
+            'read_at': r.get('read_at') or '',
         })
     return {'conversations': conversations}
 
