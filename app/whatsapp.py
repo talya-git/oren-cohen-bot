@@ -191,25 +191,6 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
     })
 
 
-async def _no_response_timer(phone: str):
-    await asyncio.sleep(NO_RESPONSE_HOURS * 3600)
-    convo = _wa_sessions.get(phone)
-    if not convo or not convo.profile.phone:
-        return
-    dry = not (sehel.PROJECT_ID or sehel.WEBHOOK_URL)
-    try:
-        is_projects = _wa_is_projects.get(phone, False)
-        payload = sehel.build_payload(
-            convo.profile, "Low", 0.0,
-            is_projects=is_projects,
-            transcript=convo.messages,
-            no_response=True,
-            media_source="WhatsApp",
-        )
-        sehel.push_lead(payload, dry_run=dry)
-    except Exception:
-        pass
-
 
 _NOT_RELEVANT = ["לא רלוונטי", "לא מעוניין", "לא רלוונט", "לא מתעניין", "לא צריך", "לא רוצה", "not relevant", "not interested", "הסר", "remove", "unsubscribe", "stop"]
 _SNOOZE_WEEK = ["עסוק", "אחר כך", "אחרי", "יחשוב", "אחשוב", "לא עכשיו", "busy", "later", "will think", "not now"]
