@@ -101,6 +101,35 @@ async def start_stalled_scheduler():
                 print(f"[STALLED SCHEDULER ERROR] {e}")
     asyncio.create_task(_stalled_scheduler())
 
+
+@app.on_event("startup")
+async def start_no_response_scheduler():
+    import asyncio
+    async def _no_response_scheduler():
+        while True:
+            await asyncio.sleep(24 * 60 * 60)  # 24 שעות
+            try:
+                from . import database as _db
+                from . import sehel as _sehel
+                rows = _db.get_no_response_conversations(hours=24)
+                for row in rows:
+                    phone = row.get("phone", "")
+                    name = row.get("client_name") or ""
+                    try:
+                        _sehel.log_call_summary(
+                            phone,
+                            f"בוט וואטסאפ — נשלחה הודעה ל{name} ולא היה מענה בתוך 24 שעות.",
+                            dry_run=not (_sehel.PROJECT_ID or _sehel.WEBHOOK_URL)
+                        )
+                        _db.mark_stalled_pushed(phone)
+                        print(f"[NO-RESPONSE->SEHEL] {phone} | {name}")
+                    except Exception as e:
+                        print(f"[NO-RESPONSE ERROR] {phone}: {e}")
+                    await asyncio.sleep(0.5)
+            except Exception as e:
+                print(f"[NO-RESPONSE SCHEDULER ERROR] {e}")
+    asyncio.create_task(_no_response_scheduler())
+
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
 # Serve static files (logo, etc.)

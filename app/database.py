@@ -515,6 +515,52 @@ def mark_stalled_pushed(phone: str) -> None:
     conn.close()
 
 
+def get_no_response_conversations(hours: int = 24) -> list:
+    """מחזיר שיחות שלא ענו בכלל אחרי X שעות ועדיין לא עודכנו."""
+    conn = get_db()
+    cur = conn.cursor()
+    if DATABASE_URL:
+        cur.execute("""
+            SELECT * FROM reengagement_sent
+            WHERE replied = FALSE
+            AND stalled_pushed = FALSE
+            AND sent_at < NOW() - INTERVAL '%s hours'
+        """, (hours,))
+    else:
+        cur.execute("""
+            SELECT * FROM reengagement_sent
+            WHERE replied = 0
+            AND stalled_pushed = 0
+            AND sent_at < datetime('now', ? || ' hours')
+        """, (f"-{hours}",))
+    rows = _fetchall(cur)
+    conn.close()
+    return rows
+
+
+def get_no_response_conversations(hours: int = 24) -> list:
+    """מחזיר שיחות שלא ענו בכלל אחרי X שעות ועדיין לא עודכנו בשכל."""
+    conn = get_db()
+    cur = conn.cursor()
+    if DATABASE_URL:
+        cur.execute("""
+            SELECT * FROM reengagement_sent
+            WHERE replied = FALSE
+            AND stalled_pushed = FALSE
+            AND sent_at < NOW() - INTERVAL '%s hours'
+        """, (hours,))
+    else:
+        cur.execute("""
+            SELECT * FROM reengagement_sent
+            WHERE replied = 0
+            AND stalled_pushed = 0
+            AND sent_at < datetime('now', ? || ' hours')
+        """, (f"-{hours}",))
+    rows = _fetchall(cur)
+    conn.close()
+    return rows
+
+
 def get_reengagement_results(agent_email: str) -> list:
     conn = get_db()
     cur = conn.cursor()
