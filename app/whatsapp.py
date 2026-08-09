@@ -115,7 +115,7 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
     from . import database as _db
     if _db.get_sent_phones_set(f"+{normalized}"):
         print(f"[SKIP DUPLICATE] {normalized} — כבר נשלח בעבר")
-        return
+        raise Exception("DUPLICATE")
     if name:
         try:
             fixed = name.encode("latin1").decode("utf-8")
@@ -585,7 +585,7 @@ async def start_reengagement_endpoint(request: Request):
         status = "sent"
         reason = ""
     except Exception as e:
-        status = "error"
+        status = "duplicate" if "DUPLICATE" in str(e) else "error"
         reason = str(e)
     try:
         from .mailer import send_bulk_report
@@ -593,6 +593,8 @@ async def start_reengagement_endpoint(request: Request):
         send_bulk_report(label, [{"phone": phone, "status": status, "reason": reason}], agent_email=agent_email)
     except Exception as e:
         print(f"[ADMIN REPORT ERROR] {e}")
+    if status == "duplicate":
+        return {"status": "duplicate", "phone": phone, "reason": "already sent"}
     if status == "error":
         return {"status": "error", "phone": phone, "reason": reason}
     return {"status": "sent", "phone": phone}

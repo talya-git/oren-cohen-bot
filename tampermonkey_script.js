@@ -658,7 +658,10 @@
                     })
                 });
                 const r = await res.json();
-                if (r.status === 'skipped') skipped++;
+                if (r.status === 'duplicate' || r.status === 'skipped') {
+                    skipped++;
+                    failedDetails.push({ phone, name: editedName || '—', error: '⚠️ כבר נשלח בעבר!' });
+                }
                 else { success++; sentPhones.push(phone); }
                 wl_sentPhones.add(phone);
             } catch(e) {
