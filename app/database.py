@@ -385,14 +385,14 @@ def mark_reengagement_sent(phone: str, client_name: str, agent_email: str, batch
     now = datetime.now(timezone.utc).isoformat()
     if DATABASE_URL:
         cur.execute(
-            "INSERT INTO reengagement_sent (phone, client_name, agent_email, batch_id, sent_at, error, transcript) VALUES (%s,%s,%s,%s,%s,%s,%s) "
+            "INSERT INTO reengagement_sent (phone, client_name, agent_email, batch_id, sent_at, transcript) VALUES (%s,%s,%s,%s,%s,%s) "
             "ON CONFLICT DO NOTHING",
-            (phone, client_name, agent_email, batch_id, now, error, transcript)
+            (phone, client_name, agent_email, batch_id, now, transcript)
         )
     else:
         cur.execute(
-            "INSERT OR IGNORE INTO reengagement_sent (phone, client_name, agent_email, batch_id, sent_at, error, transcript) VALUES (?,?,?,?,?,?,?)",
-            (phone, client_name, agent_email, batch_id, now, error, transcript)
+            "INSERT OR IGNORE INTO reengagement_sent (phone, client_name, agent_email, batch_id, sent_at, transcript) VALUES (?,?,?,?,?,?)",
+            (phone, client_name, agent_email, batch_id, now, transcript)
         )
     conn.commit()
     conn.close()
