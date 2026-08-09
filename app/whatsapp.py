@@ -550,36 +550,6 @@ async def pilot_results():
     return {"results": _wa_pilot_log}
 
 
-@router.post("/backfill-call-summaries")
-async def backfill_call_summaries():
-    """חד-פעמי — שולח callSummary לשכל עבור כל השיחות הישנות."""
-    from . import database as _db
-    from . import sehel as _sehel
-    import asyncio
-
-    conn = _db.get_db()
-    cur = conn.cursor()
-    cur.execute("SELECT phone, client_name, transcript FROM reengagement_sent WHERE transcript IS NOT NULL AND transcript != ''")
-    rows = _db._fetchall(cur)
-    conn.close()
-
-    dry = not (_sehel.PROJECT_ID or _sehel.WEBHOOK_URL)
-    results = []
-    for row in rows:
-        phone = row["phone"]
-        name = row.get("client_name") or ""
-        transcript = row.get("transcript") or ""
-        summary = f"בוט וואטסאפ — שיחה עם {name}:\n{transcript[:1800]}"
-        try:
-            result = _sehel.log_call_summary(phone, summary, dry_run=dry)
-            results.append({"phone": phone, "name": name, "status": "ok", "result": result})
-        except Exception as e:
-            results.append({"phone": phone, "name": name, "status": "error", "error": str(e)})
-        await asyncio.sleep(0.5)
-
-    return {"dry_run": dry, "total": len(rows), "results": results}
-
-
 @router.post("/pilot-clear")
 async def pilot_clear():
     _wa_pilot_log.clear()
