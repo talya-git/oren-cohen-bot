@@ -62,6 +62,45 @@ async def start_report_scheduler():
                 print(f"[REPORT ERROR] {e}")
     asyncio.create_task(_scheduler())
 
+
+@app.on_event("startup")
+async def start_stalled_scheduler():
+    import asyncio
+    async def _stalled_scheduler():
+        while True:
+            await asyncio.sleep(15 * 60)  # 15 דקות
+            try:
+                from . import database as _db
+                from . import sehel as _sehel
+                from .schemas import ExtractedParams
+                stalled = _db.get_stalled_conversations(hours=2)
+                for row in stalled:
+                    phone = row.get("phone", "")
+                    try:
+                        profile = ExtractedParams(
+                            phone=phone,
+                            contact_name=row.get("client_name") or None,
+                        )
+                        payload = _sehel.build_payload(
+                            profile, "Medium", 0.5,
+                            media_source="WhatsApp",
+                            no_response=False,
+                            transcript=None,
+                        )
+                        payload["tags[]"] = payload.get("tags[]", []) + ["לא השלים שיחה"]
+                        # הוסף תמליל מה-DB
+                        if row.get("transcript"):
+                            payload["lead_comment"] = row["transcript"]
+                        dry = not (_sehel.PROJECT_ID or _sehel.WEBHOOK_URL)
+                        _sehel.push_lead(payload, dry_run=dry)
+                        _db.mark_stalled_pushed(phone)
+                        print(f"[STALLED->SEHEL] {phone} | {row.get('client_name')}")
+                    except Exception as e:
+                        print(f"[STALLED ERROR] {phone}: {e}")
+            except Exception as e:
+                print(f"[STALLED SCHEDULER ERROR] {e}")
+    asyncio.create_task(_stalled_scheduler())
+
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
 # Serve static files (logo, etc.)

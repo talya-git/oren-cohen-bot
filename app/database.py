@@ -55,6 +55,17 @@ def init_db():
     cur = conn.cursor()
 
     if DATABASE_URL:
+        # הוסף עמודות חדשות אם לא קיימות
+        for col, definition in [
+            ("stalled_pushed", "BOOLEAN DEFAULT FALSE"),
+        ]:
+            try:
+                cur.execute(f"ALTER TABLE reengagement_sent ADD COLUMN IF NOT EXISTS {col} {definition}")
+                conn.commit()
+            except Exception:
+                conn.rollback()
+
+    if DATABASE_URL:
         cur.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
@@ -106,6 +117,7 @@ def init_db():
                 transcript TEXT,
                 error TEXT DEFAULT '',
                 read_at TIMESTAMPTZ,
+                stalled_pushed BOOLEAN DEFAULT FALSE,
                 sent_at TIMESTAMPTZ DEFAULT NOW()
             )
         """)
@@ -436,6 +448,48 @@ def get_reengagement_record(phone: str) -> dict | None:
     row = _fetchone(cur)
     conn.close()
     return row
+
+
+def get_stalled_conversations(hours: int = 2) -> list:
+    """מחזיר שיחות שהלקוח ענה אבל לא סיים — לא הועברו לסוכן ולא נשלחו לשכל."""
+    conn = get_db()
+    cur = conn.cursor()
+    if DATABASE_URL:
+        cur.execute("""
+            SELECT * FROM reengagement_sent
+            WHERE replied = TRUE
+            AND stalled_pushed = FALSE
+            AND sent_at < NOW() - INTERVAL '%s hours'
+            AND (transcript NOT LIKE '%%יום טוב%%'
+                 AND transcript NOT LIKE '%%להתראות%%'
+                 AND transcript NOT LIKE '%%bye%%'
+                 AND transcript NOT LIKE '%%thank you%%')
+        """, (hours,))
+    else:
+        cur.execute("""
+            SELECT * FROM reengagement_sent
+            WHERE replied = 1
+            AND stalled_pushed = 0
+            AND sent_at < datetime('now', ? || ' hours')
+            AND (transcript NOT LIKE '%יום טוב%'
+                 AND transcript NOT LIKE '%להתראות%'
+                 AND transcript NOT LIKE '%bye%'
+                 AND transcript NOT LIKE '%thank you%')
+        """, (f"-{hours}",))
+    rows = _fetchall(cur)
+    conn.close()
+    return rows
+
+
+def mark_stalled_pushed(phone: str) -> None:
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(
+        f"UPDATE reengagement_sent SET stalled_pushed={PH} WHERE phone={PH}",
+        (True if DATABASE_URL else 1, phone)
+    )
+    conn.commit()
+    conn.close()
 
 
 def get_reengagement_results(agent_email: str) -> list:
