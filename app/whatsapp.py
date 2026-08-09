@@ -333,12 +333,22 @@ async def whatsapp_webhook(request: Request):
                 reply_msg = "מובן, תודה על התשובה! אם בעתיד תתעניין — אנחנו כאן 😊"
             send_message(f"+{phone}", reply_msg)
             _db.update_reengagement_replied(f"+{phone}", True, f"לקוח: {text}\nדניאל: {reply_msg}")
+            dry = not (sehel.PROJECT_ID or sehel.WEBHOOK_URL)
+            try:
+                sehel.log_call_summary(f"+{phone}", f"בוט וואטסאפ: לקוח ענה 'לא רלוונטי' ({text})", dry_run=dry)
+            except Exception as e:
+                print(f"[SEHEL CALL LOG ERROR] {e}")
             return {"status": "snoozed_26w"}
         if intent == "snooze_week":
             _save_followup(phone, weeks=1, reason="snooze")
             reply_msg = "בטח, אחזור אליך בשבוע הבא! 😊"
             send_message(f"+{phone}", reply_msg)
             _db.update_reengagement_replied(f"+{phone}", True, f"לקוח: {text}\nדניאל: {reply_msg}")
+            dry = not (sehel.PROJECT_ID or sehel.WEBHOOK_URL)
+            try:
+                sehel.log_call_summary(f"+{phone}", f"בוט וואטסאפ: לקוח ענה 'לא עכשיו' ({text})", dry_run=dry)
+            except Exception as e:
+                print(f"[SEHEL CALL LOG ERROR] {e}")
             return {"status": "snoozed_1w"}
 
         # שחזור session מה-DB אם השרת נרדם
@@ -417,6 +427,16 @@ async def whatsapp_webhook(request: Request):
             )
             payload["tags[]"] = payload.get("tags[]", []) + ["בוט"]
             sehel.push_lead(payload, dry_run=dry)
+            # סיכום שיחה לכרטיס הישן
+            transcript_text = "\n".join(
+                f"{'\u05d3\u05e0\u05d9\u05d0\u05dc' if m['role']=='assistant' else '\u05dc\u05e7\u05d5\u05d7'}: {m['content']}"
+                for m in convo.messages if m.get('role') in ('assistant','user')
+            )
+            sehel.log_call_summary(
+                convo.profile.phone,
+                f"בוט וואטסאפ — שיחה הושלמה, ליד {score.level}:\n{transcript_text}",
+                dry_run=dry
+            )
         except Exception as e:
             print(f"[SEHEL ERROR] {e}")
         del _wa_sessions[phone]
