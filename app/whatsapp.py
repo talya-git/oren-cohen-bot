@@ -332,10 +332,13 @@ async def whatsapp_webhook(request: Request):
             else:
                 reply_msg = "מובן, תודה על התשובה! אם בעתיד תתעניין — אנחנו כאן 😊"
             send_message(f"+{phone}", reply_msg)
+            _db.update_reengagement_replied(f"+{phone}", True, f"לקוח: {text}\nדניאל: {reply_msg}")
             return {"status": "snoozed_26w"}
         if intent == "snooze_week":
             _save_followup(phone, weeks=1, reason="snooze")
-            send_message(f"+{phone}", "בטח, אחזור אליך בשבוע הבא! 😊")
+            reply_msg = "בטח, אחזור אליך בשבוע הבא! 😊"
+            send_message(f"+{phone}", reply_msg)
+            _db.update_reengagement_replied(f"+{phone}", True, f"לקוח: {text}\nדניאל: {reply_msg}")
             return {"status": "snoozed_1w"}
 
         # שחזור session מה-DB אם השרת נרדם
