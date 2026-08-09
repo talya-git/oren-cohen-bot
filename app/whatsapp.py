@@ -521,6 +521,7 @@ async def bulk_reengagement(request: Request):
         name = lead.get("name", "") or None
         project_name = lead.get("project_name", "") or ""
         agent_name = lead.get("agent_name", "") or ""
+        agent_email = lead.get("agent_email", "") or ""
         if not phone:
             results.append({"phone": phone, "status": "skipped", "reason": "no_phone"})
             continue

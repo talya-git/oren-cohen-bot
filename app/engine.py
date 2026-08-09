@@ -146,7 +146,7 @@ class Conversation:
             if self._language == "en":
                 closing = "Thank you for letting me know! If you're ever interested in the future, feel free to reach out 😊"
             turn = BotTurn(
-                reply=closing, stage="end",
+                reply=closing, stage="handoff",
                 extracted=ExtractedParams(), handoff_to_human=True, notes="not_interested"
             )
             self.messages.append({"role": "assistant", "content": closing})
