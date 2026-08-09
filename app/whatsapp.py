@@ -415,6 +415,7 @@ async def whatsapp_webhook(request: Request):
                 is_projects=is_projects,
                 transcript=convo.messages,
             )
+            payload["tags[]"] = payload.get("tags[]", []) + ["בוט"]
             sehel.push_lead(payload, dry_run=dry)
         except Exception as e:
             print(f"[SEHEL ERROR] {e}")

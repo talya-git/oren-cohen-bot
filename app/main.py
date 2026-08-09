@@ -87,7 +87,7 @@ async def start_stalled_scheduler():
                             no_response=False,
                             transcript=None,
                         )
-                        payload["tags[]"] = payload.get("tags[]", []) + ["לא השלים שיחה", "בוט וואטסאפ"]
+                        payload["tags[]"] = payload.get("tags[]", []) + ["לא השלים שיחה", "ליד בינוני", "בוט"]
                         # הוסף תמליל מה-DB
                         if row.get("transcript"):
                             payload["lead_comment"] = row["transcript"]
