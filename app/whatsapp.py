@@ -279,6 +279,14 @@ async def whatsapp_webhook(request: Request):
                 conn.commit()
                 conn.close()
                 print(f"[READ] {recipient}")
+            elif status == "failed" and recipient:
+                from . import database as _db
+                conn = _db.get_db()
+                cur = conn.cursor()
+                cur.execute(f"DELETE FROM reengagement_sent WHERE phone={_db.PH}", (f"+{recipient}",))
+                conn.commit()
+                conn.close()
+                print(f"[FAILED-DELETED] {recipient}")
             return {"status": "status_update"}
         msg = change["messages"][0]
         phone = msg["from"]
