@@ -401,17 +401,9 @@ def mark_reengagement_sent(phone: str, client_name: str, agent_email: str, batch
 def update_reengagement_replied(phone: str, replied: bool, transcript: str = "") -> None:
     conn = get_db()
     cur = conn.cursor()
-    # צירוף התמליל החדש לישן במקום להחליף
-    cur.execute(f"SELECT transcript FROM reengagement_sent WHERE phone={PH}", (phone,))
-    row = _fetchone(cur)
-    existing = (row.get('transcript') or '') if row else ''
-    if transcript and transcript not in existing:
-        new_transcript = (existing + '\n' + transcript).strip() if existing else transcript
-    else:
-        new_transcript = existing or transcript
     cur.execute(
         f"UPDATE reengagement_sent SET replied={PH}, transcript={PH} WHERE phone={PH}",
-        (replied, new_transcript, phone)
+        (replied, transcript, phone)
     )
     conn.commit()
     conn.close()
