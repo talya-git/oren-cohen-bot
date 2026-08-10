@@ -456,7 +456,7 @@ async def sent_phones(agent_email: str):
     from . import database as _db
     conn = _db.get_db()
     cur = conn.cursor()
-    cur.execute(f"SELECT phone, sent_at FROM reengagement_sent WHERE agent_email={_db.PH}", (agent_email,))
+    cur.execute(f"SELECT phone, sent_at FROM reengagement_sent WHERE LOWER(agent_email)=LOWER({_db.PH})", (agent_email,))
     rows = _db._fetchall(cur)
     conn.close()
     phones = [r["phone"] for r in rows]
@@ -506,11 +506,12 @@ async def all_conversations():
         'aaron@orencohengroup.com': 'אהרון',
         'lisa@orencohengroup.com': 'ליסה',
         'dovr@orencohengroup.com': 'דב',
+        'nethanele@orencohengroup.com': 'נתנאל',
     }
 
     conversations = []
     for r in rows:
-        label = r.get('agent_label') or email_to_label.get(r.get('agent_email',''), r.get('agent_email',''))
+        label = r.get('agent_label') or email_to_label.get((r.get('agent_email') or '').lower(), r.get('agent_email',''))
         conversations.append({
             'phone': r['phone'],
             'client_name': r['client_name'],
