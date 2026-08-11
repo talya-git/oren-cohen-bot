@@ -299,7 +299,13 @@ async def whatsapp_webhook(request: Request):
             reply = _resp.choices[0].message.content.strip()
         except Exception:
             reply = "הסוכן יצור איתך קשר תוך יום עסקים."
+        print(f"[DONE_REPLY] phone={phone} reply={reply!r}")
         send_message(f"+{phone}", reply)
+        # שמירת ההמשך ב-DB
+        existing = _db.get_reengagement_record(f"+{phone}")
+        if existing:
+            old = existing.get("transcript") or ""
+            _db.update_reengagement_replied(f"+{phone}", True, old + f"\nלקוח: {text}\nדניאל: {reply}")
         return {"status": "done_reply"}
 
     if phone not in _wa_sessions:
