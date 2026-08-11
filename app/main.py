@@ -20,6 +20,7 @@ from .engine import Conversation
 from .prompts import GREETING
 from .leads_api import router as leads_router
 from .whatsapp import router as whatsapp_router
+from .email_api import router as email_router
 from . import database as db
 
 app = FastAPI(title="Oren Cohen Group — Lead Bot")
@@ -31,6 +32,7 @@ app.add_middleware(
 )
 app.include_router(leads_router)
 app.include_router(whatsapp_router)
+app.include_router(email_router)
 
 
 @app.on_event("startup")
