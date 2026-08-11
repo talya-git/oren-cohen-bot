@@ -149,12 +149,11 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
     if lang == "en":
         greeting = (
             f"Hi{' ' + name if name else ''},\n"
-            f"This is Daniel from Oren Cohen Group in Jerusalem.\n"
-            f"I'm reaching out following your previous inquiry to our office. "
-            f"We are currently putting together a number of exclusive real estate opportunities in upcoming Jerusalem projects, "
-            f"on terms not available to the general public.\n"
-            f"Since you were looking for something similar in the past, I thought it would be right to update you before anyone else.\n"
-            f"Is this still relevant for you?"
+            f"This is Daniel from the Oren Cohen Group Real Estate office in Jerusalem.\n\n"
+            f"I'm reaching out as I saw that you had previously inquired about a property in Jerusalem. "
+            f"We currently have several exciting new developments and properties available, "
+            f"and I wanted to see whether buying in Jerusalem is still relevant for you.\n\n"
+            f"If so, I'd be happy to send you some options and see what might suit your requirements."
         )
     else:
         greeting = (
