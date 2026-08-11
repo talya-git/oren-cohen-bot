@@ -9,7 +9,7 @@ from uuid import uuid4
 import os
 
 import json as _json
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -821,7 +821,6 @@ def delete_feedback(index: int) -> dict:
 @app.post("/api/admin/backfill-sehel")
 async def backfill_sehel(request: Request):
     """חד-פעמי — שולח סיכום שיחה לשכל עבור רשימת טלפונים."""
-    from fastapi import Request
     data = await request.json()
     secret = data.get("secret", "")
     if secret != "oren2024backfill":
