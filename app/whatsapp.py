@@ -351,6 +351,11 @@ async def whatsapp_webhook(request: Request):
             if db_record.get("client_name"):
                 conv.profile.contact_name = db_record["client_name"]
             conv.profile.phone = f"+{phone}"
+            # הוסף הקשר לבוט שמסביר את המצב
+            conv.messages.append({
+                "role": "user",
+                "content": f"[הקשר: הלקוח קיבל הודעת וואטסאפ מדניאל ועונה. אם הלקוח שואל 'מי זה' — הסבר בקצרה שאתה דניאל מאורן כהן גרופ ושלחת לו הודעה. תגובתו: '{text}']"
+            })
             print(f"[SESSION RESTORED] {phone} — {len(conv.messages)} הודעות")
         else:
             conv.messages.append({
