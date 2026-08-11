@@ -531,21 +531,24 @@ async def all_conversations():
             return ''
         if hasattr(v, 'isoformat'):
             return v.isoformat()
-        return str(v)
+        return str(v) if v else ''
 
     conversations = []
     for r in rows:
         label = r.get('agent_label') or email_to_label.get((r.get('agent_email') or '').lower(), r.get('agent_email',''))
+        transcript = r['transcript'] or ''
+        # תקן Daniel: -> דניאל: בתמליל
+        transcript = transcript.replace('Daniel: ', 'דניאל: ').replace('Daniel:', 'דניאל:')
         conversations.append({
-            'phone': r['phone'],
-            'client_name': r['client_name'] or '',
+            'phone': r['phone'] or '',
+            'client_name': _str(r.get('client_name')),
             'agent_label': label or '',
             'replied': bool(r['replied']),
             'handoff': bool(r['handoff']),
-            'transcript': r['transcript'] or '',
+            'transcript': transcript,
             'sent_at': _str(r.get('sent_at')),
             'project_name': '',
-            'error': r.get('error') or '',
+            'error': _str(r.get('error')),
             'read_at': _str(r.get('read_at')),
         })
     from fastapi.responses import Response
