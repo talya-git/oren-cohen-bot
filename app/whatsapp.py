@@ -526,20 +526,27 @@ async def all_conversations():
         'nethanele@orencohengroup.com': 'נתנאל',
     }
 
+    def _str(v):
+        if v is None:
+            return ''
+        if hasattr(v, 'isoformat'):
+            return v.isoformat()
+        return str(v)
+
     conversations = []
     for r in rows:
         label = r.get('agent_label') or email_to_label.get((r.get('agent_email') or '').lower(), r.get('agent_email',''))
         conversations.append({
             'phone': r['phone'],
-            'client_name': r['client_name'],
-            'agent_label': label,
+            'client_name': r['client_name'] or '',
+            'agent_label': label or '',
             'replied': bool(r['replied']),
             'handoff': bool(r['handoff']),
             'transcript': r['transcript'] or '',
-            'sent_at': r['sent_at'],
+            'sent_at': _str(r.get('sent_at')),
             'project_name': '',
             'error': r.get('error') or '',
-            'read_at': r.get('read_at') or '',
+            'read_at': _str(r.get('read_at')),
         })
     from fastapi.responses import JSONResponse
     import json as _json
