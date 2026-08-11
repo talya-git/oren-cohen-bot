@@ -385,13 +385,15 @@ function refreshModal(phone) {
         (trimmed.startsWith('"') && !trimmed.includes(':') && trimmed.endsWith(',')) ||
         trimmed === '{' || trimmed === '},' || trimmed === '}') return '';
 
-    const isAgent = line.startsWith('דניאל:') || line.startsWith('Bot:') || line.startsWith('Daniel:');
+    const agentPrefixes = ['דניאל:', 'Daniel:', 'Bot:'];
+    const clientPrefixes = ['לקוח:', 'Client:'];
+    const isAgent = agentPrefixes.some(p => line.startsWith(p));
+    const isClient = clientPrefixes.some(p => line.startsWith(p));
+    if (!isAgent && !isClient) return '';
     const cls = isAgent ? 'msg-agent' : 'msg-client';
     const bcls = isAgent ? 'bubble-agent' : 'bubble-client';
-    const label = isAgent ? 'דניאל (בוט)' : 'לקוח';
-    // חילוץ הטקסט מתוך JSON string אם צריך
+    const label = isAgent ? 'Daniel' : 'לקוח';
     let text = line.replace(/^[^:]+:\s*/, '').trim();
-    // אם זה JSON string עם גרשיים - נקה אותם
     if (text.startsWith('"') && text.endsWith('",')) text = text.slice(1, -2);
     else if (text.startsWith('"') && text.endsWith('"')) text = text.slice(1, -1);
     if (!text) return '';
