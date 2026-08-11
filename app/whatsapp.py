@@ -425,6 +425,17 @@ async def whatsapp_webhook(request: Request):
     return {"status": "ok"}
 
 
+@router.post("/send-message")
+async def send_free_message(request: Request):
+    data = await request.json()
+    phone = str(data.get("phone", "")).strip()
+    message = str(data.get("message", "")).strip()
+    if not phone or not message:
+        return {"status": "error", "reason": "phone and message required"}
+    result = send_message(phone, message)
+    return {"status": "sent", "result": result}
+
+
 @router.post("/notify-agent")
 async def notify_agent(request: Request):
     from . import database as _db
