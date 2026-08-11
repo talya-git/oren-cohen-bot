@@ -66,6 +66,8 @@ async def start_email_reengagement(request: Request):
     name = data.get("name") or None
     project_name = data.get("project_name", "") or ""
     agent_email = data.get("agent_email", "") or ""
+    custom_subject = data.get("custom_subject") or None
+    custom_message = data.get("custom_message") or None
 
     if not email:
         return {"status": "error", "reason": "email required"}
@@ -79,8 +81,8 @@ async def start_email_reengagement(request: Request):
     if exists:
         return {"status": "duplicate"}
 
-    greeting = _build_greeting(name)
-    subject = "Jerusalem Real Estate — New Opportunities"
+    greeting = custom_message or _build_greeting(name)
+    subject = custom_subject or "Jerusalem Real Estate — New Opportunities"
 
     html = greeting.replace("\n", "<br>")
     try:
