@@ -818,6 +818,32 @@ def delete_feedback(index: int) -> dict:
     return {"status": "deleted"}
 
 
+@app.post("/api/admin/backfill-sehel")
+async def backfill_sehel(request: Request):
+    """חד-פעמי — שולח סיכום שיחה לשכל עבור רשימת טלפונים."""
+    from fastapi import Request
+    data = await request.json()
+    secret = data.get("secret", "")
+    if secret != "oren2024backfill":
+        return {"error": "unauthorized"}
+    phones = data.get("phones", [])
+    results = []
+    for phone in phones:
+        record = db.get_reengagement_record(phone)
+        if not record:
+            results.append({"phone": phone, "status": "not_found"})
+            continue
+        transcript = record.get("transcript") or ""
+        name = record.get("client_name") or ""
+        summary = f"בוט וואטסאפ — ינון — {name}:\n{transcript}" if transcript else f"בוט וואטסאפ — ינון — {name}: לא ענה"
+        try:
+            result = sehel.log_call_summary(phone, summary)
+            results.append({"phone": phone, "name": name, "status": "ok", "result": str(result)})
+        except Exception as e:
+            results.append({"phone": phone, "name": name, "status": "error", "reason": str(e)})
+    return {"results": results}
+
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", 8000))
