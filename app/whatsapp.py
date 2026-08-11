@@ -437,7 +437,7 @@ async def send_free_message(request: Request):
     record = _db.get_reengagement_record(phone)
     if record:
         existing = record.get("transcript") or ""
-        updated = existing + f"\nDaniel: {message}"
+        updated = existing + f"\nדניאל: {message}"
         _db.update_reengagement_replied(phone, bool(record.get("replied")), updated.strip())
     return {"status": "sent", "result": result}
 
@@ -541,7 +541,13 @@ async def all_conversations():
             'error': r.get('error') or '',
             'read_at': r.get('read_at') or '',
         })
-    return {'conversations': conversations}
+    from fastapi.responses import JSONResponse
+    import json as _json
+    return JSONResponse(
+        content={"conversations": conversations},
+        headers={"Content-Type": "application/json; charset=utf-8"},
+        media_type="application/json; charset=utf-8",
+    )
 
 
 @router.get("/pilot-results")

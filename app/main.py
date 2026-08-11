@@ -8,9 +8,10 @@ from pathlib import Path
 from uuid import uuid4
 import os
 
+import json as _json
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -23,7 +24,12 @@ from .whatsapp import router as whatsapp_router
 from .email_api import router as email_router
 from . import database as db
 
-app = FastAPI(title="Oren Cohen Group — Lead Bot")
+class _UTF8JSONResponse(JSONResponse):
+    def render(self, content) -> bytes:
+        return _json.dumps(content, ensure_ascii=False).encode("utf-8")
+
+
+app = FastAPI(title="Oren Cohen Group — Lead Bot", default_response_class=_UTF8JSONResponse)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://crm.sehel.co.il"],

@@ -55,17 +55,6 @@ def init_db():
     cur = conn.cursor()
 
     if DATABASE_URL:
-        # הוסף עמודות חדשות אם לא קיימות
-        for col, definition in [
-            ("stalled_pushed", "BOOLEAN DEFAULT FALSE"),
-        ]:
-            try:
-                cur.execute(f"ALTER TABLE reengagement_sent ADD COLUMN IF NOT EXISTS {col} {definition}")
-                conn.commit()
-            except Exception:
-                conn.rollback()
-
-    if DATABASE_URL:
         cur.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
@@ -115,9 +104,7 @@ def init_db():
                 agent_email TEXT NOT NULL,
                 replied BOOLEAN DEFAULT FALSE,
                 transcript TEXT,
-                error TEXT DEFAULT '',
-                read_at TIMESTAMPTZ,
-                stalled_pushed BOOLEAN DEFAULT FALSE,
+                greeting TEXT,
                 sent_at TIMESTAMPTZ DEFAULT NOW()
             )
         """)
@@ -166,6 +153,7 @@ def init_db():
                 agent_email TEXT NOT NULL,
                 replied INTEGER DEFAULT 0,
                 transcript TEXT,
+                greeting TEXT,
                 sent_at TEXT DEFAULT CURRENT_TIMESTAMP
             );
         """)
@@ -180,8 +168,6 @@ def init_db():
         ("מיכאל", None, "agent"),
         ("אהרון", None, "agent"),
         ("ליסה", None, "agent"),
-        ("בועז", None, "agent"),
-        ("נתנאל", None, "agent"),
     ]:
         try:
             cur.execute(
@@ -194,23 +180,6 @@ def init_db():
             pass
 
     conn.commit()
-    conn.close()
-
-
-def ensure_agent(name: str):
-    """מוסיף סוכן אם לא קיים."""
-    conn = get_db()
-    cur = conn.cursor()
-    try:
-        cur.execute(
-            f"INSERT INTO users (name, role) VALUES ({PH},{PH}) ON CONFLICT (name) DO NOTHING"
-            if DATABASE_URL else
-            f"INSERT OR IGNORE INTO users (name, role) VALUES ({PH},{PH})",
-            (name, "agent")
-        )
-        conn.commit()
-    except Exception:
-        pass
     conn.close()
 
 
@@ -392,20 +361,20 @@ def get_batch_leads(batch_id: int) -> list:
     return rows
 
 
-def mark_reengagement_sent(phone: str, client_name: str, agent_email: str, batch_id: int | None = None, error: str = "", transcript: str = "") -> None:
+def mark_reengagement_sent(phone: str, client_name: str, agent_email: str, batch_id: int | None = None, greeting: str = "") -> None:
     conn = get_db()
     cur = conn.cursor()
     now = datetime.now(timezone.utc).isoformat()
     if DATABASE_URL:
         cur.execute(
-            "INSERT INTO reengagement_sent (phone, client_name, agent_email, batch_id, sent_at, transcript) VALUES (%s,%s,%s,%s,%s,%s) "
+            "INSERT INTO reengagement_sent (phone, client_name, agent_email, batch_id, sent_at, greeting) VALUES (%s,%s,%s,%s,%s,%s) "
             "ON CONFLICT DO NOTHING",
-            (phone, client_name, agent_email, batch_id, now, transcript)
+            (phone, client_name, agent_email, batch_id, now, greeting)
         )
     else:
         cur.execute(
-            "INSERT OR IGNORE INTO reengagement_sent (phone, client_name, agent_email, batch_id, sent_at, transcript) VALUES (?,?,?,?,?,?)",
-            (phone, client_name, agent_email, batch_id, now, transcript)
+            "INSERT OR IGNORE INTO reengagement_sent (phone, client_name, agent_email, batch_id, sent_at, greeting) VALUES (?,?,?,?,?,?)",
+            (phone, client_name, agent_email, batch_id, now, greeting)
         )
     conn.commit()
     conn.close()
@@ -420,6 +389,15 @@ def update_reengagement_replied(phone: str, replied: bool, transcript: str = "")
     )
     conn.commit()
     conn.close()
+
+
+def get_reengagement_record(phone: str) -> dict | None:
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(f"SELECT * FROM reengagement_sent WHERE phone={PH} ORDER BY sent_at DESC LIMIT 1", (phone,))
+    row = _fetchone(cur)
+    conn.close()
+    return row
 
 
 def get_sent_phones_set(phone: str) -> bool:
@@ -439,127 +417,6 @@ def get_sent_phones(agent_email: str) -> set:
     phones = {row["phone"] for row in _fetchall(cur)}
     conn.close()
     return phones
-
-
-def get_reengagement_record(phone: str) -> dict | None:
-    """מחזיר רשומת reengagement לפי טלפון."""
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute(f"SELECT * FROM reengagement_sent WHERE phone={PH} LIMIT 1", (phone,))
-    row = _fetchone(cur)
-    conn.close()
-    return row
-
-
-_POSITIVE_SIGNALS = ["כן", "yes", "מעוניין", "interested", "רלוונטי", "relevant", "בטח", "sure", "אשמח", "glad", "כמובן", "of course", "יאללה", "אוקי"]
-_NEGATIVE_SIGNALS = ["no thanks", "not interested", "not relevant", "לא רלוונטי", "לא מעוניין", "לא רלוונט", "לא צריך", "לא רוצה", "הסר", "remove", "stop", "unsubscribe"]
-_HANDOFF_SIGNALS = ["יום טוב", "להתראות", "bye", "thank you", "תודה רבה"]
-
-
-def _is_positive_conversation(transcript: str) -> bool:
-    """בודק שהלקוח ענה חיובי לפחות פעם אחת ולא שללי בהמשך."""
-    if not transcript:
-        return False
-    found_positive = False
-    for line in transcript.split("\n"):
-        if not (line.startswith("לקוח:") or line.startswith("Client:")):
-            continue
-        line_lower = line.lower()
-        # אם יש סיגנל שלילי בשורה זו — דלג אותה
-        if any(sig in line_lower for sig in _NEGATIVE_SIGNALS):
-            continue
-        if any(sig in line_lower for sig in _POSITIVE_SIGNALS):
-            found_positive = True
-    return found_positive
-
-
-def get_stalled_conversations(hours: int = 2) -> list:
-    """מחזיר שיחות שהלקוח ענה חיובי אבל לא סיים — לא הועברו לסוכן ולא נשלחו לשכל."""
-    conn = get_db()
-    cur = conn.cursor()
-    if DATABASE_URL:
-        cur.execute("""
-            SELECT * FROM reengagement_sent
-            WHERE replied = TRUE
-            AND stalled_pushed = FALSE
-            AND sent_at < NOW() - INTERVAL '%s hours'
-            AND (transcript NOT LIKE '%%יום טוב%%'
-                 AND transcript NOT LIKE '%%להתראות%%'
-                 AND transcript NOT LIKE '%%bye%%'
-                 AND transcript NOT LIKE '%%thank you%%')
-        """, (hours,))
-    else:
-        cur.execute("""
-            SELECT * FROM reengagement_sent
-            WHERE replied = 1
-            AND stalled_pushed = 0
-            AND sent_at < datetime('now', ? || ' hours')
-            AND (transcript NOT LIKE '%יום טוב%'
-                 AND transcript NOT LIKE '%להתראות%'
-                 AND transcript NOT LIKE '%bye%'
-                 AND transcript NOT LIKE '%thank you%')
-        """, (f"-{hours}",))
-    rows = _fetchall(cur)
-    conn.close()
-    # סנן רק שיחות שבהן הלקוח ענה חיובי לפחות פעם אחת
-    return [r for r in rows if _is_positive_conversation(r.get("transcript", ""))]
-
-
-def mark_stalled_pushed(phone: str) -> None:
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute(
-        f"UPDATE reengagement_sent SET stalled_pushed={PH} WHERE phone={PH}",
-        (True if DATABASE_URL else 1, phone)
-    )
-    conn.commit()
-    conn.close()
-
-
-def get_no_response_conversations(hours: int = 24) -> list:
-    """מחזיר שיחות שלא ענו בכלל אחרי X שעות ועדיין לא עודכנו."""
-    conn = get_db()
-    cur = conn.cursor()
-    if DATABASE_URL:
-        cur.execute("""
-            SELECT * FROM reengagement_sent
-            WHERE replied = FALSE
-            AND stalled_pushed = FALSE
-            AND sent_at < NOW() - INTERVAL '%s hours'
-        """, (hours,))
-    else:
-        cur.execute("""
-            SELECT * FROM reengagement_sent
-            WHERE replied = 0
-            AND stalled_pushed = 0
-            AND sent_at < datetime('now', ? || ' hours')
-        """, (f"-{hours}",))
-    rows = _fetchall(cur)
-    conn.close()
-    return rows
-
-
-def get_no_response_conversations(hours: int = 24) -> list:
-    """מחזיר שיחות שלא ענו בכלל אחרי X שעות ועדיין לא עודכנו בשכל."""
-    conn = get_db()
-    cur = conn.cursor()
-    if DATABASE_URL:
-        cur.execute("""
-            SELECT * FROM reengagement_sent
-            WHERE replied = FALSE
-            AND stalled_pushed = FALSE
-            AND sent_at < NOW() - INTERVAL '%s hours'
-        """, (hours,))
-    else:
-        cur.execute("""
-            SELECT * FROM reengagement_sent
-            WHERE replied = 0
-            AND stalled_pushed = 0
-            AND sent_at < datetime('now', ? || ' hours')
-        """, (f"-{hours}",))
-    rows = _fetchall(cur)
-    conn.close()
-    return rows
 
 
 def get_reengagement_results(agent_email: str) -> list:
