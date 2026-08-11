@@ -184,8 +184,7 @@ def log_call_summary(phone: str, summary: str, *, dry_run: bool = False) -> dict
         "callSummary": summary[:2000],
         "callDirection": "outgoing",
     }
-    target = WEBHOOK_URL or SEHEL_URL
-    resp = httpx.post(target, json=payload, timeout=15)
+    resp = httpx.post(SEHEL_URL, json=payload, timeout=15)
     return resp.json()
 
 
