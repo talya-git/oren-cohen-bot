@@ -427,12 +427,19 @@ async def whatsapp_webhook(request: Request):
 
 @router.post("/send-message")
 async def send_free_message(request: Request):
+    from . import database as _db
     data = await request.json()
     phone = str(data.get("phone", "")).strip()
     message = str(data.get("message", "")).strip()
     if not phone or not message:
         return {"status": "error", "reason": "phone and message required"}
     result = send_message(phone, message)
+    # עדכון התמליל ב-DB
+    record = _db.get_reengagement_record(phone)
+    if record:
+        existing = record.get("transcript") or ""
+        updated = existing + f"\nDaniel: {message}"
+        _db.update_reengagement_replied(phone, bool(record.get("replied")), updated.strip())
     return {"status": "sent", "result": result}
 
 
