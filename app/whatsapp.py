@@ -548,11 +548,18 @@ async def all_conversations():
             'error': r.get('error') or '',
             'read_at': _str(r.get('read_at')),
         })
-    from fastapi.responses import JSONResponse
+    from fastapi.responses import Response
     import json as _json
-    return JSONResponse(
-        content={"conversations": conversations},
-        headers={"Content-Type": "application/json; charset=utf-8"},
+    from datetime import datetime, date
+
+    class _DTEncoder(_json.JSONEncoder):
+        def default(self, o):
+            if isinstance(o, (datetime, date)):
+                return o.isoformat()
+            return super().default(o)
+
+    return Response(
+        content=_json.dumps({"conversations": conversations}, cls=_DTEncoder, ensure_ascii=False),
         media_type="application/json; charset=utf-8",
     )
 
