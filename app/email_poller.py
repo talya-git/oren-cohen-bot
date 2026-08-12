@@ -12,6 +12,7 @@ CLIENT_SECRET = os.getenv("AZURE_CLIENT_SECRET", "")
 BOT_EMAIL = os.getenv("BOT_EMAIL", "daniel@orencohengroup.com")
 
 _access_token: str | None = None
+_processed_ids: set = set()  # message IDs שכבר טופלו
 
 
 def _get_token() -> str:
@@ -71,6 +72,10 @@ def poll_inbox():
 
     for msg in result.get("value", []):
         msg_id = msg["id"]
+
+        if msg_id in _processed_ids:
+            continue
+        _processed_ids.add(msg_id)
         sender = msg.get("from", {}).get("emailAddress", {})
         from_email = sender.get("address", "").lower()
         from_name = sender.get("name", "")
