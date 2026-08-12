@@ -87,12 +87,22 @@ def poll_inbox():
         text = re.sub(r"<[^>]+>", " ", body_content).strip()
         text = re.sub(r"\s+", " ", text).strip()
 
-        # חיתוך ה-quote של המייל הקודם
-        for marker in ["מאת:", "From:", "-----Original", "________________________________", "On ", "\n>"]:
+        # חיתוך ה-quote של המייל הקודם — חיתוך אגרסיבי
+        cut_markers = [
+            "מאת:", "From:", "-----Original", "________________________________",
+            "On ", "\n>", "wrote:", "כתב:", "נשלח:", "Sent:",
+            "daniel@orencohengroup", "Daniel@orencohengroup",
+        ]
+        earliest = len(text)
+        for marker in cut_markers:
             idx = text.find(marker)
-            if idx > 20:
-                text = text[:idx].strip()
-                break
+            if 0 < idx < earliest:
+                earliest = idx
+        if earliest > 5:
+            text = text[:earliest].strip()
+
+        # נקה רווחים מיותרים
+        text = re.sub(r"\s+", " ", text).strip()
 
         if not from_email or from_email == BOT_EMAIL.lower() or "mailjet.com" in from_email or "noreply" in from_email:
             _mark_read(msg_id)
