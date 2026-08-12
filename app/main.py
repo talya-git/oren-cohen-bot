@@ -111,6 +111,21 @@ async def start_stalled_scheduler():
 
 
 @app.on_event("startup")
+async def start_email_poller():
+    import asyncio
+    async def _email_poll_loop():
+        await asyncio.sleep(10)  # המתן לאתחול
+        while True:
+            try:
+                from .email_poller import poll_inbox
+                poll_inbox()
+            except Exception as e:
+                print(f"[EMAIL POLLER ERROR] {e}")
+            await asyncio.sleep(30)
+    asyncio.create_task(_email_poll_loop())
+
+
+@app.on_event("startup")
 async def start_no_response_scheduler():
     import asyncio
     async def _no_response_scheduler():
