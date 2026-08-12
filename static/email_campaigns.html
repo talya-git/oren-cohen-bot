@@ -330,6 +330,39 @@
   </div>
 </div>
 
+  <!-- שיחות מייל -->
+  <div class="section">
+    <div class="section-title">📬 שיחות מייל פעילות</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>שם</th>
+            <th>מייל</th>
+            <th>סוכן</th>
+            <th>תאריך שליחה</th>
+            <th>ענה?</th>
+            <th>תמליל</th>
+          </tr>
+        </thead>
+        <tbody id="email-conv-tbody"><tr><td colspan="6" style="text-align:center;color:#9ca3af">טוען...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal תמליל -->
+<div class="modal-overlay" id="transcript-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>📧 תמליל שיחת מייל</h3>
+      <button class="modal-close" onclick="document.getElementById('transcript-modal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body" id="transcript-body" style="white-space:pre-wrap;font-size:13px;line-height:1.7"></div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 const API = '';
@@ -559,6 +592,40 @@ async function sendAll() {
   renderLeads();
   updateStats();
 }
+
+// === שיחות מייל ===
+async function loadEmailConversations() {
+  try {
+    const res = await fetch('/api/email/sent');
+    const data = await res.json();
+    const tbody = document.getElementById('email-conv-tbody');
+    if (!data.conversations || !data.conversations.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#9ca3af">אין שיחות עדיין</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.conversations.map(c => {
+      const email = (c.phone || '').replace('email:', '');
+      const replied = c.replied ? '<span class="s-sent">ענה ✓</span>' : '<span class="s-pending">לא ענה</span>';
+      const date = c.sent_at ? new Date(c.sent_at).toLocaleString('he-IL') : '—';
+      const transcript = (c.transcript || '').replace(/"/g, '&quot;').replace(/`/g, "'");
+      return `<tr>
+        <td><strong>${c.client_name || '—'}</strong></td>
+        <td style="direction:ltr">${email}</td>
+        <td style="font-size:12px;color:#6b7280">${c.agent_email || '—'}</td>
+        <td style="font-size:12px">${date}</td>
+        <td>${replied}</td>
+        <td><button class="btn btn-secondary" style="padding:4px 10px;font-size:12px" onclick="showTranscript(this.dataset.t)" data-t="${transcript}">📄 צפה</button></td>
+      </tr>`;
+    }).join('');
+  } catch(e) { console.error(e); }
+}
+
+function showTranscript(text) {
+  document.getElementById('transcript-body').textContent = text || 'אין תמליל';
+  document.getElementById('transcript-modal').classList.add('open');
+}
+
+loadEmailConversations();
 </script>
 </body>
 </html>
