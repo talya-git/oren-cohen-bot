@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מרכז תקשורת | אורן כהן גרופ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+  }
+  .logo {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .subtitle {
+    font-size: 14px;
+    color: #a5b4fc;
+    margin-bottom: 56px;
+  }
+  .cards {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    padding: 40px 36px;
+    width: 260px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-decoration: none;
+    color: #fff;
+    backdrop-filter: blur(10px);
+  }
+  .card:hover {
+    background: rgba(255,255,255,0.14);
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+    border-color: rgba(255,255,255,0.3);
+  }
+  .card-icon { font-size: 52px; margin-bottom: 20px; }
+  .card-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+  .card-desc { font-size: 13px; color: #c4b5fd; line-height: 1.6; }
+  .card-badge {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: bold;
+  }
+  .badge-wa { background: #dcfce7; color: #166534; }
+  .badge-email { background: #e0e7ff; color: #3730a3; }
+  .footer { margin-top: 60px; font-size: 12px; color: #6b7280; }
+</style>
+</head>
+<body>
+
+<div class="logo">🏢 אורן כהן גרופ</div>
+<div class="subtitle">מרכז תקשורת — בחר ערוץ</div>
+
+<div class="cards">
+  <a class="card" href="/conversations">
+    <div class="card-icon">💬</div>
+    <div class="card-title">שיחות WhatsApp</div>
+    <div class="card-desc">צפייה בשיחות הבוט בזמן אמת, סטטוסים, תמלילים והעברה לסוכן</div>
+    <span class="card-badge badge-wa">עדכון בזמן אמת</span>
+  </a>
+
+  <a class="card" href="/email-campaigns">
+    <div class="card-icon">📧</div>
+    <div class="card-title">קמפיין מייל</div>
+    <div class="card-desc">העלאת רשימת לקוחות משכל, עריכת הודעה ושליחת מיילים מותאמים אישית</div>
+    <span class="card-badge badge-email">שליחה חכמה</span>
+  </a>
+</div>
+
+<div class="footer">Oren Cohen Group © 2025</div>
+
+</body>
+</html>

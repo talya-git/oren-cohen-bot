@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>קמפיין מייל | אורן כהן גרופ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #f0f2f5; color: #222; }
+
+  .header {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: #fff;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .header h1 { font-size: 20px; }
+  .header-nav { display: flex; gap: 12px; align-items: center; }
+  .btn-nav {
+    padding: 7px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    text-decoration: none;
+  }
+  .btn-nav:hover { background: rgba(255,255,255,0.2); }
+
+  .main { padding: 24px; max-width: 900px; margin: 0 auto; }
+
+  .section {
+    background: #fff;
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .section-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    color: #1a1a2e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Upload */
+  .upload-area {
+    border: 2px dashed #c7d2fe;
+    border-radius: 12px;
+    padding: 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #f8f9ff;
+  }
+  .upload-area:hover { border-color: #6366f1; background: #eef2ff; }
+  .upload-area.dragover { border-color: #6366f1; background: #eef2ff; }
+  .upload-icon { font-size: 36px; margin-bottom: 10px; }
+  .upload-text { font-size: 14px; color: #6b7280; }
+  .upload-text strong { color: #6366f1; }
+  #file-input { display: none; }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead { background: #1a1a2e; color: #fff; }
+  th { padding: 10px 12px; text-align: right; font-weight: 600; }
+  td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+  tr:hover td { background: #f8faff; }
+  tr:last-child td { border-bottom: none; }
+
+  input[type="text"], input[type="email"], textarea {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 13px;
+    outline: none;
+    font-family: Arial, sans-serif;
+  }
+  input[type="text"]:focus, input[type="email"]:focus, textarea:focus {
+    border-color: #6366f1;
+  }
+
+  .checkbox-col { width: 36px; text-align: center; }
+  input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+
+  /* Message editor */
+  textarea#msg-template {
+    min-height: 140px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+  .hint { font-size: 12px; color: #9ca3af; margin-top: 6px; }
+
+  /* Buttons */
+  .btn {
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: #6366f1; color: #fff; }
+  .btn-primary:hover { background: #4f46e5; }
+  .btn-primary:disabled { background: #c7d2fe; cursor: not-allowed; }
+  .btn-secondary { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
+  .btn-secondary:hover { background: #e5e7eb; }
+  .btn-danger { background: #fee2e2; color: #991b1b; }
+  .btn-danger:hover { background: #fecaca; }
+
+  .actions-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+  .selected-count { font-size: 13px; color: #6b7280; }
+
+  /* Status badges */
+  .s-pending { background: #fef9c3; color: #854d0e; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+  .s-sent { background: #dcfce7; color: #166534; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+  .s-error { background: #fee2e2; color: #991b1b; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+
+  /* Preview modal */
+  .modal-overlay {
+    display: none;
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: 14px;
+    width: 680px;
+    max-width: 95vw;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  }
+  .modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1a1a2e;
+    border-radius: 14px 14px 0 0;
+    color: #fff;
+  }
+  .modal-header h3 { font-size: 16px; }
+  .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #fff; }
+  .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+  .modal-footer { padding: 16px 20px; border-top: 1px solid #e5e7eb; display: flex; gap: 10px; justify-content: flex-end; }
+
+  .preview-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f3f4f6;
+    gap: 12px;
+    font-size: 13px;
+  }
+  .preview-row:last-child { border-bottom: none; }
+  .preview-name { font-weight: bold; min-width: 120px; }
+  .preview-email { color: #6b7280; min-width: 180px; direction: ltr; }
+  .preview-status { margin-right: auto; }
+
+  .progress-bar {
+    height: 6px;
+    background: #e5e7eb;
+    border-radius: 3px;
+    margin-top: 12px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #6366f1;
+    border-radius: 3px;
+    transition: width 0.3s;
+    width: 0%;
+  }
+
+  .empty-state { text-align: center; padding: 40px; color: #9ca3af; }
+  .empty-icon { font-size: 40px; margin-bottom: 10px; }
+
+  .stats { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+  .stat-box {
+    background: #f8f9ff;
+    border: 1px solid #e0e7ff;
+    border-radius: 10px;
+    padding: 12px 20px;
+    text-align: center;
+    min-width: 100px;
+  }
+  .stat-num { font-size: 22px; font-weight: bold; color: #4338ca; }
+  .stat-label { font-size: 11px; color: #6b7280; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📧 קמפיין מייל — אורן כהן גרופ</h1>
+  <div class="header-nav">
+    <a class="btn-nav" href="/conversations">💬 WhatsApp</a>
+    <a class="btn-nav" href="/hub">🏠 בית</a>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- שלב 1: העלאת קובץ -->
+  <div class="section">
+    <div class="section-title">📂 שלב 1 — העלאת רשימת לקוחות מאקסל</div>
+    <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
+      <div class="upload-icon">📊</div>
+      <div class="upload-text">
+        <strong>לחץ להעלאת קובץ</strong> או גרור לכאן<br>
+        קובץ Excel (.xlsx) מיוצא משכל — עמודות: שם, טלפון, מייל, פרויקט
+      </div>
+    </div>
+    <input type="file" id="file-input" accept=".xlsx,.xls,.csv">
+  </div>
+
+  <!-- שלב 2: עריכת הודעה -->
+  <div class="section" id="section-message" style="display:none">
+    <div class="section-title">✏️ שלב 2 — עריכת הודעת המייל</div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:13px;font-weight:bold;display:block;margin-bottom:6px;">נושא המייל</label>
+      <input type="text" id="email-subject" value="הזדמנויות נדל&quot;ן בירושלים — אורן כהן גרופ">
+    </div>
+    <div>
+      <label style="font-size:13px;font-weight:bold;display:block;margin-bottom:6px;">תוכן ההודעה</label>
+      <textarea id="msg-template">היי {name},
+
+כאן דניאל מאורן כהן גרופ בירושלים.
+אני פונה אליך בהמשך לפנייתך למשרדנו בעבר.
+
+בימים אלו אנחנו מרכזים עבור לקוחותינו מספר הזדמנויות נדל"ן מיוחדות בפרויקטים עתידיים בירושלים בתנאים אטרקטיביים שלא מוצעים לציבור הרחב.
+
+מאחר וחיפשת משהו דומה בעבר, חשבתי שנכון יהיה לעדכן אותך לפני כולם.
+
+האם הנושא עדיין רלוונטי עבורך?
+
+בברכה,
+דניאל
+אורן כהן גרופ</textarea>
+      <div class="hint">השתמש ב-{name} להוספת שם הלקוח אוטומטית</div>
+    </div>
+  </div>
+
+  <!-- שלב 3: רשימת לקוחות -->
+  <div class="section" id="section-list" style="display:none">
+    <div class="section-title">👥 שלב 3 — בחירת לקוחות לשליחה</div>
+
+    <div class="stats" id="stats-bar"></div>
+
+    <div style="display:flex;gap:10px;margin-bottom:12px;align-items:center;flex-wrap:wrap;">
+      <input type="text" id="search-leads" placeholder="חיפוש שם / מייל..." style="max-width:240px;">
+      <button class="btn btn-secondary" onclick="selectAll(true)">בחר הכל</button>
+      <button class="btn btn-secondary" onclick="selectAll(false)">בטל הכל</button>
+      <button class="btn btn-secondary" onclick="selectOnlyWithEmail()">רק עם מייל</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="checkbox-col"><input type="checkbox" id="check-all" onchange="selectAll(this.checked)"></th>
+            <th>שם</th>
+            <th>מייל</th>
+            <th>פרויקט</th>
+            <th>סוכן</th>
+            <th>סטטוס</th>
+          </tr>
+        </thead>
+        <tbody id="leads-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="empty-state" id="leads-empty" style="display:none">
+      <div class="empty-icon">📭</div>
+      <p>לא נמצאו לקוחות</p>
+    </div>
+
+    <div class="actions-bar">
+      <span class="selected-count" id="selected-count">0 נבחרו</span>
+      <button class="btn btn-primary" id="btn-preview" onclick="openPreview()" disabled>
+        👁️ תצוגה מקדימה ושליחה
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal תצוגה מקדימה -->
+<div class="modal-overlay" id="preview-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>📧 תצוגה מקדימה — לפני שליחה</h3>
+      <button class="modal-close" onclick="closePreview()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="preview-list"></div>
+      <div class="progress-bar" id="progress-bar" style="display:none">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div id="send-result" style="margin-top:12px;font-size:13px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closePreview()" id="btn-cancel-preview">ביטול</button>
+      <button class="btn btn-primary" id="btn-send-all" onclick="sendAll()">
+        📤 שלח לכולם
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+const API = '';
+let leads = [];
+let filteredLeads = [];
+
+// === העלאת קובץ ===
+const uploadArea = document.getElementById('upload-area');
+const fileInput = document.getElementById('file-input');
+
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+uploadArea.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadArea.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+});
+fileInput.addEventListener('change', e => {
+  if (e.target.files[0]) processFile(e.target.files[0]);
+});
+
+function processFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const wb = XLSX.read(e.target.result, { type: 'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+    leads = rows.map((r, i) => {
+      // זיהוי עמודות גמיש
+      const name = r['שם'] || r['name'] || r['Name'] || r['שם לשליחה'] || '';
+      const email = r['מייל'] || r['email'] || r['Email'] || r['email1'] || '';
+      const project = r['פרויקט'] || r['project'] || r['Project'] || '';
+      const agent = r['סוכן'] || r['agent'] || r['Agent'] || '';
+      const phone = r['טלפון'] || r['טלפון 1'] || r['phone'] || r['phone1'] || '';
+      return { id: i, name, email, project, agent, phone, selected: !!email, status: 'pending' };
+    }).filter(r => r.name);
+
+    filteredLeads = [...leads];
+    renderLeads();
+    updateStats();
+    document.getElementById('section-message').style.display = 'block';
+    document.getElementById('section-list').style.display = 'block';
+    uploadArea.innerHTML = `<div class="upload-icon">✅</div><div class="upload-text"><strong>${file.name}</strong> — ${leads.length} לקוחות נטענו</div>`;
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// === רינדור טבלה ===
+function renderLeads() {
+  const search = document.getElementById('search-leads').value.toLowerCase();
+  filteredLeads = leads.filter(l =>
+    !search || l.name.toLowerCase().includes(search) || l.email.toLowerCase().includes(search)
+  );
+
+  const tbody = document.getElementById('leads-tbody');
+  const empty = document.getElementById('leads-empty');
+
+  if (!filteredLeads.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filteredLeads.map(l => `
+    <tr>
+      <td class="checkbox-col">
+        <input type="checkbox" ${l.selected ? 'checked' : ''} ${!l.email ? 'disabled' : ''}
+          onchange="toggleSelect(${l.id}, this.checked)">
+      </td>
+      <td><strong>${l.name}</strong></td>
+      <td>
+        <input type="email" value="${l.email}" placeholder="הזן מייל..."
+          onchange="updateEmail(${l.id}, this.value)"
+          style="direction:ltr;${!l.email ? 'border-color:#fca5a5;' : ''}">
+      </td>
+      <td style="color:#6b7280;font-size:12px">${l.project || '—'}</td>
+      <td style="color:#6b7280;font-size:12px">${l.agent || '—'}</td>
+      <td>${getStatusBadge(l.status)}</td>
+    </tr>
+  `).join('');
+
+  updateSelectedCount();
+}
+
+function getStatusBadge(status) {
+  if (status === 'sent') return '<span class="s-sent">נשלח ✓</span>';
+  if (status === 'error') return '<span class="s-error">שגיאה ✗</span>';
+  return '<span class="s-pending">ממתין</span>';
+}
+
+function toggleSelect(id, checked) {
+  const lead = leads.find(l => l.id === id);
+  if (lead) lead.selected = checked;
+  updateSelectedCount();
+  updateStats();
+}
+
+function updateEmail(id, email) {
+  const lead = leads.find(l => l.id === id);
+  if (lead) {
+    lead.email = email;
+    lead.selected = !!email;
+  }
+  updateSelectedCount();
+  updateStats();
+}
+
+function selectAll(checked) {
+  leads.forEach(l => { if (l.email) l.selected = checked; });
+  renderLeads();
+  updateStats();
+}
+
+function selectOnlyWithEmail() {
+  leads.forEach(l => { l.selected = !!l.email; });
+  renderLeads();
+  updateStats();
+}
+
+function updateSelectedCount() {
+  const count = leads.filter(l => l.selected && l.email).length;
+  document.getElementById('selected-count').textContent = `${count} נבחרו`;
+  document.getElementById('btn-preview').disabled = count === 0;
+}
+
+function updateStats() {
+  const total = leads.length;
+  const withEmail = leads.filter(l => l.email).length;
+  const selected = leads.filter(l => l.selected && l.email).length;
+  const sent = leads.filter(l => l.status === 'sent').length;
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat-box"><div class="stat-num">${total}</div><div class="stat-label">סה"כ לקוחות</div></div>
+    <div class="stat-box"><div class="stat-num">${withEmail}</div><div class="stat-label">עם מייל</div></div>
+    <div class="stat-box"><div class="stat-num">${selected}</div><div class="stat-label">נבחרו</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:#166534">${sent}</div><div class="stat-label">נשלחו</div></div>
+  `;
+}
+
+document.getElementById('search-leads').addEventListener('input', renderLeads);
+
+// === תצוגה מקדימה ===
+function openPreview() {
+  const selected = leads.filter(l => l.selected && l.email);
+  const subject = document.getElementById('email-subject').value;
+  const template = document.getElementById('msg-template').value;
+
+  document.getElementById('preview-list').innerHTML = selected.map(l => {
+    const msg = template.replace(/{name}/g, l.name.split(' ')[0] || l.name);
+    return `
+      <div class="preview-row">
+        <div class="preview-name">${l.name}</div>
+        <div class="preview-email">${l.email}</div>
+        <div style="font-size:12px;color:#6b7280;flex:1">${l.project || ''}</div>
+        <div class="preview-status" id="ps-${l.id}">${getStatusBadge(l.status)}</div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('progress-bar').style.display = 'none';
+  document.getElementById('send-result').innerHTML = '';
+  document.getElementById('btn-send-all').disabled = false;
+  document.getElementById('btn-send-all').textContent = `📤 שלח ל-${selected.length} לקוחות`;
+  document.getElementById('preview-modal').classList.add('open');
+}
+
+function closePreview() {
+  document.getElementById('preview-modal').classList.remove('open');
+}
+
+// === שליחה ===
+async function sendAll() {
+  const selected = leads.filter(l => l.selected && l.email);
+  const subject = document.getElementById('email-subject').value;
+  const template = document.getElementById('msg-template').value;
+
+  document.getElementById('btn-send-all').disabled = true;
+  document.getElementById('btn-cancel-preview').disabled = true;
+  document.getElementById('progress-bar').style.display = 'block';
+
+  let sent = 0, failed = 0;
+
+  for (let i = 0; i < selected.length; i++) {
+    const l = selected[i];
+    const firstName = l.name.split(' ')[0] || l.name;
+    const message = template.replace(/{name}/g, firstName);
+
+    try {
+      const res = await fetch(`${API}/api/email/start-reengagement`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: l.email,
+          name: l.name,
+          project_name: l.project || '',
+          custom_subject: subject,
+          custom_message: message,
+        })
+      });
+      const data = await res.json();
+      if (data.status === 'sent' || data.status === 'duplicate') {
+        l.status = 'sent';
+        sent++;
+      } else {
+        l.status = 'error';
+        failed++;
+      }
+    } catch {
+      l.status = 'error';
+      failed++;
+    }
+
+    // עדכון UI
+    const el = document.getElementById(`ps-${l.id}`);
+    if (el) el.innerHTML = getStatusBadge(l.status);
+    document.getElementById('progress-fill').style.width = `${((i+1)/selected.length)*100}%`;
+    await new Promise(r => setTimeout(r, 300));
+  }
+
+  document.getElementById('send-result').innerHTML =
+    `<strong style="color:#166534">✅ נשלחו: ${sent}</strong>&nbsp;&nbsp;` +
+    (failed ? `<strong style="color:#991b1b">❌ נכשלו: ${failed}</strong>` : '');
+  document.getElementById('btn-cancel-preview').disabled = false;
+  document.getElementById('btn-cancel-preview').textContent = 'סגור';
+  renderLeads();
+  updateStats();
+}
+</script>
+</body>
+</html>

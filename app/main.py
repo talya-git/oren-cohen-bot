@@ -149,6 +149,16 @@ def conversations_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "conversations.html")
 
 
+@app.get("/hub")
+def hub_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "hub.html")
+
+
+@app.get("/email-campaigns")
+def email_campaigns_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "email_campaigns.html")
+
+
 @app.get("/")
 @app.head("/")
 def home() -> FileResponse:
