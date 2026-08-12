@@ -58,6 +58,7 @@ def init_db():
         # הוסף עמודות חדשות אם לא קיימות
         for col, definition in [
             ("stalled_pushed", "BOOLEAN DEFAULT FALSE"),
+            ("handoff", "BOOLEAN DEFAULT FALSE"),
         ]:
             try:
                 cur.execute(f"ALTER TABLE reengagement_sent ADD COLUMN IF NOT EXISTS {col} {definition}")
@@ -417,6 +418,17 @@ def update_reengagement_replied(phone: str, replied: bool, transcript: str = "")
     cur.execute(
         f"UPDATE reengagement_sent SET replied={PH}, transcript={PH} WHERE phone={PH}",
         (replied, transcript, phone)
+    )
+    conn.commit()
+    conn.close()
+
+
+def mark_reengagement_handoff(phone: str) -> None:
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(
+        f"UPDATE reengagement_sent SET handoff={PH} WHERE phone={PH}",
+        (True if DATABASE_URL else 1, phone)
     )
     conn.commit()
     conn.close()

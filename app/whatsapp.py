@@ -427,7 +427,6 @@ async def whatsapp_webhook(request: Request):
             )
             payload["tags[]"] = payload.get("tags[]", []) + ["בוט"]
             sehel.push_lead(payload, dry_run=dry)
-            # סיכום שיחה לכרטיס הישן
             transcript_text = "\n".join(
                 f"{'\u05d3\u05e0\u05d9\u05d0\u05dc' if m['role']=='assistant' else '\u05dc\u05e7\u05d5\u05d7'}: {m['content']}"
                 for m in convo.messages if m.get('role') in ('assistant','user')
@@ -439,6 +438,7 @@ async def whatsapp_webhook(request: Request):
             )
         except Exception as e:
             print(f"[SEHEL ERROR] {e}")
+        _db.mark_reengagement_handoff(f"+{phone}")
         del _wa_sessions[phone]
 
     return {"status": "ok"}
@@ -517,13 +517,7 @@ async def all_conversations():
         SELECT rs.phone, rs.client_name, rs.agent_email, rs.replied, rs.transcript, rs.sent_at,
                rs.read_at,
                rb.agent_label,
-               CASE WHEN (rs.transcript LIKE '%יום טוב%' OR rs.transcript LIKE '%להתראות%'
-                    OR rs.transcript LIKE '%bye%' OR rs.transcript LIKE '%thank you%')
-                    AND rs.transcript NOT LIKE '%לא רלוונטי%'
-                    AND rs.transcript NOT LIKE '%לא עכשיו%'
-                    AND rs.transcript NOT LIKE '%סליחה על ההטרדה%'
-                    AND rs.transcript NOT LIKE '%אחזור אליך%'
-                    THEN true ELSE false END as handoff
+               rs.handoff
         FROM reengagement_sent rs
         LEFT JOIN reengagement_batches rb ON rs.batch_id = rb.id
         ORDER BY rs.sent_at DESC
