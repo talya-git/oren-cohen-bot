@@ -608,6 +608,152 @@
         }
     }
 
+    async function sendEmailSelected() {
+        const checkboxes = document.querySelectorAll('.wl-cb:checked');
+        if (!checkboxes.length) { alert('לא נבחרו לידים'); return; }
+
+        const selectedLeads = [];
+        for (const cb of checkboxes) {
+            const lead = wl_leads[parseInt(cb.dataset.idx)];
+            if (!lead) continue;
+            const div = document.createElement('div');
+            div.innerHTML = lead.projectNameHtml || '';
+            const project = div.querySelector('.label')?.innerText?.trim() || '';
+            const nameInput = document.querySelector(`.wl-name-edit[data-idx="${cb.dataset.idx}"]`);
+            const name = nameInput ? nameInput.value.trim() || lead.name1 || '' : lead.name1 || '';
+            selectedLeads.push({ name, email: lead.email1 || '', phone: normalizePhone(lead.phone1), project });
+        }
+
+        const existing = document.getElementById('email-confirm-overlay');
+        if (existing) existing.remove();
+
+        const confirmOverlay = document.createElement('div');
+        confirmOverlay.id = 'email-confirm-overlay';
+        confirmOverlay.style.cssText = `position:fixed;top:0;left:0;width:100%;height:100%;
+            background:rgba(0,0,0,0.6);z-index:999999;display:flex;align-items:center;justify-content:center;`;
+
+        const defaultMsg = `היי {name},\n\nכאן דניאל מאורן כהן גרופ בירושלים.\nאני פונה אליך בהמשך לפנייתך למשרדנו בעבר.\n\nבימים אלו אנחנו מרכזים עבור לקוחותינו מספר הזדמנויות נדל"ן מיוחדות בפרויקטים עתידיים בירושלים.\n\nהאם הנושא עדיין רלוונטי עבורך?\n\nבברכה,\nדניאל\nאורן כהן גרופ`;
+
+        confirmOverlay.innerHTML = `
+            <div style="background:#fff;border-radius:14px;width:640px;max-width:95vw;
+                        max-height:88vh;overflow-y:auto;direction:rtl;font-family:Arial,sans-serif;
+                        box-shadow:0 12px 40px rgba(0,0,0,0.3);">
+                <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;
+                            padding:16px 20px;border-radius:14px 14px 0 0;
+                            display:flex;justify-content:space-between;align-items:center;">
+                    <strong style="font-size:16px;">📧 אישור שליחת מייל — ${selectedLeads.length} לקוחות</strong>
+                    <button id="email-confirm-close" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;">✕</button>
+                </div>
+                <div style="padding:20px;">
+                    <div style="margin-bottom:12px;">
+                        <label style="font-size:13px;font-weight:bold;display:block;margin-bottom:6px;">נושא המייל</label>
+                        <input id="email-subject-input" type="text" value="הזדמנויות נדל&quot;ן בירושלים — אורן כהן גרופ"
+                            style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+                    </div>
+                    <div style="margin-bottom:14px;">
+                        <label style="font-size:13px;font-weight:bold;display:block;margin-bottom:6px;">תוכן <span style="color:#9ca3af;font-weight:normal;">({name} = שם אישי)</span></label>
+                        <textarea id="email-msg-input"
+                            style="width:100%;height:120px;padding:8px 12px;border:1px solid #ddd;
+                                   border-radius:8px;font-size:13px;resize:vertical;line-height:1.6;">${defaultMsg}</textarea>
+                    </div>
+                    <div style="max-height:200px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:14px;">
+                        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                            <thead style="background:#f8f9fa;position:sticky;top:0;">
+                                <tr>
+                                    <th style="padding:8px 10px;text-align:right;border-bottom:1px solid #e5e7eb;">שם</th>
+                                    <th style="padding:8px 10px;text-align:right;border-bottom:1px solid #e5e7eb;">מייל</th>
+                                    <th style="padding:8px 10px;text-align:right;border-bottom:1px solid #e5e7eb;">פרויקט</th>
+                                    <th style="padding:8px 10px;text-align:center;border-bottom:1px solid #e5e7eb;">סטטוס</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${selectedLeads.map((l, i) => `
+                                    <tr style="border-bottom:1px solid #f3f4f6;">
+                                        <td style="padding:7px 10px;">${l.name || '—'}</td>
+                                        <td style="padding:7px 10px;">
+                                            <input type="email" class="email-addr-input" data-idx="${i}"
+                                                value="${l.email}" placeholder="הזן מייל..."
+                                                style="width:100%;padding:4px 8px;border:1px solid ${l.email ? '#ddd' : '#fca5a5'};
+                                                       border-radius:6px;font-size:12px;direction:ltr;">
+                                        </td>
+                                        <td style="padding:7px 10px;color:#6b7280;font-size:12px;">${l.project || 'יד 2'}</td>
+                                        <td style="padding:7px 10px;text-align:center;" id="email-status-${i}">
+                                            <span style="background:#fef9c3;color:#854d0e;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:bold;">ממתין</span>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="email-progress-wrap" style="display:none;margin-bottom:10px;">
+                        <div style="background:#e5e7eb;border-radius:4px;height:6px;">
+                            <div id="email-progress-bar" style="background:#6366f1;height:6px;border-radius:4px;width:0%;transition:width 0.3s;"></div>
+                        </div>
+                    </div>
+                    <div id="email-send-result" style="display:none;padding:10px;border-radius:8px;font-size:13px;text-align:center;"></div>
+                    <div style="display:flex;gap:10px;justify-content:flex-end;">
+                        <button id="email-confirm-cancel" style="padding:10px 20px;background:#f3f4f6;
+                            border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;">ביטול</button>
+                        <button id="email-confirm-send" style="padding:10px 24px;background:#6366f1;
+                            color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:bold;">
+                            📤 שלח מיילים
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(confirmOverlay);
+        document.getElementById('email-confirm-close').onclick = () => confirmOverlay.remove();
+        document.getElementById('email-confirm-cancel').onclick = () => confirmOverlay.remove();
+
+        document.getElementById('email-confirm-send').onclick = async () => {
+            const subject = document.getElementById('email-subject-input').value;
+            const template = document.getElementById('email-msg-input').value;
+            const sendBtn = document.getElementById('email-confirm-send');
+            const cancelBtn = document.getElementById('email-confirm-cancel');
+            sendBtn.disabled = true; sendBtn.textContent = '⏳ שולח...';
+            cancelBtn.disabled = true;
+            document.getElementById('email-progress-wrap').style.display = 'block';
+            let sent = 0, failed = 0;
+            for (let i = 0; i < selectedLeads.length; i++) {
+                const l = selectedLeads[i];
+                const emailInput = document.querySelector(`.email-addr-input[data-idx="${i}"]`);
+                const email = emailInput ? emailInput.value.trim() : l.email;
+                const statusEl = document.getElementById(`email-status-${i}`);
+                if (!email) {
+                    if (statusEl) statusEl.innerHTML = '<span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:bold;">אין מייל</span>';
+                    failed++; continue;
+                }
+                const message = template.replace(/{name}/g, l.name.split(' ')[0] || l.name);
+                try {
+                    const res = await fetch(`${BOT_URL}/api/email/start-reengagement`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, name: l.name, project_name: l.project || '',
+                            agent_email: wl_agent.email, custom_subject: subject, custom_message: message })
+                    });
+                    const data = await res.json();
+                    if (data.status === 'sent' || data.status === 'duplicate') {
+                        sent++;
+                        if (statusEl) statusEl.innerHTML = '<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:bold;">נשלח ✓</span>';
+                    } else { failed++; if (statusEl) statusEl.innerHTML = '<span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:bold;">שגיאה ✗</span>'; }
+                } catch(e) {
+                    failed++; if (statusEl) statusEl.innerHTML = '<span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:bold;">שגיאה ✗</span>';
+                }
+                document.getElementById('email-progress-bar').style.width = `${((i+1)/selectedLeads.length)*100}%`;
+                await sleep(300);
+            }
+            const resultEl = document.getElementById('email-send-result');
+            resultEl.style.display = 'block';
+            resultEl.style.background = failed === 0 ? '#dcfce7' : '#fef9c3';
+            resultEl.style.color = failed === 0 ? '#166534' : '#854d0e';
+            resultEl.innerHTML = `<strong>✅ נשלחו: ${sent}</strong>${failed ? `&nbsp;&nbsp;<strong>❌ נכשלו: ${failed}</strong>` : ''}`;
+            sendBtn.disabled = false; sendBtn.textContent = '✓ הסתיים';
+            cancelBtn.disabled = false; cancelBtn.textContent = 'סגור';
+        };
+    }
+
     async function sendWlSelected() {
         const checkboxes = document.querySelectorAll('.wl-cb:checked');
         if (!checkboxes.length) { alert('לא נבחרו לידים'); return; }
@@ -774,6 +920,10 @@
                             color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:bold;">
                             📤 שלח מסומנים / Send Selected
                         </button>
+                        <button id="wl-send-email-btn" style="flex:1;padding:10px;background:#6366f1;
+                            color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:bold;">
+                            📧 שלח מייל
+                        </button>
                         <button id="wl-next-btn" style="flex:1;padding:10px;background:#007bff;
                             color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;">
                             ⏭ 20 הבאים / Next 20
@@ -804,6 +954,7 @@
         });
 
         document.getElementById('wl-send-btn').onclick = sendWlSelected;
+        document.getElementById('wl-send-email-btn').onclick = sendEmailSelected;
         document.getElementById('wl-prev-btn').onclick = async () => {
             wl_offset = Math.max(0, wl_offset - 100);
             await loadWlPage();
