@@ -87,7 +87,7 @@ def poll_inbox():
         text = re.sub(r"<[^>]+>", " ", body_content).strip()
         text = re.sub(r"\s+", " ", text).strip()
 
-        if not from_email or from_email == BOT_EMAIL.lower():
+        if not from_email or from_email == BOT_EMAIL.lower() or "mailjet.com" in from_email or "noreply" in from_email:
             _mark_read(msg_id)
             continue
 
