@@ -283,6 +283,15 @@ async def whatsapp_webhook(request: Request):
     if not phone or not text:
         return {"status": "ignored"}
 
+    # זיהוי הודעות אוטומטיות מעסקים
+    _AUTO_REPLY_SIGNALS = [
+        "received your message", "we'll get back", "will get back",
+        "קבלנו הודעתכם", "נחזור אליכם", "whatsapp.com/channel",
+        "https://", "automated", "auto-reply", "out of office",
+    ]
+    if len(text) > 200 or any(s in text.lower() for s in _AUTO_REPLY_SIGNALS):
+        print(f"[AUTO-REPLY IGNORED] {phone}: {text[:80]}...")
+        return {"status": "auto_reply_ignored"}
     if phone in _wa_done or _db.is_conversation_done(phone):
         import openai as _oai
         try:
