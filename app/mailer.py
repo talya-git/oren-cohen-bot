@@ -152,6 +152,12 @@ def send_bulk_report(agent_label: str, results: list[dict], agent_email: str | N
     if agent_email and agent_email != ADMIN_EMAIL:
         to_list.append({"Email": agent_email})
 
+    # שלח ל-ADMIN רק אם יש שגיאות
+    if not failed:
+        to_list = [t for t in to_list if t["Email"] != ADMIN_EMAIL]
+    if not to_list:
+        return
+
     payload = json.dumps({
         "Messages": [{
             "From": {"Email": FROM_EMAIL, "Name": FROM_NAME},
