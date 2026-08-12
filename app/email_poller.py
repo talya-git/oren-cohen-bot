@@ -49,8 +49,8 @@ def _mark_read(msg_id: str):
 
 def _reply_email(to_email: str, to_name: str, subject: str, reply_text: str):
     from .email_api import _send_email
-    html = reply_text.replace("\n", "<br>")
-    _send_email(to_email, to_name, subject, f"<p>{html}</p>", reply_text)
+    html = f"<p>{reply_text.replace(chr(10), '<br>')}</p>"
+    _send_email(to_email, to_name, subject, html, reply_text)
 
 
 def poll_inbox():
