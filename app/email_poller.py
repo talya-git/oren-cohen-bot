@@ -82,6 +82,7 @@ def poll_inbox():
         subject = msg.get("subject", "Re: Jerusalem Real Estate")
         body_content = msg.get("body", {}).get("content", "")
         internet_msg_id = msg.get("internetMessageId", "")
+        print(f"[MSG-ID] {internet_msg_id}")
 
         # הסרת HTML tags
         import re
