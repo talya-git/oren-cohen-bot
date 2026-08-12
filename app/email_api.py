@@ -41,7 +41,9 @@ def _send_email(to_email: str, to_name: str, subject: str, html: str, text: str,
     )
     try:
         with urllib.request.urlopen(req) as resp:
-            return {"status": resp.status}
+            msg_id = resp.headers.get("X-Message-Id", "")
+            print(f"[SENDGRID MSG-ID] {msg_id}")
+            return {"status": resp.status, "message_id": msg_id}
     except urllib.error.HTTPError as e:
         body = e.read().decode()
         print(f"[EMAIL ERROR] {e.code}: {body}")
