@@ -504,7 +504,7 @@
             params.append(`columns[${i}][search][value]`, '');
             params.append(`columns[${i}][search][regex]`, 'false');
         });
-        params.append('order[0][column]', '19'); params.append('order[0][dir]', 'asc'); // ישנים קודם
+        params.append('order[0][column]', '19'); params.append('order[0][dir]', 'desc'); // חדשים קודם (לבדיקה)
         params.append('start', String(wl_offset));
         params.append('length', '500'); // טוענים 500 כדי לסנן ל-20
         params.append('search[value]', ''); params.append('search[regex]', 'false');
@@ -609,20 +609,25 @@
     }
 
     async function sendEmailSelected() {
-        const checkboxes = document.querySelectorAll('.wl-cb:checked');
+        const wlOverlay = document.getElementById('wl-overlay');
+        const checkboxes = (wlOverlay || document).querySelectorAll('.wl-cb:checked');
         if (!checkboxes.length) { alert('לא נבחרו לידים'); return; }
 
         const selectedLeads = [];
         for (const cb of checkboxes) {
-            const lead = wl_leads[parseInt(cb.dataset.idx)];
+            const idx = parseInt(cb.dataset.idx);
+            const lead = wl_leads[idx];
             if (!lead) continue;
             const div = document.createElement('div');
             div.innerHTML = lead.projectNameHtml || '';
             const project = div.querySelector('.label')?.innerText?.trim() || '';
-            const nameInput = document.querySelector(`.wl-name-edit[data-idx="${cb.dataset.idx}"]`);
+            const nameInput = (wlOverlay || document).querySelector(`.wl-name-edit[data-idx="${idx}"]`);
             const name = nameInput ? nameInput.value.trim() || lead.name1 || '' : lead.name1 || '';
+            // email1 מגיע משכל — אם ריק נשאיר ריק לעריכה ידנית
             selectedLeads.push({ name, email: lead.email1 || '', phone: normalizePhone(lead.phone1), project });
         }
+
+        if (!selectedLeads.length) { alert('לא נמצאו לידים תקינים'); return; }
 
         const existing = document.getElementById('email-confirm-overlay');
         if (existing) existing.remove();
@@ -630,7 +635,7 @@
         const confirmOverlay = document.createElement('div');
         confirmOverlay.id = 'email-confirm-overlay';
         confirmOverlay.style.cssText = `position:fixed;top:0;left:0;width:100%;height:100%;
-            background:rgba(0,0,0,0.6);z-index:999999;display:flex;align-items:center;justify-content:center;`;
+            background:rgba(0,0,0,0.6);z-index:9999999;display:flex;align-items:center;justify-content:center;`;
 
         const defaultMsg = `היי {name},\n\nכאן דניאל מאורן כהן גרופ בירושלים.\nאני פונה אליך בהמשך לפנייתך למשרדנו בעבר.\n\nבימים אלו אנחנו מרכזים עבור לקוחותינו מספר הזדמנויות נדל"ן מיוחדות בפרויקטים עתידיים בירושלים.\n\nהאם הנושא עדיין רלוונטי עבורך?\n\nבברכה,\nדניאל\nאורן כהן גרופ`;
 

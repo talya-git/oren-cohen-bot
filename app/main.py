@@ -33,7 +33,7 @@ app = FastAPI(title="Oren Cohen Group — Lead Bot", default_response_class=_UTF
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://crm.sehel.co.il"],
-    allow_methods=["POST", "GET", "OPTIONS"],
+    allow_methods=["POST", "GET", "OPTIONS", "DELETE"],
     allow_headers=["Content-Type"],
 )
 app.include_router(leads_router)

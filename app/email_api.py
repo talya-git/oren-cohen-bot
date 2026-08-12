@@ -176,6 +176,16 @@ async def email_inbound(request: Request):
     return {"status": "ok"}
 
 
+@router.delete("/clear-test")
+async def clear_test_email(email: str):
+    conn = db.get_db()
+    cur = conn.cursor()
+    cur.execute(f"DELETE FROM reengagement_sent WHERE phone={db.PH}", (f"email:{email}",))
+    conn.commit()
+    conn.close()
+    return {"status": "deleted", "email": email}
+
+
 @router.get("/sent")
 async def email_sent():
     """מחזיר את כל השיחות במייל."""
