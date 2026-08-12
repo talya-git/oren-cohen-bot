@@ -47,10 +47,10 @@ def _mark_read(msg_id: str):
     _graph(f"/users/{BOT_EMAIL}/messages/{msg_id}", method="PATCH", body={"isRead": True})
 
 
-def _reply_email(to_email: str, to_name: str, subject: str, reply_text: str):
+def _reply_email(to_email: str, to_name: str, subject: str, reply_text: str, msg_id: str = ""):
     from .email_api import _send_email
     html = f"<p>{reply_text.replace(chr(10), '<br>')}</p>"
-    _send_email(to_email, to_name, subject, html, reply_text)
+    _send_email(to_email, to_name, subject, html, reply_text, reply_to_msg_id=msg_id or None)
 
 
 def poll_inbox():
@@ -62,7 +62,7 @@ def poll_inbox():
     try:
         params = urllib.parse.urlencode({
             "$filter": "isRead eq false",
-            "$select": "id,from,subject,body",
+            "$select": "id,from,subject,body,internetMessageId",
             "$top": "10",
         })
         result = _graph(f"/users/{BOT_EMAIL}/mailFolders/inbox/messages?{params}")
@@ -81,6 +81,7 @@ def poll_inbox():
         from_name = sender.get("name", "")
         subject = msg.get("subject", "Re: Jerusalem Real Estate")
         body_content = msg.get("body", {}).get("content", "")
+        internet_msg_id = msg.get("internetMessageId", "")
 
         # הסרת HTML tags
         import re
@@ -135,7 +136,7 @@ def poll_inbox():
         # שליחת תשובה
         reply_subject = subject if subject.startswith("Re:") else f"Re: {subject}"
         try:
-            _reply_email(from_email, from_name, reply_subject, turn.reply)
+            _reply_email(from_email, from_name, reply_subject, turn.reply, internet_msg_id)
             print(f"[EMAIL REPLY] to={from_email}")
         except Exception as e:
             print(f"[EMAIL REPLY ERROR] {e}")
