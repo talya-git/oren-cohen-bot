@@ -178,6 +178,7 @@
   <span class="badge badge-total" id="b-total">סה"כ: 0</span>
   <span class="badge badge-replied" id="b-replied">ענו: 0</span>
   <span class="badge badge-pending" id="b-pending">ממתינים: 0</span>
+  <span class="badge" style="background:#e0f2fe;color:#0369a1" id="b-read">נקראו: 0</span>
   <span class="badge badge-handoff" id="b-handoff">הועברו: 0</span>
 </div>
 
@@ -275,10 +276,12 @@ function updateBadges() {
   const total = allData.length;
   const replied = allData.filter(c => c.replied).length;
   const handoff = allData.filter(c => c.handoff).length;
-  const pending = total - replied;
+  const read = allData.filter(c => c.read_at && !c.replied && !c.handoff).length;
+  const pending = total - replied - read;
   document.getElementById('b-total').textContent = `סה"כ: ${total}`;
   document.getElementById('b-replied').textContent = `ענו: ${replied}`;
   document.getElementById('b-pending').textContent = `ממתינים: ${pending}`;
+  document.getElementById('b-read').textContent = `נקראו: ${read}`;
   document.getElementById('b-handoff').textContent = `הועברו: ${handoff}`;
 }
 
