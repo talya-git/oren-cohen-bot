@@ -59,10 +59,12 @@ def poll_inbox():
     from .email_api import _email_sessions
 
     try:
-        result = _graph(
-            f"/users/{BOT_EMAIL}/mailFolders/inbox/messages"
-            f"?$filter=isRead eq false&$select=id,from,subject,body&$top=10"
-        )
+        params = urllib.parse.urlencode({
+            "$filter": "isRead eq false",
+            "$select": "id,from,subject,body",
+            "$top": "10",
+        })
+        result = _graph(f"/users/{BOT_EMAIL}/mailFolders/inbox/messages?{params}")
     except Exception as e:
         print(f"[EMAIL POLL ERROR] {e}")
         return
