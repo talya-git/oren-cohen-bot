@@ -11,21 +11,19 @@ router = APIRouter(prefix="/api/email", tags=["email"])
 
 BOT_EMAIL = os.getenv("BOT_EMAIL", "daniel@orencohengroup.com")
 BOT_NAME = "Daniel | Oren Cohen Group"
-SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "")
+RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
 
 _email_sessions: dict = {}  # email -> conversation
 
 
 def _send_email(to_email: str, to_name: str, subject: str, html: str, text: str, reply_to_msg_id: str | None = None) -> dict:
     payload = {
-        "personalizations": [{"to": [{"email": to_email, "name": to_name}]}],
-        "from": {"email": BOT_EMAIL, "name": BOT_NAME},
-        "reply_to": {"email": BOT_EMAIL, "name": BOT_NAME},
+        "from": f"{BOT_NAME} <{BOT_EMAIL}>",
+        "to": [to_email],
+        "reply_to": BOT_EMAIL,
         "subject": subject,
-        "content": [
-            {"type": "text/plain", "value": text},
-            {"type": "text/html", "value": html},
-        ]
+        "html": html,
+        "text": text,
     }
     if reply_to_msg_id:
         payload["headers"] = {
@@ -34,14 +32,14 @@ def _send_email(to_email: str, to_name: str, subject: str, html: str, text: str,
         }
     data = json.dumps(payload).encode()
     req = urllib.request.Request(
-        "https://api.sendgrid.com/v3/mail/send",
+        "https://api.resend.com/emails",
         data=data,
-        headers={"Authorization": f"Bearer {SENDGRID_API_KEY}", "Content-Type": "application/json"},
+        headers={"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"},
         method="POST",
     )
     try:
         with urllib.request.urlopen(req) as resp:
-            return {"status": resp.status}
+            return json.loads(resp.read().decode())
     except urllib.error.HTTPError as e:
         body = e.read().decode()
         print(f"[EMAIL ERROR] {e.code}: {body}")
