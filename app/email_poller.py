@@ -115,7 +115,8 @@ def poll_inbox():
         # שחזור session
         if from_email not in _email_sessions:
             record = db.get_reengagement_record(f"email:{from_email}")
-            convo = Conversation(language="en")
+            lang = "he" if any('\u05d0' <= c <= '\u05ea' for c in (record.get('client_name') or '')) else "en"
+            convo = Conversation(language=lang)
             if record and record.get("transcript"):
                 for line in record["transcript"].split("\n"):
                     line = line.strip()
@@ -123,10 +124,17 @@ def poll_inbox():
                         convo.messages.append({"role": "assistant", "content": line[7:].strip()})
                     elif line.startswith("Client:"):
                         convo.messages.append({"role": "user", "content": line[7:].strip()})
+            # הוסף הקשר לבוט
+            name = (record.get("client_name") or "") if record else ""
+            convo.messages.append({
+                "role": "user",
+                "content": f"[הקשר: הלקוח {name} קיבל מייל re-engagement מדניאל ועונה עליו. המשך את השיחה לפי הזרימה הרגילה — שאל על לוח זמנים, אזור, חדרים. תגובתו: '{text}']"
+            })
             _email_sessions[from_email] = convo
-
-        convo = _email_sessions[from_email]
-        turn, score = convo.send(text)
+            turn, score = convo.send(text)
+        else:
+            convo = _email_sessions[from_email]
+            turn, score = convo.send(text)
 
         # עדכון תמליל
         record = db.get_reengagement_record(f"email:{from_email}")
