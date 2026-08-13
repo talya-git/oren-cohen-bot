@@ -2,6 +2,7 @@
 
 import os
 import json
+import base64
 import urllib.request
 import urllib.error
 from fastapi import APIRouter, Request
@@ -11,39 +12,39 @@ router = APIRouter(prefix="/api/email", tags=["email"])
 
 BOT_EMAIL = os.getenv("BOT_EMAIL", "daniel@orencohengroup.com")
 BOT_NAME = "Daniel | Oren Cohen Group"
-SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "")
+MAILJET_API_KEY = os.getenv("MAILJET_API_KEY", "")
+MAILJET_SECRET_KEY = os.getenv("MAILJET_SECRET_KEY", "")
 
 _email_sessions: dict = {}  # email -> conversation
 
 
 def _send_email(to_email: str, to_name: str, subject: str, html: str, text: str, reply_to_msg_id: str | None = None) -> dict:
-    payload = {
-        "personalizations": [{"to": [{"email": to_email, "name": to_name}]}],
-        "from": {"email": BOT_EMAIL, "name": BOT_NAME},
-        "reply_to": {"email": BOT_EMAIL, "name": BOT_NAME},
-        "subject": subject,
-        "content": [
-            {"type": "text/plain", "value": text},
-            {"type": "text/html", "value": html},
-        ]
-    }
-    if reply_to_msg_id:
-        payload["headers"] = {
-            "In-Reply-To": reply_to_msg_id,
-            "References": reply_to_msg_id,
-        }
-    data = json.dumps(payload).encode()
+    payload = json.dumps({
+        "Messages": [{
+            "From": {"Email": BOT_EMAIL, "Name": BOT_NAME},
+            "To": [{"Email": to_email, "Name": to_name}],
+            "ReplyTo": {"Email": BOT_EMAIL, "Name": BOT_NAME},
+            "Subject": subject,
+            "HTMLPart": html,
+            "TextPart": text,
+            **({
+                "Headers": {
+                    "In-Reply-To": reply_to_msg_id,
+                    "References": reply_to_msg_id,
+                }
+            } if reply_to_msg_id else {}),
+        }]
+    }).encode()
+    credentials = base64.b64encode(f"{MAILJET_API_KEY}:{MAILJET_SECRET_KEY}".encode()).decode()
     req = urllib.request.Request(
-        "https://api.sendgrid.com/v3/mail/send",
-        data=data,
-        headers={"Authorization": f"Bearer {SENDGRID_API_KEY}", "Content-Type": "application/json"},
+        "https://api.mailjet.com/v3.1/send",
+        data=payload,
+        headers={"Authorization": f"Basic {credentials}", "Content-Type": "application/json"},
         method="POST",
     )
     try:
         with urllib.request.urlopen(req) as resp:
-            msg_id = resp.headers.get("X-Message-Id", "")
-            print(f"[SENDGRID MSG-ID] {msg_id}")
-            return {"status": resp.status, "message_id": msg_id}
+            return json.loads(resp.read().decode())
     except urllib.error.HTTPError as e:
         body = e.read().decode()
         print(f"[EMAIL ERROR] {e.code}: {body}")
