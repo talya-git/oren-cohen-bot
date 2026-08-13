@@ -11,6 +11,7 @@ router = APIRouter(prefix="/api/email", tags=["email"])
 
 BOT_EMAIL = os.getenv("BOT_EMAIL", "daniel@orencohengroup.com")
 BOT_NAME = "Daniel | Oren Cohen Group"
+BOT_FROM = os.getenv("BOT_FROM", "onboarding@resend.dev")
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
 
 _email_sessions: dict = {}  # email -> conversation
@@ -18,7 +19,7 @@ _email_sessions: dict = {}  # email -> conversation
 
 def _send_email(to_email: str, to_name: str, subject: str, html: str, text: str, reply_to_msg_id: str | None = None) -> dict:
     payload = {
-        "from": f"{BOT_NAME} <{BOT_EMAIL}>",
+        "from": f"{BOT_NAME} <{BOT_FROM}>",
         "to": [to_email],
         "reply_to": BOT_EMAIL,
         "subject": subject,
