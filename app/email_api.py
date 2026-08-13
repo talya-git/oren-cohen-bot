@@ -18,33 +18,28 @@ _email_sessions: dict = {}  # email -> conversation
 
 
 def _send_email(to_email: str, to_name: str, subject: str, html: str, text: str, reply_to_msg_id: str | None = None) -> dict:
-    payload = {
-        "from": f"{BOT_NAME} <{BOT_FROM}>",
-        "to": [to_email],
-        "reply_to": BOT_EMAIL,
-        "subject": subject,
-        "html": html,
-        "text": text,
-    }
+    import smtplib
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+    from email.utils import formataddr
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = formataddr((BOT_NAME, BOT_FROM))
+    msg["To"] = to_email
+    msg["Reply-To"] = BOT_EMAIL
     if reply_to_msg_id:
-        payload["headers"] = {
-            "In-Reply-To": reply_to_msg_id,
-            "References": reply_to_msg_id,
-        }
-    data = json.dumps(payload).encode()
-    req = urllib.request.Request(
-        "https://api.resend.com/emails",
-        data=data,
-        headers={"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"},
-        method="POST",
-    )
-    try:
-        with urllib.request.urlopen(req) as resp:
-            return json.loads(resp.read().decode())
-    except urllib.error.HTTPError as e:
-        body = e.read().decode()
-        print(f"[EMAIL ERROR] {e.code}: {body}")
-        raise
+        msg["In-Reply-To"] = reply_to_msg_id
+        msg["References"] = reply_to_msg_id
+
+    msg.attach(MIMEText(text, "plain", "utf-8"))
+    msg.attach(MIMEText(html, "html", "utf-8"))
+
+    with smtplib.SMTP("smtp.resend.com", 587) as server:
+        server.starttls()
+        server.login("resend", RESEND_API_KEY)
+        server.sendmail(BOT_FROM, to_email, msg.as_string())
+    return {"status": "sent"}
 
 
 def _build_greeting(name: str | None) -> str:
