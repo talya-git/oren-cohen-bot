@@ -81,10 +81,11 @@ async def start_email_reengagement(request: Request):
     greeting = custom_message or _build_greeting(name)
     subject = custom_subject or "Jerusalem Real Estate — New Opportunities"
 
-    html = greeting.replace("\n", "<br>")
     try:
         _send_email(email, name or "", subject, f"<p>{html}</p>", greeting)
+        print(f"[EMAIL SENT] {email} | {name} | {project_name}")
     except Exception as e:
+        print(f"[EMAIL SEND FAILED] {e}")
         return {"status": "error", "reason": str(e)}
 
     # שמירה ב-DB עם prefix email:
