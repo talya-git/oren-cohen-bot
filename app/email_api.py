@@ -24,7 +24,7 @@ def _send_email(to_email: str, to_name: str, subject: str, html: str, text: str,
     msg["Subject"] = subject
     msg["From"] = formataddr((BOT_NAME, GMAIL_USER))
     msg["To"] = to_email
-    msg["Reply-To"] = BOT_EMAIL
+    msg["Reply-To"] = GMAIL_USER
     if reply_to_msg_id:
         msg["In-Reply-To"] = reply_to_msg_id
         msg["References"] = reply_to_msg_id
