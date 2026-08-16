@@ -13,12 +13,6 @@ BOT_EMAIL = os.getenv("BOT_EMAIL", "daniel@orencohengroup.com")
 _processed_ids: set = set()
 
 
-def _decode_str(s) -> str:
-    if isinstance(s, bytes):
-        return s.decode("utf-8", errors="ignore")
-    return s or ""
-
-
 def _get_text(msg) -> str:
     text = ""
     if msg.is_multipart():
@@ -36,9 +30,21 @@ def _get_text(msg) -> str:
     return text
 
 
+def _build_convo_from_transcript(transcript: str, lang: str):
+    """בונה Conversation עם היסטוריה מלאה מהטרנסקריפט."""
+    from .engine import Conversation
+    convo = Conversation(language=lang)
+    for line in transcript.split("\n"):
+        line = line.strip()
+        if line.startswith("Daniel:"):
+            convo.messages.append({"role": "assistant", "content": line[7:].strip()})
+        elif line.startswith("Client:"):
+            convo.messages.append({"role": "user", "content": line[7:].strip()})
+    return convo
+
+
 def poll_inbox():
     """סורק מיילים חדשים ב-Gmail ועונה עליהם."""
-    from .engine import Conversation
     from . import database as db
     from .email_api import _send_email, _email_sessions
 
@@ -68,7 +74,6 @@ def poll_inbox():
 
         # שולח
         from_header = msg.get("From", "")
-        from_email = ""
         if "<" in from_header:
             from_email = from_header.split("<")[1].rstrip(">").strip().lower()
         else:
@@ -85,13 +90,13 @@ def poll_inbox():
 
         internet_msg_id = msg.get("Message-ID", "")
 
-        # סינון מיילים מהבוט עצמו ומיילים אוטומטיים
-        skip_domains = ["noreply", "no-reply", "youtube.com", "gmail.com", "google.com", "linkedin.com", "facebook.com"]
+        # סינון
+        skip_domains = ["noreply", "no-reply", "youtube.com", "gmail.com", "google.com", "linkedin.com", "facebook.com", "sendgrid", "mailjet"]
         if not from_email or from_email == GMAIL_USER.lower() or from_email == BOT_EMAIL.lower() or any(s in from_email for s in skip_domains):
             mail.store(num, "+FLAGS", "\\Seen")
             continue
 
-        # בדוק שיש רשומה ב-DB עבור המייל הזה
+        # בדוק שיש רשומה ב-DB
         record = db.get_reengagement_record(f"email:{from_email}")
         if not record:
             mail.store(num, "+FLAGS", "\\Seen")
@@ -99,17 +104,13 @@ def poll_inbox():
 
         # חילוץ טקסט
         text = _get_text(msg)
-
-        # הסרת HTML
         text = re.sub(r"<[^>]+>", " ", text)
         text = re.sub(r"\s+", " ", text).strip()
 
         # חיתוך quote
-        cut_markers = [
-            "מאת:", "From:", "-----Original", "________________________________",
-            "wrote:", "כתב:", "נשלח:", "Sent:",
-            "orencohengroup2020@gmail.com", "daniel@orencohengroup.com",
-        ]
+        cut_markers = ["מאת:", "From:", "-----Original", "________________________________",
+                       "wrote:", "כתב:", "נשלח:", "Sent:",
+                       "orencohengroup2020@gmail.com", "daniel@orencohengroup.com"]
         earliest = len(text)
         for marker in cut_markers:
             idx = text.find(marker)
@@ -117,7 +118,6 @@ def poll_inbox():
                 earliest = idx
         if earliest > 5:
             text = text[:earliest].strip()
-
         text = re.sub(r"\s+", " ", text).strip()
 
         if not text:
@@ -126,43 +126,32 @@ def poll_inbox():
 
         print(f"[GMAIL INBOUND] from={from_email} subject={subject}")
 
-        # שחזור session
-        if from_email not in _email_sessions:
-            lang = "he" if any('\u05d0' <= c <= '\u05ea' for c in (record.get('client_name') or '')) else "he"
-            convo = Conversation(language=lang)
-            name = (record.get("client_name") or "") if record else ""
-            # שחזור היסטוריה מה-DB
-            transcript = record.get("transcript") or ""
-            for line in transcript.split("\n"):
-                line = line.strip()
-                if line.startswith("Daniel:"):
-                    content = line[7:].strip()
-                    # שמור רק את השאלה האחרונה מההודעה הארוכה
-                    if "\n" in content:
-                        content = content.split("\n")[-1].strip()
-                    convo.messages.append({"role": "assistant", "content": content})
-                elif line.startswith("Client:"):
-                    convo.messages.append({"role": "user", "content": line[7:].strip()})
-            # אם אין היסטוריה — זו הפעם הראשונה שהלקוח עונה
-            if not convo.messages:
-                convo.messages.append({"role": "assistant", "content": "האם הנושא עדיין רלוונטי עבורך?"})
-            _email_sessions[from_email] = convo
+        name = record.get("client_name") or ""
+        lang = "he" if any('\u05d0' <= c <= '\u05ea' for c in name) else "he"
 
-        convo = _email_sessions[from_email]
-        name = (record.get("client_name") or "") if record else ""
+        # בנה session חדש מהטרנסקריפט הנוכחי ב-DB (כולל כל ההיסטוריה)
+        transcript = record.get("transcript") or ""
+        convo = _build_convo_from_transcript(transcript, lang)
+
+        # אם אין היסטוריה — הלקוח עונה לראשונה
+        if not convo.messages:
+            convo.messages.append({"role": "assistant", "content": "האם הנושא עדיין רלוונטי עבורך?"})
+
+        # שמור ב-sessions
+        _email_sessions[from_email] = convo
+
+        # שלח את ההודעה לבוט
         turn, score = convo.send(text)
 
-        # עדכון תמליל
-        record = db.get_reengagement_record(f"email:{from_email}")
-        existing = (record.get("transcript") or "") if record else ""
-        updated = existing + f"\nClient: {text}\nDaniel: {turn.reply}"
+        # עדכון תמליל ב-DB
+        updated = transcript + f"\nClient: {text}\nDaniel: {turn.reply}"
         db.update_reengagement_replied(f"email:{from_email}", True, updated.strip())
 
         # שליחת תשובה
         reply_subject = subject if subject.startswith("Re:") else f"Re: {subject}"
         html = f"<p>{turn.reply.replace(chr(10), '<br>')}</p>"
         try:
-            _send_email(from_email, name if 'name' in dir() else "", reply_subject, html, turn.reply, internet_msg_id or None)
+            _send_email(from_email, name, reply_subject, html, turn.reply, internet_msg_id or None)
             print(f"[GMAIL REPLY] to={from_email}")
         except Exception as e:
             print(f"[GMAIL REPLY ERROR] {e}")
