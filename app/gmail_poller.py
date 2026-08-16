@@ -85,8 +85,15 @@ def poll_inbox():
 
         internet_msg_id = msg.get("Message-ID", "")
 
-        # סינון מיילים מהבוט עצמו
-        if not from_email or from_email == GMAIL_USER.lower() or from_email == BOT_EMAIL.lower():
+        # סינון מיילים מהבוט עצמו ומיילים אוטומטיים
+        skip_domains = ["noreply", "no-reply", "youtube.com", "gmail.com", "google.com", "linkedin.com", "facebook.com"]
+        if not from_email or from_email == GMAIL_USER.lower() or from_email == BOT_EMAIL.lower() or any(s in from_email for s in skip_domains):
+            mail.store(num, "+FLAGS", "\\Seen")
+            continue
+
+        # בדוק שיש רשומה ב-DB עבור המייל הזה
+        record = db.get_reengagement_record(f"email:{from_email}")
+        if not record:
             mail.store(num, "+FLAGS", "\\Seen")
             continue
 
@@ -121,7 +128,6 @@ def poll_inbox():
 
         # שחזור session
         if from_email not in _email_sessions:
-            record = db.get_reengagement_record(f"email:{from_email}")
             lang = "he" if any('\u05d0' <= c <= '\u05ea' for c in (record.get('client_name') or '')) else "he"
             convo = Conversation(language=lang)
             if record and record.get("transcript"):
