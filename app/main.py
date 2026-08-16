@@ -114,10 +114,10 @@ async def start_stalled_scheduler():
 async def start_email_poller():
     import asyncio
     async def _email_poll_loop():
-        await asyncio.sleep(10)  # המתן לאתחול
+        await asyncio.sleep(10)
         while True:
             try:
-                from .email_poller import poll_inbox
+                from .gmail_poller import poll_inbox
                 poll_inbox()
             except Exception as e:
                 print(f"[EMAIL POLLER ERROR] {e}")
