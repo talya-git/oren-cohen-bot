@@ -40,14 +40,25 @@ def _send_email(to_email: str, to_name: str, subject: str, html: str, text: str,
 
 
 def _build_greeting(name: str | None) -> str:
-    greeting = f"היי{' ' + name if name else ''},\n\n"
-    greeting += (
-        "כאן דניאל מאורן כהן גרופ בירושלים.\n"
-        "אני פונה אליך בהמשך לפנייתך למשרדנו בעבר.\n\n"
-        "בימים אלו אנחנו מרכזים עבור לקוחותינו מספר הזדמנויות נדל\"ן מיוחדות בפרויקטים עתידיים בירושלים.\n\n"
-        "האם הנושא עדיין רלוונטי עבורך?\n\n"
-        "בברכה,\nדניאל\nאורן כהן גרופ"
-    )
+    is_hebrew = name and any('\u05d0' <= c <= '\u05ea' for c in name)
+    if is_hebrew or not name:
+        greeting = f"היי{' ' + name if name else ''},\n\n"
+        greeting += (
+            "כאן דניאל מאורן כהן גרופ בירושלים.\n"
+            "אני פונה אליך בהמשך לפנייתך למשרדנו בעבר.\n\n"
+            "בימים אלו אנחנו מרכזים עבור לקוחותינו מספר הזדמנויות נדל\"ן מיוחדות בפרויקטים עתידיים בירושלים.\n\n"
+            "האם הנושא עדיין רלוונטי עבורך?\n\n"
+            "בברכה,\nדניאל\nאורן כהן גרופ"
+        )
+    else:
+        greeting = f"Hi {name},\n\n"
+        greeting += (
+            "This is Daniel from Oren Cohen Group in Jerusalem.\n"
+            "I'm reaching out as a follow-up to your previous inquiry with our office.\n\n"
+            "We are currently curating exclusive real estate opportunities in upcoming Jerusalem projects for our clients.\n\n"
+            "Is this still of interest to you?\n\n"
+            "Best regards,\nDaniel\nOren Cohen Group"
+        )
     return greeting
 
 
@@ -73,8 +84,10 @@ async def start_email_reengagement(request: Request):
     if exists:
         return {"status": "duplicate"}
 
+    is_hebrew = name and any('\u05d0' <= c <= '\u05ea' for c in name)
+    lang = "he" if (is_hebrew or not name) else "en"
     greeting = custom_message or _build_greeting(name)
-    subject = custom_subject or "הזדמנויות נדל\"ן בירושלים — אורן כהן גרופ"
+    subject = custom_subject or ("הזדמנויות נדל\"ן בירושלים — אורן כהן גרופ" if lang == "he" else "Real Estate Opportunities in Jerusalem — Oren Cohen Group")
     html = greeting.replace("\n", "<br>")
 
     try:

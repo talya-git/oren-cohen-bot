@@ -128,7 +128,7 @@ def poll_inbox():
         print(f"[GMAIL INBOUND] from={from_email} subject={subject}")
 
         name = record.get("client_name") or ""
-        lang = "he" if any('\u05d0' <= c <= '\u05ea' for c in name) else "he"
+        lang = "he" if (not name or any('\u05d0' <= c <= '\u05ea' for c in name)) else "en"
 
         # בנה session חדש מהטרנסקריפט הנוכחי ב-DB (כולל כל ההיסטוריה)
         transcript = record.get("transcript") or ""
