@@ -101,7 +101,7 @@ async def start_email_reengagement(request: Request):
         phone=f"email:{email}",
         client_name=name or "",
         agent_email=agent_email,
-        transcript=f"Daniel: האם הנושא עדיין רלוונטי עבורך?"
+        transcript=f"Daniel: {greeting}"
     )
 
     convo = Conversation(language="he", project_name=project_name or None)
