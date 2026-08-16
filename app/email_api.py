@@ -123,6 +123,21 @@ async def clear_test_email(email: str):
     return {"status": "deleted", "email": email}
 
 
+@router.post("/fix-transcript")
+async def fix_transcript(request: Request):
+    data = await request.json()
+    email = data.get("email", "").strip()
+    transcript = data.get("transcript", "").strip()
+    if not email or not transcript:
+        return {"status": "error", "reason": "email and transcript required"}
+    conn = db.get_db()
+    cur = conn.cursor()
+    cur.execute(f"UPDATE reengagement_sent SET transcript={db.PH} WHERE phone={db.PH}", (transcript, f"email:{email}"))
+    conn.commit()
+    conn.close()
+    return {"status": "updated", "email": email}
+
+
 @router.get("/sent")
 async def email_sent():
     conn = db.get_db()
