@@ -132,6 +132,13 @@ def poll_inbox():
 
         # בנה session חדש מהטרנסקריפט הנוכחי ב-DB (כולל כל ההיסטוריה)
         transcript = record.get("transcript") or ""
+
+        # אם כבר היה handoff — לא לענות
+        if record.get("handoff") or "[HANDOFF]" in transcript:
+            mail.store(num, "+FLAGS", "\\Seen")
+            print(f"[GMAIL SKIP] handoff already done for {from_email}")
+            continue
+
         convo = _build_convo_from_transcript(transcript, lang)
 
         # אם אין היסטוריה — הלקוח עונה לראשונה
@@ -141,8 +148,18 @@ def poll_inbox():
         # שמור ב-sessions
         _email_sessions[from_email] = convo
 
+        # זיהוי תשובה חיובית לשאלת הפתיחה
+        positive_words = ["כן", "רלוונטי", "מעוניין", "מעוניינת", "אשמח", "בטח", "כמובן", "yes", "interested", "sure", "absolutely"]
+        is_first_reply = len([m for m in convo.messages if m["role"] == "user"]) == 0
+        is_positive = any(w in text.lower() for w in positive_words)
+
+        if is_first_reply and is_positive:
+            actual_text = f"[הלקוח ענה חיובית: '{text}'. שאל אותו עכשיו רק שאלה 1: מהו לוח הזמנים שלך לכניסה לנכס? אל תשאל על מחיר, דרישות או כל דבר אחר.]"
+        else:
+            actual_text = text
+
         # שלח את ההודעה לבוט
-        turn, score = convo.send(text)
+        turn, score = convo.send(actual_text)
 
         # עדכון תמליל ב-DB
         updated = transcript + f"\nClient: {text}\nDaniel: {turn.reply}"
@@ -160,6 +177,9 @@ def poll_inbox():
         mail.store(num, "+FLAGS", "\\Seen")
 
         if turn.handoff_to_human:
+            updated += "\n[HANDOFF]"
+            db.update_reengagement_replied(f"email:{from_email}", True, updated.strip())
+            db.mark_reengagement_handoff(f"email:{from_email}")
             _email_sessions.pop(from_email, None)
             print(f"[GMAIL HANDOFF] {from_email}")
 
