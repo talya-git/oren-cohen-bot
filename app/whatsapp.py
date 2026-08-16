@@ -520,6 +520,7 @@ async def all_conversations():
                rs.handoff
         FROM reengagement_sent rs
         LEFT JOIN reengagement_batches rb ON rs.batch_id = rb.id
+        WHERE rs.phone NOT LIKE 'email:%'
         ORDER BY rs.sent_at DESC
     """)
     rows = _db._fetchall(cur)
