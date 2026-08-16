@@ -11,8 +11,36 @@ router = APIRouter(prefix="/api/email", tags=["email"])
 
 BOT_EMAIL = os.getenv("BOT_EMAIL", "daniel@orencohengroup.com")
 BOT_NAME = "Daniel | Oren Cohen Group"
-BOT_FROM = os.getenv("BOT_FROM", "onboarding@resend.dev")
+GMAIL_USER = os.getenv("GMAIL_USER", "orencohengroup2020@gmail.com")
+GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD", "")
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
+
+_email_sessions: dict = {}  # email -> conversation
+
+
+def _send_email(to_email: str, to_name: str, subject: str, html: str, text: str, reply_to_msg_id: str | None = None) -> dict:
+    import smtplib
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+    from email.utils import formataddr
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = formataddr((BOT_NAME, GMAIL_USER))
+    msg["To"] = to_email
+    msg["Reply-To"] = BOT_EMAIL
+    if reply_to_msg_id:
+        msg["In-Reply-To"] = reply_to_msg_id
+        msg["References"] = reply_to_msg_id
+
+    msg.attach(MIMEText(text, "plain", "utf-8"))
+    msg.attach(MIMEText(html, "html", "utf-8"))
+
+    with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        server.starttls()
+        server.login(GMAIL_USER, GMAIL_APP_PASSWORD.replace(" ", ""))
+        server.sendmail(GMAIL_USER, to_email, msg.as_string())
+    return {"status": "sent"}
 
 _email_sessions: dict = {}  # email -> conversation
 
