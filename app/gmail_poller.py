@@ -138,10 +138,9 @@ def poll_inbox():
                     elif line.startswith("Client:"):
                         convo.messages.append({"role": "user", "content": line[7:].strip()})
             name = (record.get("client_name") or "") if record else ""
-            convo.messages.append({
-                "role": "user",
-                "content": f"[הקשר: הלקוח {name} קיבל מייל פתיחה מדניאל ועונה שזה רלוונטי. שאל אותו רק שאלה 1: מהו לוח הזמנים שלך לכניסה לנכס? אל תשאל שאלות אחרות. תגובתו: '{text}']"
-            })
+            # הוסף הקשר לבוט — הלקוח כבר אמר כן, שאל רק על לוח זמנים
+            convo.messages.append({"role": "assistant", "content": "האם הנושא עדיין רלוונטי עבורך?"})
+            convo.messages.append({"role": "user", "content": text})
             _email_sessions[from_email] = convo
             turn, score = convo.send(text)
         else:
