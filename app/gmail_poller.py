@@ -167,7 +167,7 @@ def poll_inbox():
 
         # שליחת תשובה
         reply_subject = subject if subject.startswith("Re:") else f"Re: {subject}"
-        html = f"<p>{turn.reply.replace(chr(10), '<br>')}</p>"
+        html = f'<div dir="rtl" style="text-align:right">{turn.reply.replace(chr(10), "<br>")}</div>'
         try:
             _send_email(from_email, name, reply_subject, html, turn.reply, internet_msg_id or None)
             print(f"[GMAIL REPLY] to={from_email}")

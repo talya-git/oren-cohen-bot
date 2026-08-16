@@ -78,7 +78,7 @@ async def start_email_reengagement(request: Request):
     html = greeting.replace("\n", "<br>")
 
     try:
-        _send_email(email, name or "", subject, f"<p>{html}</p>", greeting)
+        _send_email(email, name or "", subject, f'<div dir="rtl" style="text-align:right">{html}</div>', greeting)
         print(f"[EMAIL SENT] {email} | {name} | {project_name}")
     except Exception as e:
         print(f"[EMAIL SEND FAILED] {e}")
