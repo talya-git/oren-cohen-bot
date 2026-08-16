@@ -637,7 +637,16 @@
         confirmOverlay.style.cssText = `position:fixed;top:0;left:0;width:100%;height:100%;
             background:rgba(0,0,0,0.6);z-index:9999999;display:flex;align-items:center;justify-content:center;`;
 
-        const defaultMsg = `היי {name},\n\nכאן דניאל מאורן כהן גרופ בירושלים.\nאני פונה אליך בהמשך לפנייתך למשרדנו בעבר.\n\nבימים אלו אנחנו מרכזים עבור לקוחותינו מספר הזדמנויות נדל"ן מיוחדות בפרויקטים עתידיים בירושלים.\n\nהאם הנושא עדיין רלוונטי עבורך?\n\nבברכה,\nדניאל\nאורן כהן גרופ`;
+        const isHebrew = name => /[\u05d0-\u05ea]/.test(name);
+        const mostlyHebrew = selectedLeads.filter(l => isHebrew(l.name)).length >= selectedLeads.length / 2;
+
+        const defaultMsg = mostlyHebrew
+            ? `היי {name},\n\nכאן דניאל מאורן כהן גרופ בירושלים.\nאני פונה אליך בהמשך לפנייתך למשרדנו בעבר.\n\nבימים אלו אנחנו מרכזים עבור לקוחותינו מספר הזדמנויות נדל"ן מיוחדות בפרויקטים עתידיים בירושלים.\n\nהאם הנושא עדיין רלוונטי עבורך?\n\nבברכה,\nדניאל\nאורן כהן גרופ`
+            : `Hi {name},\n\nThis is Daniel from Oren Cohen Group in Jerusalem.\nI'm reaching out as a follow-up to your previous inquiry with our office.\n\nWe are currently curating exclusive real estate opportunities in upcoming Jerusalem projects for our clients.\n\nIs this still of interest to you?\n\nBest regards,\nDaniel\nOren Cohen Group`;
+
+        const defaultSubject = mostlyHebrew
+            ? 'הזדמנויות נדל"ן בירושלים — אורן כהן גרופ'
+            : 'Real Estate Opportunities in Jerusalem — Oren Cohen Group';
 
         confirmOverlay.innerHTML = `
             <div style="background:#fff;border-radius:14px;width:640px;max-width:95vw;
@@ -652,7 +661,7 @@
                 <div style="padding:20px;">
                     <div style="margin-bottom:12px;">
                         <label style="font-size:13px;font-weight:bold;display:block;margin-bottom:6px;">נושא המייל</label>
-                        <input id="email-subject-input" type="text" value="הזדמנויות נדל&quot;ן בירושלים — אורן כהן גרופ"
+                        <input id="email-subject-input" type="text" value="${defaultSubject}"
                             style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
                     </div>
                     <div style="margin-bottom:14px;">
