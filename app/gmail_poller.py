@@ -110,13 +110,14 @@ def poll_inbox():
         # חיתוך quote
         cut_markers = ["מאת:", "From:", "-----Original", "________________________________",
                        "wrote:", "כתב:", "נשלח:", "Sent:",
-                       "orencohengroup2020@gmail.com", "daniel@orencohengroup.com"]
+                       "orencohengroup2020@gmail.com", "daniel@orencohengroup.com",
+                       "On ", "> "]
         earliest = len(text)
         for marker in cut_markers:
             idx = text.find(marker)
             if 0 < idx < earliest:
                 earliest = idx
-        if earliest > 5:
+        if earliest > 2:
             text = text[:earliest].strip()
         text = re.sub(r"\s+", " ", text).strip()
 
