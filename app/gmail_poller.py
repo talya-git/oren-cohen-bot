@@ -130,22 +130,23 @@ def poll_inbox():
         if from_email not in _email_sessions:
             lang = "he" if any('\u05d0' <= c <= '\u05ea' for c in (record.get('client_name') or '')) else "he"
             convo = Conversation(language=lang)
-            if record and record.get("transcript"):
-                for line in record["transcript"].split("\n"):
-                    line = line.strip()
-                    if line.startswith("Daniel:"):
-                        convo.messages.append({"role": "assistant", "content": line[7:].strip()})
-                    elif line.startswith("Client:"):
-                        convo.messages.append({"role": "user", "content": line[7:].strip()})
             name = (record.get("client_name") or "") if record else ""
-            # הוסף הקשר לבוט — הלקוח כבר אמר כן, שאל רק על לוח זמנים
-            convo.messages.append({"role": "assistant", "content": "האם הנושא עדיין רלוונטי עבורך?"})
-            convo.messages.append({"role": "user", "content": text})
+            # שחזור היסטוריה מה-DB
+            transcript = record.get("transcript") or ""
+            for line in transcript.split("\n"):
+                line = line.strip()
+                if line.startswith("Daniel:"):
+                    convo.messages.append({"role": "assistant", "content": line[7:].strip()})
+                elif line.startswith("Client:"):
+                    convo.messages.append({"role": "user", "content": line[7:].strip()})
+            # אם אין היסטוריה — זו הפעם הראשונה שהלקוח עונה
+            if not convo.messages:
+                convo.messages.append({"role": "assistant", "content": "האם הנושא עדיין רלוונטי עבורך?"})
             _email_sessions[from_email] = convo
-            turn, score = convo.send(text)
-        else:
-            convo = _email_sessions[from_email]
-            turn, score = convo.send(text)
+
+        convo = _email_sessions[from_email]
+        name = (record.get("client_name") or "") if record else ""
+        turn, score = convo.send(text)
 
         # עדכון תמליל
         record = db.get_reengagement_record(f"email:{from_email}")
