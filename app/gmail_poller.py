@@ -91,7 +91,7 @@ def poll_inbox():
         internet_msg_id = msg.get("Message-ID", "")
 
         # סינון
-        skip_domains = ["noreply", "no-reply", "youtube.com", "gmail.com", "google.com", "linkedin.com", "facebook.com", "sendgrid", "mailjet"]
+        skip_domains = ["noreply", "no-reply", "youtube.com", "google.com", "linkedin.com", "facebook.com", "sendgrid", "mailjet"]
         if not from_email or from_email == GMAIL_USER.lower() or from_email == BOT_EMAIL.lower() or any(s in from_email for s in skip_domains):
             mail.store(num, "+FLAGS", "\\Seen")
             continue
