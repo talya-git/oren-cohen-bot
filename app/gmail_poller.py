@@ -140,7 +140,7 @@ def poll_inbox():
             name = (record.get("client_name") or "") if record else ""
             convo.messages.append({
                 "role": "user",
-                "content": f"[הקשר: הלקוח {name} קיבל מייל re-engagement מדניאל ועונה עליו. שאל אותו לפי הסדר הקבוע: 1. לוח זמנים לכניסה לנכס 2. אזור וחדרים. אל תשאל על דרישות נוספות לפני שסיימת את הסדר. תגובתו: '{text}']"
+                "content": f"[הקשר: הלקוח {name} קיבל מייל פתיחה מדניאל ועונה שזה רלוונטי. שאל אותו רק שאלה 1: מהו לוח הזמנים שלך לכניסה לנכס? אל תשאל שאלות אחרות. תגובתו: '{text}']"
             })
             _email_sessions[from_email] = convo
             turn, score = convo.send(text)
