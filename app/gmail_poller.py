@@ -136,7 +136,11 @@ def poll_inbox():
             for line in transcript.split("\n"):
                 line = line.strip()
                 if line.startswith("Daniel:"):
-                    convo.messages.append({"role": "assistant", "content": line[7:].strip()})
+                    content = line[7:].strip()
+                    # שמור רק את השאלה האחרונה מההודעה הארוכה
+                    if "\n" in content:
+                        content = content.split("\n")[-1].strip()
+                    convo.messages.append({"role": "assistant", "content": content})
                 elif line.startswith("Client:"):
                     convo.messages.append({"role": "user", "content": line[7:].strip()})
             # אם אין היסטוריה — זו הפעם הראשונה שהלקוח עונה
