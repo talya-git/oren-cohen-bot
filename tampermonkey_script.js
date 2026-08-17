@@ -504,18 +504,6 @@
         return new Date(y, parseInt(m[2]) - 1, parseInt(m[1]));
     }
 
-    async function getTimelineText(lead) {
-        try {
-            const match = (lead.timelineHtml || '').match(/\/api\/content\/timeline\/(\d+)\//);
-            if (!match) return '';
-            const res = await fetch(`/api/content/timeline/${match[1]}/popover-timeline-content`);
-            const text = await res.text();
-            const div = document.createElement('div');
-            div.innerHTML = text;
-            return div.textContent || '';
-        } catch(e) { return ''; }
-    }
-
     // טוען עמוד של 20 לידים לפי סוכן, מסנן 6 חודשים + לא נשלח
     async function loadWlPage() {
         const tbody = document.getElementById('wl-tbody');
@@ -580,25 +568,19 @@
         //     return d && d < SIX_MONTHS_AGO;
         // }).slice(0, 20);
         const seenPhones = new Set();
-        const candidates = raw.filter(lead => {
+        const filtered = raw.filter(lead => {
             const phone = normalizePhone(lead.phone1);
             if (!phone || seenPhones.has(phone)) return false;
             const pdiv = document.createElement('div');
             pdiv.innerHTML = lead.projectNameHtml || '';
             const proj = pdiv.querySelector('.label')?.innerText?.trim() || '';
-            if (isProfessional(lead.name1, proj, '')) return false;
+            const odiv = document.createElement('div');
+            odiv.innerHTML = lead.objectionHtml || '';
+            const objText = odiv.innerText || '';
+            if (isProfessional(lead.name1, proj, objText)) return false;
             seenPhones.add(phone);
             return true;
-        });
-
-        if (statusEl) statusEl.textContent = 'בודק הערות...';
-        const filtered = [];
-        for (const lead of candidates) {
-            if (filtered.length >= 20) break;
-            const timelineText = await getTimelineText(lead);
-            if (isProfessional('', '', timelineText)) continue;
-            filtered.push(lead);
-        }
+        }).slice(0, 20);
 
         wl_leads = filtered;
 
@@ -671,12 +653,12 @@
             const idx = parseInt(cb.dataset.idx);
             const lead = wl_leads[idx];
             if (!lead) continue;
-            div.innerHTML = lead.projectNameHtml || '';
             const div = document.createElement('div');
+            div.innerHTML = lead.projectNameHtml || '';
             const project = div.querySelector('.label')?.innerText?.trim() || '';
+            if (isProfessional(lead.name1, project, '')) continue;
             const nameInput = (wlOverlay || document).querySelector(`.wl-name-edit[data-idx="${idx}"]`);
             const fullName = nameInput ? nameInput.value.trim() || lead.name1 || '' : lead.name1 || '';
-            if (isProfessional(lead.name1, project, '')) continue;
             const name = firstNameOnly(fullName) || fullName;
             selectedLeads.push({ name, email: lead.email1 || '', phone: normalizePhone(lead.phone1), project });
         }
@@ -1069,4 +1051,3 @@
     }, 500);
 
 })();
-
