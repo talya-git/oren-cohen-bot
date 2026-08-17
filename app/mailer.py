@@ -114,6 +114,43 @@ def send_report(to_email: str, agent_label: str, leads: list[dict]) -> None:
         raise
 
 
+def send_hot_lead_alert(name: str, phone: str, score: str, transcript: str) -> None:
+    """שולח התראת לקוח חם ל-projects@orencohengroup.com"""
+    score_emoji = {"High": "🔴 HIGH", "Medium": "🟠 MEDIUM", "Low": "🟢 LOW"}.get(score, score)
+    subject = f"🔥 לקוח חם מהבוט — {name} ({phone})"
+    html = (
+        "<html><body dir='rtl' style='font-family:Arial,sans-serif;font-size:14px;'>"
+        "<h2 style='color:#dc2626;'>🔥 לקוח חם מהבוט!</h2>"
+        "<table style='border-collapse:collapse;margin-bottom:16px;'>"
+        f"<tr><td style='padding:6px 12px;font-weight:bold;'>שם:</td><td style='padding:6px 12px;'>{name}</td></tr>"
+        f"<tr><td style='padding:6px 12px;font-weight:bold;'>טלפון:</td><td style='padding:6px 12px;'>{phone}</td></tr>"
+        f"<tr><td style='padding:6px 12px;font-weight:bold;'>ציון:</td><td style='padding:6px 12px;'>{score_emoji}</td></tr>"
+        "</table><h4>תמליל שיחה:</h4>"
+        f"<div style='background:#f8f9fa;padding:12px;border-radius:8px;font-size:13px;white-space:pre-wrap;direction:rtl;'>{transcript}</div>"
+        "</body></html>"
+    )
+    payload = json.dumps({
+        "Messages": [{
+            "From": {"Email": FROM_EMAIL, "Name": FROM_NAME},
+            "To": [{"Email": "projects@orencohengroup.com"}],
+            "Subject": subject,
+            "HTMLPart": html,
+        }]
+    }).encode()
+    credentials = base64.b64encode(f"{MAILJET_API_KEY}:{MAILJET_SECRET_KEY}".encode()).decode()
+    req = urllib.request.Request(
+        "https://api.mailjet.com/v3.1/send",
+        data=payload,
+        headers={"Authorization": f"Basic {credentials}", "Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req) as resp:
+            print(f"[HOT LEAD ALERT] sent for {phone}")
+    except Exception as e:
+        print(f"[HOT LEAD ALERT ERROR] {e}")
+
+
 def send_bulk_report(agent_label: str, results: list[dict], agent_email: str | None = None) -> None:
     """שולח דוח שליחה מיידי לאדמין עם סיכום מה עבד ומה לא."""
     sent = [r for r in results if r["status"] == "sent"]

@@ -439,6 +439,17 @@ async def whatsapp_webhook(request: Request):
         except Exception as e:
             print(f"[SEHEL ERROR] {e}")
         _db.mark_reengagement_handoff(f"+{phone}")
+        # שליחת מייל התראה על לקוח חם
+        try:
+            from .mailer import send_hot_lead_alert
+            send_hot_lead_alert(
+                name=convo.profile.contact_name or phone,
+                phone=f"+{phone}",
+                score=score.level,
+                transcript=transcript_text,
+            )
+        except Exception as e:
+            print(f"[HOT LEAD ALERT ERROR] {e}")
         del _wa_sessions[phone]
 
     return {"status": "ok"}
