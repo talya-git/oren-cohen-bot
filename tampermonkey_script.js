@@ -472,10 +472,11 @@
         'ltd', 'llc', 'inc', 'בע"מ', 'בע\u05f4מ', 'חברה'
     ];
 
-    function isProfessional(name, project) {
-        if (!name) return false;
-        const lower = name.toLowerCase();
-        if (PROFESSIONAL_KEYWORDS.some(k => lower.includes(k.toLowerCase()))) return true;
+    function isProfessional(name, project, objection) {
+        const lower = (name || '').toLowerCase();
+        const objLower = (objection || '').toLowerCase();
+        const combined = lower + ' ' + objLower;
+        if (PROFESSIONAL_KEYWORDS.some(k => combined.includes(k.toLowerCase()))) return true;
         if (project && project.trim() === 'ספקים') return true;
         return false;
     }
@@ -573,7 +574,10 @@
             const pdiv = document.createElement('div');
             pdiv.innerHTML = lead.projectNameHtml || '';
             const proj = pdiv.querySelector('.label')?.innerText?.trim() || '';
-            if (isProfessional(lead.name1, proj)) return false;
+            const odiv = document.createElement('div');
+            odiv.innerHTML = lead.objectionHtml || '';
+            const objText = odiv.innerText || '';
+            if (isProfessional(lead.name1, proj, objText)) return false;
             seenPhones.add(phone);
             return true;
         }).slice(0, 20);
