@@ -569,7 +569,7 @@
         const seenPhones = new Set();
         const filtered = raw.filter(lead => {
             const phone = normalizePhone(lead.phone1);
-            if (!phone || wl_sentPhones.has(phone) || seenPhones.has(phone)) return false;
+            if (!phone || seenPhones.has(phone)) return false;
             const pdiv = document.createElement('div');
             pdiv.innerHTML = lead.projectNameHtml || '';
             const proj = pdiv.querySelector('.label')?.innerText?.trim() || '';
@@ -596,12 +596,15 @@
             const parts = (lead.updateDate || lead.createDate || '').split(' ')[0].split('-');
             const dateStr = parts.length === 3 ? `${parts[0]}.${parts[1]}.${parts[2]}` : '—';
             const isChecked = !wl_unchecked.has(phone);
+            const alreadySent = wl_sentPhones.has(phone);
+            const sentDate = alreadySent && wl_sentDates[phone] ? new Date(wl_sentDates[phone]).toLocaleDateString('he-IL') : '';
+            const sentBadge = alreadySent ? `<span style="background:#fef9c3;color:#854d0e;font-size:10px;padding:1px 6px;border-radius:10px;margin-right:4px;">נשלח ${sentDate}</span>` : '';
             return `
-                <tr style="border-bottom:1px solid #f0f0f0;">
+                <tr style="border-bottom:1px solid #f0f0f0;${alreadySent ? 'background:#fffbeb;' : ''}">
                     <td style="padding:6px;text-align:center;">
                         <input type="checkbox" class="wl-cb" data-idx="${idx}" data-phone="${phone}" ${isChecked ? 'checked' : ''}>
                     </td>
-                    <td style="padding:6px;font-size:13px;">${name}<br><span style="color:#888;font-size:11px;">${phone}</span></td>
+                    <td style="padding:6px;font-size:13px;">${sentBadge}${name}<br><span style="color:#888;font-size:11px;">${phone}</span></td>
                     <td style="padding:6px;font-size:12px;color:#555;">${project}</td>
                     <td style="padding:6px;font-size:11px;color:#999;">${dateStr}</td>
                     <td style="padding:6px;text-align:center;">
@@ -814,10 +817,11 @@
         }
 
         if (duplicates.length) {
-            const confirm = window.confirm(
-                `⚠️ שימו לב!\n\nהמספרים הבאים כבר קיבלו הודעה בעבר:\n${duplicates.join('\n')}\n\nהאם אתה בטוח שברצונך לשלוח שוב?`
+            const confirmMsg = duplicates.map(d => d).join('\n');
+            const confirmed = window.confirm(
+                `הלידים הבאים נשלחו בעבר:\n\n${confirmMsg}\n\nהאם אתה בטוח שברצונך לשלוח שוב?`
             );
-            if (!confirm) return;
+            if (!confirmed) return;
         }
         const btn = document.getElementById('wl-send-btn');
         btn.disabled = true;
