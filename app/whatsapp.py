@@ -683,7 +683,7 @@ async def fix_positive_handoffs():
     ]
     negative_keywords = [
         "לא רלוונט", "לא מעוניין", "לא צריך", "לא רוצה", "אין צורך",
-        "לא תודה", "not relevant", "not interested", "no thanks"
+        "לא תודה", "not relevant", "not interested", "no thanks", "no thank you", "no, thanks", "no, thank you", "feel free to reach out", "have a wonderful", "אנחנו כאן", "נשמח לעמוד לרשותך"
     ]
     conn = _db.get_db()
     cur = conn.cursor()
@@ -711,7 +711,7 @@ async def fix_false_handoffs():
     from . import database as _db
     negative_keywords = [
         "לא רלוונט", "לא מעוניין", "לא צריך", "לא רוצה", "אין צורך",
-        "לא מתעניין", "not relevant", "not interested", "no thanks", "no thank you", "no, thanks", "no, thank you", "currently not", "not now",
+        "לא מתעניין", "not relevant", "not interested", "no thanks", "no thank you", "no, thanks", "no, thank you", "feel free to reach out", "have a wonderful", "אנחנו כאן", "נשמח לעמוד לרשותך", "no thank you", "no, thanks", "no, thank you", "currently not", "not now",
         "מובן, תודה", "אנחנו כאן", "אנחנו כאן 😊",
         "לא תודה", "לא, תודה", "תודה לא", "לא מעניין",
         "כרגע לא", "לא כרגע"
