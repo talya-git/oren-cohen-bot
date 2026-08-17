@@ -460,8 +460,32 @@
         } catch(e) { wl_sentPhones = new Set(); wl_sentDates = {}; }
     }
 
+    const PROFESSIONAL_KEYWORDS = [
+        'עו"ד', 'עו\u05f4ד', 'עורך דין', 'עורכת דין', 'משרד עו"ד', 'עו"ד ונוטריון',
+        'מתווך', 'מתווכת', 'תיווך', 'סוכן נדל"ן', 'סוכנות נדל"ן',
+        'קבלן', 'יזם', 'יזמות', 'אדריכל', 'אדריכלות',
+        'רואה חשבון', 'רו"ח', 'רו\u05f4ח', 'יועץ', 'יועצת', 'ייעוץ',
+        'מנכ"ל', 'מנכ\u05f4ל', 'סמנכ"ל', 'שיווק', 'פרסום', 'ספקים',
+        'attorney', 'lawyer', 'realtor', 'broker',
+        'contractor', 'developer', 'architect', 'accountant',
+        'consultant', 'advisor', 'director', 'ceo', 'cfo',
+        'ltd', 'llc', 'inc', 'בע"מ', 'בע\u05f4מ', 'חברה'
+    ];
+
+    function isProfessional(name, project) {
+        if (!name) return false;
+        const lower = name.toLowerCase();
+        if (PROFESSIONAL_KEYWORDS.some(k => lower.includes(k.toLowerCase()))) return true;
+        if (project && project.trim() === 'ספקים') return true;
+        return false;
+    }
+
+    function firstNameOnly(name) {
+        if (!name) return '';
+        return name.trim().split(/\s+/)[0];
+    }
+
     function normalizePhone(p) {
-        if (!p) return '';
         p = p.trim().replace(/[\s\-]/g, '');
         if (p.startsWith('05')) return '+972' + p.slice(1);
         if (p.startsWith('972')) return '+' + p;
@@ -546,6 +570,10 @@
         const filtered = raw.filter(lead => {
             const phone = normalizePhone(lead.phone1);
             if (!phone || wl_sentPhones.has(phone) || seenPhones.has(phone)) return false;
+            const pdiv = document.createElement('div');
+            pdiv.innerHTML = lead.projectNameHtml || '';
+            const proj = pdiv.querySelector('.label')?.innerText?.trim() || '';
+            if (isProfessional(lead.name1, proj)) return false;
             seenPhones.add(phone);
             return true;
         }).slice(0, 20);
@@ -578,7 +606,7 @@
                     <td style="padding:6px;font-size:11px;color:#999;">${dateStr}</td>
                     <td style="padding:6px;text-align:center;">
                         <input type="text" class="wl-name-edit" data-idx="${idx}"
-                            value="${name !== '—' ? name : ''}"
+                            value="${name !== '—' ? firstNameOnly(name) : ''}"
                             placeholder="ללא שם"
                             style="width:90px;padding:3px 6px;border:1px solid #ddd;border-radius:4px;font-size:12px;direction:rtl;">
                     </td>
@@ -618,12 +646,13 @@
             const idx = parseInt(cb.dataset.idx);
             const lead = wl_leads[idx];
             if (!lead) continue;
+            if (isProfessional(lead.name1, project)) continue;
             const div = document.createElement('div');
             div.innerHTML = lead.projectNameHtml || '';
             const project = div.querySelector('.label')?.innerText?.trim() || '';
             const nameInput = (wlOverlay || document).querySelector(`.wl-name-edit[data-idx="${idx}"]`);
-            const name = nameInput ? nameInput.value.trim() || lead.name1 || '' : lead.name1 || '';
-            // email1 מגיע משכל — אם ריק נשאיר ריק לעריכה ידנית
+            const fullName = nameInput ? nameInput.value.trim() || lead.name1 || '' : lead.name1 || '';
+            const name = firstNameOnly(fullName) || fullName;
             selectedLeads.push({ name, email: lead.email1 || '', phone: normalizePhone(lead.phone1), project });
         }
 
