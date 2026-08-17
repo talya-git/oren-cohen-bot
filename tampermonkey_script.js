@@ -1,4 +1,4 @@
-﻿// ==UserScript==
+// ==UserScript==
 // @name         הערת לידים ישנים
 // @namespace    http://tampermonkey.net/
 // @version      4.0
@@ -671,7 +671,7 @@
             const idx = parseInt(cb.dataset.idx);
             const lead = wl_leads[idx];
             if (!lead) continue;
-            if (isProfessional(lead.name1, project)) continue;
+            if (isProfessional(lead.name1, project, '')) continue;
             const div = document.createElement('div');
             div.innerHTML = lead.projectNameHtml || '';
             const project = div.querySelector('.label')?.innerText?.trim() || '';
