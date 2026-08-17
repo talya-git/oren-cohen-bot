@@ -598,7 +598,7 @@
             const isChecked = !wl_unchecked.has(phone);
             const alreadySent = wl_sentPhones.has(phone);
             const sentDate = alreadySent && wl_sentDates[phone] ? new Date(wl_sentDates[phone]).toLocaleDateString('he-IL') : '';
-            const sentBadge = alreadySent ? `<span style="background:#fef9c3;color:#854d0e;font-size:10px;padding:1px 6px;border-radius:10px;margin-right:4px;">נשלח ${sentDate}</span>` : '';
+            const sentBadge = alreadySent ? `<div style="background:#fef9c3;color:#854d0e;font-size:10px;padding:1px 6px;border-radius:10px;display:inline-block;margin-bottom:3px;">📤 נשלח ${sentDate}</div><br>` : '';
             return `
                 <tr style="border-bottom:1px solid #f0f0f0;${alreadySent ? 'background:#fffbeb;' : ''}">
                     <td style="padding:6px;text-align:center;">
