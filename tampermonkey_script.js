@@ -1,4 +1,4 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name         הערת לידים ישנים
 // @namespace    http://tampermonkey.net/
 // @version      4.0
@@ -504,14 +504,6 @@
         return new Date(y, parseInt(m[2]) - 1, parseInt(m[1]));
     }
 
-    async function checkTimelineForProfessional(clientId) {
-        try {
-            const numericId = clientId.replace(/[^0-9]/g, '') || clientId;
-            // נסה למצוא את ה-numeric ID מה-timelineHtml
-            return false; // placeholder
-        } catch(e) { return false; }
-    }
-
     async function getTimelineText(lead) {
         try {
             const match = (lead.timelineHtml || '').match(/\/api\/content\/timeline\/(\d+)\//);
@@ -524,6 +516,7 @@
         } catch(e) { return ''; }
     }
 
+    // טוען עמוד של 20 לידים לפי סוכן, מסנן 6 חודשים + לא נשלח
     async function loadWlPage() {
         const tbody = document.getElementById('wl-tbody');
         const statusEl = document.getElementById('wl-status');
@@ -587,19 +580,25 @@
         //     return d && d < SIX_MONTHS_AGO;
         // }).slice(0, 20);
         const seenPhones = new Set();
-        const filtered = raw.filter(lead => {
+        const candidates = raw.filter(lead => {
             const phone = normalizePhone(lead.phone1);
             if (!phone || seenPhones.has(phone)) return false;
             const pdiv = document.createElement('div');
             pdiv.innerHTML = lead.projectNameHtml || '';
             const proj = pdiv.querySelector('.label')?.innerText?.trim() || '';
-            const odiv = document.createElement('div');
-            odiv.innerHTML = lead.objectionHtml || '';
-            const objText = odiv.textContent || '';
-            if (isProfessional(lead.name1, proj, objText)) return false;
+            if (isProfessional(lead.name1, proj, '')) return false;
             seenPhones.add(phone);
             return true;
-        }).slice(0, 20);
+        });
+
+        if (statusEl) statusEl.textContent = 'בודק הערות...';
+        const filtered = [];
+        for (const lead of candidates) {
+            if (filtered.length >= 20) break;
+            const timelineText = await getTimelineText(lead);
+            if (isProfessional('', '', timelineText)) continue;
+            filtered.push(lead);
+        }
 
         wl_leads = filtered;
 
