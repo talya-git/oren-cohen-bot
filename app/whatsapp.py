@@ -683,7 +683,7 @@ async def fix_false_handoffs():
     ]
     conn = _db.get_db()
     cur = conn.cursor()
-    cur.execute("SELECT phone, transcript FROM reengagement_sent WHERE handoff=1 OR handoff=TRUE")
+    cur.execute("SELECT phone, transcript FROM reengagement_sent WHERE handoff=TRUE")
     rows = _db._fetchall(cur)
     fixed = 0
     for r in rows:
