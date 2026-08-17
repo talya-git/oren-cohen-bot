@@ -440,7 +440,6 @@ async def whatsapp_webhook(request: Request):
             )
         except Exception as e:
             print(f"[SEHEL ERROR] {e}")
-        _db.mark_reengagement_handoff(f"+{phone}")
 
         try:
             from .mailer import send_hot_lead_alert
@@ -671,6 +670,34 @@ async def start_reengagement_endpoint(request: Request):
     if status == "error":
         return {"status": "error", "phone": phone, "reason": reason}
     return {"status": "sent", "phone": phone}
+
+
+@router.post("/fix-false-handoffs")
+async def fix_false_handoffs():
+    """מתקן handoff שגויים — מסיר handoff מלידים שענו שלילי."""
+    from . import database as _db
+    negative_keywords = [
+        "לא רלוונט", "לא מעוניין", "לא צריך", "לא רוצה", "אין צורך",
+        "לא מתעניין", "not relevant", "not interested", "no thanks", "no thank you",
+        "מובן, תודה", "אנחנו כאן", "אנחנו כאן 😊"
+    ]
+    conn = _db.get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT phone, transcript FROM reengagement_sent WHERE handoff=1 OR handoff=TRUE")
+    rows = _db._fetchall(cur)
+    fixed = 0
+    for r in rows:
+        transcript = (r.get("transcript") or "").lower()
+        if any(kw.lower() in transcript for kw in negative_keywords):
+            cur.execute(
+                f"UPDATE reengagement_sent SET handoff={_db.PH} WHERE phone={_db.PH}",
+                (False if _db.DATABASE_URL else 0, r["phone"])
+            )
+            fixed += 1
+    conn.commit()
+    conn.close()
+    print(f"[FIX-HANDOFFS] fixed {fixed} records")
+    return {"fixed": fixed}
 
 
 @router.post("/reset-session")
