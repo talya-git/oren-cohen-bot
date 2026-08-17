@@ -672,9 +672,42 @@ async def start_reengagement_endpoint(request: Request):
     return {"status": "sent", "phone": phone}
 
 
+@router.post("/fix-positive-handoffs")
+async def fix_positive_handoffs():
+    """מסמן handoff=true ללידים שענו חיובי אבל לא סומנו."""
+    from . import database as _db
+    positive_keywords = [
+        "כן", "אשמח", "מעוניין", "בטח", "כמובן", "רלוונט", "אוקי", "נשמע",
+        "מעניין אותי", "אשמח לשמוע", "שלח פרטים", "שלח מידע",
+        "yes", "interested", "sure", "ok", "okay", "please", "send"
+    ]
+    negative_keywords = [
+        "לא רלוונט", "לא מעוניין", "לא צריך", "לא רוצה", "אין צורך",
+        "לא תודה", "not relevant", "not interested", "no thanks"
+    ]
+    conn = _db.get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT phone, transcript FROM reengagement_sent WHERE replied=TRUE AND (handoff=FALSE OR handoff IS NULL)")
+    rows = _db._fetchall(cur)
+    fixed = 0
+    for r in rows:
+        transcript = (r.get("transcript") or "").lower()
+        if any(kw.lower() in transcript for kw in negative_keywords):
+            continue
+        if any(kw.lower() in transcript for kw in positive_keywords):
+            cur.execute(
+                f"UPDATE reengagement_sent SET handoff=TRUE WHERE phone={_db.PH}",
+                (r["phone"],)
+            )
+            fixed += 1
+    conn.commit()
+    conn.close()
+    print(f"[FIX-POSITIVE-HANDOFFS] fixed {fixed} records")
+    return {"fixed": fixed}
+
+
 @router.post("/fix-false-handoffs")
 async def fix_false_handoffs():
-    """מתקן handoff שגויים — מסיר handoff מלידים שענו שלילי."""
     from . import database as _db
     negative_keywords = [
         "לא רלוונט", "לא מעוניין", "לא צריך", "לא רוצה", "אין צורך",
@@ -684,21 +717,37 @@ async def fix_false_handoffs():
     ]
     conn = _db.get_db()
     cur = conn.cursor()
+    fixed_false = 0
+    fixed_true = 0
+
+    # 1. תקן handoff שגויים (מסומנים true אבל ענו שלילי)
     cur.execute("SELECT phone, transcript FROM reengagement_sent WHERE handoff=TRUE")
     rows = _db._fetchall(cur)
-    fixed = 0
     for r in rows:
         transcript = (r.get("transcript") or "").lower()
         if any(kw.lower() in transcript for kw in negative_keywords):
-            cur.execute(
-                f"UPDATE reengagement_sent SET handoff={_db.PH} WHERE phone={_db.PH}",
-                (False if _db.DATABASE_URL else 0, r["phone"])
-            )
-            fixed += 1
+            cur.execute(f"UPDATE reengagement_sent SET handoff=FALSE WHERE phone={_db.PH}", (r["phone"],))
+            fixed_false += 1
+
+    # 2. תקן handoff חסרים (ענו חיובי אבל לא מסומנים handoff)
+    cur.execute("SELECT phone, transcript FROM reengagement_sent WHERE handoff=FALSE AND replied=TRUE")
+    rows2 = _db._fetchall(cur)
+    for r in rows2:
+        transcript = (r.get("transcript") or "")
+        lower = transcript.lower()
+        # דלג על שליליים
+        if any(kw.lower() in lower for kw in negative_keywords):
+            continue
+        # אם יש יותר משתי שורות לקוח — סימן handoff
+        client_lines = [l for l in transcript.split("\n") if l.startswith("לקוח:")]
+        if len(client_lines) >= 2:
+            cur.execute(f"UPDATE reengagement_sent SET handoff=TRUE WHERE phone={_db.PH}", (r["phone"],))
+            fixed_true += 1
+
     conn.commit()
     conn.close()
-    print(f"[FIX-HANDOFFS] fixed {fixed} records")
-    return {"fixed": fixed}
+    print(f"[FIX-HANDOFFS] removed={fixed_false} added={fixed_true}")
+    return {"fixed_false": fixed_false, "fixed_true": fixed_true}
 
 
 @router.post("/reset-session")
