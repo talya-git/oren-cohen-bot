@@ -79,7 +79,7 @@
   }
   .s-pending  { background: #fef9c3; color: #854d0e; }
   .s-replied  { background: #dcfce7; color: #166534; }
-  .s-handoff  { background: #fee2e2; color: #991b1b; }
+  .s-handoff  { background: #dbeafe; color: #1e40af; }
   .s-read     { background: #e0f2fe; color: #0369a1; }
   .s-error    { background: #fee2e2; color: #7f1d1d; }
 
@@ -175,14 +175,14 @@
     <option value="">כל הסטטוסים</option>
     <option value="sent">נשלח - ממתין</option>
     <option value="replied">ענה</option>
-    <option value="handoff">הועבר לסוכן</option>
+    <option value="handoff">עבר לשכל (כרטיס חדש)</option>
   </select>
   <input id="filter-search" type="text" placeholder="חיפוש שם / טלפון...">
   <span class="badge badge-total" id="b-total">סה"כ: 0</span>
   <span class="badge badge-replied" id="b-replied">ענו: 0</span>
   <span class="badge badge-pending" id="b-pending">ממתינים: 0</span>
   <span class="badge" style="background:#e0f2fe;color:#0369a1" id="b-read">נקראו: 0</span>
-  <span class="badge badge-handoff" id="b-handoff">הועברו: 0</span>
+  <span class="badge" style="background:#dbeafe;color:#1e40af" id="b-handoff">עברו לשכל: 0</span>
 </div>
 
 <div class="main">
@@ -285,7 +285,7 @@ function updateBadges() {
   document.getElementById('b-replied').textContent = `ענו: ${replied}`;
   document.getElementById('b-pending').textContent = `ממתינים: ${pending}`;
   document.getElementById('b-read').textContent = `נקראו: ${read}`;
-  document.getElementById('b-handoff').textContent = `הועברו: ${handoff}`;
+  document.getElementById('b-handoff').textContent = `עברו לשכל: ${handoff}`;
 }
 
 const AGENTS_LIST = ['אהרון','אוריאל','אורן','אלחנן','אריה','בועז','חנה','דב','יניב','ליסה','מיכאל','מירי','משה','נתנאל','רבקה'];
@@ -301,10 +301,10 @@ function populateAgents() {
 
 function getStatus(c) {
   if (c.error) return { label: '❌ ' + c.error.substring(0,40), cls: 's-error' };
-  if (c.handoff) return { label: 'הועבר לסוכן', cls: 's-handoff' };
-  if (c.replied) return { label: 'ענה ✓', cls: 's-replied' };
-  if (c.read_at) return { label: 'נקרא 👁️', cls: 's-read' };
-  return { label: 'ממתין...', cls: 's-pending' };
+  if (c.handoff) return { label: '📋 עבר לשכל', cls: 's-handoff', tooltip: 'הלקוח הועבר לשכל כרטיס חדש' };
+  if (c.replied) return { label: '💬 ענה', cls: 's-replied', tooltip: 'הלקוח ענה (חיובי או שלילי)' };
+  if (c.read_at) return { label: '👁️ נקרא', cls: 's-read', tooltip: 'הלקוח קרא את ההודעה' };
+  return { label: '⏳ ממתין', cls: 's-pending', tooltip: 'ההודעה נשלחה, ממתין לתגובה' };
 }
 
 function formatDate(str) {
@@ -359,7 +359,7 @@ function renderTable() {
       <td data-label="טלפון" style="direction:ltr;color:#6b7280">${c.phone || '—'}</td>
       <td data-label="סוכן">${c.agent_label || '—'}</td>
       <td data-label="פרויקט" style="color:#6b7280;font-size:12px">${c.project_name || 'יד 2'}</td>
-      <td data-label="סטטוס"><span class="status-badge ${st.cls}">${st.label}</span></td>
+      <td data-label="סטטוס"><span class="status-badge ${st.cls}" title="${st.tooltip||''}">${st.label}</span></td>
       <td data-label="תאריך" style="color:#6b7280;font-size:12px">${formatDate(c.sent_at)}</td>
       <td data-label="">
         <button class="btn-transcript ${hasTranscript?'':'empty'}"
