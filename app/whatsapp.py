@@ -191,7 +191,7 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
 
 
 
-_NOT_RELEVANT = ["לא רלוונטי", "לא מעוניין", "לא רלוונט", "לא מתעניין", "לא צריך", "לא רוצה", "not relevant", "not interested", "הסר", "remove", "unsubscribe", "stop", "אין צורך", "לא רלוונטי לי", "לא רלוונט לי", "לא רלוונטי עבורי", "לא רלוונט עבורי", "לא רלוונטי עבורנו", "no thanks", "no thank you", "no, thanks", "no, thank you", "currently not", "not now", "not for me", "no, thanks", "no, thank you", "currently not", "not now", "לא תודה", "לא, תודה", "תודה לא", "לא מעניין", "לא רלוונטי כרגע", "לא עכשיו תודה", "כרגע לא", "לא כרגע"]
+_NOT_RELEVANT = ["לא רלוונטי", "לא רלבנטי", "לא רלוונטי", "לא רלבנטי כרגע", "כרגע זה לא", "זה לא רלבנטי", "זה לא רלוונטי", "לא מעוניין", "לא רלוונט", "לא מתעניין", "לא צריך", "לא רוצה", "not relevant", "not interested", "הסר", "remove", "unsubscribe", "stop", "אין צורך", "לא רלוונטי לי", "לא רלוונט לי", "לא רלוונטי עבורי", "לא רלוונט עבורי", "לא רלוונטי עבורנו", "no thanks", "no thank you", "no, thanks", "no, thank you", "currently not", "not now", "not for me", "no, thanks", "no, thank you", "currently not", "not now", "לא תודה", "לא, תודה", "תודה לא", "לא מעניין", "לא רלוונטי כרגע", "לא עכשיו תודה", "כרגע לא", "לא כרגע"]
 _SNOOZE_WEEK = ["עסוק", "אחר כך", "אחרי", "יחשוב", "אחשוב", "לא עכשיו", "busy", "later", "will think", "not now"]
 
 
