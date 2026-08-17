@@ -191,7 +191,7 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
 
 
 
-_NOT_RELEVANT = ["לא רלוונטי", "לא מעוניין", "לא רלוונט", "לא מתעניין", "לא צריך", "לא רוצה", "not relevant", "not interested", "הסר", "remove", "unsubscribe", "stop", "אין צורך", "לא רלוונטי לי", "לא רלוונט לי", "לא רלוונטי עבורי", "לא רלוונט עבורי", "לא רלוונטי עבורנו", "no thanks", "no thank you", "not for me"]
+_NOT_RELEVANT = ["לא רלוונטי", "לא מעוניין", "לא רלוונט", "לא מתעניין", "לא צריך", "לא רוצה", "not relevant", "not interested", "הסר", "remove", "unsubscribe", "stop", "אין צורך", "לא רלוונטי לי", "לא רלוונט לי", "לא רלוונטי עבורי", "לא רלוונט עבורי", "לא רלוונטי עבורנו", "no thanks", "no thank you", "not for me", "לא תודה", "לא, תודה", "תודה לא", "לא מעניין", "לא רלוונטי כרגע", "לא עכשיו תודה"]
 _SNOOZE_WEEK = ["עסוק", "אחר כך", "אחרי", "יחשוב", "אחשוב", "לא עכשיו", "busy", "later", "will think", "not now"]
 
 
@@ -679,7 +679,8 @@ async def fix_false_handoffs():
     negative_keywords = [
         "לא רלוונט", "לא מעוניין", "לא צריך", "לא רוצה", "אין צורך",
         "לא מתעניין", "not relevant", "not interested", "no thanks", "no thank you",
-        "מובן, תודה", "אנחנו כאן", "אנחנו כאן 😊"
+        "מובן, תודה", "אנחנו כאן", "אנחנו כאן 😊",
+        "לא תודה", "לא, תודה", "תודה לא", "לא מעניין"
     ]
     conn = _db.get_db()
     cur = conn.cursor()
