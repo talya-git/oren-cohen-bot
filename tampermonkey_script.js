@@ -671,12 +671,12 @@
             const idx = parseInt(cb.dataset.idx);
             const lead = wl_leads[idx];
             if (!lead) continue;
-            if (isProfessional(lead.name1, project, '')) continue;
-            const div = document.createElement('div');
             div.innerHTML = lead.projectNameHtml || '';
+            const div = document.createElement('div');
             const project = div.querySelector('.label')?.innerText?.trim() || '';
             const nameInput = (wlOverlay || document).querySelector(`.wl-name-edit[data-idx="${idx}"]`);
             const fullName = nameInput ? nameInput.value.trim() || lead.name1 || '' : lead.name1 || '';
+            if (isProfessional(lead.name1, project, '')) continue;
             const name = firstNameOnly(fullName) || fullName;
             selectedLeads.push({ name, email: lead.email1 || '', phone: normalizePhone(lead.phone1), project });
         }
