@@ -504,7 +504,26 @@
         return new Date(y, parseInt(m[2]) - 1, parseInt(m[1]));
     }
 
-    // טוען עמוד של 20 לידים לפי סוכן, מסנן 6 חודשים + לא נשלח
+    async function checkTimelineForProfessional(clientId) {
+        try {
+            const numericId = clientId.replace(/[^0-9]/g, '') || clientId;
+            // נסה למצוא את ה-numeric ID מה-timelineHtml
+            return false; // placeholder
+        } catch(e) { return false; }
+    }
+
+    async function getTimelineText(lead) {
+        try {
+            const match = (lead.timelineHtml || '').match(/\/api\/content\/timeline\/(\d+)\//);
+            if (!match) return '';
+            const res = await fetch(`/api/content/timeline/${match[1]}/popover-timeline-content`);
+            const text = await res.text();
+            const div = document.createElement('div');
+            div.innerHTML = text;
+            return div.textContent || '';
+        } catch(e) { return ''; }
+    }
+
     async function loadWlPage() {
         const tbody = document.getElementById('wl-tbody');
         const statusEl = document.getElementById('wl-status');
@@ -576,7 +595,7 @@
             const proj = pdiv.querySelector('.label')?.innerText?.trim() || '';
             const odiv = document.createElement('div');
             odiv.innerHTML = lead.objectionHtml || '';
-            const objText = odiv.innerText || '';
+            const objText = odiv.textContent || '';
             if (isProfessional(lead.name1, proj, objText)) return false;
             seenPhones.add(phone);
             return true;
@@ -1051,3 +1070,4 @@
     }, 500);
 
 })();
+
