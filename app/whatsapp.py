@@ -414,6 +414,8 @@ async def whatsapp_webhook(request: Request):
     send_message(f"+{phone}", turn.reply)
 
     if turn.handoff_to_human:
+        if score.level in ("High", "Medium"):
+            _db.mark_reengagement_handoff(f"+{phone}")
         _wa_done.add(phone)
         dry = not (sehel.PROJECT_ID or sehel.WEBHOOK_URL)
         is_projects = _wa_is_projects.get(phone, False)
@@ -439,7 +441,7 @@ async def whatsapp_webhook(request: Request):
         except Exception as e:
             print(f"[SEHEL ERROR] {e}")
         _db.mark_reengagement_handoff(f"+{phone}")
-        # שליחת מייל התראה על לקוח חם
+
         try:
             from .mailer import send_hot_lead_alert
             send_hot_lead_alert(
