@@ -475,7 +475,7 @@
             const text = await res.text();
             const div = document.createElement('div');
             div.innerHTML = text;
-            const items = div.querySelectorAll('.tl-item'); let notes = ''; items.forEach(item => { const noteEl = item.querySelector('.tl-note, .note-text, p'); if (noteEl) notes += ' ' + noteEl.textContent; }); return notes.toLowerCase();
+            const items = div.querySelectorAll('.tl-item'); let notes = ''; items.forEach(item => { notes += ' ' + item.textContent; }); return notes.toLowerCase();
         } catch(e) { return ''; }
     }
 
