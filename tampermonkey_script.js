@@ -475,7 +475,7 @@
             const text = await res.text();
             const div = document.createElement('div');
             div.innerHTML = text;
-            return div.textContent || '';
+            const items = div.querySelectorAll('.tl-item'); let notes = ''; items.forEach(item => { const noteEl = item.querySelector('.tl-note, .note-text, p'); if (noteEl) notes += ' ' + noteEl.textContent; }); return notes.toLowerCase();
         } catch(e) { return ''; }
     }
 
@@ -602,8 +602,6 @@
         if (statusEl) statusEl.textContent = 'בודק ברשת...';
         for (const lead of candidates.slice(0, 30)) {
             if (filtered.length >= 20) break;
-            const timelineText = await getTimelineText(lead);
-            if (isProfessional('', '', timelineText)) { console.log('[TIMELINE PRO]', lead.name1); continue; }
             const isGooglePro = await checkGoogleProfessional(lead.name1);
             if (isGooglePro) { console.log('[GOOGLE PRO]', lead.name1); continue; }
             filtered.push(lead);
