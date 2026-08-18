@@ -422,10 +422,12 @@ async def whatsapp_webhook(request: Request):
         try:
             # עדכון כרטיס קיים בשכל עם הערה + תמליל
             summary = f"הערת לידים וואטסאפ — לקוח מתעניין ({score.level}):\n\n{transcript_text}"
+            resolved_pid = _wa_original_project.get(phone) or sehel.DEFAULT_PROJECT_ID
             sehel.log_call_summary(
                 convo.profile.phone,
                 summary[:2000],
-                dry_run=dry
+                dry_run=dry,
+                project_id=resolved_pid
             )
         except Exception as e:
             print(f"[SEHEL ERROR] {e}")

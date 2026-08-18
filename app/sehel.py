@@ -170,7 +170,7 @@ def build_payload(
     return payload
 
 
-def log_call_summary(phone: str, summary: str, *, dry_run: bool = False) -> dict:
+def log_call_summary(phone: str, summary: str, *, dry_run: bool = False, project_id: str | None = None) -> dict:
     """מוסיף סיכום שיחה לכרטיס קיים בשכל לפי טלפון."""
     if dry_run:
         return {"dry_run": True, "phone": phone}
@@ -178,7 +178,7 @@ def log_call_summary(phone: str, summary: str, *, dry_run: bool = False) -> dict
     if normalized.startswith("972"):
         normalized = "0" + normalized[3:]
     payload = {
-        "project_id": PROJECT_ID or DEFAULT_PROJECT_ID,
+        "project_id": project_id or PROJECT_ID or DEFAULT_PROJECT_ID,
         "lead_phone": normalized,
         "media_source": "WhatsApp",
         "callSummary": summary[:2000],
