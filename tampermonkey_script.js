@@ -475,13 +475,13 @@
             const text = await res.text();
             const div = document.createElement('div');
             div.innerHTML = text;
-            const items = div.querySelectorAll('.tl-item'); let notes = ''; items.forEach(item => { notes += ' ' + item.textContent; }); return notes.toLowerCase();
+            const tagsEl = div.querySelector('.tagsHtml, .tags, [class*=tag]'); if (tagsEl) tagsEl.remove(); const items = div.querySelectorAll('.tl-item'); let notes = ''; items.forEach(item => { notes += ' ' + item.textContent; }); return notes.toLowerCase();
         } catch(e) { return ''; }
     }
 
     function isProfessionalInTimeline(timelineText) {
         const keywords = ['עו"ד', 'עורך דין', 'עורכת דין', 'מתווך', 'מתווכת', 'ספק', 'attorney', 'lawyer'];
-        const referralWords = ['הופנה', 'הועבר', 'ליד של', 'על ידי', 'מאת', 'referred', 'via'];
+        const referralWords = ['הופנה', 'הועבר', 'ליד של', 'על ידי', 'מאת', 'referred', 'via', '\u05d1\u05d5\u05d8 \u05d5\u05d5\u05d0\u05d8\u05e1\u05d0\u05e4', '\u05e1\u05d5\u05db\u05df \u05d1\u05db\u05d9\u05e8', '\u05d0\u05e9\u05de\u05d7 \u05dc\u05d4\u05e2\u05d1\u05d9\u05e8', '\u05d0\u05e2\u05d1\u05d9\u05e8 \u05d0\u05d5\u05ea\u05da'];
         const lower = timelineText.toLowerCase();
         for (const kw of keywords) {
             const idx = lower.indexOf(kw.toLowerCase());
