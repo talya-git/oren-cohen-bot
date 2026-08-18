@@ -431,6 +431,18 @@ async def whatsapp_webhook(request: Request):
                 project_id=resolved_pid
             )
             print(f"[SEHEL CALL RESULT] {result}")
+            # שליחת מייל לסוכן
+            from . import database as _db2
+            record = _db2.get_reengagement_record(f"+{phone}")
+            agent_email = record.get("agent_email") if record else None
+            if agent_email:
+                from .mailer import send_agent_lead_alert
+                send_agent_lead_alert(
+                    agent_email=agent_email,
+                    client_name=convo.profile.contact_name or phone,
+                    client_phone=f"+{phone}",
+                    transcript=transcript_text,
+                )
         except Exception as e:
             print(f"[SEHEL ERROR] {e}")
 

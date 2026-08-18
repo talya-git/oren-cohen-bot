@@ -114,6 +114,42 @@ def send_report(to_email: str, agent_label: str, leads: list[dict]) -> None:
         raise
 
 
+def send_agent_lead_alert(agent_email: str, client_name: str, client_phone: str, transcript: str) -> None:
+    """שולח מייל התראה לסוכן על ליד מתעניין."""
+    subject = f"🔔 התראה מהבוט — ליד מתעניין"
+    html = (
+        "<html><body dir='rtl' style='font-family:Arial,sans-serif;font-size:14px;'>"
+        "<h2 style='color:#16a34a;'>🔔 ליד מתעניין מהבוט!</h2>"
+        "<table style='border-collapse:collapse;margin-bottom:16px;'>"
+        f"<tr><td style='padding:6px 12px;font-weight:bold;'>שם:</td><td style='padding:6px 12px;'>{client_name}</td></tr>"
+        f"<tr><td style='padding:6px 12px;font-weight:bold;'>טלפון:</td><td style='padding:6px 12px;direction:ltr;'>{client_phone}</td></tr>"
+        "</table>"
+        "<h4>תמליל שיחה:</h4>"
+        f"<div style='background:#f8f9fa;padding:12px;border-radius:8px;font-size:13px;white-space:pre-wrap;direction:rtl;'>{transcript}</div>"
+        "</body></html>"
+    )
+    payload = json.dumps({
+        "Messages": [{
+            "From": {"Email": FROM_EMAIL, "Name": FROM_NAME},
+            "To": [{"Email": agent_email}],
+            "Subject": subject,
+            "HTMLPart": html,
+        }]
+    }).encode()
+    credentials = base64.b64encode(f"{MAILJET_API_KEY}:{MAILJET_SECRET_KEY}".encode()).decode()
+    req = urllib.request.Request(
+        "https://api.mailjet.com/v3.1/send",
+        data=payload,
+        headers={"Authorization": f"Basic {credentials}", "Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req) as resp:
+            print(f"[AGENT ALERT] sent to {agent_email}")
+    except Exception as e:
+        print(f"[AGENT ALERT ERROR] {e}")
+
+
 def send_hot_lead_alert(name: str, phone: str, score: str, transcript: str) -> None:
     """שולח התראת לקוח חם ל-projects@orencohengroup.com"""
     score_emoji = {"High": "🔴 HIGH", "Medium": "🟠 MEDIUM", "Low": "🟢 LOW"}.get(score, score)
