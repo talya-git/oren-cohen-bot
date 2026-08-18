@@ -475,7 +475,7 @@
             const text = await res.text();
             const div = document.createElement('div');
             div.innerHTML = text;
-            const tagsEl = div.querySelector('.tagsHtml, .tags, [class*=tag]'); if (tagsEl) tagsEl.remove(); const items = div.querySelectorAll('.tl-item'); let notes = ''; items.forEach(item => { notes += ' ' + item.textContent; }); return notes.toLowerCase();
+            const tagsEl = div.querySelector('.tagsHtml, .tags, [class*=tag]'); if (tagsEl) tagsEl.remove(); const items = div.querySelectorAll('.tl-item'); let notes = ''; items.forEach(item => { const txt = item.textContent; if (txt.includes('הערה')) notes += ' ' + txt; }); return notes.toLowerCase();
         } catch(e) { return ''; }
     }
 
