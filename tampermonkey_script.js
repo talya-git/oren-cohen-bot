@@ -473,7 +473,7 @@
     ];
 
     async function checkGoogleProfessional(name) {
-        if (!name || name === chr(8212)) return false;
+        if (!name || name === String.fromCharCode(8212)) return false;
         try {
             const res = await fetch(BOT_URL + '/api/whatsapp/check-professional?name=' + encodeURIComponent(name));
             const data = await res.json();
