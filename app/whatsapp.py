@@ -436,13 +436,23 @@ async def whatsapp_webhook(request: Request):
             record = _db2.get_reengagement_record(f"+{phone}")
             agent_email = record.get("agent_email") if record else None
             if agent_email:
-                from .mailer import send_agent_lead_alert
-                send_agent_lead_alert(
-                    agent_email=agent_email,
-                    client_name=convo.profile.contact_name or phone,
-                    client_phone=f"+{phone}",
-                    transcript=transcript_text,
+                from .email_api import _send_email
+                subject = f"🔔 התראה מהבוט — ליד מתעניין"
+                html = (
+                    f"<div dir='rtl' style='font-family:Arial,sans-serif;font-size:14px;'>"
+                    f"<h2 style='color:#16a34a;'>🔔 ליד מתעניין מהבוט!</h2>"
+                    f"<p><b>שם:</b> {convo.profile.contact_name or phone}</p>"
+                    f"<p><b>טלפון:</b> +{phone}</p>"
+                    f"<h4>תמליל שיחה:</h4>"
+                    f"<div style='background:#f8f9fa;padding:12px;border-radius:8px;font-size:13px;white-space:pre-wrap;'>{transcript_text}</div>"
+                    f"</div>"
                 )
+                text = f"ליד מתעניין: {convo.profile.contact_name or phone} | +{phone}\n\n{transcript_text}"
+                try:
+                    _send_email(agent_email, "", subject, html, text)
+                    print(f"[AGENT ALERT] sent to {agent_email}")
+                except Exception as e:
+                    print(f"[AGENT ALERT ERROR] {e}")
         except Exception as e:
             print(f"[SEHEL ERROR] {e}")
 
