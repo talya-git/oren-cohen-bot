@@ -461,15 +461,10 @@
     }
 
     const PROFESSIONAL_KEYWORDS = [
-        'עו"ד', 'עו\u05f4ד', 'עורך דין', 'עורכת דין', 'משרד עו"ד', 'עו"ד ונוטריון',
-        'מתווך', 'מתווכת', 'תיווך', 'סוכן נדל"ן', 'סוכנות נדל"ן',
-        'קבלן', 'יזם', 'יזמות', 'אדריכל', 'אדריכלות',
-        'רואה חשבון', 'רו"ח', 'רו\u05f4ח', 'יועץ', 'יועצת', 'ייעוץ',
-        'מנכ"ל', 'מנכ\u05f4ל', 'סמנכ"ל', 'שיווק', 'פרסום', 'ספקים',
-        'attorney', 'lawyer', 'realtor', 'broker',
-        'contractor', 'developer', 'architect', 'accountant',
-        'consultant', 'advisor', 'director', 'ceo', 'cfo',
-        'ltd', 'llc', 'inc', 'בע"מ', 'בע\u05f4מ', 'חברה'
+        'עו"ד', 'עורך דין', 'עורכת דין',
+        'מתווך', 'מתווכת', 'תיווך',
+        'ספקים',
+        'attorney', 'lawyer', 'realtor', 'broker'
     ];
 
     async function getTimelineText(lead) {
