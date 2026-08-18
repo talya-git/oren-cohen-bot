@@ -479,6 +479,19 @@
         } catch(e) { return ''; }
     }
 
+    function isProfessionalInTimeline(timelineText) {
+        const keywords = ['עו"ד', 'עורך דין', 'עורכת דין', 'מתווך', 'מתווכת', 'ספק', 'attorney', 'lawyer'];
+        const referralWords = ['הופנה', 'הועבר', 'ליד של', 'על ידי', 'מאת', 'referred', 'via'];
+        const lower = timelineText.toLowerCase();
+        for (const kw of keywords) {
+            const idx = lower.indexOf(kw.toLowerCase());
+            if (idx === -1) continue;
+            const before = lower.substring(Math.max(0, idx - 60), idx);
+            if (!referralWords.some(r => before.includes(r.toLowerCase()))) return true;
+        }
+        return false;
+    }
+
     async function checkGoogleProfessional(name) {
         if (!name || name === String.fromCharCode(8212)) return false;
         try {
@@ -602,6 +615,8 @@
         if (statusEl) statusEl.textContent = 'בודק ברשת...';
         for (const lead of candidates.slice(0, 30)) {
             if (filtered.length >= 20) break;
+            const timelineText = await getTimelineText(lead);
+            if (isProfessionalInTimeline(timelineText)) { console.log('[TIMELINE PRO]', lead.name1); continue; }
             const isGooglePro = await checkGoogleProfessional(lead.name1);
             if (isGooglePro) { console.log('[GOOGLE PRO]', lead.name1); continue; }
             filtered.push(lead);
