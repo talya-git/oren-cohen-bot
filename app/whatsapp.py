@@ -420,22 +420,11 @@ async def whatsapp_webhook(request: Request):
         dry = not (sehel.PROJECT_ID or sehel.WEBHOOK_URL)
         is_projects = _wa_is_projects.get(phone, False)
         try:
-            payload = sehel.build_payload(
-                convo.profile, score.level, score.score,
-                language=getattr(convo, "_language", "he"),
-                media_source="WhatsApp",
-                is_projects=is_projects,
-                transcript=convo.messages,
-            )
-            payload["tags[]"] = payload.get("tags[]", []) + ["בוט"]
-            sehel.push_lead(payload, dry_run=dry)
-            transcript_text = "\n".join(
-                f"{'\u05d3\u05e0\u05d9\u05d0\u05dc' if m['role']=='assistant' else '\u05dc\u05e7\u05d5\u05d7'}: {m['content']}"
-                for m in convo.messages if m.get('role') in ('assistant','user')
-            )
+            # עדכון כרטיס קיים בשכל עם הערה + תמליל
+            summary = f"הערת לידים וואטסאפ — לקוח מתעניין ({score.level}):\n\n{transcript_text}"
             sehel.log_call_summary(
                 convo.profile.phone,
-                f"בוט וואטסאפ — שיחה הושלמה, ליד {score.level}:\n{transcript_text}",
+                summary[:2000],
                 dry_run=dry
             )
         except Exception as e:
