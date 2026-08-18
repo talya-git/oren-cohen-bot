@@ -66,7 +66,7 @@
   }
   .modal-header h3 { font-size: 16px; }
   .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #fff; }
-  .modal-body { padding: 20px; overflow-y: auto; flex: 1; white-space: pre-wrap; font-size: 13px; line-height: 1.7; direction: ltr; text-align: left; }
+  .modal-body { padding: 20px; overflow-y: auto; flex: 1; white-space: pre-wrap; font-size: 13px; line-height: 1.7; }
   .filter-bar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
   .filter-bar input, .filter-bar select {
     padding: 7px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; outline: none;
@@ -196,7 +196,11 @@ function renderTable() {
 
 function showTranscript(name, text) {
   document.getElementById('transcript-title').textContent = `📧 תמליל — ${name}`;
-  document.getElementById('transcript-body').textContent = text || 'אין תמליל';
+  const hasHebrew = /[\u05d0-\u05ea]/.test(text || '');
+  const body = document.getElementById('transcript-body');
+  body.style.direction = hasHebrew ? 'rtl' : 'ltr';
+  body.style.textAlign = hasHebrew ? 'right' : 'left';
+  body.textContent = text || 'אין תמליל';
   document.getElementById('transcript-modal').classList.add('open');
 }
 
