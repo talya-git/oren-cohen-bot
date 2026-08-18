@@ -486,7 +486,7 @@
         for (const kw of keywords) {
             const idx = lower.indexOf(kw.toLowerCase());
             if (idx === -1) continue;
-            const before = lower.substring(Math.max(0, idx - 60), idx);
+            const before = lower.substring(Math.max(0, idx - 150), idx);
             if (!referralWords.some(r => before.includes(r.toLowerCase()))) return true;
         }
         return false;
