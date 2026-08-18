@@ -137,8 +137,8 @@
     max-width: 80%;
     line-height: 1.5;
   }
-  .bubble-agent  { background: #e0e7ff; color: #1e1b4b; border-radius: 12px 12px 12px 2px; }
-  .bubble-client { background: #dcfce7; color: #14532d; border-radius: 12px 12px 2px 12px; }
+  .bubble-agent  { background: #e0e7ff; color: #1e1b4b; border-radius: 12px 12px 12px 2px; direction: rtl; text-align: right; }
+  .bubble-client { background: #dcfce7; color: #14532d; border-radius: 12px 12px 2px 12px; direction: rtl; text-align: right; }
   .msg-label { font-size: 10px; color: #9ca3af; margin-bottom: 3px; }
 
   .empty-state { text-align: center; padding: 60px 20px; color: #9ca3af; }
@@ -403,9 +403,10 @@ function refreshModal(phone) {
     if (text.startsWith('"') && text.endsWith('",')) text = text.slice(1, -2);
     else if (text.startsWith('"') && text.endsWith('"')) text = text.slice(1, -1);
     if (!text) return '';
+    const isEng = /^[a-zA-Z0-9\s.,!?'"\-@]+$/.test(text.trim());
     return `<div class="msg ${cls}">
       <div class="msg-label">${label}</div>
-      <div class="bubble ${bcls}">${text}</div>
+      <div class="bubble ${bcls}" style="direction:${isEng?'ltr':'rtl'};text-align:${isEng?'left':'right'}">${text}</div>
     </div>`;
   }).join('');
   body.scrollTop = body.scrollHeight;
