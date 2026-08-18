@@ -403,7 +403,8 @@ function refreshModal(phone) {
     if (text.startsWith('"') && text.endsWith('",')) text = text.slice(1, -2);
     else if (text.startsWith('"') && text.endsWith('"')) text = text.slice(1, -1);
     if (!text) return '';
-    const isEng = /^[a-zA-Z0-9\s.,!?'"\-@]+$/.test(text.trim());
+    const engChars = (text.match(/[a-zA-Z]/g) || []).length;
+    const isEng = engChars > text.length * 0.4;
     return `<div class="msg ${cls}">
       <div class="msg-label">${label}</div>
       <div class="bubble ${bcls}" style="direction:${isEng?'ltr':'rtl'};text-align:${isEng?'left':'right'}">${text}</div>
