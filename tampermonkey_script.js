@@ -472,6 +472,15 @@
         'ltd', 'llc', 'inc', 'בע"מ', 'בע\u05f4מ', 'חברה'
     ];
 
+    async function checkGoogleProfessional(name) {
+        if (!name || name === chr(8212)) return false;
+        try {
+            const res = await fetch(BOT_URL + '/api/whatsapp/check-professional?name=' + encodeURIComponent(name));
+            const data = await res.json();
+            return data.is_professional === true;
+        } catch(e) { return false; }
+    }
+
     function isProfessional(name, project, objection) {
         const lower = (name || '').toLowerCase();
         const objLower = (objection || '').toLowerCase();
@@ -568,7 +577,7 @@
         //     return d && d < SIX_MONTHS_AGO;
         // }).slice(0, 20);
         const seenPhones = new Set();
-        const filtered = raw.filter(lead => {
+        const candidates = raw.filter(lead => {
             const phone = normalizePhone(lead.phone1);
             if (!phone || seenPhones.has(phone)) return false;
             const pdiv = document.createElement('div');
@@ -580,7 +589,16 @@
             if (isProfessional(lead.name1, proj, objText)) return false;
             seenPhones.add(phone);
             return true;
-        }).slice(0, 20);
+        });
+
+        const filtered = [];
+        if (statusEl) statusEl.textContent = 'בודק ברשת...';
+        for (const lead of candidates.slice(0, 30)) {
+            if (filtered.length >= 20) break;
+            const isGooglePro = await checkGoogleProfessional(lead.name1);
+            if (isGooglePro) { console.log('[GOOGLE PRO]', lead.name1); continue; }
+            filtered.push(lead);
+        }
 
         wl_leads = filtered;
 

@@ -325,7 +325,11 @@ async def whatsapp_webhook(request: Request):
             if "הסר" in msg_lower or "remove" in msg_lower or "unsubscribe" in msg_lower or "stop" in msg_lower:
                 reply_msg = "אוקי, סליחה על ההטרדה! נשמח לעזור לך תמיד אם תצטרך 😊"
             else:
-                reply_msg = "מובן, תודה על התשובה! אם בעתיד תתעניין — אנחנו כאן 😊"
+                lang_check = _detect_language(f"+{phone}", None)
+                if lang_check == "he":
+                    reply_msg = "נשמח שתשמור אותנו בזיכרון שלך 😊\nאם בעתיד תתעניין בנכס בירושלים — אנחנו תמיד כאן: https://www.orencohengroup.com/he/"
+                else:
+                    reply_msg = "We'd love to stay in your memory 😊\nIf you ever consider a property in Jerusalem in the future — we're always here: https://www.orencohengroup.com/"
             send_message(f"+{phone}", reply_msg)
             _db.update_reengagement_replied(f"+{phone}", True, f"לקוח: {text}\nדניאל: {reply_msg}")
             dry = not (sehel.PROJECT_ID or sehel.WEBHOOK_URL)
@@ -719,6 +723,31 @@ async def fix_positive_handoffs():
     conn.close()
     print(f"[FIX-POSITIVE-HANDOFFS] fixed {fixed} records")
     return {"fixed": fixed}
+
+
+@router.get("/check-professional")
+async def check_professional(name: str):
+    """בודק בגוגל אם השם שייך למקצוען."""
+    import os, httpx
+    api_key = os.getenv("GOOGLE_API_KEY", "")
+    cse_id = os.getenv("GOOGLE_CSE_ID", "")
+    if not api_key or not cse_id:
+        return {"is_professional": False}
+    professional_terms = ["עורך דין", "מתווך", "קבלן", "יזם", "רואה חשבון", "attorney", "lawyer", "realtor", "broker", "contractor", "developer", "accountant"]
+    try:
+        query = f"{name} מקצוע"
+        resp = httpx.get(
+            "https://www.googleapis.com/customsearch/v1",
+            params={"key": api_key, "cx": cse_id, "q": query, "num": 3},
+            timeout=5
+        )
+        results = resp.json().get("items", [])
+        combined = " ".join([(r.get("title", "") + " " + r.get("snippet", "")).lower() for r in results])
+        is_pro = any(term.lower() in combined for term in professional_terms)
+        return {"is_professional": is_pro, "name": name}
+    except Exception as e:
+        print(f"[GOOGLE CHECK ERROR] {e}")
+        return {"is_professional": False}
 
 
 @router.post("/fix-false-handoffs")
