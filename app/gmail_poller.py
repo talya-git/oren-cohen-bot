@@ -182,5 +182,9 @@ def poll_inbox():
             db.mark_reengagement_handoff(f"email:{from_email}")
             _email_sessions.pop(from_email, None)
             print(f"[GMAIL HANDOFF] {from_email}")
+            # התראה לסוכן + בועז
+            from .email_api import _send_agent_alert
+            agent_email = record.get("agent_email") or ""
+            _send_agent_alert(agent_email, name, from_email, updated, channel="Email")
 
     mail.logout()

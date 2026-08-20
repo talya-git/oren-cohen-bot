@@ -39,7 +39,35 @@ def _send_email(to_email: str, to_name: str, subject: str, html: str, text: str,
     return {"status": "sent"}
 
 
-def _build_greeting(name: str | None) -> str:
+BOAZ_EMAIL = "office@orencohengroup.com"
+
+
+def _send_agent_alert(agent_email: str, client_name: str, phone_or_email: str, transcript: str, channel: str = "WhatsApp") -> None:
+    """שולח התראה לסוכן + לבועז במקביל (אם הסוכן אינו בועז)."""
+    recipients = [agent_email]
+    if agent_email.lower() != BOAZ_EMAIL:
+        recipients.append(BOAZ_EMAIL)
+
+    subject = f"🔔 ליד מתעניין ({channel}) — {client_name or phone_or_email}"
+    html = (
+        f"<div dir='rtl' style='font-family:Arial,sans-serif;font-size:14px;'>"
+        f"<h2 style='color:#16a34a;'>🔔 ליד מתעניין מהבוט!</h2>"
+        f"<p><b>שם:</b> {client_name or '—'}</p>"
+        f"<p><b>{'טלפון' if channel == 'WhatsApp' else 'מייל'}:</b> {phone_or_email}</p>"
+        f"<p><b>ערוץ:</b> {channel}</p>"
+        f"<h4>תמליל שיחה:</h4>"
+        f"<div style='background:#f8f9fa;padding:12px;border-radius:8px;font-size:13px;white-space:pre-wrap;direction:rtl'>{transcript}</div>"
+        f"</div>"
+    )
+    text_body = f"ליד מתעניין: {client_name or phone_or_email}\n{phone_or_email}\n\n{transcript}"
+    for to in recipients:
+        try:
+            _send_email(to, "", subject, html, text_body)
+            print(f"[AGENT ALERT] sent to {to}")
+        except Exception as e:
+            print(f"[AGENT ALERT ERROR] {to}: {e}")
+
+
     is_hebrew = name and any('\u05d0' <= c <= '\u05ea' for c in name)
     if is_hebrew or not name:
         greeting = f"היי{' ' + name if name else ''},\n\n"
