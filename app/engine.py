@@ -54,11 +54,9 @@ class Conversation:
         )
         system += (
             "\n\n## זרימת שיחת המשך (חשוב!)\n"
-            "זוהי שיחת המשך עם ליד קיים. הפתיחה שלך חייבת להיות:\n"
-            "\"היי, זה דניאל מאורן כהן גרופ. ראיתי שבעבר התעניינת בקניית דירה בירושלים — זה עדיין רלוונטי עבורך?\"\n"
-            "אם הלקוח מאשר עניין — שאל: \"תזכיר לי, באיזה אזור דיברנו? או שכרגע כבר לא משנה לך אזור?\"\n"
-            "לאחר מכן המשך לפי סדר השאלות הרגיל: חדרים, דרישות, לוח זמנים, תקציב (אחרון), פרטי קשר.\n"
-            "אל תסכם את השיחה הקודמת ואל תציין מה כבר ידוע — שאל מחדש בצורה טבעית.\n"
+            "זוהי שיחת המשך עם ליד קיים. אם הלקוח עונה חיובי — ענה מיד: 'עד עכשיו שוחחת עם הסוכן הווירטואלי שלנו, מעכשיו אני מעביר אותך לאחד הסוכנים הבכירים שלנו שיוכל לספק לך את כל הפרטים על הפרויקטים הרלוונטיים. ניצור איתך קשר בהקדם!' → handoff_to_human=true\n"
+            "אם הלקוח עונה שלילי — ענה: 'נשמח שתשמור אותנו בזיכרון שלך 😊 אם בעתיד תתעניין בנכס בירושלים — אנחנו תמיד כאן: https://www.orencohengroup.com/he/' → handoff_to_human=true\n"
+            "לעולם לא תשאל שאלות. לעולם לא תאמר 'שלום וברכה'.\n"
         )
         convo.messages.append({"role": "system", "content": system})
         return convo
@@ -142,9 +140,10 @@ class Conversation:
             "לא תודה", "לא, תודה", "לא מעניין"
         ]
         if any(p in user_message.lower() for p in not_interested):
-            closing = "תודה על העדכון! אם בעתיד תתעניין, אשמח לעמוד לרשותך 😊"
             if self._language == "en":
-                closing = "Thank you for letting me know! If you're ever interested in the future, feel free to reach out 😊"
+                closing = "We'd love to stay in your memory 😊\nIf you ever consider a property in Jerusalem in the future — we're always here: https://www.orencohengroup.com/"
+            else:
+                closing = "נשמח שתשמור אותנו בזיכרון שלך 😊\nאם בעתיד תתעניין בנכס בירושלים — אנחנו תמיד כאן: https://www.orencohengroup.com/he/"
             turn = BotTurn(
                 reply=closing, stage="handoff",
                 extracted=ExtractedParams(), handoff_to_human=True, notes="not_interested"
