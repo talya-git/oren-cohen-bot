@@ -111,6 +111,7 @@ def poll_inbox():
         cut_markers = ["מאת:", "From:", "-----Original", "________________________________",
                        "wrote:", "כתב:", "נשלח:", "Sent:",
                        "orencohengroup2020@gmail.com", "daniel@orencohengroup.com",
+                       "ocgdaniel@gmail.com",
                        "On ", "> "]
         earliest = len(text)
         for marker in cut_markers:
@@ -119,6 +120,8 @@ def poll_inbox():
                 earliest = idx
         if earliest > 2:
             text = text[:earliest].strip()
+        # נקה שירות ריקות ותווים עודפים
+        text = re.sub(r'[_\-]{4,}', '', text)
         text = re.sub(r"\s+", " ", text).strip()
 
         if not text:
@@ -148,10 +151,16 @@ def poll_inbox():
         # שמור ב-sessions
         _email_sessions[from_email] = convo
 
+        # זיהוי תשובה שלילית לפני חיובית
+        negative_words = ["לא רלוונטי", "לא מעוניין", "לא כרגע", "לא עכשיו", "לא צריך",
+                          "לא רלוונטי בשבילי", "לא רלוונטי עבורי", "לא רלוונטי לי","לא"
+                          "not relevant", "not interested", "no thanks", "not now"]
+        is_negative = any(w in text.lower() for w in negative_words)
+
         # זיהוי תשובה חיובית לשאלת הפתיחה
-        positive_words = ["כן", "רלוונטי", "מעוניין", "מעוניינת", "אשמח", "בטח", "כמובן", "yes", "interested", "sure", "absolutely"]
+        positive_words = ["כן", "מעוניין", "מעוניינת", "אשמח", "בטח", "כמובן", "yes", "interested", "sure", "absolutely"]
         is_first_reply = len([m for m in convo.messages if m["role"] == "user"]) == 0
-        is_positive = any(w in text.lower() for w in positive_words)
+        is_positive = not is_negative and any(w in text.lower() for w in positive_words)
 
         if is_first_reply and is_positive:
             actual_text = f"[הלקוח ענה חיובית: '{text}'. ענה מיד בהודעת ההעברה לסוכן והלינק לאתר. אל תשאל שאלות נוספות.]"
@@ -161,8 +170,9 @@ def poll_inbox():
         # שלח את ההודעה לבוט
         turn, score = convo.send(actual_text)
 
-        # עדכון תמליל ב-DB
-        updated = transcript + f"\nClient: {text}\nDaniel: {turn.reply}"
+        # עדכון תמליל ב-DB — שמור רק את התשובה הנקייה
+        clean_text = text[:200]  # מקסימום 200 תווים מהתשובה
+        updated = transcript + f"\nClient: {clean_text}\nDaniel: {turn.reply}"
         db.update_reengagement_replied(f"email:{from_email}", True, updated.strip())
 
         # שליחת תשובה
@@ -177,14 +187,29 @@ def poll_inbox():
         mail.store(num, "+FLAGS", "\\Seen")
 
         if turn.handoff_to_human:
+            is_relevant = "[HANDOFF]" not in updated or any(
+                w in updated.lower() for w in ["נשמח שתשמור", "we'd love to stay"]
+            )
+            # אם התמליל מכיל את הודעת הזיכרון — לא רלוונטי
+            if "נשמח שתשמור" in turn.reply or "we'd love to stay" in turn.reply.lower():
+                is_relevant = False
             updated += "\n[HANDOFF]"
             db.update_reengagement_replied(f"email:{from_email}", True, updated.strip())
-            db.mark_reengagement_handoff(f"email:{from_email}")
+            if is_relevant:
+                db.mark_reengagement_handoff(f"email:{from_email}")
             _email_sessions.pop(from_email, None)
-            print(f"[GMAIL HANDOFF] {from_email}")
-            # התראה לסוכן + בועז
-            from .email_api import _send_agent_alert
+            print(f"[GMAIL HANDOFF] {from_email} relevant={is_relevant}")
+            from . import sehel as _sehel
+            dry = not (_sehel.PROJECT_ID or _sehel.WEBHOOK_URL)
             agent_email = record.get("agent_email") or ""
-            _send_agent_alert(agent_email, name, from_email, updated, channel="Email")
+            _sehel.update_lead_after_conversation(
+                from_email,
+                updated,
+                is_relevant=is_relevant,
+                agent_email=agent_email,
+                client_name=name,
+                channel="Email",
+                dry_run=dry,
+            )
 
     mail.logout()

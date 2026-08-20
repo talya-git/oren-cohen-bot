@@ -136,6 +136,7 @@ class Conversation:
         not_interested = [
             "לא רלוונטי", "לא מעוניין", "לא מתעניין", "לא צריך", "לא רוצה",
             "לא כרגע", "לא עכשיו", "לא עכש",
+            "לא רלוונטי בשבילי", "לא רלוונטי עבורי", "לא רלוונטי לי",
             "not interested", "not relevant", "no thanks", "no thank you", "not now", "not at the moment",
             "לא תודה", "לא, תודה", "לא מעניין"
         ]
