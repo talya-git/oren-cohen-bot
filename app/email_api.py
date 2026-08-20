@@ -43,20 +43,23 @@ BOAZ_EMAIL = "tsalyato@orencohengroup.com"
 
 
 def _send_agent_alert(agent_email: str, client_name: str, phone_or_email: str, transcript: str, channel: str = "WhatsApp") -> None:
-    """שולח התראה לסוכן + לבועז במקביל (אם הסוכן אינו בועז)."""
     recipients = [agent_email]
     if agent_email.lower() != BOAZ_EMAIL:
         recipients.append(BOAZ_EMAIL)
 
+    # פירמוט תמליל עם שורות נפרדות
+    formatted = transcript.replace('\n', '<br>').replace('דניאל:', '<br><b>דניאל:</b>').replace('לקוח:', '<br><b>לקוח:</b>').replace('Daniel:', '<br><b>Daniel:</b>').replace('Client:', '<br><b>Client:</b>')
+
     subject = f"🔔 ליד מתעניין ({channel}) — {client_name or phone_or_email}"
     html = (
-        f"<div dir='rtl' style='font-family:Arial,sans-serif;font-size:14px;'>"
+        f"<div dir='rtl' style='font-family:Arial,sans-serif;font-size:14px;line-height:1.6'>"
         f"<h2 style='color:#16a34a;'>🔔 ליד מתעניין מהבוט!</h2>"
         f"<p><b>שם:</b> {client_name or '—'}</p>"
         f"<p><b>{'טלפון' if channel == 'WhatsApp' else 'מייל'}:</b> {phone_or_email}</p>"
         f"<p><b>ערוץ:</b> {channel}</p>"
-        f"<h4>תמליל שיחה:</h4>"
-        f"<div style='background:#f8f9fa;padding:12px;border-radius:8px;font-size:13px;white-space:pre-wrap;direction:rtl'>{transcript}</div>"
+        f"<hr style='border:none;border-top:1px solid #e2e8f0;margin:12px 0'>"
+        f"<h4 style='margin-bottom:8px'>תמליל שיחה:</h4>"
+        f"<div style='background:#f8f9fa;padding:14px;border-radius:8px;font-size:13px;direction:rtl;line-height:1.8'>{formatted}</div>"
         f"</div>"
     )
     text_body = f"ליד מתעניין: {client_name or phone_or_email}\n{phone_or_email}\n\n{transcript}"

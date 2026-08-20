@@ -333,10 +333,17 @@ async def whatsapp_webhook(request: Request):
             send_message(f"+{phone}", reply_msg)
             _db.update_reengagement_replied(f"+{phone}", True, f"לקוח: {text}\nדניאל: {reply_msg}")
             dry = not (sehel.PROJECT_ID or sehel.WEBHOOK_URL)
-            try:
-                sehel.log_call_summary(f"+{phone}", f"בוט וואטסאפ: לקוח ענה 'לא רלוונטי' ({text})", dry_run=dry)
-            except Exception as e:
-                print(f"[SEHEL CALL LOG ERROR] {e}")
+            record = _db.get_reengagement_record(f"+{phone}")
+            sehel.update_lead_after_conversation(
+                f"+{phone}",
+                f"לקוח: {text}\nדניאל: {reply_msg}",
+                is_relevant=False,
+                project_id=_wa_original_project.get(phone),
+                agent_email=record.get("agent_email", "") if record else "",
+                client_name=record.get("client_name", "") if record else "",
+                channel="WhatsApp",
+                dry_run=dry,
+            )
             return {"status": "snoozed_26w"}
         if intent == "snooze_week":
             _save_followup(phone, weeks=1, reason="snooze")
@@ -344,10 +351,17 @@ async def whatsapp_webhook(request: Request):
             send_message(f"+{phone}", reply_msg)
             _db.update_reengagement_replied(f"+{phone}", True, f"לקוח: {text}\nדניאל: {reply_msg}")
             dry = not (sehel.PROJECT_ID or sehel.WEBHOOK_URL)
-            try:
-                sehel.log_call_summary(f"+{phone}", f"בוט וואטסאפ: לקוח ענה 'לא עכשיו' ({text})", dry_run=dry)
-            except Exception as e:
-                print(f"[SEHEL CALL LOG ERROR] {e}")
+            record = _db.get_reengagement_record(f"+{phone}")
+            sehel.update_lead_after_conversation(
+                f"+{phone}",
+                f"לקוח: {text}\nדניאל: {reply_msg}",
+                is_relevant=False,
+                project_id=_wa_original_project.get(phone),
+                agent_email=record.get("agent_email", "") if record else "",
+                client_name=record.get("client_name", "") if record else "",
+                channel="WhatsApp",
+                dry_run=dry,
+            )
             return {"status": "snoozed_1w"}
 
         # שחזור session מה-DB אם השרת נרדם
@@ -418,43 +432,27 @@ async def whatsapp_webhook(request: Request):
     send_message(f"+{phone}", turn.reply)
 
     if turn.handoff_to_human:
-        if score.level in ("High", "Medium"):
+        # רלוונטי = כל handoff שאינו תגובה שלילית
+        negative_in_transcript = any(w in transcript_text for w in ["נשמח שתשמור", "we'd love to stay", "לא רלוונט", "לא מעוניין"])
+        is_relevant = not negative_in_transcript
+        if is_relevant:
             _db.mark_reengagement_handoff(f"+{phone}")
         _wa_done.add(phone)
         dry = not (sehel.PROJECT_ID or sehel.WEBHOOK_URL)
-        is_projects = _wa_is_projects.get(phone, False)
-        try:
-            # עדכון כרטיס קיים בשכל עם הערה + תמליל
-            summary = f"הערת לידים וואטסאפ — לקוח מתעניין ({score.level}):\n\n{transcript_text}"
-            resolved_pid = _wa_original_project.get(phone) or sehel.DEFAULT_PROJECT_ID
-            print(f"[SEHEL CALL] phone={phone} project_id={resolved_pid} summary_len={len(summary)}")
-            result = sehel.log_call_summary(
-                convo.profile.phone,
-                summary[:2000],
-                dry_run=dry,
-                project_id=resolved_pid
-            )
-            print(f"[SEHEL CALL RESULT] {result}")
-            # שליחת התראה לסוכן + בועז
-            from . import database as _db2
-            record = _db2.get_reengagement_record(f"+{phone}")
-            agent_email = record.get("agent_email") if record else None
-            if agent_email:
-                from .email_api import _send_agent_alert
-                _send_agent_alert(agent_email, convo.profile.contact_name or phone, f"+{phone}", transcript_text, channel="WhatsApp")
-        except Exception as e:
-            print(f"[SEHEL ERROR] {e}")
-
-        try:
-            from .mailer import send_hot_lead_alert
-            send_hot_lead_alert(
-                name=convo.profile.contact_name or phone,
-                phone=f"+{phone}",
-                score=score.level,
-                transcript=transcript_text,
-            )
-        except Exception as e:
-            print(f"[HOT LEAD ALERT ERROR] {e}")
+        record2 = _db.get_reengagement_record(f"+{phone}")
+        agent_email = record2.get("agent_email", "") if record2 else ""
+        client_name = convo.profile.contact_name or (record2.get("client_name", "") if record2 else "")
+        resolved_pid = _wa_original_project.get(phone) or sehel.DEFAULT_PROJECT_ID
+        sehel.update_lead_after_conversation(
+            convo.profile.phone or f"+{phone}",
+            transcript_text,
+            is_relevant=is_relevant,
+            project_id=resolved_pid,
+            agent_email=agent_email,
+            client_name=client_name,
+            channel="WhatsApp",
+            dry_run=dry,
+        )
         del _wa_sessions[phone]
 
     return {"status": "ok"}
