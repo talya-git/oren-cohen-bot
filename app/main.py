@@ -85,6 +85,8 @@ async def send_morning_reminders():
         {"name": "אהרון", "email": "aaron@orencohengroup.com"},
         {"name": "ליסה", "email": "lisa@orencohengroup.com"},
         {"name": "דב", "email": "dovr@orencohengroup.com"},
+        {"name": "נעמי", "email": "naomi@orencohengroup.com"},
+        {"name": "יהודית", "email": "yehudit@orencohengroup.com"},
     ]
 
     # שלח מייל לכל סוכן
