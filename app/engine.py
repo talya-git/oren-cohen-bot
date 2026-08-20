@@ -234,6 +234,20 @@ class Conversation:
                 notes="parse_error",
             )
 
+        # ניקוי markdown מה-reply
+        import re as _re2
+        def _clean_reply(text: str) -> str:
+            text = _re2.sub(r'\*{1,3}([^*]+)\*{1,3}', r'\1', text)  # bold/italic
+            text = _re2.sub(r'^#{1,6}\s+', '', text, flags=_re2.MULTILINE)  # headers
+            text = _re2.sub(r'^[-*+]\s+', '', text, flags=_re2.MULTILINE)  # bullet points
+            text = _re2.sub(r'^\d+\.\s+', '', text, flags=_re2.MULTILINE)  # numbered lists
+            text = _re2.sub(r'`{1,3}[^`]*`{1,3}', '', text)  # code
+            text = _re2.sub(r'_{1,2}([^_]+)_{1,2}', r'\1', text)  # underline
+            text = text.strip()
+            return text
+
+        turn.reply = _clean_reply(turn.reply)
+
         # מיזוג הפרמטרים שחולצו לפרופיל מצטבר
         self._merge(turn.extracted)
         score = score_lead(self.profile)
