@@ -311,6 +311,9 @@ AGENTS.forEach(a => {
   btn.onclick = (e) => selectAgent(a, e.currentTarget);
   agentBtns.appendChild(btn);
 });
+// ודא שאף כפתור לא active בטעינה
+document.querySelectorAll('.agent-btn').forEach(b => b.classList.remove('active'));
+currentAgent = null;
 
 function selectAgent(a, btn) {
   if (a.isManager) {
