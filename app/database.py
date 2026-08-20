@@ -629,6 +629,18 @@ def get_meetings(date: str, agent_name: str | None = None) -> list:
     return rows
 
 
+def get_meetings_range(start: str, end: str, agent_name: str | None = None) -> list:
+    conn = get_db()
+    cur = conn.cursor()
+    if agent_name:
+        cur.execute(f"SELECT * FROM meetings WHERE meeting_date>={PH} AND meeting_date<={PH} AND agent_name={PH} ORDER BY meeting_date, meeting_time", (start, end, agent_name))
+    else:
+        cur.execute(f"SELECT * FROM meetings WHERE meeting_date>={PH} AND meeting_date<={PH} ORDER BY meeting_date, agent_name, meeting_time", (start, end))
+    rows = _fetchall(cur)
+    conn.close()
+    return rows
+
+
 def delete_meeting(meeting_id: int) -> None:
     conn = get_db()
     cur = conn.cursor()

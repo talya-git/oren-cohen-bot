@@ -771,9 +771,12 @@ def calendar_page() -> FileResponse:
 
 
 @app.get("/api/meetings")
-def get_meetings(date: str, agent: str | None = None):
+def get_meetings(date: str | None = None, start: str | None = None, end: str | None = None, agent: str | None = None):
     from . import database as _db
-    meetings = _db.get_meetings(date, agent)
+    if start and end:
+        meetings = _db.get_meetings_range(start, end, agent)
+    else:
+        meetings = _db.get_meetings(date, agent)
     return {"meetings": meetings}
 
 
