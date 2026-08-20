@@ -145,6 +145,7 @@ async def start_email_reengagement(request: Request):
     return {"status": "sent", "email": email}
 
 
+@router.get("/clear-test")
 @router.delete("/clear-test")
 async def clear_test_email(email: str):
     conn = db.get_db()
