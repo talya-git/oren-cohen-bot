@@ -64,53 +64,59 @@ async def start_morning_reminders():
 
 async def send_morning_reminders():
     from datetime import date
-    from .email_api import _send_email
-    from .whatsapp import send_message
+    import requests as _req
+    from .whatsapp import _token, META_PHONE_NUMBER_ID, META_API_VERSION
 
-    today = date.today().isoformat()
-    calendar_url = "https://oren-cohen-bot.onrender.com/calendar"
+    today = date.today()
+    day_names = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
+    date_str = f"יום {day_names[today.weekday()]} {today.strftime('%d/%m')}"
+
+    def _send_wa_template(phone: str, template: str, params: list):
+        normalized = phone.lstrip("+").replace("-", "").replace(" ", "")
+        resp = _req.post(
+            f"https://graph.facebook.com/{META_API_VERSION}/{META_PHONE_NUMBER_ID}/messages",
+            headers={"Authorization": f"Bearer {_token()}", "Content-Type": "application/json"},
+            json={
+                "messaging_product": "whatsapp",
+                "to": normalized,
+                "type": "template",
+                "template": {
+                    "name": template,
+                    "language": {"code": "he"},
+                    "components": [{"type": "body", "parameters": [{"type": "text", "text": p} for p in params]}]
+                }
+            },
+            timeout=15
+        )
+        return resp.status_code
 
     AGENTS = [
-        {"name": "יניב", "email": "yaniv@orencohengroup.com"},
-        {"name": "משה", "email": "moshe@orencohengroup.com"},
-        {"name": "מירי", "email": "miri@orencohengroup.com"},
-        {"name": "מיכאל", "email": "michael@orencohengroup.com"},
-        {"name": "רבקה", "email": "rivka@orencohengroup.com"},
-        {"name": "אוריאל", "email": "uriel400@orencohengroup.com"},
-        {"name": "אלחנן", "email": "elchanan@orencohengroup.com"},
-        {"name": "אורן", "email": "oren@orencohengroup.com"},
-        {"name": "אריה", "email": "aryeh@orencohengroup.com"},
-        {"name": "בועז", "email": "office@orencohengroup.com"},
-        {"name": "חנה", "email": "hannah@orencohengroup.com"},
-        {"name": "אהרון", "email": "aaron@orencohengroup.com"},
-        {"name": "ליסה", "email": "lisa@orencohengroup.com"},
-        {"name": "דב", "email": "dovr@orencohengroup.com"},
-        {"name": "נעמי", "email": "naomi@orencohengroup.com"},
-        {"name": "יהודית", "email": "yehudit@orencohengroup.com"},
+        {"שם": "בועז",   "phone": "+972545596052"},
+        {"שם": "יהודית", "phone": "+972584770646"},
+        {"שם": "מוישי",  "phone": "+972523873383"},
+        {"שם": "רבקה",   "phone": "+972586455059"},
+        {"שם": "מיכאל",  "phone": "+972584114686"},
+        {"שם": "מירי",    "phone": "+972543402018"},
+        {"שם": "אהרון",  "phone": "+972549183150"},
+        {"שם": "אריה",    "phone": "+972552704922"},
+        {"שם": "דב",     "phone": "+972526239608"},
+        {"שם": "ליסה",    "phone": "+13055863760"},
+        {"שם": "נעמי",    "phone": "+972515528956"},
     ]
 
-    # שלח מייל לכל סוכן
     for agent in AGENTS:
-        subject = f"📅 עדכן פגישות ליום היום"
-        html = f"""
-        <div dir='rtl' style='font-family:Arial;font-size:14px;'>
-          <p>שלום {agent['name']},</p>
-          <p>אנא עדכן את לוח הפגישות שלך ליום היום.</p>
-          <p><a href='{calendar_url}' style='background:#6366f1;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;'>📅 פתח לוח פגישות</a></p>
-        </div>
-        """
         try:
-            _send_email(agent["email"], agent["name"], subject, html, f"עדכן פגישות: {calendar_url}")
+            status = _send_wa_template(agent["phone"], "agent_morning_reminder", [agent["שם"]])
+            print(f"[REMINDER WA] {agent['שם']} -> {status}")
         except Exception as e:
-            print(f"[REMINDER EMAIL ERROR] {agent['name']}: {e}")
+            print(f"[REMINDER WA ERROR] {agent['שם']}: {e}")
 
-    # שלח וואטסאפ לרוני
+    # רוני — template נפרד עם תאריך
     try:
-        msg = f"📅 שלום רוני! הסוכנים עדכנו את הפגישות שלהם ליום. לצפייה בלוח הפגישות: {calendar_url}"
-        send_message("+972528962040", msg)
-        print("[REMINDER WA] sent to Roni")
+        status = _send_wa_template("+972528962040", "manager_morning_reminder", [date_str])
+        print(f"[REMINDER WA] Roni -> {status}")
     except Exception as e:
-        print(f"[REMINDER WA ERROR] {e}")
+        print(f"[REMINDER WA ERROR] Roni: {e}")
 
 
 @app.on_event("startup")
