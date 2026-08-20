@@ -39,7 +39,7 @@ def _send_email(to_email: str, to_name: str, subject: str, html: str, text: str,
     return {"status": "sent"}
 
 
-BOAZ_EMAIL = "office@orencohengroup.com"
+BOAZ_EMAIL = "tsalyato@orencohengroup.com"
 
 
 def _send_agent_alert(agent_email: str, client_name: str, phone_or_email: str, transcript: str, channel: str = "WhatsApp") -> None:
