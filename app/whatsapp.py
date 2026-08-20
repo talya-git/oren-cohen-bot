@@ -325,7 +325,7 @@ async def whatsapp_webhook(request: Request):
             if "הסר" in msg_lower or "remove" in msg_lower or "unsubscribe" in msg_lower or "stop" in msg_lower:
                 reply_msg = "אוקי, סליחה על ההטרדה! נשמח לעזור לך תמיד אם תצטרך 😊"
             else:
-                 lang_check = _detect_language(f"+{phone}", None)
+                lang_check = _detect_language(f"+{phone}", None)
                 if lang_check == "he":
                     reply_msg = "נשמח שתשמור אותנו בזיכרון שלך 😊\nאם בעתיד תתעניין בנכס בירושלים — אנחנו תמיד כאן: https://www.orencohengroup.com/he/"
                 else:
