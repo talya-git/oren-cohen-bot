@@ -26,19 +26,19 @@
     margin-bottom: 16px; box-shadow: 0 1px 8px rgba(0,0,0,0.06);
   }
   .agent-bar-label { font-size: 12px; font-weight: 600; color: #94a3b8; margin-bottom: 10px; display: block; }
-  .agent-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+  .agent-btns { display: flex; gap: 8px; flex-wrap: wrap; }
   .agent-btn {
-    padding: 7px 14px; border-radius: 8px;
-    border: 1.5px solid #e2e8f0; background: #f8fafc;
-    cursor: pointer; font-size: 13px; font-weight: 600;
-    color: #475569; transition: all 0.15s;
+    padding: 9px 18px; border-radius: 6px;
+    border: 1.5px solid #94a3b8; background: #fff;
+    cursor: pointer; font-size: 14px; font-weight: 500;
+    color: #1e293b; transition: all 0.15s;
     display: flex; align-items: center; gap: 5px; white-space: nowrap;
   }
-  .agent-btn:hover { border-color: #6366f1; color: #6366f1; background: #eef2ff; }
-  .agent-btn.active { border-color: #6366f1; background: #6366f1; color: #fff; box-shadow: 0 2px 8px rgba(99,102,241,0.3); }
-  .agent-btn.manager { border-color: #f59e0b; color: #92400e; background: #fffbeb; }
-  .agent-btn.manager:hover { border-color: #d97706; background: #fef3c7; color: #78350f; }
-  .agent-btn.manager.active { background: #f59e0b; color: #fff; border-color: #f59e0b; box-shadow: 0 2px 8px rgba(245,158,11,0.3); }
+  .agent-btn:hover { border-color: #334155; background: #f8fafc; color: #0f172a; }
+  .agent-btn.active { border-color: #1e293b; background: #1e293b; color: #fff; }
+  .agent-btn.manager { border-color: #92400e; color: #92400e; background: #fff; }
+  .agent-btn.manager:hover { border-color: #78350f; background: #fffbeb; }
+  .agent-btn.manager.active { background: #92400e; color: #fff; border-color: #92400e; }
 
   /* Calendar card */
   .cal-card { background: #fff; border-radius: 16px; padding: 14px; box-shadow: 0 1px 8px rgba(0,0,0,0.06); }
@@ -290,7 +290,8 @@ const AGENTS = [
   { label: 'דב', email: 'dovr@orencohengroup.com' },
   { label: 'נעמי', email: 'NaomiS@orencohengroup.com' },
   { label: 'יהודית', email: 'YehuditH@orencohengroup.com' },
-  { label: 'רוני', email: 'roni@orencohengroup.com', isManager: true },
+  { label: 'אורן', email: 'oren@orencohengroup.com', isManager: true, password: '332211' },
+  { label: 'רוני', email: 'roni@orencohengroup.com', isManager: true, password: '332211' },
 ];
 
 let currentAgent = null;
@@ -317,8 +318,8 @@ currentAgent = null;
 
 function selectAgent(a, btn) {
   if (a.isManager) {
-    const pw = prompt('סיסמת מנהל:');
-    if (pw !== '332211') { alert('סיסמה שגויה'); return; }
+    const pw = prompt(`סיסמת כניסה ל-${a.label}:`);
+    if (pw !== a.password) { alert('סיסמה שגויה'); return; }
   }
   currentAgent = a;
   document.querySelectorAll('.agent-btn').forEach(b => b.classList.remove('active'));
