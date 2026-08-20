@@ -792,6 +792,9 @@ async def create_meeting(request: Request):
         client_name=data.get("client_name", ""),
         meeting_date=data.get("meeting_date", ""),
         meeting_time=data.get("meeting_time", ""),
+        meeting_type=data.get("meeting_type", "frontal"),
+        handled_by=data.get("handled_by", ""),
+        zoom_link=data.get("zoom_link", ""),
         notes=data.get("notes", "")
     )
     return {"status": "ok", "id": mid}

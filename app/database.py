@@ -130,10 +130,24 @@ def init_db():
                 client_name TEXT NOT NULL,
                 meeting_date TEXT NOT NULL,
                 meeting_time TEXT NOT NULL,
+                meeting_type TEXT DEFAULT 'frontal',
+                handled_by TEXT DEFAULT '',
+                zoom_link TEXT DEFAULT '',
                 notes TEXT DEFAULT '',
                 created_at TIMESTAMPTZ DEFAULT NOW()
             )
         """)
+        # הוסף עמודות חדשות אם לא קיימות
+        for col, definition in [
+            ("meeting_type", "TEXT DEFAULT 'frontal'"),
+            ("handled_by", "TEXT DEFAULT ''"),
+            ("zoom_link", "TEXT DEFAULT ''"),
+        ]:
+            try:
+                cur.execute(f"ALTER TABLE meetings ADD COLUMN IF NOT EXISTS {col} {definition}")
+                conn.commit()
+            except Exception:
+                conn.rollback()
     else:
         cur.executescript("""
             CREATE TABLE IF NOT EXISTS users (
@@ -188,6 +202,9 @@ def init_db():
                 client_name TEXT NOT NULL,
                 meeting_date TEXT NOT NULL,
                 meeting_time TEXT NOT NULL,
+                meeting_type TEXT DEFAULT 'frontal',
+                handled_by TEXT DEFAULT '',
+                zoom_link TEXT DEFAULT '',
                 notes TEXT DEFAULT '',
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP
             );
@@ -596,20 +613,20 @@ def get_no_response_conversations(hours: int = 24) -> list:
     return rows
 
 
-def create_meeting(agent_name: str, agent_email: str, client_name: str, meeting_date: str, meeting_time: str, notes: str = "") -> int:
+def create_meeting(agent_name: str, agent_email: str, client_name: str, meeting_date: str, meeting_time: str, meeting_type: str = "frontal", handled_by: str = "", zoom_link: str = "", notes: str = "") -> int:
     conn = get_db()
     cur = conn.cursor()
     now = datetime.now(timezone.utc).isoformat()
     if DATABASE_URL:
         cur.execute(
-            "INSERT INTO meetings (agent_name, agent_email, client_name, meeting_date, meeting_time, notes, created_at) VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id",
-            (agent_name, agent_email, client_name, meeting_date, meeting_time, notes, now)
+            "INSERT INTO meetings (agent_name, agent_email, client_name, meeting_date, meeting_time, meeting_type, handled_by, zoom_link, notes, created_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id",
+            (agent_name, agent_email, client_name, meeting_date, meeting_time, meeting_type, handled_by, zoom_link, notes, now)
         )
         mid = cur.fetchone()[0]
     else:
         cur.execute(
-            "INSERT INTO meetings (agent_name, agent_email, client_name, meeting_date, meeting_time, notes, created_at) VALUES (?,?,?,?,?,?,?)",
-            (agent_name, agent_email, client_name, meeting_date, meeting_time, notes, now)
+            "INSERT INTO meetings (agent_name, agent_email, client_name, meeting_date, meeting_time, meeting_type, handled_by, zoom_link, notes, created_at) VALUES (?,?,?,?,?,?,?,?,?,?)",
+            (agent_name, agent_email, client_name, meeting_date, meeting_time, meeting_type, handled_by, zoom_link, notes, now)
         )
         mid = cur.lastrowid
     conn.commit()

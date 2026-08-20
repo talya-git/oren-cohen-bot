@@ -239,6 +239,21 @@
     <input type="text" id="client-name" placeholder="ישראל ישראלי" />
     <label>שעה</label>
     <input type="time" id="meeting-time" value="10:00" />
+    <label>סוג פגישה</label>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <label style="flex:1;display:flex;align-items:center;gap:6px;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:14px;font-weight:500;color:#1e293b" id="lbl-frontal">
+        <input type="radio" name="meeting_type" value="frontal" checked onchange="updateTypeLabels()"> פרונטלי
+      </label>
+      <label style="flex:1;display:flex;align-items:center;gap:6px;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:14px;font-weight:500;color:#1e293b" id="lbl-zoom">
+        <input type="radio" name="meeting_type" value="zoom" onchange="updateTypeLabels()"> זאום
+      </label>
+    </div>
+    <div id="zoom-link-row" style="display:none">
+      <label>קישור זום</label>
+      <input type="url" id="zoom-link" placeholder="https://us06web.zoom.us/j/..." />
+    </div>
+    <label>סוכן מטפל</label>
+    <input type="text" id="handled-by" placeholder="שם הסוכן המטפל" />
     <label>הערות</label>
     <textarea id="meeting-notes" placeholder="פרטים נוספים..."></textarea>
     <div class="modal-btns">
@@ -267,8 +282,8 @@ const AGENTS = [
   { label: 'אהרון', email: 'aaron@orencohengroup.com' },
   { label: 'ליסה', email: 'lisa@orencohengroup.com' },
   { label: 'דב', email: 'dovr@orencohengroup.com' },
-  { label: 'נעמי', email: 'naomi@orencohengroup.com' },
-  { label: 'יהודית', email: 'yehudit@orencohengroup.com' },
+  { label: 'נעמי', email: 'NaomiS@orencohengroup.com' },
+  { label: 'יהודית', email: 'YehuditH@orencohengroup.com' },
   { label: 'רוני', email: 'roni@orencohengroup.com', isManager: true },
 ];
 
@@ -417,6 +432,13 @@ function showDayPanel(date) {
       <div class="meeting-info">
         <div class="meeting-client">${m.client_name}</div>
         ${isManager ? `<div class="meeting-agent"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> ${m.agent_name}</div>` : ''}
+        ${m.handled_by ? `<div class="meeting-agent"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> סוכן מטפל: ${m.handled_by}</div>` : ''}
+        <div class="meeting-agent" style="color:${m.meeting_type==='zoom'?'#6366f1':'#16a34a'}">
+          ${m.meeting_type === 'zoom'
+            ? `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="15" height="10" rx="2"/><path d="M17 9l5-2v10l-5-2"/></svg> זאום${m.zoom_link ? ` — <a href="${m.zoom_link}" target="_blank" style="color:#6366f1;text-decoration:underline">פתח פגישה</a>` : ''}`
+            : `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> פרונטלי`
+          }
+        </div>
         ${m.notes ? `<div class="meeting-notes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> ${m.notes}</div>` : ''}
       </div>
       ${!isManager ? `<button class="btn-delete" onclick="deleteMeeting(${m.id})">
@@ -427,20 +449,34 @@ function showDayPanel(date) {
   `).join('');
 }
 
-function openAddModal() { document.getElementById('add-modal').classList.add('open'); }
+function updateTypeLabels() {
+  const frontal = document.querySelector('input[value="frontal"]').checked;
+  document.getElementById('lbl-frontal').style.borderColor = frontal ? '#16a34a' : '#e2e8f0';
+  document.getElementById('lbl-zoom').style.borderColor = !frontal ? '#6366f1' : '#e2e8f0';
+  document.getElementById('zoom-link-row').style.display = !frontal ? 'block' : 'none';
+}
+
+function openAddModal() { document.getElementById('add-modal').classList.add('open'); updateTypeLabels(); }
 function closeModal() { document.getElementById('add-modal').classList.remove('open'); }
 
 async function addMeeting() {
   const clientName = document.getElementById('client-name').value.trim();
   const time = document.getElementById('meeting-time').value;
+  const meetingType = document.querySelector('input[name="meeting_type"]:checked').value;
+  const handledBy = document.getElementById('handled-by').value.trim();
+  const zoomLink = document.getElementById('zoom-link').value.trim();
   const notes = document.getElementById('meeting-notes').value.trim();
   if (!clientName) { alert('נא להזין שם לקוח'); return; }
   await fetch('/api/meetings', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ agent_name: currentAgent.label, agent_email: currentAgent.email, client_name: clientName, meeting_date: formatDate(selectedDate), meeting_time: time, notes })
+    body: JSON.stringify({ agent_name: currentAgent.label, agent_email: currentAgent.email, client_name: clientName, meeting_date: formatDate(selectedDate), meeting_time: time, meeting_type: meetingType, handled_by: handledBy, zoom_link: zoomLink, notes })
   });
   document.getElementById('client-name').value = '';
+  document.getElementById('handled-by').value = '';
+  document.getElementById('zoom-link').value = '';
   document.getElementById('meeting-notes').value = '';
+  document.querySelector('input[value="frontal"]').checked = true;
+  updateTypeLabels();
   closeModal();
   await loadMonthMeetings();
 }
