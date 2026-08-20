@@ -71,6 +71,7 @@ def _send_agent_alert(agent_email: str, client_name: str, phone_or_email: str, t
             print(f"[AGENT ALERT ERROR] {to}: {e}")
 
 
+def _build_greeting(name: str | None) -> str:
     is_hebrew = name and any('\u05d0' <= c <= '\u05ea' for c in name)
     if is_hebrew or not name:
         greeting = f"היי{' ' + name if name else ''},\n\n"
