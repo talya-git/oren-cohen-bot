@@ -188,6 +188,53 @@ def log_call_summary(phone: str, summary: str, *, dry_run: bool = False, project
     return resp.json()
 
 
+def update_lead_after_conversation(
+    phone: str,
+    transcript: str,
+    is_relevant: bool,
+    *,
+    project_id: str | None = None,
+    agent_email: str = "",
+    client_name: str = "",
+    channel: str = "WhatsApp",
+    dry_run: bool = False,
+) -> None:
+    """מעדכן כרטיס בשכל אחרי שיחה עם הבוט — תמיד, ללא קשר לרלוונטיות."""
+    from datetime import datetime
+    date_str = datetime.now().strftime("%d/%m/%Y %H:%M")
+
+    # הערה ראשונה — תמיד נשלחת
+    first_note = f"[{channel}] הערת ליד — {date_str}\n"
+    if is_relevant:
+        first_note += "סטטוס: לקוח רלוונטי — הועבר לסוכן"
+    else:
+        first_note += "סטטוס: לקוח לא רלוונטי"
+
+    try:
+        log_call_summary(phone, first_note, dry_run=dry_run, project_id=project_id)
+        print(f"[SEHEL NOTE 1] {phone} | relevant={is_relevant}")
+    except Exception as e:
+        print(f"[SEHEL NOTE 1 ERROR] {e}")
+
+    # הערה שנייה — תמליל מלא (תמיד)
+    transcript_note = f"[{channel}] תמליל שיחה — {date_str}\n\n{transcript[:1800]}"
+    if not is_relevant:
+        transcript_note += "\n\n[לא רלוונטי]"
+    try:
+        log_call_summary(phone, transcript_note, dry_run=dry_run, project_id=project_id)
+        print(f"[SEHEL NOTE 2] {phone} | transcript sent")
+    except Exception as e:
+        print(f"[SEHEL NOTE 2 ERROR] {e}")
+
+    # מייל התראה — רק אם רלוונטי
+    if is_relevant and agent_email:
+        try:
+            from .email_api import _send_agent_alert
+            _send_agent_alert(agent_email, client_name, phone, transcript, channel=channel)
+        except Exception as e:
+            print(f"[AGENT ALERT ERROR] {e}")
+
+
 def push_lead(payload: dict, *, dry_run: bool = False) -> dict:
     """שולח את הליד לשכל (או ל-webhook של Make/Zapier אם הוגדר).
 

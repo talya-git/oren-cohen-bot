@@ -293,6 +293,28 @@ async def whatsapp_webhook(request: Request):
         print(f"[AUTO-REPLY IGNORED] {phone}: {text[:80]}...")
         return {"status": "auto_reply_ignored"}
     if phone in _wa_done or _db.is_conversation_done(phone):
+        # בדוק אם זו תשובה שלילית אחרי סיום השיחה
+        intent_after = _classify_response(text)
+        if intent_after == "not_relevant":
+            lang_check = _detect_language(f"+{phone}", None)
+            if lang_check == "he":
+                reply_msg = "נשמח שתשמור אותנו בזיכרון שלך 😊\nאם בעתיד תתעניין בנכס בירושלים — אנחנו תמיד כאן: https://www.orencohengroup.com/he/"
+            else:
+                reply_msg = "We'd love to stay in your memory 😊\nIf you ever consider a property in Jerusalem — we're always here: https://www.orencohengroup.com/"
+            send_message(f"+{phone}", reply_msg)
+            record = _db.get_reengagement_record(f"+{phone}")
+            dry = not (sehel.PROJECT_ID or sehel.WEBHOOK_URL)
+            sehel.update_lead_after_conversation(
+                f"+{phone}",
+                f"לקוח: {text}\nדניאל: {reply_msg}",
+                is_relevant=False,
+                project_id=_wa_original_project.get(phone),
+                agent_email=record.get("agent_email", "") if record else "",
+                client_name=record.get("client_name", "") if record else "",
+                channel="WhatsApp",
+                dry_run=dry,
+            )
+            return {"status": "not_relevant_after_done"}
         import openai as _oai
         try:
             _resp = _oai.OpenAI().chat.completions.create(
