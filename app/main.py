@@ -806,6 +806,21 @@ async def create_meeting(request: Request):
     return {"status": "ok", "id": mid}
 
 
+@app.put("/api/meetings/{meeting_id}")
+async def update_meeting(meeting_id: int, request: Request):
+    from . import database as _db
+    data = await request.json()
+    conn = _db.get_db()
+    cur = conn.cursor()
+    cur.execute(
+        f"UPDATE meetings SET client_name={_db.PH}, meeting_time={_db.PH}, meeting_type={_db.PH}, zoom_link={_db.PH}, notes={_db.PH} WHERE id={_db.PH}",
+        (data.get('client_name',''), data.get('meeting_time',''), data.get('meeting_type','frontal'), data.get('zoom_link',''), data.get('notes',''), meeting_id)
+    )
+    conn.commit()
+    conn.close()
+    return {"status": "ok"}
+
+
 @app.delete("/api/meetings/{meeting_id}")
 def delete_meeting(meeting_id: int):
     from . import database as _db
