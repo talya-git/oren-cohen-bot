@@ -6,121 +6,213 @@
 <title>לוח פגישות | אורן כהן גרופ</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, sans-serif; background: #f0f2f5; color: #222; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f8fafc; color: #1e293b; min-height: 100vh; }
+
   .header {
-    background: linear-gradient(135deg, #1a1a2e, #16213e);
-    color: #fff; padding: 16px 24px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff; padding: 18px 28px;
     display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(99,102,241,0.3);
   }
-  .header h1 { font-size: 20px; }
-  .main { padding: 20px; max-width: 960px; margin: 0 auto; }
+  .header h1 { font-size: 22px; font-weight: 700; letter-spacing: 0.3px; }
+  .header a { color: rgba(255,255,255,0.8); font-size: 13px; text-decoration: none; padding: 6px 14px; border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; transition: all 0.2s; }
+  .header a:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+  .main { padding: 24px; max-width: 1000px; margin: 0 auto; }
 
   /* Agent selector */
-  .agent-bar { background:#fff; border-radius:12px; padding:16px 20px; margin-bottom:16px; box-shadow:0 1px 4px rgba(0,0,0,0.08); }
-  .agent-bar-title { font-size:13px; color:#6b7280; margin-bottom:10px; }
-  .agent-btns { display:flex; gap:8px; flex-wrap:wrap; }
-  .agent-btn { padding:6px 14px; border:1px solid #ddd; border-radius:20px; background:#f8f9fa; cursor:pointer; font-size:13px; }
-  .agent-btn.active { background:#6366f1; color:#fff; border-color:#6366f1; }
-
-  /* Calendar */
-  .cal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
-  .cal-header h2 { font-size:18px; font-weight:bold; color:#1a1a2e; }
-  .cal-nav { display:flex; gap:8px; }
-  .cal-nav button { padding:6px 14px; border:1px solid #ddd; border-radius:8px; background:#fff; cursor:pointer; font-size:13px; }
-  .cal-nav button.today { background:#6366f1; color:#fff; border-color:#6366f1; }
-
-  .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
-  .cal-day-name { text-align:center; font-size:12px; font-weight:bold; color:#6b7280; padding:8px 0; }
-  .cal-cell {
-    background:#fff; border-radius:8px; min-height:80px; padding:6px;
-    border:1px solid #e5e7eb; cursor:pointer; transition:all 0.15s;
-    position:relative;
+  .agent-bar {
+    background: #fff; border-radius: 16px; padding: 18px 22px;
+    margin-bottom: 20px; box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
   }
-  .cal-cell:hover { border-color:#6366f1; background:#f5f3ff; }
-  .cal-cell.today { border-color:#6366f1; border-width:2px; }
-  .cal-cell.selected { background:#ede9fe; border-color:#6366f1; border-width:2px; }
-  .cal-cell.other-month { opacity:0.4; }
-  .cal-date { font-size:13px; font-weight:bold; color:#374151; margin-bottom:4px; }
-  .cal-cell.today .cal-date { color:#6366f1; }
-  .cal-dot { font-size:10px; background:#6366f1; color:#fff; border-radius:10px; padding:1px 6px; margin-bottom:2px; display:inline-block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .cal-more { font-size:10px; color:#6b7280; }
+  .agent-bar-label { font-size: 13px; font-weight: 600; color: #64748b; white-space: nowrap; }
+  .agent-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .agent-btn {
+    padding: 7px 16px; border: 1.5px solid #e2e8f0; border-radius: 24px;
+    background: #f8fafc; cursor: pointer; font-size: 13px; font-weight: 500;
+    color: #475569; transition: all 0.2s;
+  }
+  .agent-btn:hover { border-color: #6366f1; color: #6366f1; background: #eef2ff; }
+  .agent-btn.active { background: #6366f1; color: #fff; border-color: #6366f1; box-shadow: 0 2px 8px rgba(99,102,241,0.3); }
+  .agent-btn.manager { border-color: #f59e0b; color: #92400e; background: #fffbeb; }
+  .agent-btn.manager.active { background: #f59e0b; color: #fff; border-color: #f59e0b; }
+
+  /* Calendar card */
+  .cal-card { background: #fff; border-radius: 20px; padding: 24px; box-shadow: 0 1px 8px rgba(0,0,0,0.06); }
+
+  .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .cal-title { font-size: 20px; font-weight: 700; color: #1e293b; }
+  .cal-nav { display: flex; gap: 8px; }
+  .cal-nav button {
+    padding: 8px 16px; border: 1.5px solid #e2e8f0; border-radius: 10px;
+    background: #fff; cursor: pointer; font-size: 13px; font-weight: 500; color: #475569;
+    transition: all 0.2s;
+  }
+  .cal-nav button:hover { border-color: #6366f1; color: #6366f1; }
+  .cal-nav .btn-today { background: #6366f1; color: #fff; border-color: #6366f1; }
+  .cal-nav .btn-today:hover { background: #4f46e5; }
+
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .cal-day-name {
+    text-align: center; font-size: 12px; font-weight: 700;
+    color: #94a3b8; padding: 8px 0; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .cal-cell {
+    background: #f8fafc; border-radius: 12px; min-height: 88px; padding: 8px;
+    border: 1.5px solid transparent; cursor: pointer; transition: all 0.15s;
+  }
+  .cal-cell:hover { background: #eef2ff; border-color: #c7d2fe; }
+  .cal-cell.has-meetings { background: #faf5ff; }
+  .cal-cell.today { border-color: #6366f1; background: #eef2ff; }
+  .cal-cell.selected { border-color: #6366f1; background: #eef2ff; box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+  .cal-cell.other-month { opacity: 0.35; }
+  .cal-date {
+    font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 5px;
+    width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+  }
+  .cal-cell.today .cal-date { background: #6366f1; color: #fff; }
+  .cal-dot {
+    font-size: 10px; background: #6366f1; color: #fff; border-radius: 6px;
+    padding: 2px 6px; margin-bottom: 2px; display: block;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .cal-dot.manager-dot { background: #8b5cf6; }
+  .cal-more { font-size: 10px; color: #94a3b8; margin-top: 2px; }
 
   /* Day panel */
-  .day-panel { background:#fff; border-radius:12px; padding:20px; margin-top:16px; box-shadow:0 1px 4px rgba(0,0,0,0.08); }
-  .day-panel-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
-  .day-panel-title { font-size:16px; font-weight:bold; color:#1a1a2e; }
-  .btn-add { background:#6366f1; color:#fff; border:none; border-radius:8px; padding:8px 18px; font-size:13px; font-weight:bold; cursor:pointer; }
-  .btn-add:hover { background:#4f46e5; }
+  .day-panel {
+    background: #fff; border-radius: 20px; padding: 24px;
+    margin-top: 20px; box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+    animation: slideIn 0.2s ease;
+  }
+  @keyframes slideIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
-  .meeting-card { border:1px solid #e5e7eb; border-radius:10px; padding:12px 16px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
-  .meeting-time { font-size:18px; font-weight:bold; color:#6366f1; min-width:60px; }
-  .meeting-info { flex:1; margin-right:16px; }
-  .meeting-client { font-size:14px; font-weight:bold; }
-  .meeting-agent { font-size:12px; color:#6b7280; }
-  .meeting-notes { font-size:12px; color:#9ca3af; margin-top:3px; }
-  .btn-delete { background:#fee2e2; color:#991b1b; border:none; border-radius:6px; padding:5px 10px; cursor:pointer; font-size:12px; }
-  .empty { text-align:center; color:#9ca3af; padding:30px; }
+  .day-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .day-panel-title { font-size: 17px; font-weight: 700; color: #1e293b; }
+  .day-panel-count { font-size: 13px; color: #94a3b8; margin-top: 2px; }
+
+  .btn-add {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff; border: none; border-radius: 10px;
+    padding: 10px 20px; font-size: 13px; font-weight: 600;
+    cursor: pointer; box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+    transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+  }
+  .btn-add:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,0.4); }
+
+  .meeting-card {
+    border: 1.5px solid #f1f5f9; border-radius: 12px; padding: 14px 18px;
+    margin-bottom: 10px; display: flex; align-items: center; gap: 16px;
+    transition: all 0.15s; background: #fafafa;
+  }
+  .meeting-card:hover { border-color: #c7d2fe; background: #faf5ff; }
+  .meeting-time-badge {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff; border-radius: 10px; padding: 8px 12px;
+    font-size: 15px; font-weight: 700; min-width: 64px; text-align: center;
+    box-shadow: 0 2px 6px rgba(99,102,241,0.25);
+  }
+  .meeting-info { flex: 1; }
+  .meeting-client { font-size: 15px; font-weight: 600; color: #1e293b; }
+  .meeting-agent { font-size: 12px; color: #64748b; margin-top: 3px; display: flex; align-items: center; gap: 4px; }
+  .meeting-notes { font-size: 12px; color: #94a3b8; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+  .btn-delete {
+    background: #fff; color: #ef4444; border: 1.5px solid #fecaca;
+    border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 12px;
+    transition: all 0.15s;
+  }
+  .btn-delete:hover { background: #fee2e2; border-color: #ef4444; }
+
+  .empty { text-align: center; color: #94a3b8; padding: 40px; font-size: 14px; }
+  .empty-icon { font-size: 40px; margin-bottom: 10px; }
 
   /* Modal */
-  .modal-overlay { display:none; position:fixed; top:0;left:0;width:100%;height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; }
-  .modal-overlay.open { display:flex; }
-  .modal { background:#fff; border-radius:14px; width:420px; max-width:95vw; padding:24px; box-shadow:0 8px 32px rgba(0,0,0,0.2); }
-  .modal h3 { font-size:16px; font-weight:bold; margin-bottom:16px; color:#1a1a2e; }
-  .modal input, .modal textarea { width:100%; padding:9px 12px; border:1px solid #ddd; border-radius:8px; font-size:13px; outline:none; margin-bottom:10px; }
-  .modal textarea { min-height:60px; resize:vertical; }
-  .modal-btns { display:flex; gap:10px; justify-content:flex-end; margin-top:6px; }
-  .btn-cancel { background:#f3f4f6; color:#374151; border:1px solid #e5e7eb; border-radius:8px; padding:8px 18px; font-size:13px; cursor:pointer; }
+  .modal-overlay {
+    display: none; position: fixed; top:0;left:0;width:100%;height:100%;
+    background: rgba(15,23,42,0.5); z-index: 1000;
+    align-items: center; justify-content: center; backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff; border-radius: 20px; width: 440px; max-width: 95vw;
+    padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+  .modal-title { font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 20px; }
+  .modal label { font-size: 12px; font-weight: 600; color: #64748b; display: block; margin-bottom: 5px; }
+  .modal input, .modal textarea {
+    width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0;
+    border-radius: 10px; font-size: 14px; outline: none; margin-bottom: 14px;
+    transition: border-color 0.15s; color: #1e293b;
+  }
+  .modal input:focus, .modal textarea:focus { border-color: #6366f1; }
+  .modal textarea { min-height: 70px; resize: vertical; }
+  .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+  .btn-cancel {
+    background: #f1f5f9; color: #475569; border: none; border-radius: 10px;
+    padding: 10px 20px; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .btn-cancel:hover { background: #e2e8f0; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>📅 לוח פגישות — אורן כהן גרופ</h1>
-  <a href="/static/hub.html" style="color:#fff;font-size:13px;text-decoration:none;opacity:0.8;">🏠 בית</a>
+  <h1>📅 לוח פגישות</h1>
+  <a href="/static/hub.html">🏠 בית</a>
 </div>
 
 <div class="main">
 
-  <!-- בחירת סוכן -->
   <div class="agent-bar">
-    <div class="agent-bar-title">👤 בחר סוכן / מנהלת</div>
+    <span class="agent-bar-label">👤 בחר:</span>
     <div class="agent-btns" id="agent-btns"></div>
   </div>
 
-  <!-- לוח חודשי -->
-  <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+  <div class="cal-card">
     <div class="cal-header">
+      <div class="cal-title" id="month-title">בחר סוכן להצגת לוח</div>
       <div class="cal-nav">
-        <button onclick="changeMonth(-1)">→ חודש קודם</button>
-        <button class="today" onclick="goToday()">היום</button>
-        <button onclick="changeMonth(1)">חודש הבא ←</button>
+        <button onclick="changeMonth(-1)">‹ קודם</button>
+        <button class="btn-today" onclick="goToday()">היום</button>
+        <button onclick="changeMonth(1)">הבא ›</button>
       </div>
-      <h2 id="month-title"></h2>
     </div>
-    <div class="cal-grid" id="cal-grid"></div>
+    <div class="cal-grid" id="cal-grid">
+      <div style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:40px;font-size:14px;">בחר סוכן כדי להציג את לוח הפגישות</div>
+    </div>
   </div>
 
-  <!-- פאנל יום נבחר -->
   <div class="day-panel" id="day-panel" style="display:none">
     <div class="day-panel-header">
-      <div class="day-panel-title" id="day-panel-title"></div>
-      <button class="btn-add" id="btn-add" style="display:none" onclick="openAddModal()">➕ הוסף פגישה</button>
+      <div>
+        <div class="day-panel-title" id="day-panel-title"></div>
+        <div class="day-panel-count" id="day-panel-count"></div>
+      </div>
+      <button class="btn-add" id="btn-add" style="display:none" onclick="openAddModal()">
+        <span>➕</span> הוסף פגישה
+      </button>
     </div>
     <div id="meetings-list"></div>
   </div>
 
 </div>
 
-<!-- Modal הוספת פגישה -->
 <div class="modal-overlay" id="add-modal">
   <div class="modal">
-    <h3>➕ הוסף פגישה</h3>
-    <input type="text" id="client-name" placeholder="שם לקוח *" />
+    <div class="modal-title">➕ פגישה חדשה</div>
+    <label>שם לקוח *</label>
+    <input type="text" id="client-name" placeholder="ישראל ישראלי" />
+    <label>שעה</label>
     <input type="time" id="meeting-time" value="10:00" />
-    <textarea id="meeting-notes" placeholder="הערות (אופציונלי)"></textarea>
+    <label>הערות</label>
+    <textarea id="meeting-notes" placeholder="פרטים נוספים..."></textarea>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeModal()">ביטול</button>
-      <button class="btn-add" onclick="addMeeting()">שמור</button>
+      <button class="btn-add" onclick="addMeeting()">💾 שמור פגישה</button>
     </div>
   </div>
 </div>
@@ -141,7 +233,7 @@ const AGENTS = [
   { label: 'אהרון', email: 'aaron@orencohengroup.com' },
   { label: 'ליסה', email: 'lisa@orencohengroup.com' },
   { label: 'דב', email: 'dovr@orencohengroup.com' },
-  { label: 'רוני (מנהלת)', email: 'roni@orencohengroup.com', isManager: true },
+  { label: 'רוני', email: 'roni@orencohengroup.com', isManager: true },
 ];
 
 let currentAgent = null;
@@ -150,13 +242,14 @@ let selectedDate = null;
 let allMeetings = {};
 
 const DAY_NAMES = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
+const MONTH_NAMES = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+const DAY_NAMES_FULL = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
 
-// בניית כפתורי סוכנים
 const agentBtns = document.getElementById('agent-btns');
 AGENTS.forEach(a => {
   const btn = document.createElement('button');
-  btn.className = 'agent-btn';
-  btn.textContent = a.label;
+  btn.className = 'agent-btn' + (a.isManager ? ' manager' : '');
+  btn.textContent = a.isManager ? '👑 ' + a.label : a.label;
   btn.onclick = (e) => {
     currentAgent = a;
     document.querySelectorAll('.agent-btn').forEach(b => b.classList.remove('active'));
@@ -167,14 +260,11 @@ AGENTS.forEach(a => {
 });
 
 function formatDate(d) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth()+1).padStart(2,'0');
-  const day = String(d.getDate()).padStart(2,'0');
-  return `${y}-${m}-${day}`;
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
 function changeMonth(dir) {
-  currentMonth.setMonth(currentMonth.getMonth() + dir);
+  currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + dir, 1);
   loadMonthMeetings();
 }
 
@@ -186,17 +276,13 @@ function goToday() {
 
 async function loadMonthMeetings() {
   if (!currentAgent) return;
-  // טען את כל הפגישות של החודש
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month+1, 0);
-
+  const lastDay = new Date(year, month+1, 0).getDate();
   allMeetings = {};
-  // טען כל יום בחודש
   const promises = [];
-  for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate()+1)) {
-    const dateStr = formatDate(new Date(d));
+  for (let d = 1; d <= lastDay; d++) {
+    const dateStr = formatDate(new Date(year, month, d));
     const url = currentAgent.isManager
       ? `/api/meetings?date=${dateStr}`
       : `/api/meetings?date=${dateStr}&agent=${encodeURIComponent(currentAgent.label)}`;
@@ -212,110 +298,79 @@ async function loadMonthMeetings() {
 function renderCalendar() {
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
-  const monthNames = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
-  document.getElementById('month-title').textContent = `${monthNames[month]} ${year}`;
-
+  document.getElementById('month-title').textContent = `${MONTH_NAMES[month]} ${year}`;
   const grid = document.getElementById('cal-grid');
   grid.innerHTML = '';
-
-  // כותרות ימים
   DAY_NAMES.forEach(d => {
     const el = document.createElement('div');
     el.className = 'cal-day-name';
     el.textContent = d;
     grid.appendChild(el);
   });
-
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month+1, 0);
-  const today = formatDate(new Date());
-
-  // ימים ריקים בהתחלה (ראשון=0)
-  let startDow = firstDay.getDay(); // 0=Sun
-  for (let i = 0; i < startDow; i++) {
-    const prev = new Date(year, month, -startDow+i+1);
-    const cell = makeCell(prev, true);
-    grid.appendChild(cell);
+  const firstDow = new Date(year, month, 1).getDay();
+  const lastDate = new Date(year, month+1, 0).getDate();
+  const todayStr = formatDate(new Date());
+  const selectedStr = selectedDate ? formatDate(selectedDate) : '';
+  for (let i = 0; i < firstDow; i++) {
+    const prev = new Date(year, month, -firstDow+i+1);
+    grid.appendChild(makeCell(prev, true, todayStr, selectedStr));
   }
-
-  // ימי החודש
-  for (let d = 1; d <= lastDay.getDate(); d++) {
-    const date = new Date(year, month, d);
-    const cell = makeCell(date, false);
-    grid.appendChild(cell);
+  for (let d = 1; d <= lastDate; d++) {
+    grid.appendChild(makeCell(new Date(year, month, d), false, todayStr, selectedStr));
   }
-
-  // ימים ריקים בסוף
-  const endDow = lastDay.getDay();
-  for (let i = endDow+1; i < 7; i++) {
-    const next = new Date(year, month+1, i-endDow);
-    const cell = makeCell(next, true);
-    grid.appendChild(cell);
+  const lastDow = new Date(year, month, lastDate).getDay();
+  for (let i = lastDow+1; i < 7; i++) {
+    grid.appendChild(makeCell(new Date(year, month+1, i-lastDow), true, todayStr, selectedStr));
   }
 }
 
-function makeCell(date, otherMonth) {
+function makeCell(date, otherMonth, todayStr, selectedStr) {
   const dateStr = formatDate(date);
-  const todayStr = formatDate(new Date());
-  const selectedStr = selectedDate ? formatDate(selectedDate) : '';
-
+  const meetings = allMeetings[dateStr] || [];
   const cell = document.createElement('div');
   cell.className = 'cal-cell' +
     (otherMonth ? ' other-month' : '') +
+    (meetings.length ? ' has-meetings' : '') +
     (dateStr === todayStr ? ' today' : '') +
     (dateStr === selectedStr ? ' selected' : '');
-
   const dateEl = document.createElement('div');
   dateEl.className = 'cal-date';
   dateEl.textContent = date.getDate();
   cell.appendChild(dateEl);
-
-  const meetings = allMeetings[dateStr] || [];
-  meetings.slice(0,3).forEach(m => {
-    const dot = document.createElement('div');
-    dot.className = 'cal-dot';
+  meetings.slice(0,2).forEach(m => {
+    const dot = document.createElement('span');
+    dot.className = 'cal-dot' + (currentAgent?.isManager ? ' manager-dot' : '');
     dot.textContent = `${m.meeting_time} ${m.client_name}`;
     cell.appendChild(dot);
   });
-  if (meetings.length > 3) {
+  if (meetings.length > 2) {
     const more = document.createElement('div');
     more.className = 'cal-more';
-    more.textContent = `+${meetings.length-3} נוספות`;
+    more.textContent = `+${meetings.length-2} עוד`;
     cell.appendChild(more);
   }
-
-  cell.onclick = () => {
-    selectedDate = new Date(date);
-    renderCalendar();
-    showDayPanel(date);
-  };
+  cell.onclick = () => { selectedDate = new Date(date); renderCalendar(); showDayPanel(date); };
   return cell;
 }
 
 function showDayPanel(date) {
   const dateStr = formatDate(date);
-  const panel = document.getElementById('day-panel');
-  panel.style.display = 'block';
-
-  const dayNames = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
-  const monthNames = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+  document.getElementById('day-panel').style.display = 'block';
   document.getElementById('day-panel-title').textContent =
-    `יום ${dayNames[date.getDay()]}, ${date.getDate()} ב${monthNames[date.getMonth()]} ${date.getFullYear()}`;
-
-  const addBtn = document.getElementById('btn-add');
-  addBtn.style.display = currentAgent?.isManager ? 'none' : 'block';
-
+    `יום ${DAY_NAMES_FULL[date.getDay()]}, ${date.getDate()} ב${MONTH_NAMES[date.getMonth()]} ${date.getFullYear()}`;
   const meetings = allMeetings[dateStr] || [];
+  document.getElementById('day-panel-count').textContent =
+    meetings.length ? `${meetings.length} פגישות` : 'אין פגישות';
+  document.getElementById('btn-add').style.display = currentAgent?.isManager ? 'none' : 'flex';
   const list = document.getElementById('meetings-list');
   const isManager = currentAgent?.isManager;
-
   if (!meetings.length) {
-    list.innerHTML = '<div class="empty">אין פגישות ליום זה</div>';
+    list.innerHTML = '<div class="empty"><div class="empty-icon">📭</div>אין פגישות ביום זה</div>';
     return;
   }
   list.innerHTML = meetings.map(m => `
     <div class="meeting-card">
-      <div class="meeting-time">${m.meeting_time}</div>
+      <div class="meeting-time-badge">${m.meeting_time}</div>
       <div class="meeting-info">
         <div class="meeting-client">${m.client_name}</div>
         ${isManager ? `<div class="meeting-agent">👤 ${m.agent_name}</div>` : ''}
@@ -326,13 +381,8 @@ function showDayPanel(date) {
   `).join('');
 }
 
-function openAddModal() {
-  document.getElementById('add-modal').classList.add('open');
-}
-
-function closeModal() {
-  document.getElementById('add-modal').classList.remove('open');
-}
+function openAddModal() { document.getElementById('add-modal').classList.add('open'); }
+function closeModal() { document.getElementById('add-modal').classList.remove('open'); }
 
 async function addMeeting() {
   const clientName = document.getElementById('client-name').value.trim();
@@ -340,16 +390,8 @@ async function addMeeting() {
   const notes = document.getElementById('meeting-notes').value.trim();
   if (!clientName) { alert('נא להזין שם לקוח'); return; }
   await fetch('/api/meetings', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      agent_name: currentAgent.label,
-      agent_email: currentAgent.email,
-      client_name: clientName,
-      meeting_date: formatDate(selectedDate),
-      meeting_time: time,
-      notes
-    })
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ agent_name: currentAgent.label, agent_email: currentAgent.email, client_name: clientName, meeting_date: formatDate(selectedDate), meeting_time: time, notes })
   });
   document.getElementById('client-name').value = '';
   document.getElementById('meeting-notes').value = '';
@@ -363,10 +405,9 @@ async function deleteMeeting(id) {
   await loadMonthMeetings();
 }
 
-// טעינה ראשונית
-selectedDate = new Date();
-renderCalendar();
-document.getElementById('month-title').textContent = '';
+document.getElementById('add-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('add-modal')) closeModal();
+});
 </script>
 </body>
 </html>
