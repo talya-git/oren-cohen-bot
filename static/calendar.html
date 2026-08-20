@@ -476,7 +476,7 @@ async function addMeeting() {
   const clientName = document.getElementById('client-name').value.trim();
   const time = document.getElementById('meeting-time').value;
   const meetingType = document.querySelector('input[name="meeting_type"]:checked').value;
-  const handledBy = document.getElementById('handled-by').value.trim();
+  const handledBy = currentAgent.label;
   const zoomLink = document.getElementById('zoom-link').value.trim();
   const notes = document.getElementById('meeting-notes').value.trim();
   if (!clientName) { alert('נא להזין שם לקוח'); return; }
@@ -485,7 +485,6 @@ async function addMeeting() {
     body: JSON.stringify({ agent_name: currentAgent.label, agent_email: currentAgent.email, client_name: clientName, meeting_date: formatDate(selectedDate), meeting_time: time, meeting_type: meetingType, handled_by: handledBy, zoom_link: zoomLink, notes })
   });
   document.getElementById('client-name').value = '';
-  document.getElementById('handled-by').value = '';
   document.getElementById('zoom-link').value = '';
   document.getElementById('meeting-notes').value = '';
   document.querySelector('input[value="frontal"]').checked = true;
