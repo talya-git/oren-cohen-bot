@@ -122,6 +122,18 @@ def init_db():
                 sent_at TIMESTAMPTZ DEFAULT NOW()
             )
         """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS meetings (
+                id SERIAL PRIMARY KEY,
+                agent_name TEXT NOT NULL,
+                agent_email TEXT,
+                client_name TEXT NOT NULL,
+                meeting_date TEXT NOT NULL,
+                meeting_time TEXT NOT NULL,
+                notes TEXT DEFAULT '',
+                created_at TIMESTAMPTZ DEFAULT NOW()
+            )
+        """)
     else:
         cur.executescript("""
             CREATE TABLE IF NOT EXISTS users (
@@ -168,6 +180,16 @@ def init_db():
                 replied INTEGER DEFAULT 0,
                 transcript TEXT,
                 sent_at TEXT DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE TABLE IF NOT EXISTS meetings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                agent_name TEXT NOT NULL,
+                agent_email TEXT,
+                client_name TEXT NOT NULL,
+                meeting_date TEXT NOT NULL,
+                meeting_time TEXT NOT NULL,
+                notes TEXT DEFAULT '',
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
             );
         """)
 
@@ -572,6 +594,47 @@ def get_no_response_conversations(hours: int = 24) -> list:
     rows = _fetchall(cur)
     conn.close()
     return rows
+
+
+def create_meeting(agent_name: str, agent_email: str, client_name: str, meeting_date: str, meeting_time: str, notes: str = "") -> int:
+    conn = get_db()
+    cur = conn.cursor()
+    now = datetime.now(timezone.utc).isoformat()
+    if DATABASE_URL:
+        cur.execute(
+            "INSERT INTO meetings (agent_name, agent_email, client_name, meeting_date, meeting_time, notes, created_at) VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id",
+            (agent_name, agent_email, client_name, meeting_date, meeting_time, notes, now)
+        )
+        mid = cur.fetchone()[0]
+    else:
+        cur.execute(
+            "INSERT INTO meetings (agent_name, agent_email, client_name, meeting_date, meeting_time, notes, created_at) VALUES (?,?,?,?,?,?,?)",
+            (agent_name, agent_email, client_name, meeting_date, meeting_time, notes, now)
+        )
+        mid = cur.lastrowid
+    conn.commit()
+    conn.close()
+    return mid
+
+
+def get_meetings(date: str, agent_name: str | None = None) -> list:
+    conn = get_db()
+    cur = conn.cursor()
+    if agent_name:
+        cur.execute(f"SELECT * FROM meetings WHERE meeting_date={PH} AND agent_name={PH} ORDER BY meeting_time", (date, agent_name))
+    else:
+        cur.execute(f"SELECT * FROM meetings WHERE meeting_date={PH} ORDER BY agent_name, meeting_time", (date,))
+    rows = _fetchall(cur)
+    conn.close()
+    return rows
+
+
+def delete_meeting(meeting_id: int) -> None:
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(f"DELETE FROM meetings WHERE id={PH}", (meeting_id,))
+    conn.commit()
+    conn.close()
 
 
 def get_reengagement_results(agent_email: str) -> list:

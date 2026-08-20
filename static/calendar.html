@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>לוח פגישות | אורן כהן גרופ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #f0f2f5; color: #222; }
+  .header {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: #fff; padding: 16px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .header h1 { font-size: 20px; }
+  .main { padding: 24px; max-width: 800px; margin: 0 auto; }
+  .section { background: #fff; border-radius: 14px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .section-title { font-size: 16px; font-weight: bold; margin-bottom: 16px; color: #1a1a2e; }
+  .form-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .form-row input, .form-row select, .form-row textarea {
+    flex: 1; min-width: 140px; padding: 9px 12px;
+    border: 1px solid #ddd; border-radius: 8px; font-size: 13px; outline: none;
+  }
+  .form-row textarea { min-height: 60px; resize: vertical; }
+  .btn { padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
+  .btn-primary { background: #6366f1; color: #fff; }
+  .btn-primary:hover { background: #4f46e5; }
+  .date-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .date-nav button { padding: 6px 14px; border: 1px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; font-size: 14px; }
+  .date-nav span { font-size: 16px; font-weight: bold; color: #1a1a2e; }
+  .meeting-card {
+    border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px 16px;
+    margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .meeting-time { font-size: 18px; font-weight: bold; color: #6366f1; min-width: 60px; }
+  .meeting-info { flex: 1; margin-right: 16px; }
+  .meeting-client { font-size: 14px; font-weight: bold; }
+  .meeting-agent { font-size: 12px; color: #6b7280; }
+  .meeting-notes { font-size: 12px; color: #9ca3af; margin-top: 3px; }
+  .btn-delete { background: #fee2e2; color: #991b1b; border: none; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 12px; }
+  .agent-select { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .agent-btn { padding: 6px 14px; border: 1px solid #ddd; border-radius: 20px; background: #f8f9fa; cursor: pointer; font-size: 13px; }
+  .agent-btn.active { background: #6366f1; color: #fff; border-color: #6366f1; }
+  .empty { text-align: center; color: #9ca3af; padding: 30px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📅 לוח פגישות — אורן כהן גרופ</h1>
+  <a href="/static/hub.html" style="color:#fff;font-size:13px;text-decoration:none;opacity:0.8;">🏠 בית</a>
+</div>
+
+<div class="main">
+
+  <!-- בחירת סוכן -->
+  <div class="section">
+    <div class="section-title">👤 בחר סוכן</div>
+    <div class="agent-select" id="agent-select"></div>
+  </div>
+
+  <!-- הוספת פגישה -->
+  <div class="section" id="add-section" style="display:none">
+    <div class="section-title">➕ הוסף פגישה</div>
+    <div class="form-row">
+      <input type="text" id="client-name" placeholder="שם לקוח *" />
+      <input type="time" id="meeting-time" value="10:00" />
+    </div>
+    <div class="form-row">
+      <textarea id="meeting-notes" placeholder="הערות (אופציונלי)"></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="addMeeting()">שמור פגישה</button>
+  </div>
+
+  <!-- לוח יומי -->
+  <div class="section" id="calendar-section" style="display:none">
+    <div class="date-nav">
+      <button onclick="changeDate(-1)">→ אתמול</button>
+      <span id="date-display"></span>
+      <button onclick="changeDate(1)">מחר ←</button>
+      <button onclick="goToday()" style="background:#6366f1;color:#fff;border-color:#6366f1;">היום</button>
+    </div>
+    <div id="meetings-list"></div>
+  </div>
+
+</div>
+
+<script>
+const AGENTS = [
+  { label: 'יניב', email: 'yaniv@orencohengroup.com' },
+  { label: 'משה', email: 'moshe@orencohengroup.com' },
+  { label: 'מירי', email: 'miri@orencohengroup.com' },
+  { label: 'מיכאל', email: 'michael@orencohengroup.com' },
+  { label: 'רבקה', email: 'rivka@orencohengroup.com' },
+  { label: 'אוריאל', email: 'uriel400@orencohengroup.com' },
+  { label: 'אלחנן', email: 'elchanan@orencohengroup.com' },
+  { label: 'אורן', email: 'oren@orencohengroup.com' },
+  { label: 'אריה', email: 'aryeh@orencohengroup.com' },
+  { label: 'בועז', email: 'office@orencohengroup.com' },
+  { label: 'חנה', email: 'hannah@orencohengroup.com' },
+  { label: 'אהרון', email: 'aaron@orencohengroup.com' },
+  { label: 'ליסה', email: 'lisa@orencohengroup.com' },
+  { label: 'דב', email: 'dovr@orencohengroup.com' },
+  { label: 'רוני (מנהלת)', email: 'roni@orencohengroup.com', isManager: true },
+];
+
+let currentAgent = null;
+let currentDate = new Date();
+
+function formatDate(d) {
+  return d.toISOString().split('T')[0];
+}
+
+function formatDateHe(d) {
+  return d.toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+// בניית כפתורי סוכנים
+const agentSelect = document.getElementById('agent-select');
+AGENTS.forEach(a => {
+  const btn = document.createElement('button');
+  btn.className = 'agent-btn';
+  btn.textContent = a.label;
+  btn.onclick = () => selectAgent(a);
+  agentSelect.appendChild(btn);
+});
+
+function selectAgent(agent) {
+  currentAgent = agent;
+  document.querySelectorAll('.agent-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('add-section').style.display = agent.isManager ? 'none' : 'block';
+  document.getElementById('calendar-section').style.display = 'block';
+  loadMeetings();
+}
+
+function changeDate(days) {
+  currentDate.setDate(currentDate.getDate() + days);
+  loadMeetings();
+}
+
+function goToday() {
+  currentDate = new Date();
+  loadMeetings();
+}
+
+async function loadMeetings() {
+  document.getElementById('date-display').textContent = formatDateHe(currentDate);
+  const date = formatDate(currentDate);
+  const isManager = currentAgent?.isManager;
+  const url = isManager
+    ? `/api/meetings?date=${date}`
+    : `/api/meetings?date=${date}&agent=${encodeURIComponent(currentAgent.label)}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  const list = document.getElementById('meetings-list');
+  if (!data.meetings?.length) {
+    list.innerHTML = '<div class="empty">אין פגישות ליום זה</div>';
+    return;
+  }
+  list.innerHTML = data.meetings.map(m => `
+    <div class="meeting-card">
+      <div class="meeting-time">${m.meeting_time}</div>
+      <div class="meeting-info">
+        <div class="meeting-client">${m.client_name}</div>
+        ${isManager ? `<div class="meeting-agent">👤 ${m.agent_name}</div>` : ''}
+        ${m.notes ? `<div class="meeting-notes">📝 ${m.notes}</div>` : ''}
+      </div>
+      ${!isManager ? `<button class="btn-delete" onclick="deleteMeeting(${m.id})">🗑 מחק</button>` : ''}
+    </div>
+  `).join('');
+}
+
+async function addMeeting() {
+  const clientName = document.getElementById('client-name').value.trim();
+  const time = document.getElementById('meeting-time').value;
+  const notes = document.getElementById('meeting-notes').value.trim();
+  if (!clientName) { alert('נא להזין שם לקוח'); return; }
+  await fetch('/api/meetings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      agent_name: currentAgent.label,
+      agent_email: currentAgent.email,
+      client_name: clientName,
+      meeting_date: formatDate(currentDate),
+      meeting_time: time,
+      notes
+    })
+  });
+  document.getElementById('client-name').value = '';
+  document.getElementById('meeting-notes').value = '';
+  loadMeetings();
+}
+
+async function deleteMeeting(id) {
+  if (!confirm('למחוק פגישה זו?')) return;
+  await fetch(`/api/meetings/${id}`, { method: 'DELETE' });
+  loadMeetings();
+}
+</script>
+</body>
+</html>

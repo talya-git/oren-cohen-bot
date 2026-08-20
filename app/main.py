@@ -42,6 +42,76 @@ app.include_router(email_router)
 
 
 @app.on_event("startup")
+async def start_morning_reminders():
+    import asyncio
+    from datetime import datetime, timezone, timedelta
+
+    async def _reminder_loop():
+        while True:
+            now = datetime.now(timezone.utc).astimezone()
+            # חכה עד 9:00 בבוקר
+            target = now.replace(hour=9, minute=0, second=0, microsecond=0)
+            if now >= target:
+                target += timedelta(days=1)
+            await asyncio.sleep((target - now).total_seconds())
+            try:
+                await send_morning_reminders()
+            except Exception as e:
+                print(f"[REMINDER ERROR] {e}")
+
+    asyncio.create_task(_reminder_loop())
+
+
+async def send_morning_reminders():
+    from datetime import date
+    from .email_api import _send_email
+    from .whatsapp import send_message
+
+    today = date.today().isoformat()
+    calendar_url = "https://oren-cohen-bot.onrender.com/calendar"
+
+    AGENTS = [
+        {"name": "יניב", "email": "yaniv@orencohengroup.com"},
+        {"name": "משה", "email": "moshe@orencohengroup.com"},
+        {"name": "מירי", "email": "miri@orencohengroup.com"},
+        {"name": "מיכאל", "email": "michael@orencohengroup.com"},
+        {"name": "רבקה", "email": "rivka@orencohengroup.com"},
+        {"name": "אוריאל", "email": "uriel400@orencohengroup.com"},
+        {"name": "אלחנן", "email": "elchanan@orencohengroup.com"},
+        {"name": "אורן", "email": "oren@orencohengroup.com"},
+        {"name": "אריה", "email": "aryeh@orencohengroup.com"},
+        {"name": "בועז", "email": "office@orencohengroup.com"},
+        {"name": "חנה", "email": "hannah@orencohengroup.com"},
+        {"name": "אהרון", "email": "aaron@orencohengroup.com"},
+        {"name": "ליסה", "email": "lisa@orencohengroup.com"},
+        {"name": "דב", "email": "dovr@orencohengroup.com"},
+    ]
+
+    # שלח מייל לכל סוכן
+    for agent in AGENTS:
+        subject = f"📅 עדכן פגישות ליום היום"
+        html = f"""
+        <div dir='rtl' style='font-family:Arial;font-size:14px;'>
+          <p>שלום {agent['name']},</p>
+          <p>אנא עדכן את לוח הפגישות שלך ליום היום.</p>
+          <p><a href='{calendar_url}' style='background:#6366f1;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;'>📅 פתח לוח פגישות</a></p>
+        </div>
+        """
+        try:
+            _send_email(agent["email"], agent["name"], subject, html, f"עדכן פגישות: {calendar_url}")
+        except Exception as e:
+            print(f"[REMINDER EMAIL ERROR] {agent['name']}: {e}")
+
+    # שלח וואטסאפ לרוני
+    try:
+        msg = f"📅 שלום רוני! הסוכנים עדכנו את הפגישות שלהם ליום. לצפייה בלוח הפגישות: {calendar_url}"
+        send_message("+972528962040", msg)
+        print("[REMINDER WA] sent to Roni")
+    except Exception as e:
+        print(f"[REMINDER WA ERROR] {e}")
+
+
+@app.on_event("startup")
 async def start_report_scheduler():
     import asyncio
     async def _scheduler():
@@ -693,6 +763,40 @@ def create_lead_from_chat(req: CreateLeadRequest) -> dict:
             return {"status": "error", "detail": create_res.text}
     except Exception as e:
         return {"status": "error", "detail": str(e)}
+
+
+@app.get("/calendar")
+def calendar_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "calendar.html")
+
+
+@app.get("/api/meetings")
+def get_meetings(date: str, agent: str | None = None):
+    from . import database as _db
+    meetings = _db.get_meetings(date, agent)
+    return {"meetings": meetings}
+
+
+@app.post("/api/meetings")
+async def create_meeting(request: Request):
+    from . import database as _db
+    data = await request.json()
+    mid = _db.create_meeting(
+        agent_name=data.get("agent_name", ""),
+        agent_email=data.get("agent_email", ""),
+        client_name=data.get("client_name", ""),
+        meeting_date=data.get("meeting_date", ""),
+        meeting_time=data.get("meeting_time", ""),
+        notes=data.get("notes", "")
+    )
+    return {"status": "ok", "id": mid}
+
+
+@app.delete("/api/meetings/{meeting_id}")
+def delete_meeting(meeting_id: int):
+    from . import database as _db
+    _db.delete_meeting(meeting_id)
+    return {"status": "ok"}
 
 
 @app.get("/dashboard")
