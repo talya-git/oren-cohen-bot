@@ -154,7 +154,7 @@ def poll_inbox():
         is_positive = any(w in text.lower() for w in positive_words)
 
         if is_first_reply and is_positive:
-            actual_text = f"[הלקוח ענה חיובית: '{text}'. שאל אותו עכשיו רק שאלה 1: מהו לוח הזמנים שלך לכניסה לנכס? אל תשאל על מחיר, דרישות או כל דבר אחר.]"
+            actual_text = f"[הלקוח ענה חיובית: '{text}'. ענה מיד בהודעת ההעברה לסוכן והלינק לאתר. אל תשאל שאלות נוספות.]"
         else:
             actual_text = text
 
