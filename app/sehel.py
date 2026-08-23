@@ -212,24 +212,15 @@ def update_lead_after_conversation(
 
     first_note = f"[{channel}] הערת ליד — {date_str}\n"
     first_note += "סטטוס: לקוח רלוונטי — הועבר לסוכן" if is_relevant else "סטטוס: לקוח לא רלוונטי"
+    first_note += f"\n\nתמליל שיחה:\n{transcript[:1500]}"
+    if not is_relevant:
+        first_note += "\n\n[לא רלוונטי]"
 
     try:
         result1 = log_call_summary(phone, first_note, dry_run=dry_run, project_id=effective_pid)
         print(f"[SEHEL NOTE 1] {phone} | relevant={is_relevant} | result={result1}")
     except Exception as e:
         print(f"[SEHEL NOTE 1 ERROR] {phone} | {e}")
-
-    import time as _time
-    _time.sleep(2)
-
-    transcript_note = f"[{channel}] תמליל שיחה — {date_str}\n\n{transcript[:1800]}"
-    if not is_relevant:
-        transcript_note += "\n\n[לא רלוונטי]"
-    try:
-        result2 = log_call_summary(phone, transcript_note, dry_run=dry_run, project_id=effective_pid)
-        print(f"[SEHEL NOTE 2] {phone} | transcript sent | result={result2}")
-    except Exception as e:
-        print(f"[SEHEL NOTE 2 ERROR] {phone} | {e}")
 
     if is_relevant and agent_email:
         try:
