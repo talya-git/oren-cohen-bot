@@ -180,11 +180,14 @@ def poll_inbox():
         updated = transcript + f"\nClient: {clean_text}\nDaniel: {turn.reply}"
         db.update_reengagement_replied(f"email:{from_email}", True, updated.strip())
 
+        # נקה מקפים מהתשובה
+        reply_text = turn.reply.replace('\u2014', ',').replace('\u2013', ',')
+
         # שליחת תשובה
         reply_subject = subject if subject.startswith("Re:") else f"Re: {subject}"
-        html = f'<div dir="rtl" style="text-align:right">{turn.reply.replace(chr(10), "<br>")}</div>'
+        html = f'<div dir="rtl" style="text-align:right">{reply_text.replace(chr(10), "<br>")}</div>'
         try:
-            _send_email(from_email, name, reply_subject, html, turn.reply, internet_msg_id or None)
+            _send_email(from_email, name, reply_subject, html, reply_text, internet_msg_id or None)
             print(f"[GMAIL REPLY] to={from_email}")
         except Exception as e:
             print(f"[GMAIL REPLY ERROR] {e}")
