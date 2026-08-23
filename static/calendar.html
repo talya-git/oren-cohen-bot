@@ -609,7 +609,7 @@ async function addMeeting() {
   if (currentDept === 'projects' && time) {
     const chk = await fetch(`/api/meetings/check-conflict?date=${formatDate(selectedDate)}&time=${time}&department=projects&agent=${encodeURIComponent(currentAgent.label)}`).then(r => r.json());
     if (chk.conflict) {
-      alert(`נקבעה כבר פגישה ע"י ${chk.agent_name} לשעה זו`);
+      alert(`נקבעה כבר פגישה ע"י ${chk.agent_name} לשעה ${time}`);
       return;
     }
   }
