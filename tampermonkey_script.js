@@ -714,7 +714,9 @@
             const nameInput = (wlOverlay || document).querySelector(`.wl-name-edit[data-idx="${idx}"]`);
             const fullName = nameInput ? nameInput.value.trim() || lead.name1 || '' : lead.name1 || '';
             const name = firstNameOnly(fullName) || fullName;
-            selectedLeads.push({ name, email: lead.email1 || '', phone: normalizePhone(extractPhone(lead)), project });
+            const phone = cb.dataset.phone || normalizePhone(extractPhone(lead));
+            console.log('phone from dataset:', cb.dataset.phone, 'extractPhone:', extractPhone(lead));
+            selectedLeads.push({ name, email: lead.email1 || '', phone: phone, project });
         }
 
         if (!selectedLeads.length) { alert('לא נמצאו לידים תקינים'); return; }
