@@ -213,29 +213,18 @@ def poll_inbox():
         mail.store(num, "+FLAGS", "\\Seen")
 
         if turn.handoff_to_human:
-            is_relevant = "[HANDOFF]" not in updated or any(
-                w in updated.lower() for w in ["נשמח שתשמור", "we'd love to stay"]
-            )
-            # אם התמליל מכיל את הודעת הזיכרון — לא רלוונטי
-            if "נשמח שתשמור" in turn.reply or "we'd love to stay" in turn.reply.lower():
-                is_relevant = False
+            is_relevant = not ("נשמח שתשמור" in turn.reply or "we'd love to stay" in turn.reply.lower())
             updated += "\n[HANDOFF]"
             db.update_reengagement_replied(f"email:{from_email}", True, updated.strip())
             if is_relevant:
                 db.mark_reengagement_handoff(f"email:{from_email}")
             _email_sessions.pop(from_email, None)
             print(f"[GMAIL HANDOFF] {from_email} relevant={is_relevant}")
-            from . import sehel as _sehel
-            dry = not (_sehel.PROJECT_ID or _sehel.WEBHOOK_URL)
-            agent_email = record.get("agent_email") or ""
-            _sehel.update_lead_after_conversation(
-                from_email,
-                updated,
-                is_relevant=is_relevant,
-                agent_email=agent_email,
-                client_name=name,
-                channel="Email",
-                dry_run=dry,
-            )
+            # שלח מייל התראה לסוכן בלבד — ללא עדכון שכל
+            if is_relevant:
+                agent_email = record.get("agent_email") or ""
+                if agent_email:
+                    from .email_api import _send_agent_alert
+                    _send_agent_alert(agent_email, name, from_email, updated, channel="Email")
 
     mail.logout()

@@ -49,9 +49,19 @@ async def start_morning_reminders():
     async def _reminder_loop():
         while True:
             now = datetime.now(timezone.utc).astimezone()
-            target = now.replace(hour=9, minute=0, second=0, microsecond=0)
-            if now >= target:
-                target += timedelta(days=1)
+            # חכה עד 9:00 בישראל (UTC+3)
+            from datetime import timezone as _tz
+            import zoneinfo
+            try:
+                il_tz = zoneinfo.ZoneInfo("Asia/Jerusalem")
+                now_il = datetime.now(il_tz)
+                target = now_il.replace(hour=9, minute=0, second=0, microsecond=0)
+                if now_il >= target:
+                    target += timedelta(days=1)
+            except Exception:
+                target = now.replace(hour=6, minute=0, second=0, microsecond=0)
+                if now >= target:
+                    target += timedelta(days=1)
             await asyncio.sleep((target - now).total_seconds())
             # דלג על שישי (יום 4) ושבת (יום 5)
             if target.weekday() in (4, 5):  # 4=Friday, 5=Saturday
