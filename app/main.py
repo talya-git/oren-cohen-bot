@@ -113,7 +113,7 @@ async def send_morning_reminders():
 
     # רוני — template נפרד עם תאריך
     try:
-        status = _send_wa_template("+972528962040", "manager_morning_reminder", [date_str])
+        status = _send_wa_template("+972528962040", "morning_reminder_he", [date_str])
         print(f"[REMINDER WA] Roni -> {status}")
     except Exception as e:
         print(f"[REMINDER WA ERROR] Roni: {e}")
