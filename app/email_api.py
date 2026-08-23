@@ -100,6 +100,7 @@ async def start_email_reengagement(request: Request):
     data = await request.json()
     email = str(data.get("email", "")).strip()
     name = data.get("name") or None
+    phone = str(data.get("phone", "") or "").strip()  # מספר טלפון לשליחה לשכל
     project_name = data.get("project_name", "") or ""
     agent_email = data.get("agent_email", "") or ""
     custom_subject = data.get("custom_subject") or None
@@ -137,6 +138,13 @@ async def start_email_reengagement(request: Request):
         agent_email=agent_email,
         transcript=f"Daniel: {greeting}"
     )
+    # שמור טלפון ב-notes אם סופק — לשליחה לשכל
+    if phone:
+        conn2 = db.get_db()
+        cur2 = conn2.cursor()
+        cur2.execute(f"UPDATE reengagement_sent SET notes={db.PH} WHERE phone={db.PH}", (f"phone:{phone}", f"email:{email}"))
+        conn2.commit()
+        conn2.close()
 
     convo = Conversation(language="he", project_name=project_name or None)
     if name:

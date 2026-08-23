@@ -223,8 +223,12 @@ def poll_inbox():
             from . import sehel as _sehel
             dry = not (_sehel.PROJECT_ID or _sehel.WEBHOOK_URL)
             agent_email = record.get("agent_email") or ""
+            # שלח לשכל לפי טלפון אם קיים, אחרת כך לפי מייל
+            notes = record.get("notes") or ""
+            sehel_phone = notes.replace("phone:", "").strip() if notes.startswith("phone:") else None
+            sehel_id = sehel_phone if sehel_phone else from_email
             _sehel.update_lead_after_conversation(
-                from_email,
+                sehel_id,
                 updated,
                 is_relevant=is_relevant,
                 agent_email=agent_email,
