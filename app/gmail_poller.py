@@ -52,16 +52,8 @@ def poll_inbox():
         mail = imaplib.IMAP4_SSL("imap.gmail.com")
         mail.login(GMAIL_USER, GMAIL_APP_PASSWORD.replace(" ", ""))
         mail.select("inbox")
-        # סרוק מיילים לא נקראים + מיילים מה-24 שעות האחרונות שעדיין לא עובדו (לא ב-processed_ids)
-        from datetime import datetime, timedelta
-        since = (datetime.now() - timedelta(hours=24)).strftime("%d-%b-%Y")
-        _, unseen_data = mail.search(None, "UNSEEN")
-        _, recent_data = mail.search(None, f'(SINCE "{since}")')
-        seen_ids = set(unseen_data[0].split())
-        recent_ids = set(recent_data[0].split())
-        # איחוד — UNSEEN + recent שלא עובדו
-        all_ids = seen_ids | recent_ids
-        mail_ids = [mid for mid in all_ids if mid not in set()]
+        _, data = mail.search(None, "UNSEEN")
+        mail_ids = data[0].split()
     except Exception as e:
         print(f"[GMAIL POLL ERROR] {e}")
         return
@@ -167,11 +159,10 @@ def poll_inbox():
         convo = _build_convo_from_transcript(transcript, lang)
         convo._language = lang
         # בנה system prompt בשפה הנכונה לפני send()
-        if not convo._system_built:
-            from .engine import Conversation as _Conv
-            system = _Conv._build_system(convo, lang)
-            convo.messages.insert(0, {"role": "system", "content": system})
-            convo._system_built = True
+        from .engine import Conversation as _Conv
+        system = _Conv._build_system(convo, lang)
+        convo.messages.insert(0, {"role": "system", "content": system})
+        convo._system_built = True
 
         # אם אין היסטוריה — הלקוח עונה לראשונה
         if not convo.messages:
