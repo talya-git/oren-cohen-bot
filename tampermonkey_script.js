@@ -706,17 +706,18 @@
         for (const cb of checkboxes) {
             const idx = parseInt(cb.dataset.idx);
             const lead = wl_leads[idx];
-            if (!lead) continue;
+            const phoneFromDataset = cb.dataset.phone || '';
+            if (!lead && !phoneFromDataset) continue;
             const div = document.createElement('div');
-            div.innerHTML = lead.projectNameHtml || '';
+            if (lead) div.innerHTML = lead.projectNameHtml || '';
             const project = div.querySelector('.label')?.innerText?.trim() || '';
-            if (isProfessional(lead.name1, project, '')) continue;
+            if (lead && isProfessional(lead.name1, project, '')) continue;
             const nameInput = (wlOverlay || document).querySelector(`.wl-name-edit[data-idx="${idx}"]`);
-            const fullName = nameInput ? nameInput.value.trim() || lead.name1 || '' : lead.name1 || '';
+            const fullName = nameInput ? nameInput.value.trim() || (lead?.name1 || '') : (lead?.name1 || '');
             const name = firstNameOnly(fullName) || fullName;
-            const phone = cb.dataset.phone || normalizePhone(extractPhone(lead));
-            console.log('phone from dataset:', cb.dataset.phone, 'extractPhone:', extractPhone(lead));
-            selectedLeads.push({ name, email: lead.email1 || '', phone: phone, project });
+            const phone = phoneFromDataset || normalizePhone(extractPhone(lead || {}));
+            const email = lead?.email1 || '';
+            selectedLeads.push({ name, email, phone, project });
         }
 
         if (!selectedLeads.length) { alert('לא נמצאו לידים תקינים'); return; }
