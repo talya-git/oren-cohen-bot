@@ -139,7 +139,10 @@
   }
   .bubble-agent  { background: #e0e7ff; color: #1e1b4b; border-radius: 12px 12px 12px 2px; direction: rtl; text-align: right; }
   .bubble-client { background: #dcfce7; color: #14532d; border-radius: 12px 12px 2px 12px; direction: rtl; text-align: right; }
-  .msg-label { font-size: 10px; color: #9ca3af; margin-bottom: 3px; }
+  .msg-label { font-size: 11px; font-weight: 700; color: #6366f1; margin-bottom: 4px; }
+  .msg-client .msg-label { color: #16a34a; text-align: right; }
+  .msg-agent .msg-label { text-align: left; }
+  .bubble { white-space: pre-wrap; word-break: break-word; }
 
   .empty-state { text-align: center; padding: 60px 20px; color: #9ca3af; }
   .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
@@ -382,6 +385,7 @@ function refreshModal(phone) {
   const c = allData.find(x => x.phone === phone);
   if (!c || !c.transcript) return;
   const body = document.getElementById('modal-body');
+  const scrollPos = body.scrollTop; // שמור מיקום גלילה
   const lines = c.transcript.split('\n').filter(l => l.trim());
   body.innerHTML = lines.map(line => {
     // דלג שורות JSON גולמיות
@@ -398,19 +402,22 @@ function refreshModal(phone) {
     if (!isAgent && !isClient) return '';
     const cls = isAgent ? 'msg-agent' : 'msg-client';
     const bcls = isAgent ? 'bubble-agent' : 'bubble-client';
-    const label = isAgent ? 'Daniel' : 'לקוח';
+    const label = isAgent ? 'דניאל' : 'לקוח';
     let text = line.replace(/^[^:]+:\s*/, '').trim();
     if (text.startsWith('"') && text.endsWith('",')) text = text.slice(1, -2);
     else if (text.startsWith('"') && text.endsWith('"')) text = text.slice(1, -1);
+    // נקה סיומי מייל מהטקסט
+    text = text.replace(/\u202b[^\u202a]*\u202a/g, '').trim();
     if (!text) return '';
     const engChars = (text.match(/[a-zA-Z]/g) || []).length;
     const isEng = engChars > text.length * 0.4;
-    return `<div class="msg ${cls}">
+    const formattedText = text.replace(/\n/g, '<br>');
+    return `<div class="msg ${cls}" style="margin-bottom:16px">
       <div class="msg-label">${label}</div>
-      <div class="bubble ${bcls}" style="direction:${isEng?'ltr':'rtl'};text-align:${isEng?'left':'right'}">${text}</div>
+      <div class="bubble ${bcls}" style="direction:${isEng?'ltr':'rtl'};text-align:${isEng?'left':'right'};padding:10px 14px;font-size:13px;line-height:1.6">${formattedText}</div>
     </div>`;
   }).join('');
-  body.scrollTop = body.scrollHeight;
+  body.scrollTop = scrollPos || body.scrollHeight; // חזור למיקום או לסוף אם פתיחה ראשונה
 }
 
 function closeModal() {
