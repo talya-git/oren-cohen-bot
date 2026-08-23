@@ -123,10 +123,10 @@ def poll_inbox():
         # נקה קווים תחתונים ותווים עודפים
         text = re.sub(r'[_\-]{4,}', '', text)
         text = re.sub(r"\s+", " ", text).strip()
-        # אם הטקסט קצר מדי אחרי הניקוי - התשובה היית בתוך ה-quote
-        if len(text) < 3:
+        # אם הטקסט ריק לגמרי אחרי הניקוי - התשובה היית בתוך ה-quote
+        if not text:
             mail.store(num, "+FLAGS", "\\Seen")
-            print(f"[GMAIL SKIP] text too short after cut: {repr(text)}")
+            print(f"[GMAIL SKIP] empty text after cut")
             continue
 
         if not text:
