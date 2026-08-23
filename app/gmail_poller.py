@@ -220,11 +220,17 @@ def poll_inbox():
                 db.mark_reengagement_handoff(f"email:{from_email}")
             _email_sessions.pop(from_email, None)
             print(f"[GMAIL HANDOFF] {from_email} relevant={is_relevant}")
-            # שלח מייל התראה לסוכן בלבד — ללא עדכון שכל
-            if is_relevant:
-                agent_email = record.get("agent_email") or ""
-                if agent_email:
-                    from .email_api import _send_agent_alert
-                    _send_agent_alert(agent_email, name, from_email, updated, channel="Email")
+            from . import sehel as _sehel
+            dry = not (_sehel.PROJECT_ID or _sehel.WEBHOOK_URL)
+            agent_email = record.get("agent_email") or ""
+            _sehel.update_lead_after_conversation(
+                from_email,
+                updated,
+                is_relevant=is_relevant,
+                agent_email=agent_email,
+                client_name=name,
+                channel="Email",
+                dry_run=dry,
+            )
 
     mail.logout()
