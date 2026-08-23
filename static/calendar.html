@@ -26,6 +26,14 @@
     margin-bottom: 16px; box-shadow: 0 1px 8px rgba(0,0,0,0.06);
   }
   .agent-bar-label { font-size: 12px; font-weight: 600; color: #94a3b8; margin-bottom: 10px; display: block; }
+  .dept-btns { display: flex; gap: 6px; margin-bottom: 10px; }
+  .dept-btn {
+    padding: 5px 12px; border-radius: 6px; border: 1.5px solid #e2e8f0;
+    background: #f8fafc; cursor: pointer; font-size: 12px; font-weight: 600;
+    color: #475569; transition: all 0.15s;
+  }
+  .dept-btn:hover { border-color: #6366f1; color: #6366f1; }
+  .dept-btn.active { background: #6366f1; color: #fff; border-color: #6366f1; }
   .agent-btns { display: flex; gap: 8px; flex-wrap: wrap; }
   .agent-btn {
     padding: 9px 18px; border-radius: 6px;
@@ -201,8 +209,14 @@
   <div class="agent-bar">
     <span class="agent-bar-label">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-left:4px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      בחר סוכן:
+      בחר מחלקה:
     </span>
+    <div class="dept-btns">
+      <button class="dept-btn" data-dept="projects" onclick="selectDept(this)">פרויקטים</button>
+      <button class="dept-btn" data-dept="yad2" onclick="selectDept(this)">יד 2</button>
+      <button class="dept-btn" data-dept="az" onclick="selectDept(this)">A-Z</button>
+    </div>
+    <span class="agent-bar-label" id="agent-label" style="display:none">בחר סוכן:</span>
     <div class="agent-btns" id="agent-btns"></div>
   </div>
 
@@ -309,6 +323,21 @@ let allMeetings = {};
 const DAY_NAMES = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
 const MONTH_NAMES = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
 const DAY_NAMES_FULL = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+
+let currentDept = '';
+
+function selectDept(btn) {
+  document.querySelectorAll('.dept-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentDept = btn.dataset.dept;
+  document.getElementById('agent-label').style.display = 'block';
+  // אפס סוכן
+  currentAgent = null;
+  document.querySelectorAll('.agent-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('day-panel').style.display = 'none';
+  document.getElementById('cal-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:40px;font-size:14px;">בחר סוכן כדי להציג את לוח הפגישות</div>';
+  document.getElementById('month-title').textContent = 'בחר סוכן להצגת לוח';
+}
 
 const agentBtns = document.getElementById('agent-btns');
 AGENTS.forEach(a => {
@@ -539,6 +568,16 @@ async function addMeeting() {
   const zoomLink = document.getElementById('zoom-link').value.trim();
   const notes = document.getElementById('meeting-notes').value.trim();
   if (!clientName) { alert('נא להזין שם לקוח'); return; }
+
+  // בדיקת התנגשות רק למחלקת פרויקטים
+  if (currentDept === 'projects' && time) {
+    const chk = await fetch(`/api/meetings/check-conflict?date=${formatDate(selectedDate)}&time=${time}&department=projects&agent=${encodeURIComponent(currentAgent.label)}`).then(r => r.json());
+    if (chk.conflict) {
+      alert(`נקבעה כבר פגישה ע"י ${chk.agent_name} לשעה זו`);
+      return;
+    }
+  }
+
   if (_editingId) {
     await fetch(`/api/meetings/${_editingId}`, {
       method: 'PUT', headers: { 'Content-Type': 'application/json' },
@@ -547,7 +586,7 @@ async function addMeeting() {
   } else {
     await fetch('/api/meetings', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ agent_name: currentAgent.label, agent_email: currentAgent.email, client_name: clientName, meeting_date: formatDate(selectedDate), meeting_time: time, meeting_type: meetingType, handled_by: handledBy, zoom_link: zoomLink, notes })
+      body: JSON.stringify({ agent_name: currentAgent.label, agent_email: currentAgent.email, client_name: clientName, meeting_date: formatDate(selectedDate), meeting_time: time, meeting_type: meetingType, handled_by: handledBy, zoom_link: zoomLink, notes, department: currentDept })
     });
   }
   closeModal();

@@ -801,6 +801,15 @@ def get_meetings(date: str | None = None, start: str | None = None, end: str | N
     return {"meetings": meetings}
 
 
+@app.get("/api/meetings/check-conflict")
+def check_conflict(date: str, time: str, department: str, agent: str = ""):
+    from . import database as _db
+    conflict = _db.check_meeting_conflict(date, time, department, agent)
+    if conflict:
+        return {"conflict": True, "agent_name": conflict.get("agent_name", "")}
+    return {"conflict": False}
+
+
 @app.post("/api/meetings")
 async def create_meeting(request: Request):
     from . import database as _db
@@ -814,7 +823,8 @@ async def create_meeting(request: Request):
         meeting_type=data.get("meeting_type", "frontal"),
         handled_by=data.get("handled_by", ""),
         zoom_link=data.get("zoom_link", ""),
-        notes=data.get("notes", "")
+        notes=data.get("notes", ""),
+        department=data.get("department", "")
     )
     return {"status": "ok", "id": mid}
 
