@@ -309,7 +309,7 @@ async def whatsapp_webhook(request: Request):
         if intent_after == "not_relevant":
             lang_check = _detect_language(f"+{phone}", None)
             if lang_check == "he":
-                reply_msg = "נשמח להישאר בקשר 😊\nאם בעתיד תתעניין בנכס בירושלים , אנחנו תמיד כאן: https://www.orencohengroup.com/he/"
+                reply_msg = "נשמח להישאר אצלכם בזיכרון 😊\nאם בעתיד תתעניין בנכס בירושלים , אנחנו תמיד כאן: https://www.orencohengroup.com/he/"
             else:
                 reply_msg = "We'd love to stay in touch 😊\nIf you ever consider a property in Jerusalem — we're always here: https://www.orencohengroup.com/"
             send_message(f"+{phone}", reply_msg)
@@ -360,7 +360,7 @@ async def whatsapp_webhook(request: Request):
             else:
                 lang_check = _detect_language(f"+{phone}", None)
                 if lang_check == "he":
-                    reply_msg = "נשמח להישאר בקשר 😊\nאם בעתיד תתעניין בנכס בירושלים , אנחנו תמיד כאן: https://www.orencohengroup.com/he/"
+                    reply_msg = "נשמח להישאר אצלכם בזיכרון 😊\nאם בעתיד תתעניין בנכס בירושלים , אנחנו תמיד כאן: https://www.orencohengroup.com/he/"
                 else:
                     reply_msg = "We'd love to stay in touch 😊\nIf this ever becomes relevant in the future, we're always here: https://www.orencohengroup.com/"
             send_message(f"+{phone}", reply_msg)

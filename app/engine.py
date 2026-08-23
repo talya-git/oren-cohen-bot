@@ -144,7 +144,7 @@ class Conversation:
             if self._language == "en":
                 closing = "We'd love to stay in touch 😊\nIf this ever becomes relevant in the future, we're always here: https://www.orencohengroup.com/"
             else:
-                closing = "נשמח להישאר בקשר 😊\nאם בעתיד תתעניין בנכס בירושלים , אנחנו תמיד כאן: https://www.orencohengroup.com/he/"
+                closing = "נשמח להישאר אצלכם בזיכרון 😊\nאם בעתיד תתעניין בנכס בירושלים , אנחנו תמיד כאן: https://www.orencohengroup.com/he/"
             turn = BotTurn(
                 reply=closing, stage="handoff",
                 extracted=ExtractedParams(), handoff_to_human=True, notes="not_interested"
