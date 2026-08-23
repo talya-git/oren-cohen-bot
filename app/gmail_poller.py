@@ -52,8 +52,16 @@ def poll_inbox():
         mail = imaplib.IMAP4_SSL("imap.gmail.com")
         mail.login(GMAIL_USER, GMAIL_APP_PASSWORD.replace(" ", ""))
         mail.select("inbox")
-        _, data = mail.search(None, "UNSEEN")
-        mail_ids = data[0].split()
+        # סרוק מיילים לא נקראים + מיילים מה-24 שעות האחרונות שעדיין לא עובדו (לא ב-processed_ids)
+        from datetime import datetime, timedelta
+        since = (datetime.now() - timedelta(hours=24)).strftime("%d-%b-%Y")
+        _, unseen_data = mail.search(None, "UNSEEN")
+        _, recent_data = mail.search(None, f'(SINCE "{since}")')
+        seen_ids = set(unseen_data[0].split())
+        recent_ids = set(recent_data[0].split())
+        # איחוד — UNSEEN + recent שלא עובדו
+        all_ids = seen_ids | recent_ids
+        mail_ids = [mid for mid in all_ids if mid not in set()]
     except Exception as e:
         print(f"[GMAIL POLL ERROR] {e}")
         return
@@ -226,15 +234,49 @@ def poll_inbox():
             # שלח לשכל לפי טלפון אם קיים, אחרת כך לפי מייל
             notes = record.get("notes") or ""
             sehel_phone = notes.replace("phone:", "").strip() if notes.startswith("phone:") else None
-            sehel_id = sehel_phone if sehel_phone else from_email
-            _sehel.update_lead_after_conversation(
-                sehel_id,
-                updated,
-                is_relevant=is_relevant,
-                agent_email=agent_email,
-                client_name=name,
-                channel="Email",
-                dry_run=dry,
-            )
+            # אם אין טלפון — חפש בשכל לפי שם
+            if not sehel_phone and name:
+                try:
+                    import httpx as _hx
+                    from . import sehel as _s
+                    search_resp = _hx.get(
+                        f"https://leads.sehel.co.il/search",
+                        params={"q": name, "project_id": _s.DEFAULT_PROJECT_ID},
+                        timeout=8
+                    )
+                    results = search_resp.json().get("data", [])
+                    if not results:
+                        # נסה API אחר
+                        search_resp2 = _hx.post(
+                            "https://leads.sehel.co.il",
+                            json={"project_id": _s.DEFAULT_PROJECT_ID, "lead_name": name, "search_only": True},
+                            timeout=8
+                        )
+                        results = search_resp2.json().get("data", [])
+                    if results:
+                        raw_phone = results[0].get("lead_phone") or results[0].get("phone", "")
+                        if raw_phone:
+                            p = str(raw_phone).strip().replace("-", "").replace(" ", "")
+                            if p.startswith("05"):
+                                sehel_phone = "+972" + p[1:]
+                            elif not p.startswith("+"):
+                                sehel_phone = "+" + p
+                            else:
+                                sehel_phone = p
+                            print(f"[SEHEL PHONE FOUND] name={name} phone={sehel_phone}")
+                except Exception as e:
+                    print(f"[SEHEL SEARCH ERROR] {e}")
+            if not sehel_phone:
+                print(f"[SEHEL SKIP] no phone found for {from_email}")
+            else:
+                _sehel.update_lead_after_conversation(
+                    sehel_phone,
+                    updated,
+                    is_relevant=is_relevant,
+                    agent_email=agent_email,
+                    client_name=name,
+                    channel="Email",
+                    dry_run=dry,
+                )
 
     mail.logout()
