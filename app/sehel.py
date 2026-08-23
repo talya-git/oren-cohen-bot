@@ -171,21 +171,25 @@ def build_payload(
 
 
 def log_call_summary(phone: str, summary: str, *, dry_run: bool = False, project_id: str | None = None) -> dict:
-    """מוסיף סיכום שיחה לכרטיס קיים בשכל לפי טלפון."""
     if dry_run:
+        print(f"[SEHEL DRY RUN] phone={phone} project_id={project_id}")
         return {"dry_run": True, "phone": phone}
     normalized = phone.lstrip("+").replace("-", "").replace(" ", "")
     if normalized.startswith("972"):
         normalized = "0" + normalized[3:]
+    pid = project_id or PROJECT_ID or DEFAULT_PROJECT_ID
     payload = {
-        "project_id": project_id or PROJECT_ID or DEFAULT_PROJECT_ID,
+        "project_id": pid,
         "lead_phone": normalized,
         "media_source": "WhatsApp",
         "callSummary": summary[:2000],
         "callDirection": "outgoing",
     }
+    print(f"[SEHEL API CALL] phone={normalized} project_id={pid} summary_len={len(summary)}")
     resp = httpx.post(SEHEL_URL, json=payload, timeout=15)
-    return resp.json()
+    result = resp.json()
+    print(f"[SEHEL API RESULT] status={resp.status_code} result={str(result)[:200]}")
+    return result
 
 
 def update_lead_after_conversation(
@@ -199,34 +203,28 @@ def update_lead_after_conversation(
     channel: str = "WhatsApp",
     dry_run: bool = False,
 ) -> None:
-    """מעדכן כרטיס בשכל אחרי שיחה עם הבוט — תמיד, ללא קשר לרלוונטיות."""
     from datetime import datetime
     date_str = datetime.now().strftime("%d/%m/%Y %H:%M")
+    print(f"[SEHEL UPDATE] phone={phone} relevant={is_relevant} channel={channel} dry_run={dry_run} project_id={project_id}")
 
-    # הערה ראשונה — תמיד נשלחת
     first_note = f"[{channel}] הערת ליד — {date_str}\n"
-    if is_relevant:
-        first_note += "סטטוס: לקוח רלוונטי — הועבר לסוכן"
-    else:
-        first_note += "סטטוס: לקוח לא רלוונטי"
+    first_note += "סטטוס: לקוח רלוונטי — הועבר לסוכן" if is_relevant else "סטטוס: לקוח לא רלוונטי"
 
     try:
-        log_call_summary(phone, first_note, dry_run=dry_run, project_id=project_id)
-        print(f"[SEHEL NOTE 1] {phone} | relevant={is_relevant}")
+        result1 = log_call_summary(phone, first_note, dry_run=dry_run, project_id=project_id)
+        print(f"[SEHEL NOTE 1] {phone} | relevant={is_relevant} | result={result1}")
     except Exception as e:
-        print(f"[SEHEL NOTE 1 ERROR] {e}")
+        print(f"[SEHEL NOTE 1 ERROR] {phone} | {e}")
 
-    # הערה שנייה — תמליל מלא (תמיד)
     transcript_note = f"[{channel}] תמליל שיחה — {date_str}\n\n{transcript[:1800]}"
     if not is_relevant:
         transcript_note += "\n\n[לא רלוונטי]"
     try:
-        log_call_summary(phone, transcript_note, dry_run=dry_run, project_id=project_id)
-        print(f"[SEHEL NOTE 2] {phone} | transcript sent")
+        result2 = log_call_summary(phone, transcript_note, dry_run=dry_run, project_id=project_id)
+        print(f"[SEHEL NOTE 2] {phone} | transcript sent | result={result2}")
     except Exception as e:
-        print(f"[SEHEL NOTE 2 ERROR] {e}")
+        print(f"[SEHEL NOTE 2 ERROR] {phone} | {e}")
 
-    # מייל התראה — רק אם רלוונטי
     if is_relevant and agent_email:
         try:
             from .email_api import _send_agent_alert
