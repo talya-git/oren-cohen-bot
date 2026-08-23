@@ -101,11 +101,11 @@ async def start_email_reengagement(request: Request):
     email = str(data.get("email", "")).strip()
     name = data.get("name") or None
     phone = str(data.get("phone", "") or "").strip()  # מספר טלפון לשליחה לשכל
-    print(f"[EMAIL REENGAGEMENT] email={email} name={name} phone={phone} project={project_name}")
     project_name = data.get("project_name", "") or ""
     agent_email = data.get("agent_email", "") or ""
     custom_subject = data.get("custom_subject") or None
     custom_message = data.get("custom_message") or None
+    print(f"[EMAIL REENGAGEMENT] email={email} name={name} phone={phone} project={project_name}")
 
     if not email:
         return {"status": "error", "reason": "email required"}
