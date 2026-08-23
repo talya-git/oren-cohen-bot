@@ -107,11 +107,11 @@ def poll_inbox():
         text = re.sub(r"<[^>]+>", " ", text)
         text = re.sub(r"\s+", " ", text).strip()
 
-        # חיתוך quote
+        # חיתוך quote - קודם כל דבר אחר
         cut_markers = ["מאת:", "From:", "-----Original", "________________________________",
                        "wrote:", "כתב:", "נשלח:", "Sent:",
                        "orencohengroup2020@gmail.com", "daniel@orencohengroup.com",
-                       "ocgdaniel@gmail.com",
+                       "ocgdaniel@gmail.com", "Daniel | Oren Cohen Group",
                        "On ", "> "]
         earliest = len(text)
         for marker in cut_markers:
@@ -120,9 +120,14 @@ def poll_inbox():
                 earliest = idx
         if earliest > 2:
             text = text[:earliest].strip()
-        # נקה שירות ריקות ותווים עודפים
+        # נקה קווים תחתונים ותווים עודפים
         text = re.sub(r'[_\-]{4,}', '', text)
         text = re.sub(r"\s+", " ", text).strip()
+        # אם הטקסט קצר מדי אחרי הניקוי - התשובה היית בתוך ה-quote
+        if len(text) < 3:
+            mail.store(num, "+FLAGS", "\\Seen")
+            print(f"[GMAIL SKIP] text too short after cut: {repr(text)}")
+            continue
 
         if not text:
             mail.store(num, "+FLAGS", "\\Seen")
