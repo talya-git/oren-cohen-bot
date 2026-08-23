@@ -157,8 +157,13 @@ def poll_inbox():
             continue
 
         convo = _build_convo_from_transcript(transcript, lang)
-        convo._language = lang  # ודא שפה נכונה
-        convo._system_built = False  # אפשר לבנות system בשפה הנכונה
+        convo._language = lang
+        # בנה system prompt בשפה הנכונה לפני send()
+        if not convo._system_built:
+            from .engine import Conversation as _Conv
+            system = _Conv._build_system(convo, lang)
+            convo.messages.insert(0, {"role": "system", "content": system})
+            convo._system_built = True
 
         # אם אין היסטוריה — הלקוח עונה לראשונה
         if not convo.messages:
