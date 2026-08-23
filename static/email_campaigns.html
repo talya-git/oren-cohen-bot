@@ -215,7 +215,17 @@ function showTranscript(name, text) {
     const isClient = ['Client:', 'לקוח:'].some(p => line.startsWith(p));
     if (isAgent || isClient) {
       if (cur) blocks.push(cur);
-      cur = { type: isAgent ? 'agent' : 'client', text: line.replace(/^[^:]+:\s*/, '').trim() };
+      let rawText = line.replace(/^[^:]+:\s*/, '').trim();
+      // חלץ תאריך מהטקסט של הלקוח
+      let dateStr = null;
+      if (!isAgent) {
+        const dateMatch = rawText.match(/בתאריך\s+[\u05d0-\u05eaא-ת'\s,א-ת]+\d{1,2}:\d{2}/);
+        if (dateMatch) {
+          dateStr = dateMatch[0].replace('בתאריך', '').trim();
+          rawText = rawText.replace(dateMatch[0], '').replace(/\u202b[^\u202a]*\u202a/g,'').replace(/מאת\s*$/,'').trim();
+        }
+      }
+      cur = { type: isAgent ? 'agent' : 'client', text: rawText, date: dateStr };
     } else if (cur && line.trim() && !line.startsWith('[')) {
       cur.text += '\n' + line.trim();
     }
@@ -225,14 +235,18 @@ function showTranscript(name, text) {
   if (!blocks.length) {
     body.innerHTML = `<p style="color:#9ca3af">${text || 'אין תמליל'}</p>`;
   } else {
-    body.innerHTML = blocks.map(b => {
+    body.innerHTML = blocks.map((b, idx) => {
       const t = b.text.replace(/\u202b[^\u202a]*\u202a/g,'').replace(/\u202b/g,'').replace(/\u202a/g,'').trim();
       if (!t) return '';
       const isAgent = b.type === 'agent';
       const eng = (t.match(/[a-zA-Z]/g)||[]).length > t.length * 0.4;
+      const dateHtml = b.date
+        ? `<div style="font-size:10px;color:#9ca3af;margin-top:4px;text-align:${isAgent?'left':'right'}">${b.date}</div>`
+        : (idx === 0 ? `<div style="font-size:10px;color:#9ca3af;margin-top:4px;text-align:left">נשלח</div>` : '');
       return `<div class="msg ${isAgent?'msg-agent':'msg-client'}">
         <div class="msg-label">${isAgent?'דניאל':'לקוח'}</div>
         <div class="bubble ${isAgent?'bubble-agent':'bubble-client'}" style="direction:${eng?'ltr':'rtl'};text-align:${eng?'left':'right'}">${t.replace(/\n/g,'<br>')}</div>
+        ${dateHtml}
       </div>`;
     }).join('');
   }
