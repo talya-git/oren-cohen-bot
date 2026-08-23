@@ -59,6 +59,7 @@ def init_db():
         for col, definition in [
             ("stalled_pushed", "BOOLEAN DEFAULT FALSE"),
             ("handoff", "BOOLEAN DEFAULT FALSE"),
+            ("notes", "TEXT DEFAULT ''"),
         ]:
             try:
                 cur.execute(f"ALTER TABLE reengagement_sent ADD COLUMN IF NOT EXISTS {col} {definition}")
