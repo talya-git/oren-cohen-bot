@@ -387,28 +387,34 @@ function refreshModal(phone) {
   const body = document.getElementById('modal-body');
   const scrollPos = body.scrollTop; // שמור מיקום גלילה
   const lines = c.transcript.split('\n').filter(l => l.trim());
-  body.innerHTML = lines.map(line => {
-    // דלג שורות JSON גולמיות
-    const trimmed = line.trim();
-    if (trimmed.startsWith('{') || trimmed.startsWith('}') || trimmed === 'null,' ||
-        trimmed === 'false,' || trimmed === 'true,' ||
-        (trimmed.startsWith('"') && !trimmed.includes(':') && trimmed.endsWith(',')) ||
-        trimmed === '{' || trimmed === '},' || trimmed === '}') return '';
-
+  // אחד את השורות לבלוקים לפי סוכן
+  const blocks = [];
+  let currentBlock = null;
+  for (const line of lines) {
     const agentPrefixes = ['דניאל:', 'Daniel:', 'Bot:'];
     const clientPrefixes = ['לקוח:', 'Client:'];
     const isAgent = agentPrefixes.some(p => line.startsWith(p));
     const isClient = clientPrefixes.some(p => line.startsWith(p));
-    if (!isAgent && !isClient) return '';
+    if (isAgent || isClient) {
+      if (currentBlock) blocks.push(currentBlock);
+      const text = line.replace(/^[^:]+:\s*/, '').trim();
+      currentBlock = { type: isAgent ? 'agent' : 'client', text };
+    } else if (currentBlock && line.trim() && !line.startsWith('[')) {
+      currentBlock.text += '\n' + line.trim();
+    }
+  }
+  if (currentBlock) blocks.push(currentBlock);
+
+  body.innerHTML = blocks.map(block => {
+    let text = block.text
+      .replace(/\u202b[^\u202a]*\u202a/g, '')
+      .replace(/\u202b/g, '').replace(/\u202a/g, '')
+      .trim();
+    if (!text) return '';
+    const isAgent = block.type === 'agent';
     const cls = isAgent ? 'msg-agent' : 'msg-client';
     const bcls = isAgent ? 'bubble-agent' : 'bubble-client';
     const label = isAgent ? 'דניאל' : 'לקוח';
-    let text = line.replace(/^[^:]+:\s*/, '').trim();
-    if (text.startsWith('"') && text.endsWith('",')) text = text.slice(1, -2);
-    else if (text.startsWith('"') && text.endsWith('"')) text = text.slice(1, -1);
-    // נקה סיומי מייל מהטקסט
-    text = text.replace(/\u202b[^\u202a]*\u202a/g, '').trim();
-    if (!text) return '';
     const engChars = (text.match(/[a-zA-Z]/g) || []).length;
     const isEng = engChars > text.length * 0.4;
     const formattedText = text.replace(/\n/g, '<br>');
