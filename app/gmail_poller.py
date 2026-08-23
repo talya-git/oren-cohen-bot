@@ -136,7 +136,16 @@ def poll_inbox():
         print(f"[GMAIL INBOUND] from={from_email} subject={subject}")
 
         name = record.get("client_name") or ""
-        lang = "he" if (not name or any('\u05d0' <= c <= '\u05ea' for c in name)) else "en"
+        # שפת פתיחה לפי שם, בהמשך לפי הטקסט שלקוח
+        name_is_hebrew = name and any('\u05d0' <= c <= '\u05ea' for c in name)
+        he_chars = sum(1 for c in text if '\u05d0' <= c <= '\u05ea')
+        en_chars = sum(1 for c in text if 'a' <= c.lower() <= 'z')
+        if he_chars > 0 or en_chars > 0:
+            # יש טקסט בריר — זיהוי לפי התשובה
+            lang = "he" if he_chars >= en_chars else "en"
+        else:
+            # אין תווים ברורים — זיהוי לפי שם
+            lang = "he" if (not name or name_is_hebrew) else "en"
 
         # בנה session חדש מהטרנסקריפט הנוכחי ב-DB (כולל כל ההיסטוריה)
         transcript = record.get("transcript") or ""
@@ -148,6 +157,8 @@ def poll_inbox():
             continue
 
         convo = _build_convo_from_transcript(transcript, lang)
+        convo._language = lang  # ודא שפה נכונה
+        convo._system_built = False  # אפשר לבנות system בשפה הנכונה
 
         # אם אין היסטוריה — הלקוח עונה לראשונה
         if not convo.messages:
@@ -185,7 +196,9 @@ def poll_inbox():
 
         # שליחת תשובה
         reply_subject = subject if subject.startswith("Re:") else f"Re: {subject}"
-        html = f'<div dir="rtl" style="text-align:right">{reply_text.replace(chr(10), "<br>")}</div>'
+        html_dir = "ltr" if lang == "en" else "rtl"
+        html_align = "left" if lang == "en" else "right"
+        html = f'<div dir="{html_dir}" style="text-align:{html_align}">{reply_text.replace(chr(10), "<br>")}</div>'
         try:
             _send_email(from_email, name, reply_subject, html, reply_text, internet_msg_id or None)
             print(f"[GMAIL REPLY] to={from_email}")
