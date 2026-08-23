@@ -207,23 +207,26 @@ def update_lead_after_conversation(
     date_str = datetime.now().strftime("%d/%m/%Y %H:%M")
     print(f"[SEHEL UPDATE] phone={phone} relevant={is_relevant} channel={channel} dry_run={dry_run} project_id={project_id}")
 
+    # אם לא צוין project_id בפירוש — נסה למצוא לפי הטלפון בכל הפרויקטים
+    effective_pid = project_id or DEFAULT_PROJECT_ID
+
     first_note = f"[{channel}] הערת ליד — {date_str}\n"
     first_note += "סטטוס: לקוח רלוונטי — הועבר לסוכן" if is_relevant else "סטטוס: לקוח לא רלוונטי"
 
     try:
-        result1 = log_call_summary(phone, first_note, dry_run=dry_run, project_id=project_id)
+        result1 = log_call_summary(phone, first_note, dry_run=dry_run, project_id=effective_pid)
         print(f"[SEHEL NOTE 1] {phone} | relevant={is_relevant} | result={result1}")
     except Exception as e:
         print(f"[SEHEL NOTE 1 ERROR] {phone} | {e}")
 
     import time as _time
-    _time.sleep(2)  # השהייה בין הערות כדי ששכל ישמור שתייהן
+    _time.sleep(2)
 
     transcript_note = f"[{channel}] תמליל שיחה — {date_str}\n\n{transcript[:1800]}"
     if not is_relevant:
         transcript_note += "\n\n[לא רלוונטי]"
     try:
-        result2 = log_call_summary(phone, transcript_note, dry_run=dry_run, project_id=project_id)
+        result2 = log_call_summary(phone, transcript_note, dry_run=dry_run, project_id=effective_pid)
         print(f"[SEHEL NOTE 2] {phone} | transcript sent | result={result2}")
     except Exception as e:
         print(f"[SEHEL NOTE 2 ERROR] {phone} | {e}")
