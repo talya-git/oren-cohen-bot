@@ -206,21 +206,34 @@
 
 <div class="main">
 
-  <div class="agent-bar">
-    <span class="agent-bar-label">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-left:4px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      בחר מחלקה:
-    </span>
-    <div class="dept-btns">
-      <button class="dept-btn" data-dept="projects" onclick="selectDept(this)">פרויקטים</button>
-      <button class="dept-btn" data-dept="yad2" onclick="selectDept(this)">יד 2</button>
-      <button class="dept-btn" data-dept="az" onclick="selectDept(this)">A-Z</button>
+  <!-- שלב 1: בחירת מחלקה -->
+  <div id="step-dept" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;">
+    <div style="background:#fff;border-radius:20px;padding:40px 32px;box-shadow:0 2px 16px rgba(0,0,0,0.08);text-align:center;max-width:400px;width:100%">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" style="margin-bottom:16px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <h2 style="font-size:20px;font-weight:700;color:#1e293b;margin-bottom:8px">בחר מחלקה</h2>
+      <p style="font-size:14px;color:#94a3b8;margin-bottom:28px">לאיזו מחלקה אתה שייך?</p>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <button onclick="chooseDept('projects')" style="padding:16px;border-radius:12px;border:2px solid #e2e8f0;background:#f8fafc;font-size:16px;font-weight:600;color:#1e293b;cursor:pointer;transition:all 0.15s" onmouseover="this.style.borderColor='#6366f1';this.style.background='#eef2ff'" onmouseout="this.style.borderColor='#e2e8f0';this.style.background='#f8fafc'">פרויקטים</button>
+        <button onclick="chooseDept('yad2')" style="padding:16px;border-radius:12px;border:2px solid #e2e8f0;background:#f8fafc;font-size:16px;font-weight:600;color:#1e293b;cursor:pointer;transition:all 0.15s" onmouseover="this.style.borderColor='#6366f1';this.style.background='#eef2ff'" onmouseout="this.style.borderColor='#e2e8f0';this.style.background='#f8fafc'">יד 2</button>
+        <button onclick="chooseDept('az')" style="padding:16px;border-radius:12px;border:2px solid #e2e8f0;background:#f8fafc;font-size:16px;font-weight:600;color:#1e293b;cursor:pointer;transition:all 0.15s" onmouseover="this.style.borderColor='#6366f1';this.style.background='#eef2ff'" onmouseout="this.style.borderColor='#e2e8f0';this.style.background='#f8fafc'">A-Z</button>
+      </div>
     </div>
-    <span class="agent-bar-label" id="agent-label" style="display:none">בחר סוכן:</span>
-    <div class="agent-btns" id="agent-btns"></div>
   </div>
 
-  <div class="cal-card">
+  <!-- שלב 2: בחירת סוכן -->
+  <div id="step-agent" style="display:none">
+    <div class="agent-bar">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <button onclick="backToDept()" style="background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px;color:#64748b">← חזרה</button>
+        <span style="font-size:13px;font-weight:600;color:#64748b" id="dept-label-text"></span>
+      </div>
+      <span class="agent-bar-label">בחר סוכן:</span>
+      <div class="agent-btns" id="agent-btns"></div>
+    </div>
+  </div>
+
+  <!-- שלב 3: לוח פגישות -->
+  <div id="step-calendar" style="display:none">
     <div class="cal-header">
       <div class="cal-title" id="month-title">בחר סוכן להצגת לוח</div>
       <div class="cal-nav">
@@ -246,9 +259,11 @@
       </button>
     </div>
     <div id="meetings-list"></div>
-  </div>
+  </div><!-- end day-panel -->
 
-</div>
+  </div><!-- end step-calendar -->
+
+</div><!-- end main -->
 
 <div class="modal-overlay" id="add-modal">
   <div class="modal">
@@ -325,13 +340,31 @@ const MONTH_NAMES = ['ינואר','פברואר','מרץ','אפריל','מאי',
 const DAY_NAMES_FULL = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
 
 let currentDept = '';
+const DEPT_LABELS = { projects: 'מחלקת פרויקטים', yad2: 'מחלקת יד 2', az: 'מחלקת A-Z' };
+
+function chooseDept(dept) {
+  currentDept = dept;
+  document.getElementById('step-dept').style.display = 'none';
+  document.getElementById('step-agent').style.display = 'block';
+  document.getElementById('dept-label-text').textContent = DEPT_LABELS[dept];
+  currentAgent = null;
+  document.querySelectorAll('.agent-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('step-calendar').style.display = 'none';
+}
+
+function backToDept() {
+  document.getElementById('step-dept').style.display = 'flex';
+  document.getElementById('step-agent').style.display = 'none';
+  document.getElementById('step-calendar').style.display = 'none';
+  currentAgent = null;
+  currentDept = '';
+}
 
 function selectDept(btn) {
   document.querySelectorAll('.dept-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   currentDept = btn.dataset.dept;
   document.getElementById('agent-label').style.display = 'block';
-  // אפס סוכן
   currentAgent = null;
   document.querySelectorAll('.agent-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('day-panel').style.display = 'none';
@@ -360,6 +393,9 @@ function selectAgent(a, btn) {
   currentAgent = a;
   document.querySelectorAll('.agent-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  // עבור לשלב לוח פגישות
+  document.getElementById('step-agent').style.display = 'none';
+  document.getElementById('step-calendar').style.display = 'block';
   selectedDate = new Date();
   currentMonth = new Date();
   loadMonthMeetings();
