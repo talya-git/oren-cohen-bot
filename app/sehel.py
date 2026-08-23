@@ -216,6 +216,9 @@ def update_lead_after_conversation(
     except Exception as e:
         print(f"[SEHEL NOTE 1 ERROR] {phone} | {e}")
 
+    import time as _time
+    _time.sleep(2)  # השהייה בין הערות כדי ששכל ישמור שתייהן
+
     transcript_note = f"[{channel}] תמליל שיחה — {date_str}\n\n{transcript[:1800]}"
     if not is_relevant:
         transcript_note += "\n\n[לא רלוונטי]"
