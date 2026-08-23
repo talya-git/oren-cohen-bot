@@ -49,11 +49,14 @@ async def start_morning_reminders():
     async def _reminder_loop():
         while True:
             now = datetime.now(timezone.utc).astimezone()
-            # חכה עד 9:00 בבוקר
             target = now.replace(hour=9, minute=0, second=0, microsecond=0)
             if now >= target:
                 target += timedelta(days=1)
             await asyncio.sleep((target - now).total_seconds())
+            # דלג על שישי (יום 4) ושבת (יום 5)
+            if target.weekday() in (4, 5):  # 4=Friday, 5=Saturday
+                print("[REMINDER SKIP] Shabbat/Friday")
+                continue
             try:
                 await send_morning_reminders()
             except Exception as e:
