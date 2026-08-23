@@ -486,7 +486,7 @@
         for (const kw of keywords) {
             const idx = lower.indexOf(kw.toLowerCase());
             if (idx === -1) continue;
-            const before = lower.substring(Math.max(0, idx - 150), idx);
+            const before = lower.substring(Math.max(0, idx - 500), idx);
             if (!referralWords.some(r => before.includes(r.toLowerCase()))) return true;
         }
         return false;
@@ -820,7 +820,7 @@
                     const res = await fetch(`${BOT_URL}/api/email/start-reengagement`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email, name: l.name, project_name: l.project || '',
+                        body: JSON.stringify({ email, name: l.name, phone: l.phone || '', project_name: l.project || '',
                             agent_email: wl_agent.email, custom_subject: subject, custom_message: message })
                     });
                     const data = await res.json();
