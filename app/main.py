@@ -32,8 +32,8 @@ class _UTF8JSONResponse(JSONResponse):
 app = FastAPI(title="Oren Cohen Group — Lead Bot", default_response_class=_UTF8JSONResponse)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://crm.sehel.co.il"],
-    allow_methods=["POST", "GET", "OPTIONS", "DELETE"],
+    allow_origins=["https://crm.sehel.co.il", "https://crm.sehel.co.il/"],
+    allow_methods=["POST", "GET", "OPTIONS", "DELETE", "PUT"],
     allow_headers=["Content-Type"],
 )
 app.include_router(leads_router)
