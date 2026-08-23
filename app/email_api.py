@@ -101,6 +101,7 @@ async def start_email_reengagement(request: Request):
     email = str(data.get("email", "")).strip()
     name = data.get("name") or None
     phone = str(data.get("phone", "") or "").strip()  # מספר טלפון לשליחה לשכל
+    print(f"[EMAIL REENGAGEMENT] email={email} name={name} phone={phone} project={project_name}")
     project_name = data.get("project_name", "") or ""
     agent_email = data.get("agent_email", "") or ""
     custom_subject = data.get("custom_subject") or None
@@ -145,6 +146,9 @@ async def start_email_reengagement(request: Request):
         cur2.execute(f"UPDATE reengagement_sent SET notes={db.PH} WHERE phone={db.PH}", (f"phone:{phone}", f"email:{email}"))
         conn2.commit()
         conn2.close()
+        print(f"[EMAIL PHONE SAVED] email={email} phone={phone}")
+    else:
+        print(f"[EMAIL NO PHONE] email={email} - no phone provided")
 
     convo = Conversation(language="he", project_name=project_name or None)
     if name:
