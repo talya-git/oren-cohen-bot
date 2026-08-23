@@ -515,6 +515,20 @@
         return name.trim().split(/\s+/)[0];
     }
 
+    function extractPhone(lead) {
+        if (lead.phone1) return lead.phone1;
+        if (lead.phone2) return lead.phone2;
+        // חלץ מ-phoneHtml
+        if (lead.phoneHtml) {
+            const div = document.createElement('div');
+            div.innerHTML = lead.phoneHtml;
+            const txt = div.textContent || div.innerText || '';
+            const m = txt.match(/0[5-9]\d{8}/);
+            if (m) return m[0];
+        }
+        return '';
+    }
+
     function normalizePhone(p) {
         p = p.trim().replace(/[\s\-]/g, '');
         if (p.startsWith('05')) return '+972' + p.slice(1);
@@ -700,7 +714,7 @@
             const nameInput = (wlOverlay || document).querySelector(`.wl-name-edit[data-idx="${idx}"]`);
             const fullName = nameInput ? nameInput.value.trim() || lead.name1 || '' : lead.name1 || '';
             const name = firstNameOnly(fullName) || fullName;
-            selectedLeads.push({ name, email: lead.email1 || '', phone: normalizePhone(lead.phone1 || lead.phone2 || ''), project });
+            selectedLeads.push({ name, email: lead.email1 || '', phone: normalizePhone(extractPhone(lead)), project });
         }
 
         if (!selectedLeads.length) { alert('לא נמצאו לידים תקינים'); return; }
