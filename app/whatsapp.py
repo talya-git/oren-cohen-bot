@@ -309,9 +309,9 @@ async def whatsapp_webhook(request: Request):
         if intent_after == "not_relevant":
             lang_check = _detect_language(f"+{phone}", None)
             if lang_check == "he":
-                reply_msg = "נשמח שתשמור אותנו בזיכרון שלך 😊\nאם בעתיד תתעניין בנכס בירושלים — אנחנו תמיד כאן: https://www.orencohengroup.com/he/"
+                reply_msg = "נשמח להישמר בזיכרון שלך 😊\nאם בעתיד תתעניין בנכס בירושלים , אנחנו תמיד כאן: https://www.orencohengroup.com/he/"
             else:
-                reply_msg = "We'd love to stay in your memory 😊\nIf you ever consider a property in Jerusalem — we're always here: https://www.orencohengroup.com/"
+                reply_msg = "We'd love to be remembered by you 😊\nIf you ever consider a property in Jerusalem — we're always here: https://www.orencohengroup.com/"
             send_message(f"+{phone}", reply_msg)
             record = _db.get_reengagement_record(f"+{phone}")
             dry = not (sehel.PROJECT_ID or sehel.WEBHOOK_URL)
@@ -360,9 +360,9 @@ async def whatsapp_webhook(request: Request):
             else:
                 lang_check = _detect_language(f"+{phone}", None)
                 if lang_check == "he":
-                    reply_msg = "נשמח שתשמור אותנו בזיכרון שלך 😊\nאם בעתיד תתעניין בנכס בירושלים — אנחנו תמיד כאן: https://www.orencohengroup.com/he/"
+                    reply_msg = "נשמח להישמר בזיכרון שלך 😊\nאם בעתיד תתעניין בנכס בירושלים , אנחנו תמיד כאן: https://www.orencohengroup.com/he/"
                 else:
-                    reply_msg = "We'd love to stay in your memory 😊\nIf you ever consider a property in Jerusalem in the future — we're always here: https://www.orencohengroup.com/"
+                    reply_msg = "We'd love to be remembered by you 😊\nIf you ever consider a property in Jerusalem in the future, we're always here: https://www.orencohengroup.com/"
             send_message(f"+{phone}", reply_msg)
             _db.update_reengagement_replied(f"+{phone}", True, f"לקוח: {text}\nדניאל: {reply_msg}")
             dry = not (sehel.PROJECT_ID or sehel.WEBHOOK_URL)

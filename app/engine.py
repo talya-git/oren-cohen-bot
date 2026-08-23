@@ -142,9 +142,9 @@ class Conversation:
         ]
         if any(p in user_message.lower() for p in not_interested):
             if self._language == "en":
-                closing = "We'd love to stay in your memory 😊\nIf you ever consider a property in Jerusalem in the future — we're always here: https://www.orencohengroup.com/"
+                closing = "We'd love to be remembered by you 😊\nIf you ever consider a property in Jerusalem in the future, we're always here: https://www.orencohengroup.com/"
             else:
-                closing = "נשמח שתשמור אותנו בזיכרון שלך 😊\nאם בעתיד תתעניין בנכס בירושלים — אנחנו תמיד כאן: https://www.orencohengroup.com/he/"
+                closing = "נשמח להישמר בזיכרון שלך 😊\nאם בעתיד תתעניין בנכס בירושלים , אנחנו תמיד כאן: https://www.orencohengroup.com/he/"
             turn = BotTurn(
                 reply=closing, stage="handoff",
                 extracted=ExtractedParams(), handoff_to_human=True, notes="not_interested"
