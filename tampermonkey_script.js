@@ -646,7 +646,7 @@
         }
 
         tbody.innerHTML = filtered.map((lead, idx) => {
-            const phone = normalizePhone(lead.phone1);
+            const phone = normalizePhone(extractPhone(lead));
             const name = lead.name1 || '—';
             const div = document.createElement('div');
             div.innerHTML = lead.projectNameHtml || '';
