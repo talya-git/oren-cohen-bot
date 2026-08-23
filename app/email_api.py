@@ -137,15 +137,10 @@ async def start_email_reengagement(request: Request):
         phone=f"email:{email}",
         client_name=name or "",
         agent_email=agent_email,
-        transcript=f"Daniel: {greeting}"
+        transcript=f"Daniel: {greeting}",
+        notes=f"phone:{phone}" if phone else ""
     )
-    # שמור טלפון ב-notes אם סופק — לשליחה לשכל
     if phone:
-        conn2 = db.get_db()
-        cur2 = conn2.cursor()
-        cur2.execute(f"UPDATE reengagement_sent SET notes={db.PH} WHERE phone={db.PH}", (f"phone:{phone}", f"email:{email}"))
-        conn2.commit()
-        conn2.close()
         print(f"[EMAIL PHONE SAVED] email={email} phone={phone}")
     else:
         print(f"[EMAIL NO PHONE] email={email} - no phone provided")
