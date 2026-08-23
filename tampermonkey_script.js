@@ -700,7 +700,7 @@
             const nameInput = (wlOverlay || document).querySelector(`.wl-name-edit[data-idx="${idx}"]`);
             const fullName = nameInput ? nameInput.value.trim() || lead.name1 || '' : lead.name1 || '';
             const name = firstNameOnly(fullName) || fullName;
-            selectedLeads.push({ name, email: lead.email1 || '', phone: normalizePhone(lead.phone1), project });
+            selectedLeads.push({ name, email: lead.email1 || '', phone: normalizePhone(lead.phone1 || lead.phone2 || ''), project });
         }
 
         if (!selectedLeads.length) { alert('לא נמצאו לידים תקינים'); return; }
