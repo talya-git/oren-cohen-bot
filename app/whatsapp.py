@@ -455,7 +455,7 @@ async def whatsapp_webhook(request: Request):
 
     if turn.handoff_to_human:
         # רלוונטי = כל handoff שאינו תגובה שלילית
-        negative_in_transcript = any(w in transcript_text for w in ["נשמח שתשמור", "we'd love to stay", "לא רלוונט", "לא מעוניין"])
+        negative_in_transcript = any(w in transcript_text.lower() for w in ["נשמח שתשמור", "we'd love to stay", "לא רלוונט", "לא מעוניין", "not relevant", "not interested", "no thanks"])
         is_relevant = not negative_in_transcript
         if is_relevant:
             _db.mark_reengagement_handoff(f"+{phone}")

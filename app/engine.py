@@ -243,6 +243,7 @@ class Conversation:
             text = _re2.sub(r'^\d+\.\s+', '', text, flags=_re2.MULTILINE)  # numbered lists
             text = _re2.sub(r'`{1,3}[^`]*`{1,3}', '', text)  # code
             text = _re2.sub(r'_{1,2}([^_]+)_{1,2}', r'\1', text)  # underline
+            text = text.replace('\u2014', ',').replace('\u2013', ',')  # em/en dash
             text = text.strip()
             return text
 
