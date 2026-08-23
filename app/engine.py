@@ -55,7 +55,7 @@ class Conversation:
         system += (
             "\n\n## זרימת שיחת המשך (חשוב!)\n"
             "זוהי שיחת המשך עם ליד קיים. אם הלקוח עונה חיובי — ענה מיד: 'עד עכשיו שוחחת עם הסוכן הווירטואלי שלנו, מעכשיו אני מעביר אותך לאחד הסוכנים הבכירים שלנו שיוכל לספק לך את כל הפרטים על הפרויקטים הרלוונטיים. ניצור איתך קשר בהקדם!' → handoff_to_human=true\n"
-            "אם הלקוח עונה שלילי — ענה: 'נשמח להישמר בזיכרונך 😊 אם בעתיד תתעניין בנכס בירושלים, אנחנו תמיד כאן: https://www.orencohengroup.com/he/' → handoff_to_human=true\n"
+            "אם הלקוח עונה שלילי — ענה: 'נשמח להישמר בזיכרונך 😊 אם בעתיד זה יהיה רלוונטי, אנחנו תמיד כאן: https://www.orencohengroup.com/he/' → handoff_to_human=true\n"
             "לעולם לא תשאל שאלות. לעולם לא תאמר 'שלום וברכה'.\n"
         )
         convo.messages.append({"role": "system", "content": system})
@@ -142,9 +142,9 @@ class Conversation:
         ]
         if any(p in user_message.lower() for p in not_interested):
             if self._language == "en":
-                closing = "We'd love to be remembered by you 😊\nIf you ever consider a property in Jerusalem in the future, we're always here: https://www.orencohengroup.com/"
+                closing = "We'd love to stay in touch 😊\nIf this ever becomes relevant in the future, we're always here: https://www.orencohengroup.com/"
             else:
-                closing = "נשמח להישמר בזיכרון שלך 😊\nאם בעתיד תתעניין בנכס בירושלים , אנחנו תמיד כאן: https://www.orencohengroup.com/he/"
+                closing = "נשמח להישאר בקשר 😊\nאם בעתיד תתעניין בנכס בירושלים , אנחנו תמיד כאן: https://www.orencohengroup.com/he/"
             turn = BotTurn(
                 reply=closing, stage="handoff",
                 extracted=ExtractedParams(), handoff_to_human=True, notes="not_interested"
