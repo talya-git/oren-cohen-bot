@@ -119,6 +119,8 @@ async def start_email_reengagement(request: Request):
     is_hebrew = name and any('\u05d0' <= c <= '\u05ea' for c in name)
     lang = "he" if (is_hebrew or not name) else "en"
     greeting = custom_message or _build_greeting(name)
+    if custom_message and name:
+        greeting = greeting.replace("{name}", name).replace("{{name}}", name)
     subject = custom_subject or ("הזדמנויות נדל\"ן בירושלים — אורן כהן גרופ" if lang == "he" else "Real Estate Opportunities in Jerusalem — Oren Cohen Group")
     html = greeting.replace("\n", "<br>")
 

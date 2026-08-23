@@ -110,7 +110,7 @@ def poll_inbox():
         # חיתוך quote - קודם כל דבר אחר
         cut_markers = ["מאת:", "From:", "-----Original", "________________________________",
                        "wrote:", "כתב:", "נשלח:", "Sent:",
-                       "orencohengroup2020@gmail.com", "daniel@orencohengroup.com",
+                       "daniel@orencohengroup.com",
                        "ocgdaniel@gmail.com", "Daniel | Oren Cohen Group",
                        "On ", "> "]
         earliest = len(text)
