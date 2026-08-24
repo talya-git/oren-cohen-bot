@@ -74,21 +74,21 @@ def _send_agent_alert(agent_email: str, client_name: str, phone_or_email: str, t
 def _build_greeting(name: str | None) -> str:
     is_hebrew = name and any('\u05d0' <= c <= '\u05ea' for c in name)
     if is_hebrew or not name:
-        greeting = f"היי{' ' + name if name else ''},\n\n"
+        greeting = f"שלום{' ' + name if name else ''},\n\n"
         greeting += (
-            "כאן דניאל מאורן כהן גרופ בירושלים.\n"
-            "אני פונה אליך בהמשך לפנייתך למשרדנו בעבר.\n\n"
-            "בימים אלו אנחנו מרכזים עבור לקוחותינו מספר הזדמנויות נדל\"ן מיוחדות בפרויקטים עתידיים בירושלים.\n\n"
-            "האם הנושא עדיין רלוונטי עבורך?\n\n"
+            "מה שלומך? כאן דניאל מאורן כהן גרופ.\n\n"
+            "בהמשך לפנייתך אלינו בעבר, רציתי לעדכן אותך שאנחנו עומדים לצאת בקרוב לשיווק עם מספר פרויקטים ייחודיים באזורים המבוקשים ביותר בירושלים.\n\n"
+            "מכיוון שחיפשת בעבר נכס בירושלים, חשבתי שיהיה נכון לתת לך הצצה מוקדמת ולעדכן אותך לפני שאנחנו פותחים אותם לשיווק הרחב.\n\n"
+            "האם זה יכול לעניין אותך?\n\n"
             "בברכה,\nדניאל\nאורן כהן גרופ"
         )
     else:
         greeting = f"Hi {name},\n\n"
         greeting += (
-            "This is Daniel from Oren Cohen Group in Jerusalem.\n"
-            "I'm reaching out as a follow-up to your previous inquiry with our office.\n\n"
-            "We are currently curating exclusive real estate opportunities in upcoming Jerusalem projects for our clients.\n\n"
-            "Is this still of interest to you?\n\n"
+            "How are you? This is Daniel from Oren Cohen Group.\n\n"
+            "Following your previous inquiry with our office, I wanted to let you know that we're about to launch several unique new projects in some of Jerusalem's most sought-after locations.\n\n"
+            "Since you were looking in the past, I thought it would be right to reach out to you first, before we introduce them to the wider market.\n\n"
+            "Would this be of interest to you?\n\n"
             "Best regards,\nDaniel\nOren Cohen Group"
         )
     return greeting
@@ -123,7 +123,7 @@ async def start_email_reengagement(request: Request):
     greeting = custom_message or _build_greeting(name)
     if custom_message and name:
         greeting = greeting.replace("{name}", name).replace("{{name}}", name)
-    subject = custom_subject or ("הזדמנויות נדל\"ן בירושלים — אורן כהן גרופ" if lang == "he" else "Real Estate Opportunities in Jerusalem — Oren Cohen Group")
+    subject = custom_subject or ("הזדמנויות נדל\"ן בירושלים — אורן כהן גרופ" if lang == "he" else "Real Estate Opportunities in Jerusalem")
     html = greeting.replace("\n", "<br>")
 
     try:
