@@ -108,7 +108,7 @@ footer{background:#1e293b;text-align:center;padding:28px;color:#64748b;font-size
 <div class="card"><h3>🔍 סינון לפי סוכן</h3><p>כל סוכן רואה רק את הלקוחות שלו. מנהל רואה את כולם.</p></div>
 <div class="card"><h3>📊 סטטיסטיקות</h3><p>כמה נשלחו, כמה ענו, כמה הועברו — מספרים בזמן אמת בראש הדף.</p></div>
 </div>
-<div class="url">🔗 כתובת הדשבורד: https://[הדומיין שלכם]/conversations</div>
+<div class="url">🔗 כתובת הדשבורד: https://oren-cohen-bot.onrender.com/conversations</div>
 <div class="alert-g">💡 הדשבורד מתעדכן אוטומטית. אין צורך לרענן — כל תגובה חדשה מופיעה מיד.</div></div>
 <div class="section" id="calendar"><div class="section-title">📅 לוח פגישות</div>
 <div class="section-sub">כל סוכן מנהל את הפגישות שלו — פרונטלי וזום</div>
@@ -118,13 +118,16 @@ footer{background:#1e293b;text-align:center;padding:28px;color:#64748b;font-size
 <div class="step"><div class="num">3</div><div><h4>בדיקת התנגשויות</h4><p>במחלקת פרויקטים — הבוט בודק אוטומטית אם יש פגישה באותה שעה ומציג התראה.</p></div></div>
 <div class="step"><div class="num">4</div><div><h4>עריכה ומחיקה</h4><p>כל פגישה ניתנת לעריכה ומחיקה. מנהל רואה את כל הפגישות של כל הסוכנים.</p></div></div>
 </div>
-<div class="url">🔗 כתובת לוח הפגישות: https://[הדומיין שלכם]/calendar</div></div><div class="section" id="sehel"><div class="section-title">🔗 אינטגרציה עם שכל CRM</div>
+<div class="url">🔗 כתובת לוח הפגישות: https://oren-cohen-bot.onrender.com/calendar</div></div><div class="section" id="sehel"><div class="section-title">🔗 אינטגרציה עם שכל CRM</div>
 <div class="section-sub">כל שיחה שמסתיימת — נשמרת אוטומטית בשכל</div>
 <div class="grid">
 <div class="card"><h3>📝 הערה אוטומטית</h3><p>בסיום כל שיחה — הבוט מוסיף הערה לכרטיס הלקוח בשכל עם תמליל מלא, סטטוס ותאריך.</p></div>
 <div class="card"><h3>🏷️ תגיות אוטומטיות</h3><p>כל ליד מקבל תגיות: ליד חם / ליד בינוני / ליד קר. לידים שלא ענו מקבלים תגית "אין מענה".</p></div>
 <div class="card"><h3>👤 שיוך לסוכן</h3><p>הליד משויך אוטומטית לסוכן הנכון לפי המחלקה — פרויקטים לאהרון, יד 2 לבועז, אנגלית לליסה.</p></div>
-<div class="card"><h3>⚠️ לידים תקועים</h3><p>אם לקוח ענה אבל השיחה לא הסתיימה תוך שעתיים — הבוט שולח את הליד לשכל אוטומטית.</p></div>
+<div class="card"><h3>🚨 התראת כפילות</h3><p>אם ליד כבר נשלח בתוך 6 חודשים — התוסף מתריע ולא שולח שנית. אחרי 6 חודשים אפשר לשלוח מחדש.</p></div>
+<div class="card"><h3>🏷️ תגית תאריך שליחה</h3><p>כל ליד שנשלח מקבל תגית בשכל עם תאריך השליחה המדויק. כך תוכלו לראות מתי בדיוק פנה אליו הבוט.</p></div>
+<div class="card"><h3>🔄 מניעת כפילות בתצוגה</h3><p>התוסף ממזג כרטיסים כפולים בשכל ומציג אותם כרשומה אחת בלבד. לא תראו את אותו ליד פעמיים.</p></div>
+<div class="card"><h3>🚫 סינון מקצוענים</h3><p>התוסף מזהה אוטומטית עורכי דין, ספקים ומתווכים — גם לפי מידע קיים בשכל וגם לפי בדיקה ברשת. אלו לא ישלחו לבוט.</p></div>
 </div>
 <div class="alert-g">✅ הבוט לעולם לא יוצר כרטיס כפול — הוא מזהה לפי מספר טלפון ומוסיף הערה לכרטיס הקיים.</div></div>
 <div class="section" id="reminders"><div class="section-title">⏰ תזכורות ודוחות אוטומטיים</div>
@@ -150,12 +153,11 @@ footer{background:#1e293b;text-align:center;padding:28px;color:#64748b;font-size
 <div class="tst"><p>"שלחתי 80 לקוחות ישנים. 23 ענו חיובית. הבוט ניהל את כולם בו-זמנית בלי שאני צריך לעשות כלום. קיבלתי 23 התראות מייל עם תמליל מוכן."</p><div class="auth">— סוכן מחלקת יד 2</div></div>
 <div class="tst"><p>"לקוח שלא ענה לי 3 שנים — ענה לבוט תוך 10 דקות. כנראה שהודעת וואטסאפ מ'דניאל' נראית אחרת מהתקשרות של סוכן."</p><div class="auth">— סוכן בכיר</div></div>
 </div></div>
-<div class="section"><div class="section-title">🚀 איך מתחילים — 4 צעדים</div>
+<div class="section"><div class="section-title">🚀 איך מתחילים — 3 צעדים</div>
 <div class="steps">
-<div class="step"><div class="num">1</div><div><h4>הכינו רשימת לקוחות</h4><p>Excel עם עמודות: שם, טלפון, שם פרויקט. טלפון בפורמט: 05XXXXXXXX</p></div></div>
-<div class="step"><div class="num">2</div><div><h4>העלו את הרשימה</h4><p>דרך ממשק הסוכן — לחצו "שלח קמפיין" והעלו את הקובץ. הבוט מתחיל לשלוח אוטומטית.</p></div></div>
-<div class="step"><div class="num">3</div><div><h4>עקבו בדשבורד</h4><p>פתחו את הדשבורד ועקבו בזמן אמת מי ענה ומי הועבר אליכם.</p></div></div>
-<div class="step"><div class="num">4</div><div><h4>חזרו ללקוחות שהועברו</h4><p>כל לקוח שהועבר — מקבלים מייל עם תמליל. התקשרו אליו בהקדם האפשרי.</p></div></div>
+<div class="step"><div class="num">1</div><div><h4>עדכנו בשכל נכון ללא שגיאות</h4><p>ודאו שכל הלידים שלכם מעודכנים נכון בשכל — שם, טלפון ופרויקט. זה הבסיס לכל השאר.</p></div></div>
+<div class="step"><div class="num">2</div><div><h4>פתחו את כפתור התוסף "הערת לידים"</h4><p>בשכל, פתחו את התוסף, בחרו את הלידים שלכם ושלחו. הבוט מתחיל לשלוח אוטומטית לכל אחד.</p></div></div>
+<div class="step"><div class="num">3</div><div><h4>עקבו בדשבורד וחזרו ללקוחות</h4><p>פתחו את הדשבורד: <a href="https://oren-cohen-bot.onrender.com/conversations" style="color:#60a5fa">oren-cohen-bot.onrender.com/conversations</a> — עקבו מי ענה ומי הועבר אליכם. כל לקוח שהועבר — התקשרו אליו בהקדם.</p></div></div>
 </div></div>
 </div>
 <footer><p>🤖 בוט דניאל | אורן כהן גרופ | מסמך הכשרה פנימי</p><p style="margin-top:8px">לשאלות — פנו לטליה</p></footer>
