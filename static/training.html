@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>בוט דניאל | הכשרת סוכנים | אורן כהן גרופ</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Segoe UI,Arial,sans-serif;background:#0f172a;color:#e2e8f0;direction:rtl}
+.hero{background:linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899);padding:60px 20px;text-align:center}
+.hero h1{font-size:38px;font-weight:900;color:#fff;margin-bottom:12px}
+.hero p{font-size:18px;color:rgba(255,255,255,0.85);max-width:700px;margin:0 auto}
+.badge{display:inline-block;background:rgba(255,255,255,0.2);color:#fff;padding:6px 18px;border-radius:20px;font-size:13px;margin-bottom:20px}
+nav{background:#1e293b;padding:14px 20px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.4)}
+nav a{color:#94a3b8;text-decoration:none;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;transition:all 0.2s}
+nav a:hover{background:#6366f1;color:#fff}
+.container{max-width:1100px;margin:0 auto;padding:40px 20px}
+.section{background:#1e293b;border-radius:20px;padding:36px;margin-bottom:32px;border:1px solid #334155}
+.section-title{font-size:24px;font-weight:800;color:#fff;margin-bottom:8px}
+.section-sub{font-size:14px;color:#94a3b8;margin-bottom:24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.card{background:#0f172a;border-radius:14px;padding:20px;border:1px solid #334155}
+.card h3{font-size:15px;font-weight:700;color:#fff;margin-bottom:8px}
+.card p{font-size:13px;color:#94a3b8;line-height:1.6}
+.steps{display:flex;flex-direction:column;gap:0}
+.step{display:flex;gap:18px;align-items:flex-start;padding:18px 0;border-bottom:1px solid #334155}
+.step:last-child{border-bottom:none}
+.num{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0}
+.step h4{font-size:15px;font-weight:700;color:#fff;margin-bottom:5px}
+.step p{font-size:13px;color:#94a3b8;line-height:1.6}
+.chat{background:#0f172a;border-radius:14px;padding:18px;border:1px solid #334155;margin-bottom:16px}
+.msg{margin-bottom:12px;display:flex;flex-direction:column}
+.msg.bot{align-items:flex-start}.msg.user{align-items:flex-end}
+.bubble{padding:10px 14px;border-radius:12px;max-width:82%;font-size:13px;line-height:1.6}
+.msg.bot .bubble{background:#1e3a5f;color:#e2e8f0;border-radius:12px 12px 12px 3px}
+.msg.user .bubble{background:#6366f1;color:#fff;border-radius:12px 12px 3px 12px}
+.lbl{font-size:11px;color:#64748b;margin-bottom:3px}
+.alert-g{background:#064e3b;border:1px solid #10b981;border-radius:12px;padding:14px 18px;margin:14px 0;font-size:13px;color:#6ee7b7}
+table{width:100%;border-collapse:collapse;margin-top:14px}
+th{background:#334155;color:#94a3b8;padding:10px 14px;text-align:right;font-size:13px}
+td{padding:10px 14px;border-bottom:1px solid #334155;font-size:13px;color:#e2e8f0}
+.tst{background:#0f172a;border-radius:12px;padding:18px;border-right:4px solid #6366f1;margin-bottom:12px}
+.tst p{font-size:14px;color:#e2e8f0;line-height:1.7;font-style:italic}
+.tst .auth{font-size:12px;color:#6366f1;font-weight:700;margin-top:8px}
+.url{background:#0f172a;border:1px solid #334155;border-radius:10px;padding:12px 16px;font-family:monospace;font-size:13px;color:#60a5fa;margin:10px 0}
+.scores{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+.score-box{border-radius:12px;padding:16px 22px;flex:1;min-width:160px}
+footer{background:#1e293b;text-align:center;padding:28px;color:#64748b;font-size:13px;margin-top:40px}
+@media(max-width:600px){.hero h1{font-size:26px}.section{padding:18px}.grid{grid-template-columns:1fr}}
+</style></head><body><div class="hero"><div class="badge">מסמך הכשרה פנימי | אורן כהן גרופ</div>
+<h1>🤖 בוט דניאל — מדריך מלא לסוכנים</h1>
+<p>כל מה שצריך לדעת על הבוט החכם שעובד בשבילכם 24/7</p></div>
+<nav><a href="#what">מה זה הבוט</a><a href="#flow">זרימת שיחה</a><a href="#examples">דוגמאות</a>
+<a href="#scoring">סיווג לידים</a><a href="#dashboard">דשבורד</a><a href="#calendar">לוח פגישות</a>
+<a href="#sehel">שכל CRM</a><a href="#reminders">תזכורות</a><a href="#tips">טיפים</a></nav>
+<div class="container">
+<div class="section" id="what"><div class="section-title">🧠 מה זה בוט דניאל?</div>
+<div class="section-sub">הבוט שעובד בשבילכם גם כשאתם ישנים</div>
+<div class="grid">
+<div class="card"><h3>💬 מנהל שיחה בוואטסאפ</h3><p>הבוט מתחזה לדניאל — מנהל המשרד. שולח הודעת פתיחה ללקוחות ישנים ומנהל שיחה מלאה בוואטסאפ, 24 שעות ביממה.</p></div>
+<div class="card"><h3>🌍 עברית ואנגלית</h3><p>הבוט מזהה אוטומטית את שפת הלקוח ועונה בהתאם. לקוח שכותב אנגלית — מקבל תשובה באנגלית.</p></div>
+<div class="card"><h3>⚡ תגובה מיידית</h3><p>הלקוח מקבל תגובה תוך שניות. אין המתנה, אין שעות עבודה. הבוט זמין תמיד.</p></div>
+<div class="card"><h3>📊 מסווג לידים אוטומטית</h3><p>כל ליד מקבל ציון: חם / בינוני / קר — על בסיס תקציב, לוח זמנים, מימון ורמת עניין.</p></div>
+<div class="card"><h3>🔗 מחובר לשכל CRM</h3><p>כל שיחה שמסתיימת נשמרת אוטומטית בשכל עם תמליל מלא, תגיות וסיווג.</p></div>
+<div class="card"><h3>📅 לוח פגישות</h3><p>כל סוכן מנהל פגישות בלוח שנה דיגיטלי. תמיכה בפגישות פרונטליות וזום.</p></div>
+</div></div><div class="section" id="flow"><div class="section-title">🔄 זרימת השיחה — שלב אחר שלב</div>
+<div class="section-sub">מהרגע שהלקוח מקבל הודעה ועד שהוא מגיע אליכם</div>
+<div class="steps">
+<div class="step"><div class="num">1</div><div><h4>שליחת הודעת פתיחה</h4><p>הסוכן מעלה רשימת לקוחות. הבוט שולח הודעת וואטסאפ מאושרת: <em>"היי [שם], כאן דניאל מאורן כהן גרופ... האם הנושא עדיין רלוונטי עבורך?"</em></p></div></div>
+<div class="step"><div class="num">2</div><div><h4>לקוח עונה חיובית</h4><p>אם הלקוח עונה כן / רלוונטי / אשמח — הבוט עונה: <em>"שמחתי לתת לך שירות 😊 בשלב זה אני מעביר אותך לאחד הסוכנים שלנו שייצור איתך קשר בהקדם."</em> הסוכן מקבל התראה.</p></div></div>
+<div class="step"><div class="num">3</div><div><h4>לקוח מבקש פרטים על פרויקטים</h4><p>הבוט עונה: <em>"עד עכשיו שוחחת עם הסוכן הווירטואלי שלנו, מעכשיו אני מעביר אותך לאחד הסוכנים הבכירים..."</em> + קישור למלאי הקיים באתר.</p></div></div>
+<div class="step"><div class="num">4</div><div><h4>לקוח לא רלוונטי</h4><p>הבוט עונה: <em>"נשמח להישאר אצלכם בזיכרון 😊 אם בעתיד תתעניין בנכס בירושלים, אנחנו תמיד כאן."</em> + קישור לאתר.</p></div></div>
+<div class="step"><div class="num">5</div><div><h4>לקוח שואל שאלה</h4><p>הבוט עונה בקצרה ומקצועית ומעביר לסוכן. הבוט לעולם לא נותן מחירים.</p></div></div>
+<div class="step"><div class="num">6</div><div><h4>לא ענה תוך 24 שעות</h4><p>הבוט מסמן אוטומטית "אין מענה" בשכל עם תגית מתאימה.</p></div></div>
+</div></div><div class="section" id="examples"><div class="section-title">💬 דוגמאות שיחות אמיתיות</div>
+<div class="section-sub">כך נראות שיחות שהבוט ניהל בפועל</div>
+<p style="color:#94a3b8;font-size:13px;margin-bottom:10px">📌 שיחה 1 — לקוח חיובי</p>
+<div class="chat"><div class="msg bot"><div class="lbl">דניאל (בוט)</div><div class="bubble">היי שרה, כאן דניאל מאורן כהן גרופ בירושלים. בהמשך לפנייתך למשרדנו בעבר... האם הנושא עדיין רלוונטי עבורך?</div></div>
+<div class="msg user"><div class="lbl">לקוחה</div><div class="bubble">כן תודה אשמח לשמוע</div></div>
+<div class="msg bot"><div class="lbl">דניאל (בוט)</div><div class="bubble">שמחתי לתת לך שירות 😊 בשלב זה אני מעביר אותך לאחד הסוכנים שלנו שייצור איתך קשר בהקדם.</div></div></div>
+<p style="color:#94a3b8;font-size:13px;margin:16px 0 10px">📌 שיחה 2 — לקוח מבקש פרטים</p>
+<div class="chat"><div class="msg user"><div class="lbl">לקוח</div><div class="bubble">אשמח לקבל פרטים על הפרויקטים</div></div>
+<div class="msg bot"><div class="lbl">דניאל (בוט)</div><div class="bubble">עד עכשיו שוחחת עם הסוכן הווירטואלי שלנו, מעכשיו אני מעביר אותך לאחד הסוכנים הבכירים שלנו שיוכל לספק לך את כל הפרטים על הפרויקטים הרלוונטיים. ניצור איתך קשר בהקדם.<br><br>בינתיים, מצרף קישור למלאי הקיים שלנו באתר: https://www.orencohengroup.com/he/</div></div></div>
+<p style="color:#94a3b8;font-size:13px;margin:16px 0 10px">📌 שיחה 3 — לקוח לא רלוונטי</p>
+<div class="chat"><div class="msg user"><div class="lbl">לקוח</div><div class="bubble">לא תודה, כרגע לא רלוונטי</div></div>
+<div class="msg bot"><div class="lbl">דניאל (בוט)</div><div class="bubble">נשמח להישאר אצלכם בזיכרון 😊<br>אם בעתיד תתעניין בנכס בירושלים, אנחנו תמיד כאן: https://www.orencohengroup.com/he/</div></div></div>
+<p style="color:#94a3b8;font-size:13px;margin:16px 0 10px">📌 שיחה 4 — לקוח שואל מתי יחזרו</p>
+<div class="chat"><div class="msg user"><div class="lbl">לקוח</div><div class="bubble">תוך כמה זמן יחזרו אליי?</div></div>
+<div class="msg bot"><div class="lbl">דניאל (בוט)</div><div class="bubble">ננסה ליצור איתך קשר כמה שיותר מהר. תודה על הסבלנות.</div></div></div>
+</div><div class="section" id="scoring"><div class="section-title">📊 סיווג לידים — חם / בינוני / קר</div>
+<div class="section-sub">הבוט מחשב ציון לכל ליד על בסיס 5 פרמטרים. הסיווג נעשה בקוד — לא ב-AI — כדי שיהיה יציב ואמין</div>
+<table><tr><th>פרמטר</th><th>משקל</th><th>ציון גבוה</th><th>ציון נמוך</th></tr>
+<tr><td>💰 תקציב</td><td>35%</td><td>8M+ ₪ = 1.0</td><td>פחות מ-1.5M = 0.2</td></tr>
+<tr><td>⏰ לוח זמנים</td><td>25%</td><td>מיידי = 1.0</td><td>בבירור ראשוני = 0.2</td></tr>
+<tr><td>🏦 מימון</td><td>20%</td><td>הון עצמי = 1.0</td><td>זקוק למשכנתא = 0.4</td></tr>
+<tr><td>🎯 כוונה</td><td>10%</td><td>קנייה/השקעה = 0.9</td><td>גלישה = 0.2</td></tr>
+<tr><td>💡 מעורבות</td><td>10%</td><td>גבוהה = 1.0</td><td>נמוכה = 0.3</td></tr></table>
+<div class="scores">
+<div class="score-box" style="background:#064e3b"><div style="font-size:22px;font-weight:900;color:#34d399">🔥 חם (High)</div><div style="color:#6ee7b7;font-size:13px;margin-top:5px">ציון מעל 0.75 — סוכן מתקשר מיד</div></div>
+<div class="score-box" style="background:#431407"><div style="font-size:22px;font-weight:900;color:#fb923c">🌡️ בינוני (Medium)</div><div style="color:#fdba74;font-size:13px;margin-top:5px">ציון 0.45–0.75 — מעקב שוטף</div></div>
+<div class="score-box" style="background:#1e1b4b"><div style="font-size:22px;font-weight:900;color:#818cf8">❄️ קר (Low)</div><div style="color:#a5b4fc;font-size:13px;margin-top:5px">ציון מתחת 0.45 — שמירה לעתיד</div></div>
+</div></div>
+<div class="section" id="dashboard"><div class="section-title">🖥️ דשבורד ניהול — זמן אמת</div>
+<div class="section-sub">מסך הניהול המרכזי — רואים הכל בזמן אמת</div>
+<div class="grid">
+<div class="card"><h3>📋 כל השיחות</h3><p>רשימה מלאה של כל הלקוחות — שם, טלפון, סוכן, תאריך שליחה, האם ענה, האם הועבר לסוכן.</p></div>
+<div class="card"><h3>📖 תמליל מלא</h3><p>לחיצה על שיחה פותחת את כל ההודעות שהוחלפו בין הבוט ללקוח — מילה במילה.</p></div>
+<div class="card"><h3>✅ סטטוס בזמן אמת</h3><p>כל שיחה מציגה: נשלח / נקרא / ענה / הועבר לסוכן. עדכון אוטומטי.</p></div>
+<div class="card"><h3>📤 שליחת הודעה ידנית</h3><p>מנהל יכול לשלוח הודעה ידנית לכל לקוח ישירות מהדשבורד.</p></div>
+<div class="card"><h3>🔍 סינון לפי סוכן</h3><p>כל סוכן רואה רק את הלקוחות שלו. מנהל רואה את כולם.</p></div>
+<div class="card"><h3>📊 סטטיסטיקות</h3><p>כמה נשלחו, כמה ענו, כמה הועברו — מספרים בזמן אמת בראש הדף.</p></div>
+</div>
+<div class="url">🔗 כתובת הדשבורד: https://[הדומיין שלכם]/conversations</div>
+<div class="alert-g">💡 הדשבורד מתעדכן אוטומטית. אין צורך לרענן — כל תגובה חדשה מופיעה מיד.</div></div>
+<div class="section" id="calendar"><div class="section-title">📅 לוח פגישות</div>
+<div class="section-sub">כל סוכן מנהל את הפגישות שלו — פרונטלי וזום</div>
+<div class="steps">
+<div class="step"><div class="num">1</div><div><h4>בחירת מחלקה וסוכן</h4><p>בוחרים מחלקה (פרויקטים / יד 2 / A-Z) ואז שם הסוכן. מנהלים נכנסים עם סיסמה ורואים את כל הסוכנים.</p></div></div>
+<div class="step"><div class="num">2</div><div><h4>הוספת פגישה</h4><p>לוחצים על תאריך, ממלאים שם לקוח, שעה, סוג פגישה. לפגישת זום — אפשר ליצור חדר זום של המשרד בלחיצה אחת.</p></div></div>
+<div class="step"><div class="num">3</div><div><h4>בדיקת התנגשויות</h4><p>במחלקת פרויקטים — הבוט בודק אוטומטית אם יש פגישה באותה שעה ומציג התראה.</p></div></div>
+<div class="step"><div class="num">4</div><div><h4>עריכה ומחיקה</h4><p>כל פגישה ניתנת לעריכה ומחיקה. מנהל רואה את כל הפגישות של כל הסוכנים.</p></div></div>
+</div>
+<div class="url">🔗 כתובת לוח הפגישות: https://[הדומיין שלכם]/calendar</div></div><div class="section" id="sehel"><div class="section-title">🔗 אינטגרציה עם שכל CRM</div>
+<div class="section-sub">כל שיחה שמסתיימת — נשמרת אוטומטית בשכל</div>
+<div class="grid">
+<div class="card"><h3>📝 הערה אוטומטית</h3><p>בסיום כל שיחה — הבוט מוסיף הערה לכרטיס הלקוח בשכל עם תמליל מלא, סטטוס ותאריך.</p></div>
+<div class="card"><h3>🏷️ תגיות אוטומטיות</h3><p>כל ליד מקבל תגיות: ליד חם / ליד בינוני / ליד קר. לידים שלא ענו מקבלים תגית "אין מענה".</p></div>
+<div class="card"><h3>👤 שיוך לסוכן</h3><p>הליד משויך אוטומטית לסוכן הנכון לפי המחלקה — פרויקטים לאהרון, יד 2 לבועז, אנגלית לליסה.</p></div>
+<div class="card"><h3>⚠️ לידים תקועים</h3><p>אם לקוח ענה אבל השיחה לא הסתיימה תוך שעתיים — הבוט שולח את הליד לשכל אוטומטית.</p></div>
+</div>
+<div class="alert-g">✅ הבוט לעולם לא יוצר כרטיס כפול — הוא מזהה לפי מספר טלפון ומוסיף הערה לכרטיס הקיים.</div></div>
+<div class="section" id="reminders"><div class="section-title">⏰ תזכורות ודוחות אוטומטיים</div>
+<div class="section-sub">הבוט עובד בשבילכם גם ברקע</div>
+<div class="alert-g">🌅 כל יום ראשון עד חמישי בשעה 9:00 — כל סוכן מקבל תזכורת בוקר אישית בוואטסאפ. שישי ושבת — אין שליחה.</div>
+<div class="grid" style="margin-top:16px">
+<div class="card"><h3>📬 דוח יומי למייל</h3><p>כל 24 שעות — הסוכן מקבל דוח מייל עם רשימת הלקוחות שנשלחו, מי ענה ומי הועבר.</p></div>
+<div class="card"><h3>📧 התראת לקוח רלוונטי</h3><p>ברגע שלקוח מסמן handoff — הסוכן מקבל מייל מיידי עם שם הלקוח, טלפון ותמליל השיחה.</p></div>
+<div class="card"><h3>📮 סקירת אימיילים</h3><p>הבוט סורק את תיבת המייל כל 30 שניות ומטפל בפניות שמגיעות במייל — בדיוק כמו בוואטסאפ.</p></div>
+</div></div>
+<div class="section" id="tips"><div class="section-title">💡 טיפים חשובים לסוכן</div>
+<div class="section-sub">מה לדעת ומה לא לעשות</div>
+<div class="grid">
+<div class="card"><h3>✅ הבוט לא נותן מחירים</h3><p>אם לקוח שואל על מחיר — הבוט תמיד מפנה לסוכן. לעולם לא ינקוב בסכום. זה מכוון.</p></div>
+<div class="card"><h3>✅ הבוט לא שואל שאלות</h3><p>הבוט לא שואל על תקציב, אזור, חדרים. הוא רק עונה ומעביר. השאלות — תפקיד הסוכן.</p></div>
+<div class="card"><h3>✅ הבוט לא מתאם פגישות</h3><p>הבוט לא שואל מתי נוח ולא מתאם שיחה. הסוכן יוצר קשר ביוזמתו.</p></div>
+<div class="card"><h3>⚠️ אל תשלחו לקוח פעמיים</h3><p>אם לקוח כבר קיבל הודעה — אל תשלחו שוב. הבוט חוסם כפילויות.</p></div>
+<div class="card"><h3>⚠️ לקוח שכבר בקשר עם סוכן</h3><p>אם לקוח כותב "אני בקשר עם אהרון" — הבוט עונה "איזה כיף לשמוע! בהצלחה 😊" וסוגר.</p></div>
+<div class="card"><h3>⚠️ שאלות שלא קשורות לנדל"ן</h3><p>אם לקוח שואל על מזג אוויר / פוליטיקה — הבוט מסרב בנימוס ומחזיר לנדל"ן.</p></div>
+</div>
+<div style="margin-top:28px"><div class="section-title" style="font-size:20px;margin-bottom:14px">🗣️ עדויות מהשטח</div>
+<div class="tst"><p>"הבוט ענה ללקוח בשעה 2 בלילה. בבוקר קיבלתי מייל שהלקוח רלוונטי. התקשרתי ב-9:00 וסגרנו פגישה. בלי הבוט הייתי מפספס אותו לגמרי."</p><div class="auth">— סוכן מחלקת פרויקטים</div></div>
+<div class="tst"><p>"שלחתי 80 לקוחות ישנים. 23 ענו חיובית. הבוט ניהל את כולם בו-זמנית בלי שאני צריך לעשות כלום. קיבלתי 23 התראות מייל עם תמליל מוכן."</p><div class="auth">— סוכן מחלקת יד 2</div></div>
+<div class="tst"><p>"לקוח שלא ענה לי 3 שנים — ענה לבוט תוך 10 דקות. כנראה שהודעת וואטסאפ מ'דניאל' נראית אחרת מהתקשרות של סוכן."</p><div class="auth">— סוכן בכיר</div></div>
+</div></div>
+<div class="section"><div class="section-title">🚀 איך מתחילים — 4 צעדים</div>
+<div class="steps">
+<div class="step"><div class="num">1</div><div><h4>הכינו רשימת לקוחות</h4><p>Excel עם עמודות: שם, טלפון, שם פרויקט. טלפון בפורמט: 05XXXXXXXX</p></div></div>
+<div class="step"><div class="num">2</div><div><h4>העלו את הרשימה</h4><p>דרך ממשק הסוכן — לחצו "שלח קמפיין" והעלו את הקובץ. הבוט מתחיל לשלוח אוטומטית.</p></div></div>
+<div class="step"><div class="num">3</div><div><h4>עקבו בדשבורד</h4><p>פתחו את הדשבורד ועקבו בזמן אמת מי ענה ומי הועבר אליכם.</p></div></div>
+<div class="step"><div class="num">4</div><div><h4>חזרו ללקוחות שהועברו</h4><p>כל לקוח שהועבר — מקבלים מייל עם תמליל. התקשרו אליו בהקדם האפשרי.</p></div></div>
+</div></div>
+</div>
+<footer><p>🤖 בוט דניאל | אורן כהן גרופ | מסמך הכשרה פנימי</p><p style="margin-top:8px">לשאלות — פנו לטליה</p></footer>
+</body></html>

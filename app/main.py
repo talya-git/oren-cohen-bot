@@ -793,7 +793,7 @@ def calendar_page() -> FileResponse:
 
 @app.get("/הכשרה")
 def training_page() -> FileResponse:
-    return FileResponse(Path(__file__).resolve().parent.parent / "הכשרה1" / "index.html")
+    return FileResponse(STATIC_DIR / "training.html")
 
 
 @app.get("/api/meetings")
