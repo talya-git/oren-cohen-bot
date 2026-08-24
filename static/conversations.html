@@ -159,8 +159,21 @@
 </head>
 <body>
 
+<div id="login-screen" style="min-height:100vh;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);display:flex;align-items:center;justify-content:center;">
+  <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:40px 36px;width:320px;text-align:center;backdrop-filter:blur(10px);color:#fff;">
+    <div style="font-size:48px;margin-bottom:16px">💬</div>
+    <h2 style="font-size:22px;margin-bottom:8px">מרכז שיחות</h2>
+    <p style="font-size:13px;color:#a5b4fc;margin-bottom:24px">אורן כהן גרופ | הזן סיסמא אישית</p>
+    <input type="password" id="login-pw" placeholder="••••••••••" onkeydown="if(event.key==='Enter')doLogin()" style="width:100%;padding:12px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:16px;text-align:center;outline:none;margin-bottom:14px;letter-spacing:2px;" />
+    <button onclick="doLogin()" style="width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:15px;font-weight:bold;cursor:pointer;">כניסה</button>
+    <div id="login-err" style="color:#f87171;font-size:13px;margin-top:10px;display:none">סיסמא שגויה</div>
+  </div>
+</div>
+
+<div id="dashboard" style="display:none">
+
 <div class="header">
-  <h1>🏢 מרכז שיחות — אורן כהן גרופ</h1>
+  <h1>🏢 מרכז שיחות — <span id="agent-name-display"></span></h1>
   <div style="display:flex;align-items:center;gap:16px;">
     <a href="/static/hub.html" style="color:#fff;font-size:13px;text-decoration:none;opacity:0.8;">🏠 דף הבית</a>
     <button id="btn-sound" onclick="toggleSound()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:5px 12px;border-radius:20px;cursor:pointer;font-size:12px;">🔔 צפצוף: כבוי</button>
@@ -230,8 +243,59 @@
 </div>
 
 <script>
-const API = '';
-let allData = [];
+const AGENTS_PASSWORDS = {
+  'יניב':   { pw: 'yaniv2025',  email: 'yaniv@orencohengroup.com' },
+  'משה':    { pw: 'moshe2025',  email: 'moshe@orencohengroup.com' },
+  'מירי':    { pw: 'miri2025',   email: 'miri@orencohengroup.com' },
+  'מיכאל':  { pw: 'michael2025',email: 'michael@orencohengroup.com' },
+  'רבקה':   { pw: 'rivka2025',  email: 'rivka@orencohengroup.com' },
+  'אלחנן':  { pw: 'elchanan25', email: 'elchanan@orencohengroup.com' },
+  'אורן':   { pw: 'oren2025',   email: 'oren@orencohengroup.com' },
+  'אריה':   { pw: 'aryeh2025',  email: 'aryeh@orencohengroup.com' },
+  'בועז':   { pw: 'boaz2025',   email: 'office@orencohengroup.com' },
+  'אהרון':  { pw: 'aaron2025',  email: 'aaron@orencohengroup.com' },
+  'ליסה':   { pw: 'lisa2025',   email: 'lisa@orencohengroup.com' },
+  'דב':     { pw: 'dov2025',    email: 'dovr@orencohengroup.com' },
+  'נעמי':   { pw: 'naomi2025',  email: 'NaomiS@orencohengroup.com' },
+  'יהודית': { pw: 'yehudit25',  email: 'YehuditH@orencohengroup.com' },
+  'מנהל':   { pw: 'admin2025',  email: '' },
+};
+
+let currentAgentFilter = '';
+
+function doLogin() {
+  const pw = document.getElementById('login-pw').value.trim();
+  const found = Object.entries(AGENTS_PASSWORDS).find(([,v]) => v.pw === pw);
+  if (!found) {
+    document.getElementById('login-err').style.display = 'block';
+    document.getElementById('login-pw').value = '';
+    return;
+  }
+  const [name, info] = found;
+  sessionStorage.setItem('conv_auth', pw);
+  sessionStorage.setItem('conv_name', name);
+  sessionStorage.setItem('conv_email', info.email);
+  showDashboard(name, info.email);
+}
+
+function showDashboard(name, email) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  document.getElementById('agent-name-display').textContent = name;
+  if (name !== 'מנהל') {
+    currentAgentFilter = name;
+    document.getElementById('filter-agent').style.display = 'none';
+  }
+  fetchData();
+  setInterval(fetchData, 5000);
+}
+
+const saved = sessionStorage.getItem('conv_auth');
+if (saved) {
+  const found = Object.entries(AGENTS_PASSWORDS).find(([,v]) => v.pw === saved);
+  if (found) showDashboard(found[0], found[1].email);
+}
+</script>
 let openPhone = null;
 let prevReplied = new Set();
 let firstLoad = true;
@@ -336,6 +400,7 @@ function renderTable() {
   const searchF = document.getElementById('filter-search').value.toLowerCase();
 
   let rows = allData.filter(c => {
+    if (currentAgentFilter && c.agent_label !== currentAgentFilter) return false;
     if (agentF && c.agent_label !== agentF) return false;
     if (statusF === 'sent' && (c.replied || c.handoff)) return false;
     if (statusF === 'replied' && !c.replied) return false;
@@ -463,6 +528,9 @@ function changePage(dir) {
 
 fetchData();
 setInterval(fetchData, 5000);
+}
 </script>
+</div><!-- end dashboard -->
+
 </body>
 </html>
