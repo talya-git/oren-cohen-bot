@@ -22,10 +22,11 @@
 
   /* Agent selector */
   .agent-bar {
-    background: #fff; border-radius: 16px; padding: 14px 16px;
-    margin-bottom: 16px; box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+    min-height: calc(100vh - 56px);
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 24px 16px;
   }
-  .agent-bar-label { font-size: 12px; font-weight: 600; color: #94a3b8; margin-bottom: 10px; display: block; }
+  .agent-bar-label { font-size: 13px; font-weight: 700; color: #94a3b8; margin-bottom: 16px; display: block; text-align: center; letter-spacing: 0.05em; text-transform: uppercase; }
   .dept-btns { display: flex; gap: 6px; margin-bottom: 10px; }
   .dept-btn {
     padding: 5px 12px; border-radius: 6px; border: 1.5px solid #e2e8f0;
@@ -34,19 +35,46 @@
   }
   .dept-btn:hover { border-color: #6366f1; color: #6366f1; }
   .dept-btn.active { background: #6366f1; color: #fff; border-color: #6366f1; }
-  .agent-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-  .agent-btn {
-    padding: 9px 18px; border-radius: 6px;
-    border: 1.5px solid #94a3b8; background: #fff;
-    cursor: pointer; font-size: 14px; font-weight: 500;
-    color: #1e293b; transition: all 0.15s;
-    display: flex; align-items: center; gap: 5px; white-space: nowrap;
+  .agent-btns {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 14px;
   }
-  .agent-btn:hover { border-color: #334155; background: #f8fafc; color: #0f172a; }
-  .agent-btn.active { border-color: #1e293b; background: #1e293b; color: #fff; }
-  .agent-btn.manager { border-color: #92400e; color: #92400e; background: #fff; }
-  .agent-btn.manager:hover { border-color: #78350f; background: #fffbeb; }
-  .agent-btn.manager.active { background: #92400e; color: #fff; border-color: #92400e; }
+  .agent-btn {
+    padding: 22px 12px;
+    border-radius: 16px;
+    border: 2px solid #e2e8f0;
+    background: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    transition: all 0.18s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    white-space: nowrap;
+  }
+  .agent-btn .agent-avatar {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 800; color: #4f46e5;
+    transition: all 0.18s;
+  }
+  .agent-btn:hover { border-color: #6366f1; background: #eef2ff; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(99,102,241,0.15); }
+  .agent-btn:hover .agent-avatar { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; }
+  .agent-btn.active { border-color: #6366f1; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; box-shadow: 0 8px 20px rgba(99,102,241,0.35); transform: translateY(-3px); }
+  .agent-btn.active .agent-avatar { background: rgba(255,255,255,0.25); color: #fff; }
+  .agent-btn.manager .agent-avatar { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
+  .agent-btn.manager { border-color: #fbbf24; }
+  .agent-btn.manager:hover { border-color: #f59e0b; background: #fffbeb; }
+  .agent-btn.manager:hover .agent-avatar { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
+  .agent-btn.manager.active { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; border-color: #f59e0b; }
+  .agent-btn.manager.active .agent-avatar { background: rgba(255,255,255,0.25); color: #fff; }
 
   /* Calendar card */
   .cal-card { background: #fff; border-radius: 16px; padding: 14px; box-shadow: 0 1px 8px rgba(0,0,0,0.06); }
@@ -223,12 +251,14 @@
   <!-- שלב 2: בחירת סוכן -->
   <div id="step-agent" style="display:none">
     <div class="agent-bar">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <button onclick="backToDept()" style="background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px;color:#64748b">← חזרה</button>
-        <span style="font-size:13px;font-weight:600;color:#64748b" id="dept-label-text"></span>
+      <div style="max-width:800px;width:100%;margin:0 auto">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+          <button onclick="backToDept()" style="background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:600;color:#64748b;box-shadow:0 1px 4px rgba(0,0,0,0.06);transition:all 0.15s" onmouseover="this.style.borderColor='#6366f1';this.style.color='#6366f1'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← חזרה</button>
+          <span style="font-size:18px;font-weight:700;color:#1e293b" id="dept-label-text"></span>
+        </div>
+        <span class="agent-bar-label">בחר סוכן</span>
+        <div class="agent-btns" id="agent-btns"></div>
       </div>
-      <span class="agent-bar-label">בחר סוכן:</span>
-      <div class="agent-btns" id="agent-btns"></div>
     </div>
   </div>
 
@@ -376,8 +406,10 @@ const agentBtns = document.getElementById('agent-btns');
 AGENTS.forEach(a => {
   const btn = document.createElement('button');
   btn.className = 'agent-btn' + (a.isManager ? ' manager' : '');
-  const starSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="flex-shrink:0"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
-  btn.innerHTML = a.isManager ? `${starSvg} ${a.label}` : a.label;
+  const initials = a.label.slice(0,1);
+  const starIcon = a.isManager ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="position:absolute;top:8px;left:8px;opacity:0.7"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>` : '';
+  btn.style.position = 'relative';
+  btn.innerHTML = `${starIcon}<div class="agent-avatar">${initials}</div>${a.label}`;
   btn.onclick = (e) => selectAgent(a, e.currentTarget);
   agentBtns.appendChild(btn);
 });
