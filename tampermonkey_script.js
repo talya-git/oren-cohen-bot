@@ -734,7 +734,7 @@
         const mostlyHebrew = selectedLeads.filter(l => isHebrew(l.name)).length >= selectedLeads.length / 2;
 
         const defaultMsg = mostlyHebrew
-            ? `שלום {name},\n\nכאן דניאל מאורן כהן גרופ בירושלים.\nאני פונה אליך בהמשך לפנייתך למשרדנו בעבר.\n\nבימים אלו אנחנו מרכזים עבור לקוחותינו מספר הזדמנויות נדל"ן מיוחדות בפרויקטים עתידיים בירושלים.\n\nהאם הנושא עדיין רלוונטי עבורך?\n\nבברכה,\nדניאל\nאורן כהן גרופ`
+            ? `שלום {name},\n\nכאן דניאל מאורן כהן גרופ בירושלים.\nאני פונה אליך בהמשך לפנייתך למשרדנו בעבר.\n\nבימים אלו אנחנו מרכזים עבור לקוחותינו מספר הזדמנויות נדלן מיוחדות בפרויקטים עתידיים בירושלים.\n\nהאם הנושא עדיין רלוונטי עבורך?\n\nבברכה,\nדניאל\nאורן כהן גרופ`
             : `Hi {name},\n\nHow are you? This is Daniel from Oren Cohen Group.\n\nFollowing your previous inquiry with our office, I wanted to let you know that we're about to launch several unique new projects in some of Jerusalem's most sought-after locations.\n\nSince you were looking in the past, I thought it would be right to reach out to you first, before we introduce them to the wider market.\n\nWould this be of interest to you?\n\nBest regards,\nDaniel\nOren Cohen Group`;
 
         const defaultSubject = mostlyHebrew
