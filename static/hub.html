@@ -16,6 +16,31 @@
     justify-content: center;
     color: #fff;
   }
+  #login-screen {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 40px 36px;
+    width: 320px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+  }
+  #login-screen h2 { font-size: 22px; margin-bottom: 8px; }
+  #login-screen p { font-size: 13px; color: #a5b4fc; margin-bottom: 24px; }
+  #login-screen input {
+    width: 100%; padding: 12px 16px; border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1);
+    color: #fff; font-size: 16px; text-align: center; outline: none;
+    margin-bottom: 14px; letter-spacing: 2px;
+  }
+  #login-screen button {
+    width: 100%; padding: 12px; border-radius: 10px; border: none;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff; font-size: 15px; font-weight: bold; cursor: pointer;
+  }
+  #login-screen button:hover { opacity: 0.9; }
+  #login-error { color: #f87171; font-size: 13px; margin-top: 10px; display: none; }
+  #main-content { display: none; width: 100%; flex-direction: column; align-items: center; }
   .logo {
     font-size: 28px;
     font-weight: bold;
@@ -70,9 +95,20 @@
 </head>
 <body>
 
+<div id="login-screen">
+  <div style="font-size:48px;margin-bottom:16px">🔐</div>
+  <h2>אורן כהן גרופ</h2>
+  <p>הזן סיסמה להמשך</p>
+  <input type="password" id="pw-input" placeholder="••••••••••" onkeydown="if(event.key==='Enter')checkPw()" />
+  <button onclick="checkPw()">כניסה</button>
+  <div id="login-error">סיסמה שגויה</div>
+</div>
+
+<div id="main-content">
+<a href="/הכשרה" style="position:fixed;top:14px;left:14px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:#fff;text-decoration:none;padding:6px 14px;border-radius:20px;font-size:12px;backdrop-filter:blur(10px);transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">📖 הכשרה</a>
+
 <div class="logo">🏢 אורן כהן גרופ</div>
 <div class="subtitle">מרכז תקשורת — בחר ערוץ</div>
-<a href="/הכשרה" style="position:fixed;top:14px;left:14px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:#fff;text-decoration:none;padding:6px 14px;border-radius:20px;font-size:12px;backdrop-filter:blur(10px);transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">📖 הכשרה</a>
 
 <div class="cards">
   <a class="card" href="/conversations">
@@ -98,6 +134,26 @@
 </div>
 
 <div class="footer">Oren Cohen Group © 2025</div>
+</div>
+
+<script>
+const PW = '0545596052';
+function checkPw() {
+  const v = document.getElementById('pw-input').value;
+  if (v === PW) {
+    sessionStorage.setItem('hub_auth','1');
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('main-content').style.display = 'flex';
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('pw-input').value = '';
+  }
+}
+if (sessionStorage.getItem('hub_auth') === '1') {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-content').style.display = 'flex';
+}
+</script>
 
 </body>
 </html>
