@@ -734,12 +734,12 @@
         const mostlyHebrew = selectedLeads.filter(l => isHebrew(l.name)).length >= selectedLeads.length / 2;
 
         const defaultMsg = mostlyHebrew
-            ? `היי {name},\n\nכאן דניאל מאורן כהן גרופ בירושלים.\nאני פונה אליך בהמשך לפנייתך למשרדנו בעבר.\n\nבימים אלו אנחנו מרכזים עבור לקוחותינו מספר הזדמנויות נדל"ן מיוחדות בפרויקטים עתידיים בירושלים.\n\nהאם הנושא עדיין רלוונטי עבורך?\n\nבברכה,\nדניאל\nאורן כהן גרופ`
-            : `Hi {name},\n\nThis is Daniel from Oren Cohen Group in Jerusalem.\nI'm reaching out as a follow-up to your previous inquiry with our office.\n\nWe are currently curating exclusive real estate opportunities in upcoming Jerusalem projects for our clients.\n\nIs this still of interest to you?\n\nBest regards,\nDaniel\nOren Cohen Group`;
+            ? `שלום {name},\n\nכאן דניאל מאורן כהן גרופ בירושלים.\nאני פונה אליך בהמשך לפנייתך למשרדנו בעבר.\n\nבימים אלו אנחנו מרכזים עבור לקוחותינו מספר הזדמנויות נדל"ן מיוחדות בפרויקטים עתידיים בירושלים.\n\nהאם הנושא עדיין רלוונטי עבורך?\n\nבברכה,\nדניאל\nאורן כהן גרופ`
+            : `Hi {name},\n\nHow are you? This is Daniel from Oren Cohen Group.\n\nFollowing your previous inquiry with our office, I wanted to let you know that we're about to launch several unique new projects in some of Jerusalem's most sought-after locations.\n\nSince you were looking in the past, I thought it would be right to reach out to you first, before we introduce them to the wider market.\n\nWould this be of interest to you?\n\nBest regards,\nDaniel\nOren Cohen Group`;
 
         const defaultSubject = mostlyHebrew
-            ? 'הזדמנויות נדל"ן בירושלים — אורן כהן גרופ'
-            : 'Real Estate Opportunities in Jerusalem — Oren Cohen Group';
+            ? 'הזדמנויות נדלן בירושלים'
+            : 'Real Estate Opportunities in Jerusalem';
 
         confirmOverlay.innerHTML = `
             <div style="background:#fff;border-radius:14px;width:640px;max-width:95vw;
