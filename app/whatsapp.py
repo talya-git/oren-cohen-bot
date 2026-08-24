@@ -79,6 +79,9 @@ _wa_original_project: dict[str, str] = {}
 _wa_is_projects: dict[str, bool] = {}
 _wa_is_reengagement: dict[str, bool] = {}
 _wa_pilot_log: list[dict] = []
+# debounce — תור הודעות ממתינות לפני עיבוד
+_wa_pending_msgs: dict[str, list[str]] = {}
+_wa_debounce_tasks: dict[str, asyncio.Task] = {}
 
 
 def _detect_language(phone: str, name: str | None) -> str:
@@ -298,6 +301,33 @@ async def whatsapp_webhook(request: Request):
     if len(text) > 200 or any(s in text.lower() for s in _AUTO_REPLY_SIGNALS):
         print(f"[AUTO-REPLY IGNORED] {phone}: {text[:80]}...")
         return {"status": "auto_reply_ignored"}
+
+    # debounce — אסוף הודעות ברצף ועבד יחד אחרי 4 שניות
+    if phone not in _wa_pending_msgs:
+        _wa_pending_msgs[phone] = []
+    _wa_pending_msgs[phone].append(text)
+
+    # בטל task קודם אם קיים
+    if phone in _wa_debounce_tasks and not _wa_debounce_tasks[phone].done():
+        _wa_debounce_tasks[phone].cancel()
+
+    async def _process_after_delay(p: str):
+        await asyncio.sleep(4)
+        msgs = _wa_pending_msgs.pop(p, [])
+        if not msgs:
+            return
+        combined = " | ".join(msgs) if len(msgs) > 1 else msgs[0]
+        print(f"[DEBOUNCE] {p} — {len(msgs)} הודעות: {combined[:80]}")
+        await _handle_message(p, combined, _db)
+
+    task = asyncio.create_task(_process_after_delay(phone))
+    _wa_debounce_tasks[phone] = task
+    return {"status": "queued"}
+
+
+async def _handle_message(phone: str, text: str, _db) -> None:
+    """מעבד הודעה (או מספר הודעות מאוחדות) מלקוח."""
+    from .engine import Conversation
     if phone in _wa_done or _db.is_conversation_done(phone):
         # בדוק אם זו תשובה שלילית אחרי סיום השיחה
         intent_after = _classify_response(text)
