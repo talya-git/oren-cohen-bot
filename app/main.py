@@ -791,6 +791,11 @@ def calendar_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "calendar.html")
 
 
+@app.get("/הכשרה")
+def training_page() -> FileResponse:
+    return FileResponse(Path(__file__).resolve().parent.parent / "הכשרה1" / "index.html")
+
+
 @app.get("/api/meetings")
 def get_meetings(date: str | None = None, start: str | None = None, end: str | None = None, agent: str | None = None):
     from . import database as _db
