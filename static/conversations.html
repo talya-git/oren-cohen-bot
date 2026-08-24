@@ -252,7 +252,7 @@ async function fetchData() {
     } else {
       checkNewReplies();
     }
-    if (openPhone) refreshModal(openPhone);
+  if (openPhone) refreshModal(openPhone);
   } catch(e) {}
 }
 
@@ -385,7 +385,8 @@ function refreshModal(phone) {
   const c = allData.find(x => x.phone === phone);
   if (!c || !c.transcript) return;
   const body = document.getElementById('modal-body');
-  const scrollPos = body.scrollTop; // שמור מיקום גלילה
+  const scrollPos = body.scrollTop;
+  const wasAtBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 50;
   const lines = c.transcript.split('\n').filter(l => l.trim());
   // אחד את השורות לבלוקים לפי סוכן
   const blocks = [];
@@ -423,7 +424,7 @@ function refreshModal(phone) {
       <div class="bubble ${bcls}" style="direction:${isEng?'ltr':'rtl'};text-align:${isEng?'left':'right'};padding:10px 14px;font-size:13px;line-height:1.6">${formattedText}</div>
     </div>`;
   }).join('');
-  body.scrollTop = scrollPos || body.scrollHeight; // חזור למיקום או לסוף אם פתיחה ראשונה
+  body.scrollTop = wasAtBottom ? body.scrollHeight : scrollPos;
 }
 
 function closeModal() {
