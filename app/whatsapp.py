@@ -284,12 +284,7 @@ async def whatsapp_webhook(request: Request):
         return {"status": "ignored"}
 
     # חסימת מספרי סוכנים — לא לעבד אותם כלידים
-    AGENT_PHONES = {
-        "972545596052", "972584770646", "972523873383", "972586455059",
-        "972584114686", "972543402018", "972549183150", "972552704922",
-        "972526239608", "13055863760", "972515528956", "972528962040",
-        "972523353569",
-    }
+    AGENT_PHONES: set[str] = set()
     if phone in AGENT_PHONES:
         print(f"[AGENT REPLY IGNORED] {phone}: {text[:50]}")
         return {"status": "agent_ignored"}
