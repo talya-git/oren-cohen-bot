@@ -41,10 +41,10 @@ def send_template_reengagement(phone: str, name: str | None, lang: str = "he") -
     components = []
     if name:
         components = [{"type": "body", "parameters": [{"type": "text", "text": name}]}]
-    template_name = "reengagement_he" if lang == "he" else "reengagement_en"
+    template_name = "bothebrew" if lang == "he" else "botenglish"
     # מספרים אמריקאים - שימוש בתבנית utility
     if normalized.startswith("1") and len(normalized) == 11:
-        template_name = "reengagement_en"
+        template_name = "botenglish"
     lang_code = "he" if lang == "he" else "en"
     resp = requests.post(
         f"https://graph.facebook.com/{META_API_VERSION}/{META_PHONE_NUMBER_ID}/messages",
