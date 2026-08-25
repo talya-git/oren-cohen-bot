@@ -147,7 +147,7 @@ const AGENTS_PASSWORDS = {
   'אלחנן':  { pw: 'elchanan25', email: 'elchanan@orencohengroup.com' },
   'אורן':   { pw: 'oren2025',   email: 'oren@orencohengroup.com' },
   'אריה':   { pw: 'aryeh2025',  email: 'aryeh@orencohengroup.com' },
-  'בועז':   { pw: 'boaz2025',   email: 'office@orencohengroup.com' },
+  'בועז':   { pw: 'boaz2025',   email: 'office@orencohengroup.com', isAdmin: true },
   'אהרון':  { pw: 'aaron2025',  email: 'aaron@orencohengroup.com' },
   'ליסה':   { pw: 'lisa2025',   email: 'lisa@orencohengroup.com' },
   'דב':     { pw: 'dov2025',    email: 'dovr@orencohengroup.com' },
@@ -177,14 +177,14 @@ function doLogin() {
   }
   const [name, info] = found;
   sessionStorage.setItem('conv_auth', pw);
-  showDashboard(name, info.email);
+  showDashboard(name, info.email, info.isAdmin);
 }
 
-function showDashboard(name, email) {
+function showDashboard(name, email, isAdmin) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   document.getElementById('agent-name-display').textContent = name;
-  if (name !== 'מנהל') {
+  if (name !== 'מנהל' && !isAdmin) {
     currentAgentFilter = name;
     document.getElementById('filter-agent').style.display = 'none';
   }
@@ -195,7 +195,7 @@ function showDashboard(name, email) {
 const saved = sessionStorage.getItem('conv_auth');
 if (saved) {
   const found = Object.entries(AGENTS_PASSWORDS).find(([,v]) => v.pw === saved);
-  if (found) showDashboard(found[0], found[1].email);
+  if (found) showDashboard(found[0], found[1].email, found[1].isAdmin);
 }
 
 function toggleSound() {
