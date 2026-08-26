@@ -35,16 +35,31 @@ def send_message(phone: str, message: str) -> dict:
     return result
 
 
-def send_template_reengagement(phone: str, name: str | None, lang: str = "he") -> dict:
+def send_template_reengagement(phone: str, name: str | None, lang: str = "he", agent_email: str = "") -> dict:
     """שולח template reengagement — עובד גם אחרי 24 שעות."""
     normalized = phone.lstrip("+").replace(" ", "").replace("-", "")
     components = []
     if name:
         components = [{"type": "body", "parameters": [{"type": "text", "text": name}]}]
-    template_name = "bothebrew" if lang == "he" else "botenglish"
-    # מספרים אמריקאים - שימוש בתבנית utility
+
+    # מחלקת יד 2 — סוכנים ספציפיים
+    YAD2_AGENTS = {
+        "michael@orencohengroup.com",
+        "moshe@orencohengroup.com",
+        "rivka@orencohengroup.com",
+        "aryeh@orencohengroup.com",
+        "dovr@orencohengroup.com",
+    }
+    is_yad2 = agent_email.lower() in YAD2_AGENTS
+
+    if is_yad2:
+        template_name = "secondhebrew" if lang == "he" else "secendenglish"
+    else:
+        template_name = "bothebrew" if lang == "he" else "botenglish"
+
+    # מספרים אמריקאים
     if normalized.startswith("1") and len(normalized) == 11:
-        template_name = "botenglish"
+        template_name = "secendenglish" if is_yad2 else "botenglish"
     lang_code = "he" if lang == "he" else "en"
     resp = requests.post(
         f"https://graph.facebook.com/{META_API_VERSION}/{META_PHONE_NUMBER_ID}/messages",
@@ -171,7 +186,7 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
 
     convo.messages.append({"role": "assistant", "content": greeting})
     print(f"[GREETING] phone={normalized} name={name!r} lang={lang} project={pname_for_convo!r}")
-    result = send_template_reengagement(f"+{normalized}", name, lang)
+    result = send_template_reengagement(f"+{normalized}", name, lang, agent_email or final_agent_email)
     if "error" in result or (result.get("messages", [{}])[0].get("message_status") == "failed"):
         error_msg = result.get("error", {}).get("message", "Meta API error")
         raise Exception(error_msg)
