@@ -439,6 +439,9 @@
         { label: 'אהרון',  email: 'aaron@orencohengroup.com' },
         { label: 'ליסה',   email: 'lisa@orencohengroup.com' },
         { label: 'דב',     email: 'dovr@orencohengroup.com' },
+        { label: 'נתנאל',  email: 'netanel@orencohengroup.com' },
+        { label: 'נעמי',   email: 'NaomiS@orencohengroup.com' },
+        { label: 'נתנאל',  email: 'netanel@orencohengroup.com' },
     ];
 
     // state
@@ -572,7 +575,7 @@
             params.append(`columns[${i}][search][value]`, '');
             params.append(`columns[${i}][search][regex]`, 'false');
         });
-        params.append('order[0][column]', '19'); params.append('order[0][dir]', 'desc'); // חדשים קודם (לבדיקה)
+        params.append('order[0][column]', '19'); params.append('order[0][dir]', 'asc'); // ישנים קודם
         params.append('start', String(wl_offset));
         params.append('length', '500'); // טוענים 500 כדי לסנן ל-20
         params.append('search[value]', ''); params.append('search[regex]', 'false');

@@ -12,7 +12,8 @@ FROM_EMAIL = os.getenv("FROM_EMAIL", "orencohengroup2020@gmail.com")
 FROM_NAME = "בוט אורן כהן גרופ"
 
 
-ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "talyatoledano10@gmail.com")
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "naomi@orencohengroup.com")
+ADMIN_EMAIL2 = "lisa@orencohengroup.com"
 
 
 def send_report(to_email: str, agent_label: str, leads: list[dict]) -> None:
@@ -81,6 +82,8 @@ def send_report(to_email: str, agent_label: str, leads: list[dict]) -> None:
     to_list = [{"Email": to_email}]
     if ADMIN_EMAIL and ADMIN_EMAIL != to_email:
         to_list.append({"Email": ADMIN_EMAIL})
+    if ADMIN_EMAIL2 and ADMIN_EMAIL2 != to_email and ADMIN_EMAIL2 != ADMIN_EMAIL:
+        to_list.append({"Email": ADMIN_EMAIL2})
 
     payload = json.dumps({
         "Messages": [{
@@ -222,7 +225,9 @@ def send_bulk_report(agent_label: str, results: list[dict], agent_email: str | N
     """
 
     to_list = [{"Email": ADMIN_EMAIL}]
-    if agent_email and agent_email != ADMIN_EMAIL:
+    if ADMIN_EMAIL2 and ADMIN_EMAIL2 != ADMIN_EMAIL:
+        to_list.append({"Email": ADMIN_EMAIL2})
+    if agent_email and agent_email != ADMIN_EMAIL and agent_email != ADMIN_EMAIL2:
         to_list.append({"Email": agent_email})
 
     # שלח ל-ADMIN רק אם יש שגיאות
