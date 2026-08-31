@@ -81,7 +81,7 @@ async def send_morning_reminders():
     from .whatsapp import _token, META_PHONE_NUMBER_ID, META_API_VERSION
 
     today = date.today()
-    day_names = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
+    day_names = ['שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת', 'ראשון']
     date_str = f"יום {day_names[today.weekday()]} {today.strftime('%d/%m')}"
 
     def _send_wa_template(phone: str, template: str, params: list):
