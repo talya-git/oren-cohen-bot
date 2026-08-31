@@ -351,7 +351,7 @@ let currentMonth = new Date();
 let selectedDate = null;
 let allMeetings = {};
 
-const DAY_NAMES = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
+const DAY_NAMES = ['ב׳','ג׳','ד׳','ה׳','ו׳','ש׳','א׳'];
 const MONTH_NAMES = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
 const DAY_NAMES_FULL = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
 
@@ -464,7 +464,7 @@ function renderCalendar() {
     el.textContent = d;
     grid.appendChild(el);
   });
-  const firstDow = new Date(year, month, 1).getDay();
+  const firstDow = (new Date(year, month, 1).getDay() + 6) % 7;
   const lastDate = new Date(year, month+1, 0).getDate();
   const todayStr = formatDate(new Date());
   const selectedStr = selectedDate ? formatDate(selectedDate) : '';
@@ -475,7 +475,7 @@ function renderCalendar() {
   for (let d = 1; d <= lastDate; d++) {
     grid.appendChild(makeCell(new Date(year, month, d), false, todayStr, selectedStr));
   }
-  const lastDow = new Date(year, month, lastDate).getDay();
+  const lastDow = (new Date(year, month, lastDate).getDay() + 6) % 7;
   for (let i = lastDow+1; i < 7; i++) {
     grid.appendChild(makeCell(new Date(year, month+1, i-lastDow), true, todayStr, selectedStr));
   }
