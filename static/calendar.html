@@ -700,20 +700,27 @@ async function addMeeting() {
       if (!m.meeting_time) continue;
       const [mH, mM] = m.meeting_time.split(':').map(Number);
       const mMins = mH * 60 + mM;
-      const diff = newMins - mMins;
-      const diffRev = mMins - newMins;
+      const mEndMins = mMins + 45; // סיום הפגישה אחרי 45 דקות
 
-      if (diff > 0 && diff < 45) {
-        alert(`לא ניתן לקבוע פגישה — הפגישה של ${m.client_name} (${m.agent_name || ''}) התחילה לפני ${diff} דקות בלבד.\nיש להמתין לפחות 45 דקות בין פגישות.`);
+      // הפגישה החדשה בתוך 45 דקות מתחילת הפגישה הקיימת (חסום)
+      if (newMins > mMins && newMins < mEndMins) {
+        const minsSinceStart = newMins - mMins;
+        alert(`לא ניתן לקבוע פגישה — הפגישה של ${m.client_name} (${m.agent_name || ''}) התחילה לפני ${minsSinceStart} דקות וטרם הסתיימה.\nיש להמתין עד סיום הפגישה + 15 דקות הפסקה.`);
         return;
       }
-      if (diff >= 45 && diff < 60) {
-        const minsAfter = diff - 45;
-        const ok = confirm(`הפגישה של ${m.client_name} (${m.agent_name || ''}) הסתיימה לפני ${minsAfter} דקות.\nיש הפסקה של 15 דקות בין פגישות — תרצה בכל אופן לקבוע?`);
+
+      // הפגישה החדשה בתוך 15 דקות ההפסקה (התראה עם אישור)
+      if (newMins >= mEndMins && newMins < mEndMins + 15) {
+        const minsAfterEnd = newMins - mEndMins;
+        const ok = confirm(`הפגישה של ${m.client_name} (${m.agent_name || ''}) הסתיימה לפני ${minsAfterEnd} דקות.\nיש הפסקה של 15 דקות בין פגישות — תרצה בכל אופן לקבוע?`);
         if (!ok) return;
       }
-      if (diffRev > 0 && diffRev < 45) {
-        alert(`לא ניתן לקבוע פגישה — יש פגישה של ${m.client_name} (${m.agent_name || ''}) בעוד ${diffRev} דקות.\nיש להמתין לפחות 45 דקות בין פגישות.`);
+
+      // הפגישה הקיימת מתחילה בתוך 45 דקות מהפגישה החדשה (חסום)
+      const newEndMins = newMins + 45;
+      if (mMins > newMins && mMins < newEndMins) {
+        const minsUntil = mMins - newMins;
+        alert(`לא ניתן לקבוע פגישה — יש פגישה של ${m.client_name} (${m.agent_name || ''}) בעוד ${minsUntil} דקות.\nיש להמתין לפחות 45 דקות בין פגישות.`);
         return;
       }
     }
