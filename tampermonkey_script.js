@@ -450,6 +450,22 @@
     let wl_sentPhones = new Set();
     let wl_sentDates = {};
     let wl_unchecked = new Set();
+    let wl_lang_filter = 'all'; // 'all' | 'he' | 'en'
+
+    function setLangFilter(lang) {
+        wl_lang_filter = lang;
+        ['all','he','en'].forEach(l => {
+            const btn = document.getElementById(`wl-filter-${l}`);
+            if (!btn) return;
+            if (l === lang) {
+                btn.style.background = '#6366f1'; btn.style.color = '#fff'; btn.style.borderColor = '#6366f1';
+            } else {
+                btn.style.background = '#f8f9fa'; btn.style.color = '#333'; btn.style.borderColor = '#ddd';
+            }
+        });
+        wl_offset = 0;
+        loadWlPage();
+    }
 
     async function fetchSentPhones() {
         try {
@@ -628,13 +644,18 @@
         });
 
         const filtered = [];
-        if (statusEl) statusEl.textContent = 'בודק ברשת...';
+        if (statusEl) statusEl.textContent = 'בודק...';
         for (const lead of candidates.slice(0, 30)) {
             if (filtered.length >= 20) break;
+            // סינון שפה
+            if (wl_lang_filter !== 'all') {
+                const name = lead.name1 || '';
+                const isHe = /[\u05d0-\u05ea]/.test(name);
+                if (wl_lang_filter === 'he' && !isHe) continue;
+                if (wl_lang_filter === 'en' && isHe) continue;
+            }
             const timelineText = await getTimelineText(lead);
             if (isProfessionalInTimeline(timelineText)) { console.log('[TIMELINE PRO]', lead.name1); continue; }
-            const isGooglePro = await checkGoogleProfessional(lead.name1);
-            if (isGooglePro) { console.log('[GOOGLE PRO]', lead.name1); continue; }
             filtered.push(lead);
         }
 
@@ -997,6 +1018,13 @@
                         </button>`).join('')}
                 </div>
 
+                <!-- סינון שפה -->
+                <div style="display:flex;gap:8px;margin-bottom:12px;">
+                    <button id="wl-filter-all" onclick="setLangFilter('all')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #6366f1;background:#6366f1;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">הכל</button>
+                    <button id="wl-filter-he" onclick="setLangFilter('he')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #ddd;background:#f8f9fa;color:#333;font-size:13px;font-weight:600;cursor:pointer;">🇮🇱 עברית</button>
+                    <button id="wl-filter-en" onclick="setLangFilter('en')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #ddd;background:#f8f9fa;color:#333;font-size:13px;font-weight:600;cursor:pointer;">🇬🇧 אנגלית</button>
+                </div>
+
                 <!-- סטטוס שליחה -->
                 <div id="wl-send-status" style="display:none;margin-top:10px;padding:10px;border-radius:8px;
                     background:#d4edda;color:#155724;font-size:13px;text-align:center;"></div>
@@ -1056,6 +1084,7 @@
                 btn.style.background = '#25D366'; btn.style.borderColor = '#25D366'; btn.style.color = '#fff';
                 wl_agent = AGENTS.find(a => a.email === btn.dataset.email);
                 wl_offset = 0;
+                wl_lang_filter = 'all';
                 wl_unchecked = new Set();
                 document.getElementById('wl-table-wrap').style.display = 'block';
                 await fetchSentPhones();

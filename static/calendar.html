@@ -700,37 +700,39 @@ async function addMeeting() {
       if (!m.meeting_time) continue;
       const [mH, mM] = m.meeting_time.split(':').map(Number);
       const mMins = mH * 60 + mM;
-      const mEndMins = mMins + 45; // סיום הפגישה אחרי 45 דקות
+      const mEndMins = mMins + 45; // סיום הפגישה הקיימת
+      const newEndMins = newMins + 45; // סיום הפגישה החדשה
 
-      // הפגישה החדשה בתוך 45 דקות מתחילת הפגישה הקיימת (חסום)
-      if (newMins > mMins && newMins < mEndMins) {
-        const minsSinceStart = newMins - mMins;
-        alert(`לא ניתן לקבוע פגישה — הפגישה של ${m.client_name} (${m.agent_name || ''}) התחילה לפני ${minsSinceStart} דקות וטרם הסתיימה.\nיש להמתין עד סיום הפגישה + 15 דקות הפסקה.`);
-        return;
-      }
-
-      // הפגישה החדשה בתוך 15 דקות ההפסקה (התראה עם אישור)
-      if (newMins >= mEndMins && newMins < mEndMins + 15) {
-        const minsAfterEnd = newMins - mEndMins;
-        const ok = confirm(`הפגישה של ${m.client_name} (${m.agent_name || ''}) הסתיימה לפני ${minsAfterEnd} דקות.\nיש הפסקה של 15 דקות בין פגישות — תרצה בכל אופן לקבוע?`);
-        if (!ok) return;
-      }
-
-      // הפגישה הקיימת מתחילה לפני שהפגישה החדשה מסתיימת (חסום)
-      const newEndMins = newMins + 45;
-      if (mMins > newEndMins && mMins < newEndMins + 45) {
-        const minsUntil = mMins - newEndMins;
-        if (minsUntil < 15) {
-          const ok = confirm(`הפגישה של ${m.client_name} (${m.agent_name || ''}) מתחילה בעוד ${mMins - newMins} דקות.\nיש הפסקה של 15 דקות בין פגישות — תרצה בכל אופן לקבוע?`);
-          if (!ok) return;
-        } else {
-          alert(`לא ניתן לקבוע פגישה — יש פגישה של ${m.client_name} (${m.agent_name || ''}) בעוד ${mMins - newMins} דקות.\nיש להמתין לפחות 45 דקות בין פגישות.`);
+      if (mMins < newMins) {
+        // פגישה קיימת לפני הפגישה החדשה
+        if (newMins < mEndMins) {
+          // חסום: הפגישה הקיימת עדיין רצה
+          alert(`לא ניתן לקבוע פגישה — הפגישה של ${m.client_name} (${m.agent_name || ''}) עדיין מתקיימת ותסתיים ב-${String(Math.floor(mEndMins/60)).padStart(2,'0')}:${String(mEndMins%60).padStart(2,'0')}.`);
           return;
         }
-      } else if (mMins > newMins && mMins <= newEndMins) {
-        alert(`לא ניתן לקבוע פגישה — יש פגישה של ${m.client_name} (${m.agent_name || ''}) בעוד ${mMins - newMins} דקות.\nהפגישות יחפפו אחת את השנייה.`);
-        return;
+        if (newMins < mEndMins + 15) {
+          // התראה: בתוך הפסקה של 15 דקות
+          const minsAfterEnd = newMins - mEndMins;
+          const ok = confirm(`הפגישה של ${m.client_name} (${m.agent_name || ''}) הסתיימה לפני ${minsAfterEnd} דקות.\nיש הפסקה של 15 דקות בין פגישות — תרצה בכל אופן לקבוע?`);
+          if (!ok) return;
+        }
+        // אם הפגישה הקיימת מסתיימת 15+ דקות לפני הפגישה החדשה — בסדר
+      } else {
+        // פגישה קיימת אחרי הפגישה החדשה
+        if (mMins < newEndMins) {
+          // חסום: הפגישה הקיימת מתחילה לפני שהפגישה החדשה מסתיימת
+          alert(`לא ניתן לקבוע פגישה — יש פגישה של ${m.client_name} (${m.agent_name || ''}) ב-${m.meeting_time} והפגישות יחפפו אחת את השנייה.`);
+          return;
+        }
+        if (mMins < newEndMins + 15) {
+          // התראה: הפגישה הקיימת מתחילה בתוך הפסקה של 15 דקות
+          const minsUntil = mMins - newEndMins;
+          const ok = confirm(`הפגישה של ${m.client_name} (${m.agent_name || ''}) מתחילה בעוד ${minsUntil} דקות אחרי סיום הפגישה החדשה.\nיש הפסקה של 15 דקות בין פגישות — תרצה בכל אופן לקבוע?`);
+          if (!ok) return;
+        }
+        // אם הפגישה הקיימת מתחילה 15+ דקות אחרי סיום הפגישה החדשה — בסדר
       }
+    }
     }
   }
 
