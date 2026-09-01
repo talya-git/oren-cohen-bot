@@ -806,30 +806,36 @@ function renderTodaySidebar() {
   const container = document.getElementById('today-hours');
   if (!container) return;
   const todayStr = formatDate(new Date());
-  const todayMeetings = allMeetings[todayStr] || [];
 
-  // שעות עבודה 8:00-20:00 בקפיצות של שעה
-  const hours = [];
-  for (let h = 8; h <= 19; h++) {
-    const timeStr = `${String(h).padStart(2,'0')}:00`;
-    const meeting = todayMeetings.find(m => m.meeting_time && m.meeting_time.startsWith(timeStr.slice(0,2)));
-    hours.push({ time: timeStr, meeting });
-  }
+  // אסוף כל הפגישות של היום מכל המחלקות
+  fetch(`/api/meetings?start=${todayStr}&end=${todayStr}`)
+    .then(r => r.json())
+    .then(data => {
+      const todayMeetings = (data.meetings || []).sort((a,b) => a.meeting_time > b.meeting_time ? 1 : -1);
 
-  container.innerHTML = hours.map(({ time, meeting }) => {
-    if (meeting) {
-      return `<div style="background:#fee2e2;border-radius:8px;padding:6px 8px;font-size:11px;">
-        <div style="font-weight:700;color:#991b1b;">${time}</div>
-        <div style="color:#7f1d1d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${meeting.client_name}">${meeting.client_name}</div>
-        ${meeting.agent_name ? `<div style="color:#b91c1c;font-size:10px;">${meeting.agent_name}</div>` : ''}
-      </div>`;
-    } else {
-      return `<div style="background:#f0fdf4;border-radius:8px;padding:6px 8px;font-size:11px;display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-weight:600;color:#166534;">${time}</span>
-        <span style="color:#16a34a;font-size:10px;">פנוי</span>
-      </div>`;
-    }
-  }).join('');
+      const hours = [];
+      for (let h = 8; h <= 19; h++) {
+        const timeStr = `${String(h).padStart(2,'0')}:00`;
+        const meeting = todayMeetings.find(m => m.meeting_time && m.meeting_time.startsWith(String(h).padStart(2,'0')));
+        hours.push({ time: timeStr, meeting });
+      }
+
+      container.innerHTML = hours.map(({ time, meeting }) => {
+        if (meeting) {
+          return `<div style="background:#fee2e2;border-radius:8px;padding:6px 8px;font-size:11px;">
+            <div style="font-weight:700;color:#991b1b;">${time}</div>
+            <div style="color:#7f1d1d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${meeting.client_name}">${meeting.client_name}</div>
+            <div style="color:#b91c1c;font-size:10px;">${meeting.agent_name || ''}</div>
+          </div>`;
+        } else {
+          return `<div style="background:#f0fdf4;border-radius:8px;padding:6px 8px;font-size:11px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-weight:600;color:#166534;">${time}</span>
+            <span style="color:#16a34a;font-size:10px;">פנוי</span>
+          </div>`;
+        }
+      }).join('');
+    })
+    .catch(() => {});
 }
 
 document.getElementById('add-modal').addEventListener('click', e => {
