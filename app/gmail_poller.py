@@ -222,10 +222,8 @@ def poll_inbox():
             from . import sehel as _sehel
             dry = not (_sehel.PROJECT_ID or _sehel.WEBHOOK_URL)
             agent_email = record.get("agent_email") or ""
-            # שלח לשכל לפי טלפון אם קיים, אחרת כך לפי מייל
             notes = record.get("notes") or ""
             sehel_phone = notes.replace("phone:", "").strip() if notes.startswith("phone:") else None
-            # אם אין טלפון — חפש בשכל לפי שם
             if not sehel_phone and name:
                 try:
                     import httpx as _hx
@@ -237,7 +235,6 @@ def poll_inbox():
                     )
                     results = search_resp.json().get("data", [])
                     if not results:
-                        # נסה API אחר
                         search_resp2 = _hx.post(
                             "https://leads.sehel.co.il",
                             json={"project_id": _s.DEFAULT_PROJECT_ID, "lead_name": name, "search_only": True},
@@ -260,14 +257,22 @@ def poll_inbox():
             if not sehel_phone:
                 print(f"[SEHEL SKIP] no phone found for {from_email}")
             else:
-                _sehel.update_lead_after_conversation(
-                    sehel_phone,
-                    updated,
-                    is_relevant=is_relevant,
-                    agent_email=agent_email,
-                    client_name=name,
-                    channel="Email",
-                    dry_run=dry,
-                )
+                # שלח הערה לכרטיס הקיים בשכל עם תמליל השיחה
+                from datetime import datetime
+                date_str = datetime.now().strftime("%d/%m/%Y %H:%M")
+                status_str = "לקוח רלוונטי — הועבר לסוכן" if is_relevant else "לקוח לא רלוונטי"
+                note = f"[מייל] הערת ליד — {date_str}\nסטטוס: {status_str}\nמייל: {from_email}\n\nתמליל שיחה:\n{updated[:1500]}"
+                try:
+                    _sehel.log_call_summary(sehel_phone, note, dry_run=dry)
+                    print(f"[SEHEL EMAIL NOTE] {sehel_phone} | relevant={is_relevant}")
+                except Exception as e:
+                    print(f"[SEHEL EMAIL NOTE ERROR] {e}")
+            # שלח התראה לסוכן
+            if is_relevant and agent_email:
+                try:
+                    from .email_api import _send_agent_alert
+                    _send_agent_alert(agent_email, name, from_email, updated, channel="Email")
+                except Exception as e:
+                    print(f"[AGENT ALERT ERROR] {e}")
 
     mail.logout()

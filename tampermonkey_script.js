@@ -449,6 +449,8 @@
     let wl_leads = [];
     let wl_sentPhones = new Set();
     let wl_sentDates = {};
+    let wl_sentEmails = new Set();
+    let wl_sentEmailDates = {};
     let wl_unchecked = new Set();
     let wl_lang_filter = 'all'; // 'all' | 'he' | 'en'
 
@@ -473,10 +475,23 @@
             const res = await fetch(`${BOT_URL}/api/whatsapp/sent-phones?agent_email=${encodeURIComponent(wl_agent.email)}`);
             const data = await res.json();
             wl_sentPhones = new Set(data.phones || []);
-            // שמירת תאריכי שליחה
             wl_sentDates = {};
             (data.phones_with_dates || []).forEach(p => { wl_sentDates[p.phone] = p.sent_at; });
         } catch(e) { wl_sentPhones = new Set(); wl_sentDates = {}; }
+        // טען גם מיילים שנשלחו
+        try {
+            const res2 = await fetch(`${BOT_URL}/api/email/sent`);
+            const data2 = await res2.json();
+            wl_sentEmails = new Set();
+            wl_sentEmailDates = {};
+            (data2.conversations || []).forEach(c => {
+                if (c.phone && c.phone.startsWith('email:')) {
+                    const email = c.phone.replace('email:', '');
+                    wl_sentEmails.add(email);
+                    wl_sentEmailDates[email] = c.sent_at;
+                }
+            });
+        } catch(e) { wl_sentEmails = new Set(); wl_sentEmailDates = {}; }
     }
 
     const PROFESSIONAL_KEYWORDS = [
@@ -675,16 +690,20 @@
             const project = div.querySelector('.label')?.innerText?.trim() || 'יד 2';
             const parts = (lead.updateDate || lead.createDate || '').split(' ')[0].split('-');
             const dateStr = parts.length === 3 ? `${parts[0]}.${parts[1]}.${parts[2]}` : '—';
-            const isChecked = !wl_unchecked.has(phone);
+            const isChecked = !wl_unchecked.has(phone) && !alreadySent;
             const alreadySent = wl_sentPhones.has(phone);
             const sentDate = alreadySent && wl_sentDates[phone] ? new Date(wl_sentDates[phone]).toLocaleDateString('he-IL') : '';
-            const sentBadge = alreadySent ? `<div style="background:#fef9c3;color:#854d0e;font-size:10px;padding:1px 6px;border-radius:10px;display:inline-block;margin-bottom:3px;">📤 נשלח ${sentDate}</div><br>` : '';
+            const sentBadge = alreadySent ? `<div style="background:#fef9c3;color:#854d0e;font-size:10px;padding:1px 6px;border-radius:10px;display:inline-block;margin-bottom:3px;">📤 וואטסאפ ${sentDate}</div><br>` : '';
+            const email = lead.email1 || '';
+            const alreadyEmailSent = email && wl_sentEmails.has(email);
+            const emailSentDate = alreadyEmailSent && wl_sentEmailDates[email] ? new Date(wl_sentEmailDates[email]).toLocaleDateString('he-IL') : '';
+            const emailBadge = alreadyEmailSent ? `<div style="background:#e0e7ff;color:#3730a3;font-size:10px;padding:1px 6px;border-radius:10px;display:inline-block;margin-bottom:3px;">📧 מייל ${emailSentDate}</div><br>` : '';
             return `
                 <tr style="border-bottom:1px solid #f0f0f0;${alreadySent ? 'background:#fffbeb;' : ''}">
                     <td style="padding:6px;text-align:center;">
                         <input type="checkbox" class="wl-cb" data-idx="${idx}" data-phone="${phone}" ${isChecked ? 'checked' : ''}>
                     </td>
-                    <td style="padding:6px;font-size:13px;">${sentBadge}${name}<br><span style="color:#888;font-size:11px;">${phone}</span></td>
+                    <td style="padding:6px;font-size:13px;">${sentBadge}${emailBadge}${name}<br><span style="color:#888;font-size:11px;">${phone}</span></td>
                     <td style="padding:6px;font-size:12px;color:#555;">${project}</td>
                     <td style="padding:6px;font-size:11px;color:#999;">${dateStr}</td>
                     <td style="padding:6px;text-align:center;">
