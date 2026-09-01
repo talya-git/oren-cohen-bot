@@ -466,6 +466,7 @@
         wl_offset = 0;
         loadWlPage();
     }
+    window.wlSetLangFilter = setLangFilter;
 
     async function fetchSentPhones() {
         try {
@@ -654,8 +655,6 @@
                 if (wl_lang_filter === 'he' && !isHe) continue;
                 if (wl_lang_filter === 'en' && isHe) continue;
             }
-            const timelineText = await getTimelineText(lead);
-            if (isProfessionalInTimeline(timelineText)) { console.log('[TIMELINE PRO]', lead.name1); continue; }
             filtered.push(lead);
         }
 
@@ -1020,9 +1019,9 @@
 
                 <!-- סינון שפה -->
                 <div style="display:flex;gap:8px;margin-bottom:12px;">
-                    <button id="wl-filter-all" onclick="setLangFilter('all')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #6366f1;background:#6366f1;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">הכל</button>
-                    <button id="wl-filter-he" onclick="setLangFilter('he')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #ddd;background:#f8f9fa;color:#333;font-size:13px;font-weight:600;cursor:pointer;">🇮🇱 עברית</button>
-                    <button id="wl-filter-en" onclick="setLangFilter('en')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #ddd;background:#f8f9fa;color:#333;font-size:13px;font-weight:600;cursor:pointer;">🇬🇧 אנגלית</button>
+                    <button id="wl-filter-all" onclick="wlSetLangFilter('all')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #6366f1;background:#6366f1;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">הכל</button>
+                    <button id="wl-filter-he" onclick="wlSetLangFilter('he')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #ddd;background:#f8f9fa;color:#333;font-size:13px;font-weight:600;cursor:pointer;">🇮🇱 עברית</button>
+                    <button id="wl-filter-en" onclick="wlSetLangFilter('en')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #ddd;background:#f8f9fa;color:#333;font-size:13px;font-weight:600;cursor:pointer;">🇬🇧 אנגלית</button>
                 </div>
 
                 <!-- סטטוס שליחה -->
