@@ -161,6 +161,8 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
     _wa_is_reengagement[normalized] = True
     _wa_sessions[normalized] = convo
 
+    final_agent_email = agent_email or ("aaron@orencohengroup.com" if is_projects else "office@orencohengroup.com")
+
     division = "פרויקטים" if is_projects else "יד 2"
     print(f"[INBOUND] {phone} | {name} | פרויקט: {project_name!r} | מחלקה: {division}")
 
@@ -186,13 +188,11 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
 
     convo.messages.append({"role": "assistant", "content": greeting})
     print(f"[GREETING] phone={normalized} name={name!r} lang={lang} project={pname_for_convo!r}")
-    result = send_template_reengagement(f"+{normalized}", name, lang, agent_email or final_agent_email)
+    result = send_template_reengagement(f"+{normalized}", name, lang, final_agent_email)
     if "error" in result or (result.get("messages", [{}])[0].get("message_status") == "failed"):
         error_msg = result.get("error", {}).get("message", "Meta API error")
         raise Exception(error_msg)
 
-    from . import database as _db
-    final_agent_email = agent_email or ("aaron@orencohengroup.com" if is_projects else "office@orencohengroup.com")
     initial_transcript = f"דניאל: {greeting}"
     _db.mark_reengagement_sent(f"+{normalized}", name or "", final_agent_email, transcript=initial_transcript)
 

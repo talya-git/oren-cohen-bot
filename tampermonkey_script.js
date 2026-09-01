@@ -477,6 +477,7 @@
             wl_sentPhones = new Set(data.phones || []);
             wl_sentDates = {};
             (data.phones_with_dates || []).forEach(p => { wl_sentDates[p.phone] = p.sent_at; });
+
         } catch(e) { wl_sentPhones = new Set(); wl_sentDates = {}; }
         // טען גם מיילים שנשלחו
         try {
@@ -648,6 +649,8 @@
         const candidates = raw.filter(lead => {
             const phone = normalizePhone(lead.phone1);
             if (!phone || seenPhones.has(phone)) return false;
+            if (wl_sentPhones.has(phone)) return false;
+
             const pdiv = document.createElement('div');
             pdiv.innerHTML = lead.projectNameHtml || '';
             const proj = pdiv.querySelector('.label')?.innerText?.trim() || '';
@@ -690,8 +693,8 @@
             const project = div.querySelector('.label')?.innerText?.trim() || 'יד 2';
             const parts = (lead.updateDate || lead.createDate || '').split(' ')[0].split('-');
             const dateStr = parts.length === 3 ? `${parts[0]}.${parts[1]}.${parts[2]}` : '—';
-            const isChecked = !wl_unchecked.has(phone) && !alreadySent;
             const alreadySent = wl_sentPhones.has(phone);
+            const isChecked = !wl_unchecked.has(phone) && !alreadySent;
             const sentDate = alreadySent && wl_sentDates[phone] ? new Date(wl_sentDates[phone]).toLocaleDateString('he-IL') : '';
             const sentBadge = alreadySent ? `<div style="background:#fef9c3;color:#854d0e;font-size:10px;padding:1px 6px;border-radius:10px;display:inline-block;margin-bottom:3px;">📤 וואטסאפ ${sentDate}</div><br>` : '';
             const email = lead.email1 || '';
