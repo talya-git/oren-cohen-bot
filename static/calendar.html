@@ -573,7 +573,14 @@ function showDayPanel(date) {
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
           מחק
         </button>
-      </div>` : ''}
+        <button class="btn-catering" data-date="${formatDate(date)}" data-time="${m.meeting_time}" data-client="${m.client_name}" style="background:#fff;color:#f59e0b;border:1.5px solid #fde68a;border-radius:7px;padding:6px 10px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:4px;">
+          כיבוד ☕
+        </button>
+      </div>` : `<div class="card-actions">
+        <button class="btn-catering" data-date="${formatDate(date)}" data-time="${m.meeting_time}" data-client="${m.client_name}" style="background:#fff;color:#f59e0b;border:1.5px solid #fde68a;border-radius:7px;padding:6px 10px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:4px;">
+          כיבוד ☕
+        </button>
+      </div>`}
     </div>
   `).join('');
 
@@ -587,6 +594,9 @@ function showDayPanel(date) {
       btn.onclick = () => deleteMeeting(+btn.dataset.id);
     });
   }
+  list.querySelectorAll('.btn-catering').forEach(btn => {
+    btn.onclick = () => orderCatering(btn.dataset.date, btn.dataset.time, btn.dataset.client);
+  });
 }
 
 let _editingId = null;
@@ -700,6 +710,52 @@ async function deleteMeeting(id) {
   if (!confirm('למחוק פגישה זו?')) return;
   await fetch(`/api/meetings/${id}`, { method: 'DELETE' });
   await loadMonthMeetings();
+}
+
+async function orderCatering(date, time, clientName) {
+  const agentName = currentAgent ? currentAgent.label : '';
+
+  // בחירת סוג כיבוד
+  const existing = document.getElementById('catering-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'catering-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:20px;padding:28px 24px;width:320px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+      <div style="font-size:36px;margin-bottom:12px">☕🥤</div>
+      <h3 style="font-size:17px;font-weight:700;color:#1e293b;margin-bottom:6px">הזמנת כיבוד</h3>
+      <p style="font-size:13px;color:#64748b;margin-bottom:20px">פגישה: ${clientName} | ${date} ${time}</p>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button onclick="sendCateringMsg('${date}','${time}','${clientName}','${agentName}','כיבוד')" style="padding:12px;border-radius:10px;border:2px solid #fde68a;background:#fffbeb;font-size:15px;font-weight:600;color:#92400e;cursor:pointer;">🥤 כיבוד בלבד</button>
+        <button onclick="sendCateringMsg('${date}','${time}','${clientName}','${agentName}','שתייה')" style="padding:12px;border-radius:10px;border:2px solid #bfdbfe;background:#eff6ff;font-size:15px;font-weight:600;color:#1e40af;cursor:pointer;">☕ שתייה בלבד</button>
+        <button onclick="sendCateringMsg('${date}','${time}','${clientName}','${agentName}','כיבוד ושתייה')" style="padding:12px;border-radius:10px;border:2px solid #d1fae5;background:#f0fdf4;font-size:15px;font-weight:600;color:#065f46;cursor:pointer;">🥤☕ כיבוד ושתייה</button>
+        <button onclick="document.getElementById('catering-overlay').remove()" style="padding:10px;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;font-size:14px;color:#64748b;cursor:pointer;">ביטול</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+}
+
+async function sendCateringMsg(date, time, clientName, agentName, type) {
+  document.getElementById('catering-overlay')?.remove();
+  const msg = `שלום בועז,
+תזכורת ${type}:
+פגישה עם ${clientName}
+תאריך: ${date} | שעה: ${time}
+סוכן: ${agentName}
+נא לוודא שיש מספיק ${type}.`;
+  try {
+    const res = await fetch('/api/whatsapp/send-message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: '+972545596052', message: msg })
+    });
+    const data = await res.json();
+    alert(data.status === 'sent' ? `תזכורת ${type} נשלחה לבועז` : 'שגיאה בשליחה');
+  } catch(e) { alert('שגיאה: ' + e.message); }
 }
 
 function renderTodaySidebar() {
