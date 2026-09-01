@@ -252,6 +252,8 @@
 
   <!-- שלב 3: לוח פגישות -->
   <div id="step-calendar" style="display:none">
+    <div style="display:flex;gap:16px;align-items:flex-start;">
+      <div style="flex:1;min-width:0;">
     <div class="cal-header">
       <div class="cal-title" id="month-title">בחר סוכן להצגת לוח</div>
       <div class="cal-nav">
@@ -262,6 +264,14 @@
     </div>
     <div class="cal-grid" id="cal-grid">
       <div style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:40px;font-size:14px;">בחר סוכן כדי להציג את לוח הפגישות</div>
+    </div>
+      </div>
+
+      <!-- פאנל שעות היום -->
+      <div id="today-sidebar" style="width:200px;flex-shrink:0;background:#fff;border-radius:16px;padding:14px;box-shadow:0 1px 8px rgba(0,0,0,0.06);">
+        <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px;text-align:center;">📅 היום</div>
+        <div id="today-hours" style="display:flex;flex-direction:column;gap:4px;"></div>
+      </div>
     </div>
   </div>
 
@@ -452,6 +462,7 @@ async function loadMonthMeetings() {
   });
   renderCalendar();
   if (selectedDate) showDayPanel(selectedDate);
+  renderTodaySidebar();
 }
 
 function renderCalendar() {
@@ -623,13 +634,38 @@ async function addMeeting() {
   const zoomLink = document.getElementById('zoom-link').value.trim();
   const notes = document.getElementById('meeting-notes').value.trim();
   if (!clientName) { alert('נא להזין שם לקוח'); return; }
+  if (!time) { alert('נא לבחור שעה'); return; }
 
-  // בדיקת התנגשות רק למחלקת פרויקטים
-  if (currentDept === 'projects' && time) {
-    const chk = await fetch(`/api/meetings/check-conflict?date=${formatDate(selectedDate)}&time=${time}&department=projects&agent=${encodeURIComponent(currentAgent.label)}`).then(r => r.json());
-    if (chk.conflict) {
-      alert(`נקבעה כבר פגישה ע"י ${chk.agent_name} לשעה ${time}`);
-      return;
+  // בדיקת חסימת 45 דקות + התראת 15 דקות — בכל המחלקות
+  if (selectedDate) {
+    const dateStr = formatDate(selectedDate);
+    const dayMeetings = allMeetings[dateStr] || [];
+    const [newH, newM] = time.split(':').map(Number);
+    const newMins = newH * 60 + newM;
+
+    for (const m of dayMeetings) {
+      if (!m.meeting_time) continue;
+      const [mH, mM] = m.meeting_time.split(':').map(Number);
+      const mMins = mH * 60 + mM;
+      const diff = newMins - mMins; // דקות אחרי הפגישה הקיימת
+      const diffRev = mMins - newMins; // דקות לפני הפגישה הקיימת
+
+      if (diff > 0 && diff < 45) {
+        // חסום — בתוך 45 דקות מפגישה קיימת
+        alert(`לא ניתן לקבוע פגישה — הפגישה של ${m.client_name || m.agent_name} התחילה לפני ${diff} דקות בלבד.\nיש להמתין לפחות 45 דקות בין פגישות.`);
+        return;
+      }
+      if (diff >= 45 && diff < 60) {
+        // אזור ההפסקה — שאל אם להמשיך
+        const minsAfter = diff - 45;
+        const ok = confirm(`הפגישה של ${m.client_name || m.agent_name} הסתיימה לפני ${minsAfter} דקות.\nיש הפסקה של 15 דקות בין פגישות — תרצה בכל אופן לקבוע?`);
+        if (!ok) return;
+      }
+      if (diffRev > 0 && diffRev < 45) {
+        // חסום — פגישה קיימת מתחילה בעוד ${diffRev} דקות
+        alert(`לא ניתן לקבוע פגישה — יש פגישה של ${m.client_name || m.agent_name} בעוד ${diffRev} דקות.\nיש להמתין לפחות 45 דקות בין פגישות.`);
+        return;
+      }
     }
   }
 
@@ -646,12 +682,43 @@ async function addMeeting() {
   }
   closeModal();
   await loadMonthMeetings();
+  renderTodaySidebar();
 }
 
 async function deleteMeeting(id) {
   if (!confirm('למחוק פגישה זו?')) return;
   await fetch(`/api/meetings/${id}`, { method: 'DELETE' });
   await loadMonthMeetings();
+}
+
+function renderTodaySidebar() {
+  const container = document.getElementById('today-hours');
+  if (!container) return;
+  const todayStr = formatDate(new Date());
+  const todayMeetings = allMeetings[todayStr] || [];
+
+  // שעות עבודה 8:00-20:00 בקפיצות של שעה
+  const hours = [];
+  for (let h = 8; h <= 19; h++) {
+    const timeStr = `${String(h).padStart(2,'0')}:00`;
+    const meeting = todayMeetings.find(m => m.meeting_time && m.meeting_time.startsWith(timeStr.slice(0,2)));
+    hours.push({ time: timeStr, meeting });
+  }
+
+  container.innerHTML = hours.map(({ time, meeting }) => {
+    if (meeting) {
+      return `<div style="background:#fee2e2;border-radius:8px;padding:6px 8px;font-size:11px;">
+        <div style="font-weight:700;color:#991b1b;">${time}</div>
+        <div style="color:#7f1d1d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${meeting.client_name}">${meeting.client_name}</div>
+        ${meeting.agent_name ? `<div style="color:#b91c1c;font-size:10px;">${meeting.agent_name}</div>` : ''}
+      </div>`;
+    } else {
+      return `<div style="background:#f0fdf4;border-radius:8px;padding:6px 8px;font-size:11px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-weight:600;color:#166534;">${time}</span>
+        <span style="color:#16a34a;font-size:10px;">פנוי</span>
+      </div>`;
+    }
+  }).join('');
 }
 
 document.getElementById('add-modal').addEventListener('click', e => {
