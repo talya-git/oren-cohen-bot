@@ -580,7 +580,7 @@ async def sent_phones(agent_email: str):
     from . import database as _db
     conn = _db.get_db()
     cur = conn.cursor()
-    cur.execute(f"SELECT phone, sent_at FROM reengagement_sent WHERE LOWER(agent_email)=LOWER({_db.PH})", (agent_email,))
+    cur.execute(f"SELECT phone, sent_at FROM reengagement_sent WHERE phone NOT LIKE 'email:%'")
     rows = _db._fetchall(cur)
     conn.close()
     phones = [r["phone"] for r in rows]
