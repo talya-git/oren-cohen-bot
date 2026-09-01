@@ -314,7 +314,11 @@
     <input type="text" id="client-name" placeholder="ישראל ישראלי" />
     <label>שעה</label>
     <input type="text" id="meeting-time" placeholder="09:00" maxlength="5"
-      oninput="this.value=this.value.replace(/[^0-9:]/g,'')"
+      oninput="
+        let v=this.value.replace(/[^0-9]/g,'');
+        if(v.length>=3) v=v.slice(0,2)+':'+v.slice(2,4);
+        this.value=v;
+      "
       style="direction:ltr;text-align:center;letter-spacing:2px;font-size:20px;" />
     <label>סוג פגישה</label>
     <div style="display:flex;gap:8px;margin-bottom:14px">
