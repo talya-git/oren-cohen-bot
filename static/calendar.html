@@ -337,6 +337,21 @@
     <input type="text" id="handled-by" placeholder="שם הסוכן המטפל" style="display:none" />
     <label>הערות</label>
     <textarea id="meeting-notes" placeholder="פרטים נוספים..."></textarea>
+    <label>כיבוד ושתייה</label>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+      <label style="flex:1;min-width:80px;display:flex;align-items:center;gap:6px;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:14px;font-weight:500;color:#1e293b" id="lbl-cat-none">
+        <input type="radio" name="catering" value="none" checked onchange="updateCateringLabels()"> בלי
+      </label>
+      <label style="flex:1;min-width:80px;display:flex;align-items:center;gap:6px;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:14px;font-weight:500;color:#1e293b" id="lbl-cat-food">
+        <input type="radio" name="catering" value="כיבוד" onchange="updateCateringLabels()"> 🥤 כיבוד
+      </label>
+      <label style="flex:1;min-width:80px;display:flex;align-items:center;gap:6px;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:14px;font-weight:500;color:#1e293b" id="lbl-cat-drink">
+        <input type="radio" name="catering" value="שתייה" onchange="updateCateringLabels()"> ☕ שתייה
+      </label>
+      <label style="flex:1;min-width:80px;display:flex;align-items:center;gap:6px;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:14px;font-weight:500;color:#1e293b" id="lbl-cat-both">
+        <input type="radio" name="catering" value="כיבוד ושתייה" onchange="updateCateringLabels()"> 🥤☕ שניהם
+      </label>
+    </div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeModal()">ביטול</button>
       <button class="btn-add" onclick="addMeeting()">
@@ -621,6 +636,8 @@ function openAddModal() {
   document.getElementById('zoom-link').value = '';
   document.getElementById('meeting-notes').value = '';
   document.querySelector('input[value="frontal"]').checked = true;
+  document.querySelector('input[name="catering"][value="none"]').checked = true;
+  updateCateringLabels();
   document.getElementById('add-modal').classList.add('open');
   updateTypeLabels();
 }
@@ -636,6 +653,14 @@ function openEditModal(id, clientName, time, type, zoomLink, notes) {
   document.querySelector(`input[value="${typeVal}"]`).checked = true;
   document.getElementById('add-modal').classList.add('open');
   updateTypeLabels();
+}
+
+function updateCateringLabels() {
+  const val = document.querySelector('input[name="catering"]:checked')?.value || 'none';
+  document.getElementById('lbl-cat-none').style.borderColor  = val === 'none' ? '#94a3b8' : '#e2e8f0';
+  document.getElementById('lbl-cat-food').style.borderColor  = val === 'כיבוד' ? '#f59e0b' : '#e2e8f0';
+  document.getElementById('lbl-cat-drink').style.borderColor = val === 'שתייה' ? '#3b82f6' : '#e2e8f0';
+  document.getElementById('lbl-cat-both').style.borderColor  = val === 'כיבוד ושתייה' ? '#10b981' : '#e2e8f0';
 }
 
 function closeModal() { document.getElementById('add-modal').classList.remove('open'); }
@@ -704,6 +729,25 @@ async function addMeeting() {
   closeModal();
   await loadMonthMeetings();
   renderTodaySidebar();
+
+  // שלח לבועז אם נבחר כיבוד
+  const catering = document.querySelector('input[name="catering"]:checked')?.value || 'none';
+  if (catering !== 'none' && !_editingId) {
+    const dateStr = formatDate(selectedDate);
+    const msg = `שלום בועז,
+תזכורת ${catering}:
+פגישה עם ${clientName}
+תאריך: ${dateStr} | שעה: ${time}
+סוכן: ${currentAgent.label}
+נא לוודא שיש מספיק ${catering}.`;
+    try {
+      await fetch('/api/whatsapp/send-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: '+972545596052', message: msg })
+      });
+    } catch(e) { console.error('catering msg failed', e); }
+  }
 }
 
 async function deleteMeeting(id) {
