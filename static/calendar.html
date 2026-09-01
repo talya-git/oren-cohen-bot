@@ -313,7 +313,9 @@
     <label>שם לקוח *</label>
     <input type="text" id="client-name" placeholder="ישראל ישראלי" />
     <label>שעה</label>
-    <input type="time" id="meeting-time" step="300" />
+    <input type="text" id="meeting-time" placeholder="09:00" maxlength="5"
+      oninput="this.value=this.value.replace(/[^0-9:]/g,'')"
+      style="direction:ltr;text-align:center;letter-spacing:2px;font-size:20px;" />
     <label>סוג פגישה</label>
     <div style="display:flex;gap:8px;margin-bottom:14px">
       <label style="flex:1;display:flex;align-items:center;gap:6px;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:14px;font-weight:500;color:#1e293b" id="lbl-frontal">
@@ -688,7 +690,10 @@ async function addMeeting() {
   const zoomLink = document.getElementById('zoom-link').value.trim();
   const notes = document.getElementById('meeting-notes').value.trim();
   if (!clientName) { alert('נא להזין שם לקוח'); return; }
-  if (!time) { alert('נא לבחור שעה'); return; }
+  if (!time || !/^\d{1,2}:\d{2}$/.test(time)) { alert('נא להזין שעה בפורמט HH:MM (\u05dcמשל 09:30)'); return; }
+  const [hh, mm] = time.split(':').map(Number);
+  if (hh > 23 || mm > 59) { alert('שעה לא תקינה'); return; }
+  time = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
 
   // בדיקת חסימת 45 דקות + התראת 15 דקות — כל המחלקות
   if (selectedDate) {
@@ -712,16 +717,14 @@ async function addMeeting() {
       const newEndMins = newMins + 45; // סיום הפגישה החדשה
 
       if (mMins < newMins) {
-        // פגישה קיימת לפני הפגישה החדשה
         if (newMins < mEndMins) {
-          // חסום: הפגישה הקיימת עדיין רצה
-          alert(`לא ניתן לקבוע פגישה — הפגישה של ${m.client_name} (${m.agent_name || ''}) עדיין מתקיימת ותסתיים ב-${String(Math.floor(mEndMins/60)).padStart(2,'0')}:${String(mEndMins%60).padStart(2,'0')}.`);
+          const minsLeft = mEndMins - newMins;
+          alert(`לא ניתן לקבוע פגישה — הפגישה של ${m.client_name} (${m.agent_name || ''}) תסתיים בעוד ${minsLeft} דקות (ב-${String(Math.floor(mEndMins/60)).padStart(2,'0')}:${String(mEndMins%60).padStart(2,'0')}).`);
           return;
         }
         if (newMins < mEndMins + 15) {
-          // התראה: בתוך הפסקה של 15 דקות
-          const minsAfterEnd = newMins - mEndMins;
-          const ok = confirm(`הפגישה של ${m.client_name} (${m.agent_name || ''}) הסתיימה לפני ${minsAfterEnd} דקות.\nיש הפסקה של 15 דקות בין פגישות — תרצה בכל אופן לקבוע?`);
+          const minsUntilFree = mEndMins - newMins;
+          const ok = confirm(`הפגישה של ${m.client_name} (${m.agent_name || ''}) תסתיים בעוד ${minsUntilFree} דקות.\nיש הפסקה של 15 דקות בין פגישות — תרצה בכל אופן לקבוע?`);
           if (!ok) return;
         }
         // אם הפגישה הקיימת מסתיימת 15+ דקות לפני הפגישה החדשה — בסדר
