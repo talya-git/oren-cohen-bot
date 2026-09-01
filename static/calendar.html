@@ -716,11 +716,19 @@ async function addMeeting() {
         if (!ok) return;
       }
 
-      // הפגישה הקיימת מתחילה בתוך 45 דקות מהפגישה החדשה (חסום)
+      // הפגישה הקיימת מתחילה לפני שהפגישה החדשה מסתיימת (חסום)
       const newEndMins = newMins + 45;
-      if (mMins > newMins && mMins < newEndMins) {
-        const minsUntil = mMins - newMins;
-        alert(`לא ניתן לקבוע פגישה — יש פגישה של ${m.client_name} (${m.agent_name || ''}) בעוד ${minsUntil} דקות.\nיש להמתין לפחות 45 דקות בין פגישות.`);
+      if (mMins > newEndMins && mMins < newEndMins + 45) {
+        const minsUntil = mMins - newEndMins;
+        if (minsUntil < 15) {
+          const ok = confirm(`הפגישה של ${m.client_name} (${m.agent_name || ''}) מתחילה בעוד ${mMins - newMins} דקות.\nיש הפסקה של 15 דקות בין פגישות — תרצה בכל אופן לקבוע?`);
+          if (!ok) return;
+        } else {
+          alert(`לא ניתן לקבוע פגישה — יש פגישה של ${m.client_name} (${m.agent_name || ''}) בעוד ${mMins - newMins} דקות.\nיש להמתין לפחות 45 דקות בין פגישות.`);
+          return;
+        }
+      } else if (mMins > newMins && mMins <= newEndMins) {
+        alert(`לא ניתן לקבוע פגישה — יש פגישה של ${m.client_name} (${m.agent_name || ''}) בעוד ${mMins - newMins} דקות.\nהפגישות יחפפו אחת את השנייה.`);
         return;
       }
     }
