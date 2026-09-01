@@ -646,7 +646,7 @@
 
         const filtered = [];
         if (statusEl) statusEl.textContent = 'בודק...';
-        for (const lead of candidates.slice(0, 30)) {
+        for (const lead of candidates) {
             if (filtered.length >= 20) break;
             // סינון שפה
             if (wl_lang_filter !== 'all') {
