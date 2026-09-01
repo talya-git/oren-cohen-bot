@@ -694,11 +694,11 @@
             const parts = (lead.updateDate || lead.createDate || '').split(' ')[0].split('-');
             const dateStr = parts.length === 3 ? `${parts[0]}.${parts[1]}.${parts[2]}` : '—';
             const alreadySent = wl_sentPhones.has(phone);
-            const isChecked = !wl_unchecked.has(phone) && !alreadySent;
-            const sentDate = alreadySent && wl_sentDates[phone] ? new Date(wl_sentDates[phone]).toLocaleDateString('he-IL') : '';
-            const sentBadge = alreadySent ? `<div style="background:#fef9c3;color:#854d0e;font-size:10px;padding:1px 6px;border-radius:10px;display:inline-block;margin-bottom:3px;">📤 וואטסאפ ${sentDate}</div><br>` : '';
             const email = lead.email1 || '';
             const alreadyEmailSent = email && wl_sentEmails.has(email);
+            const isChecked = !wl_unchecked.has(phone) && !alreadySent && !alreadyEmailSent;
+            const sentDate = alreadySent && wl_sentDates[phone] ? new Date(wl_sentDates[phone]).toLocaleDateString('he-IL') : '';
+            const sentBadge = alreadySent ? `<div style="background:#fef9c3;color:#854d0e;font-size:10px;padding:1px 6px;border-radius:10px;display:inline-block;margin-bottom:3px;">📤 וואטסאפ ${sentDate}</div><br>` : '';
             const emailSentDate = alreadyEmailSent && wl_sentEmailDates[email] ? new Date(wl_sentEmailDates[email]).toLocaleDateString('he-IL') : '';
             const emailBadge = alreadyEmailSent ? `<div style="background:#e0e7ff;color:#3730a3;font-size:10px;padding:1px 6px;border-radius:10px;display:inline-block;margin-bottom:3px;">📧 מייל ${emailSentDate}</div><br>` : '';
             return `
