@@ -124,10 +124,18 @@ async def send_morning_reminders():
         except Exception as e:
             print(f"[REMINDER WA ERROR] {agent['שם']}: {e}")
 
-    # רוני — template נפרד עם תאריך
+    # רוני — template נפרד עם תאריך, ב-9:30
     try:
-        status = _send_wa_template("+972528962040", "morning_reminder_he", [date_str])
-        print(f"[REMINDER WA] Roni -> {status}")
+        import zoneinfo as _zi
+        il_tz2 = _zi.ZoneInfo("Asia/Jerusalem")
+        now_il2 = datetime.now(il_tz2)
+        target_roni = now_il2.replace(hour=9, minute=30, second=0, microsecond=0)
+        if now_il2 >= target_roni:
+            target_roni += timedelta(days=1)
+        await asyncio.sleep((target_roni - now_il2).total_seconds())
+        if target_roni.weekday() not in (4, 5):
+            status = _send_wa_template("+972528962040", "morning_reminder_he", [date_str])
+            print(f"[REMINDER WA] Roni -> {status}")
     except Exception as e:
         print(f"[REMINDER WA ERROR] Roni: {e}")
 
