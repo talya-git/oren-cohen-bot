@@ -441,7 +441,6 @@
         { label: 'דב',     email: 'dovr@orencohengroup.com' },
         { label: 'נתנאל',  email: 'netanel@orencohengroup.com' },
         { label: 'נעמי',   email: 'NaomiS@orencohengroup.com' },
-        { label: 'נתנאל',  email: 'netanel@orencohengroup.com' },
     ];
 
     // state

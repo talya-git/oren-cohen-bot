@@ -205,6 +205,17 @@
     .modal { border-radius: 20px; max-width: 440px; padding: 28px; }
     @keyframes modalIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
   }
+  @media (max-width: 599px) {
+    #today-sidebar { width: 100% !important; margin-top: 12px; }
+    #step-calendar > div:first-child { flex-direction: column !important; }
+    .agent-btn { padding: 16px 8px; font-size: 14px; }
+    .cal-cell { min-height: 48px; padding: 3px; }
+    .cal-dot { font-size: 8px; padding: 1px 2px; }
+    .meeting-card { flex-wrap: wrap; }
+    .card-actions { flex-direction: row !important; }
+    .header h1 { font-size: 15px; }
+    .main { padding: 8px; }
+  }
 </style>
 </head>
 <body>
@@ -232,7 +243,7 @@
         <button onclick="chooseDept('projects')" style="padding:16px;border-radius:12px;border:2px solid #e2e8f0;background:#f8fafc;font-size:16px;font-weight:600;color:#1e293b;cursor:pointer;transition:all 0.15s" onmouseover="this.style.borderColor='#6366f1';this.style.background='#eef2ff'" onmouseout="this.style.borderColor='#e2e8f0';this.style.background='#f8fafc'">פרויקטים</button>
         <button onclick="chooseDept('yad2')" style="padding:16px;border-radius:12px;border:2px solid #e2e8f0;background:#f8fafc;font-size:16px;font-weight:600;color:#1e293b;cursor:pointer;transition:all 0.15s" onmouseover="this.style.borderColor='#6366f1';this.style.background='#eef2ff'" onmouseout="this.style.borderColor='#e2e8f0';this.style.background='#f8fafc'">יד 2</button>
         <button onclick="chooseDept('az')" style="padding:16px;border-radius:12px;border:2px solid #e2e8f0;background:#f8fafc;font-size:16px;font-weight:600;color:#1e293b;cursor:pointer;transition:all 0.15s" onmouseover="this.style.borderColor='#6366f1';this.style.background='#eef2ff'" onmouseout="this.style.borderColor='#e2e8f0';this.style.background='#f8fafc'">A-Z</button>
-      </div>
+        <button onclick="chooseDept('finance')" style="padding:16px;border-radius:12px;border:2px solid #e2e8f0;background:#f8fafc;font-size:16px;font-weight:600;color:#1e293b;cursor:pointer;transition:all 0.15s" onmouseover="this.style.borderColor='#6366f1';this.style.background='#eef2ff'" onmouseout="this.style.borderColor='#e2e8f0';this.style.background='#f8fafc'">כספים</button>      </div>
     </div>
   </div>
 
@@ -368,7 +379,7 @@ const MONTH_NAMES = ['ינואר','פברואר','מרץ','אפריל','מאי',
 const DAY_NAMES_FULL = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
 
 let currentDept = '';
-const DEPT_LABELS = { projects: 'מחלקת פרויקטים', yad2: 'מחלקת יד 2', az: 'מחלקת A-Z' };
+const DEPT_LABELS = { projects: 'מחלקת פרויקטים', yad2: 'מחלקת יד 2', az: 'מחלקת A-Z', finance: 'מחלקת כספים' };
 
 function chooseDept(dept) {
   currentDept = dept;
