@@ -674,7 +674,15 @@ function updateTypeLabels() {
 
 async function addMeeting() {
   const clientName = document.getElementById('client-name').value.trim();
-  const time = document.getElementById('meeting-time').value;
+  let time = document.getElementById('meeting-time').value;
+  // נרמול שעה — מוודא פורמט HH:MM 24 שעות
+  if (time && time.includes(' ')) {
+    const [t, ampm] = time.split(' ');
+    let [h, m] = t.split(':').map(Number);
+    if (ampm === 'PM' && h < 12) h += 12;
+    if (ampm === 'AM' && h === 12) h = 0;
+    time = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+  }
   const meetingType = document.querySelector('input[name="meeting_type"]:checked').value;
   const handledBy = currentAgent.label;
   const zoomLink = document.getElementById('zoom-link').value.trim();
@@ -836,7 +844,11 @@ function renderTodaySidebar() {
       const hours = [];
       for (let h = 8; h <= 19; h++) {
         const timeStr = `${String(h).padStart(2,'0')}:00`;
-        const meeting = todayMeetings.find(m => m.meeting_time && m.meeting_time.startsWith(String(h).padStart(2,'0')));
+        const meeting = todayMeetings.find(m => {
+          if (!m.meeting_time) return false;
+          const [mH] = m.meeting_time.split(':').map(Number);
+          return mH === h;
+        });
         hours.push({ time: timeStr, meeting });
       }
 
