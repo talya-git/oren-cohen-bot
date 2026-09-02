@@ -839,7 +839,8 @@ async def create_meeting(request: Request):
         handled_by=data.get("handled_by", ""),
         zoom_link=data.get("zoom_link", ""),
         notes=data.get("notes", ""),
-        department=data.get("department", "")
+        department=data.get("department", ""),
+        location=data.get("location", "")
     )
     return {"status": "ok", "id": mid}
 
@@ -863,6 +864,37 @@ async def update_meeting(meeting_id: int, request: Request):
 def delete_meeting(meeting_id: int):
     from . import database as _db
     _db.delete_meeting(meeting_id)
+    return {"status": "ok"}
+
+
+@app.get("/api/tours")
+def get_tours(start: str | None = None, end: str | None = None, agent: str | None = None):
+    from . import database as _db
+    tours = _db.get_tours_range(start or "", end or "", agent)
+    return {"tours": tours}
+
+
+@app.post("/api/tours")
+async def create_tour(request: Request):
+    from . import database as _db
+    data = await request.json()
+    tid = _db.create_tour(
+        agent_name=data.get("agent_name", ""),
+        agent_email=data.get("agent_email", ""),
+        client_name=data.get("client_name", ""),
+        apartment_name=data.get("apartment_name", ""),
+        tour_date=data.get("tour_date", ""),
+        tour_time=data.get("tour_time", ""),
+        notes=data.get("notes", ""),
+        department=data.get("department", "")
+    )
+    return {"status": "ok", "id": tid}
+
+
+@app.delete("/api/tours/{tour_id}")
+def delete_tour(tour_id: int):
+    from . import database as _db
+    _db.delete_tour(tour_id)
     return {"status": "ok"}
 
 

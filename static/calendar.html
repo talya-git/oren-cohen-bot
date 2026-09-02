@@ -296,6 +296,10 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         הוסף פגישה
       </button>
+      <button class="btn-add" id="btn-add-tour" style="display:none;background:linear-gradient(135deg,#f59e0b,#d97706);margin-right:8px" onclick="openAddTourModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        הוסף סיור
+      </button>
     </div>
     <div id="meetings-list"></div>
   </div><!-- end day-panel -->
@@ -320,6 +324,15 @@
         this.value=v;
       "
       style="direction:ltr;text-align:center;letter-spacing:2px;font-size:20px;" />
+    <label>מיקום פגישה</label>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <label style="flex:1;display:flex;align-items:center;gap:6px;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:14px;font-weight:500;color:#1e293b" id="lbl-loc-main">
+        <input type="radio" name="meeting_location" value="main" checked onchange="updateLocationLabels()"> 🏢 משרד ראשי
+      </label>
+      <label style="flex:1;display:flex;align-items:center;gap:6px;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:14px;font-weight:500;color:#1e293b" id="lbl-loc-projects">
+        <input type="radio" name="meeting_location" value="projects" onchange="updateLocationLabels()"> 🏗️ משרד פרויקטים
+      </label>
+    </div>
     <label>סוג פגישה</label>
     <div style="display:flex;gap:8px;margin-bottom:14px">
       <label style="flex:1;display:flex;align-items:center;gap:6px;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:14px;font-weight:500;color:#1e293b" id="lbl-frontal">
@@ -363,6 +376,32 @@
       <button class="btn-add" onclick="addMeeting()">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         שמור פגישה
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="tour-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" style="vertical-align:-3px;margin-left:7px"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>סיור חדש</span>
+    </div>
+    <label>שם לקוח *</label>
+    <input type="text" id="tour-client-name" placeholder="ישראל ישראלי" />
+    <label>שם הדירה *</label>
+    <input type="text" id="tour-apartment-name" placeholder="רחוביה 16 דירה 5" />
+    <label>שעה</label>
+    <input type="text" id="tour-time" placeholder="10:00" maxlength="5"
+      oninput="let v=this.value.replace(/[^0-9]/g,'');if(v.length>=3)v=v.slice(0,2)+':'+v.slice(2,4);this.value=v;"
+      style="direction:ltr;text-align:center;letter-spacing:2px;font-size:20px;" />
+    <label>הערות</label>
+    <textarea id="tour-notes" placeholder="פרטים נוספים..."></textarea>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeTourModal()">ביטול</button>
+      <button class="btn-add" style="background:linear-gradient(135deg,#f59e0b,#d97706)" onclick="addTour()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        שמור סיור
       </button>
     </div>
   </div>
@@ -486,10 +525,19 @@ async function loadMonthMeetings() {
     ? `/api/meetings?start=${startDate}&end=${endDate}`
     : `/api/meetings?start=${startDate}&end=${endDate}&agent=${encodeURIComponent(currentAgent.label)}`;
   allMeetings = {};
+  allTours = {};
   const data = await fetch(url).then(r => r.json());
   (data.meetings || []).forEach(m => {
     if (!allMeetings[m.meeting_date]) allMeetings[m.meeting_date] = [];
     allMeetings[m.meeting_date].push(m);
+  });
+  const tourUrl = currentAgent.isManager
+    ? `/api/tours?start=${startDate}&end=${endDate}`
+    : `/api/tours?start=${startDate}&end=${endDate}&agent=${encodeURIComponent(currentAgent.label)}`;
+  const tourData = await fetch(tourUrl).then(r => r.json());
+  (tourData.tours || []).forEach(t => {
+    if (!allTours[t.tour_date]) allTours[t.tour_date] = [];
+    allTours[t.tour_date].push(t);
   });
   renderCalendar();
   if (selectedDate) showDayPanel(selectedDate);
@@ -528,10 +576,11 @@ function renderCalendar() {
 function makeCell(date, otherMonth, todayStr, selectedStr) {
   const dateStr = formatDate(date);
   const meetings = allMeetings[dateStr] || [];
+  const tours = allTours[dateStr] || [];
   const cell = document.createElement('div');
   cell.className = 'cal-cell' +
     (otherMonth ? ' other-month' : '') +
-    (meetings.length ? ' has-meetings' : '') +
+    ((meetings.length || tours.length) ? ' has-meetings' : '') +
     (dateStr === todayStr ? ' today' : '') +
     (dateStr === selectedStr ? ' selected' : '');
   const dateEl = document.createElement('div');
@@ -544,10 +593,18 @@ function makeCell(date, otherMonth, todayStr, selectedStr) {
     dot.textContent = `${m.meeting_time} ${m.client_name}`;
     cell.appendChild(dot);
   });
-  if (meetings.length > 2) {
+  tours.slice(0, meetings.length >= 2 ? 0 : 2 - meetings.length).forEach(t => {
+    const dot = document.createElement('span');
+    dot.className = 'cal-dot';
+    dot.style.background = '#f59e0b';
+    dot.textContent = `🏠 ${t.tour_time} ${t.client_name}`;
+    cell.appendChild(dot);
+  });
+  const total = meetings.length + tours.length;
+  if (total > 2) {
     const more = document.createElement('div');
     more.className = 'cal-more';
-    more.textContent = `+${meetings.length-2} עוד`;
+    more.textContent = `+${total-2} עוד`;
     cell.appendChild(more);
   }
   cell.onclick = () => { selectedDate = new Date(date); renderCalendar(); showDayPanel(date); };
@@ -563,9 +620,11 @@ function showDayPanel(date) {
   document.getElementById('day-panel-count').textContent =
     meetings.length ? `${meetings.length} פגישות` : 'אין פגישות';
   document.getElementById('btn-add').style.display = currentAgent?.isManager ? 'none' : 'flex';
+  document.getElementById('btn-add-tour').style.display = currentAgent?.isManager ? 'none' : 'flex';
   const list = document.getElementById('meetings-list');
   const isManager = currentAgent?.isManager;
-  if (!meetings.length) {
+  const tours = allTours[dateStr] || [];
+  if (!meetings.length && !tours.length) {
     list.innerHTML = '<div class="empty"><div class="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>אין פגישות ביום זה</div>';
     return;
   }
@@ -583,6 +642,7 @@ function showDayPanel(date) {
           }
         </div>
         ${m.notes ? `<div class="meeting-notes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> ${m.notes}</div>` : ''}
+        ${m.location ? `<div class="meeting-agent" style="color:#7c3aed">🏢 ${m.location === 'main' ? 'משרד ראשי' : 'משרד פרויקטים'}</div>` : ''}
       </div>
       ${!isManager ? `<div class="card-actions">
         <button class="btn-edit" data-idx="${i}">
@@ -617,6 +677,33 @@ function showDayPanel(date) {
   list.querySelectorAll('.btn-catering').forEach(btn => {
     btn.onclick = () => orderCatering(btn.dataset.date, btn.dataset.time, btn.dataset.client);
   });
+
+  // הצגת סיורים
+  if (tours.length) {
+    const tourSection = document.createElement('div');
+    tourSection.style.cssText = 'margin-top:12px;border-top:2px dashed #fde68a;padding-top:12px;';
+    tourSection.innerHTML = `<div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:8px">🏠 סיורים (${tours.length})</div>`;
+    tours.forEach(t => {
+      const card = document.createElement('div');
+      card.className = 'meeting-card';
+      card.style.background = '#fffbeb';
+      card.style.borderColor = '#fde68a';
+      card.innerHTML = `
+        <div class="meeting-time-badge" style="background:linear-gradient(135deg,#f59e0b,#d97706)">${t.tour_time}</div>
+        <div class="meeting-info">
+          <div class="meeting-client">${t.client_name}</div>
+          <div class="meeting-agent" style="color:#92400e">🏠 ${t.apartment_name}</div>
+          ${t.notes ? `<div class="meeting-notes">${t.notes}</div>` : ''}
+        </div>
+        ${!isManager ? `<button class="btn-delete" onclick="deleteTour(${t.id})">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          מחק
+        </button>` : ''}
+      `;
+      tourSection.appendChild(card);
+    });
+    list.appendChild(tourSection);
+  }
 }
 
 let _editingId = null;
@@ -641,6 +728,8 @@ function openAddModal() {
   document.getElementById('zoom-link').value = '';
   document.getElementById('meeting-notes').value = '';
   document.querySelector('input[value="frontal"]').checked = true;
+  document.querySelector('input[name="meeting_location"][value="main"]').checked = true;
+  updateLocationLabels();
   document.querySelector('input[name="catering"][value="none"]').checked = true;
   updateCateringLabels();
   document.getElementById('add-modal').classList.add('open');
@@ -670,6 +759,12 @@ function updateCateringLabels() {
 
 function closeModal() { document.getElementById('add-modal').classList.remove('open'); }
 
+function updateLocationLabels() {
+  const loc = document.querySelector('input[name="meeting_location"]:checked')?.value || 'main';
+  document.getElementById('lbl-loc-main').style.borderColor = loc === 'main' ? '#6366f1' : '#e2e8f0';
+  document.getElementById('lbl-loc-projects').style.borderColor = loc === 'projects' ? '#6366f1' : '#e2e8f0';
+}
+
 function updateTypeLabels() {
   const frontal = document.querySelector('input[value="frontal"]').checked;
   document.getElementById('lbl-frontal').style.borderColor = frontal ? '#16a34a' : '#e2e8f0';
@@ -689,6 +784,7 @@ async function addMeeting() {
     time = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
   }
   const meetingType = document.querySelector('input[name="meeting_type"]:checked').value;
+  const location = document.querySelector('input[name="meeting_location"]:checked').value;
   const handledBy = currentAgent.label;
   const zoomLink = document.getElementById('zoom-link').value.trim();
   const notes = document.getElementById('meeting-notes').value.trim();
@@ -714,6 +810,8 @@ async function addMeeting() {
 
     for (const m of allDayMeetings) {
       if (!m.meeting_time) continue;
+      // אם משרד שונה — מותר במקביל
+      if (m.location && location && m.location !== location) continue;
       const [mH, mM] = m.meeting_time.split(':').map(Number);
       const mMins = mH * 60 + mM;
       const mEndMins = mMins + 45; // סיום הפגישה הקיימת
@@ -757,7 +855,7 @@ async function addMeeting() {
   } else {
     await fetch('/api/meetings', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ agent_name: currentAgent.label, agent_email: currentAgent.email, client_name: clientName, meeting_date: formatDate(selectedDate), meeting_time: time, meeting_type: meetingType, handled_by: handledBy, zoom_link: zoomLink, notes, department: currentDept })
+      body: JSON.stringify({ agent_name: currentAgent.label, agent_email: currentAgent.email, client_name: clientName, meeting_date: formatDate(selectedDate), meeting_time: time, meeting_type: meetingType, handled_by: handledBy, zoom_link: zoomLink, notes, department: currentDept, location })
     });
   }
   closeModal();
@@ -876,8 +974,52 @@ function renderTodaySidebar() {
     .catch(() => {});
 }
 
+// ─── סיורים ───────────────────────────────────────────────────────────────
+let allTours = {};
+
+function openAddTourModal() {
+  document.getElementById('tour-client-name').value = '';
+  document.getElementById('tour-apartment-name').value = '';
+  document.getElementById('tour-time').value = _nowTime();
+  document.getElementById('tour-notes').value = '';
+  document.getElementById('tour-modal').classList.add('open');
+}
+
+function closeTourModal() {
+  document.getElementById('tour-modal').classList.remove('open');
+}
+
+async function addTour() {
+  const clientName = document.getElementById('tour-client-name').value.trim();
+  const apartmentName = document.getElementById('tour-apartment-name').value.trim();
+  let time = document.getElementById('tour-time').value;
+  const notes = document.getElementById('tour-notes').value.trim();
+  if (!clientName) { alert('נא להזין שם לקוח'); return; }
+  if (!apartmentName) { alert('נא להזין שם דירה'); return; }
+  if (!time || !/^\d{1,2}:\d{2}$/.test(time)) { alert('נא להזין שעה תקינה'); return; }
+  const [hh, mm] = time.split(':').map(Number);
+  time = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+  await fetch('/api/tours', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ agent_name: currentAgent.label, agent_email: currentAgent.email,
+      client_name: clientName, apartment_name: apartmentName,
+      tour_date: formatDate(selectedDate), tour_time: time, notes, department: currentDept })
+  });
+  closeTourModal();
+  await loadMonthMeetings();
+}
+
+async function deleteTour(id) {
+  if (!confirm('למחוק סיור זה?')) return;
+  await fetch(`/api/tours/${id}`, { method: 'DELETE' });
+  await loadMonthMeetings();
+}
+
 document.getElementById('add-modal').addEventListener('click', e => {
   if (e.target === document.getElementById('add-modal')) closeModal();
+});
+document.getElementById('tour-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('tour-modal')) closeTourModal();
 });
 </script>
 </body>

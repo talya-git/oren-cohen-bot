@@ -138,12 +138,27 @@ def init_db():
                 created_at TIMESTAMPTZ DEFAULT NOW()
             )
         """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS tours (
+                id SERIAL PRIMARY KEY,
+                agent_name TEXT NOT NULL,
+                agent_email TEXT,
+                client_name TEXT NOT NULL,
+                apartment_name TEXT NOT NULL,
+                tour_date TEXT NOT NULL,
+                tour_time TEXT NOT NULL,
+                notes TEXT DEFAULT '',
+                department TEXT DEFAULT '',
+                created_at TIMESTAMPTZ DEFAULT NOW()
+            )
+        """)
         # הוסף עמודות חדשות אם לא קיימות
         for col, definition in [
             ("meeting_type", "TEXT DEFAULT 'frontal'"),
             ("handled_by", "TEXT DEFAULT ''"),
             ("zoom_link", "TEXT DEFAULT ''"),
             ("department", "TEXT DEFAULT ''"),
+            ("location", "TEXT DEFAULT ''"),
         ]:
             try:
                 cur.execute(f"ALTER TABLE meetings ADD COLUMN IF NOT EXISTS {col} {definition}")
@@ -208,6 +223,18 @@ def init_db():
                 handled_by TEXT DEFAULT '',
                 zoom_link TEXT DEFAULT '',
                 notes TEXT DEFAULT '',
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE TABLE IF NOT EXISTS tours (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                agent_name TEXT NOT NULL,
+                agent_email TEXT,
+                client_name TEXT NOT NULL,
+                apartment_name TEXT NOT NULL,
+                tour_date TEXT NOT NULL,
+                tour_time TEXT NOT NULL,
+                notes TEXT DEFAULT '',
+                department TEXT DEFAULT '',
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP
             );
         """)
@@ -615,20 +642,20 @@ def get_no_response_conversations(hours: int = 24) -> list:
     return rows
 
 
-def create_meeting(agent_name: str, agent_email: str, client_name: str, meeting_date: str, meeting_time: str, meeting_type: str = "frontal", handled_by: str = "", zoom_link: str = "", notes: str = "", department: str = "") -> int:
+def create_meeting(agent_name: str, agent_email: str, client_name: str, meeting_date: str, meeting_time: str, meeting_type: str = "frontal", handled_by: str = "", zoom_link: str = "", notes: str = "", department: str = "", location: str = "") -> int:
     conn = get_db()
     cur = conn.cursor()
     now = datetime.now(timezone.utc).isoformat()
     if DATABASE_URL:
         cur.execute(
-            "INSERT INTO meetings (agent_name, agent_email, client_name, meeting_date, meeting_time, meeting_type, handled_by, zoom_link, notes, department, created_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id",
-            (agent_name, agent_email, client_name, meeting_date, meeting_time, meeting_type, handled_by, zoom_link, notes, department, now)
+            "INSERT INTO meetings (agent_name, agent_email, client_name, meeting_date, meeting_time, meeting_type, handled_by, zoom_link, notes, department, location, created_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id",
+            (agent_name, agent_email, client_name, meeting_date, meeting_time, meeting_type, handled_by, zoom_link, notes, department, location, now)
         )
         mid = cur.fetchone()[0]
     else:
         cur.execute(
-            "INSERT INTO meetings (agent_name, agent_email, client_name, meeting_date, meeting_time, meeting_type, handled_by, zoom_link, notes, department, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-            (agent_name, agent_email, client_name, meeting_date, meeting_time, meeting_type, handled_by, zoom_link, notes, department, now)
+            "INSERT INTO meetings (agent_name, agent_email, client_name, meeting_date, meeting_time, meeting_type, handled_by, zoom_link, notes, department, location, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+            (agent_name, agent_email, client_name, meeting_date, meeting_time, meeting_type, handled_by, zoom_link, notes, department, location, now)
         )
         mid = cur.lastrowid
     conn.commit()
@@ -699,6 +726,47 @@ def get_reengagement_results(agent_email: str) -> list:
     results = _fetchall(cur)
     conn.close()
     return results
+
+
+def create_tour(agent_name: str, agent_email: str, client_name: str, apartment_name: str, tour_date: str, tour_time: str, notes: str = "", department: str = "") -> int:
+    conn = get_db()
+    cur = conn.cursor()
+    now = datetime.now(timezone.utc).isoformat()
+    if DATABASE_URL:
+        cur.execute(
+            "INSERT INTO tours (agent_name, agent_email, client_name, apartment_name, tour_date, tour_time, notes, department, created_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id",
+            (agent_name, agent_email, client_name, apartment_name, tour_date, tour_time, notes, department, now)
+        )
+        tid = cur.fetchone()[0]
+    else:
+        cur.execute(
+            "INSERT INTO tours (agent_name, agent_email, client_name, apartment_name, tour_date, tour_time, notes, department, created_at) VALUES (?,?,?,?,?,?,?,?,?)",
+            (agent_name, agent_email, client_name, apartment_name, tour_date, tour_time, notes, department, now)
+        )
+        tid = cur.lastrowid
+    conn.commit()
+    conn.close()
+    return tid
+
+
+def get_tours_range(start: str, end: str, agent_name: str | None = None) -> list:
+    conn = get_db()
+    cur = conn.cursor()
+    if agent_name:
+        cur.execute(f"SELECT * FROM tours WHERE tour_date>={PH} AND tour_date<={PH} AND agent_name={PH} ORDER BY tour_date, tour_time", (start, end, agent_name))
+    else:
+        cur.execute(f"SELECT * FROM tours WHERE tour_date>={PH} AND tour_date<={PH} ORDER BY tour_date, agent_name, tour_time", (start, end))
+    rows = _fetchall(cur)
+    conn.close()
+    return rows
+
+
+def delete_tour(tour_id: int) -> None:
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(f"DELETE FROM tours WHERE id={PH}", (tour_id,))
+    conn.commit()
+    conn.close()
 
 
 # Initialize on import
