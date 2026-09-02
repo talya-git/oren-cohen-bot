@@ -942,34 +942,31 @@ function renderTodaySidebar() {
   // אסוף כל הפגישות של היום מכל המחלקות
   fetch(`/api/meetings?start=${todayStr}&end=${todayStr}`)
     .then(r => r.json())
-    .then(data => {
+    .then(async data => {
+      const toursRes = await fetch(`/api/tours?start=${todayStr}&end=${todayStr}`);
+      const toursData = await toursRes.json();
+      data.tours = toursData.tours || [];
       const todayMeetings = (data.meetings || []).sort((a,b) => a.meeting_time > b.meeting_time ? 1 : -1);
+      const todayTours = (data.tours || []).sort((a,b) => a.tour_time > b.tour_time ? 1 : -1);
 
-      const hours = [];
-      for (let h = 8; h <= 19; h++) {
-        const timeStr = `${String(h).padStart(2,'0')}:00`;
-        const meeting = todayMeetings.find(m => {
-          if (!m.meeting_time) return false;
-          const [mH] = m.meeting_time.split(':').map(Number);
-          return mH === h;
-        });
-        hours.push({ time: timeStr, meeting });
+      // מיזוג פגישות וסיורים לפי שעה
+      const allItems = [
+        ...todayMeetings.map(m => ({ time: m.meeting_time, label: m.client_name, agent: m.agent_name || '', type: 'meeting' })),
+        ...todayTours.map(t => ({ time: t.tour_time, label: `🏠 ${t.apartment_name}`, agent: t.agent_name || '', type: 'tour' }))
+      ].sort((a,b) => a.time > b.time ? 1 : -1);
+
+      if (!allItems.length) {
+        container.innerHTML = '<div style="color:#94a3b8;font-size:11px;text-align:center;padding:8px">אין פגישות היום</div>';
+        return;
       }
 
-      container.innerHTML = hours.map(({ time, meeting }) => {
-        if (meeting) {
-          return `<div style="background:#fee2e2;border-radius:8px;padding:6px 8px;font-size:11px;">
-            <div style="font-weight:700;color:#991b1b;">${time}</div>
-            <div style="color:#7f1d1d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${meeting.client_name}">${meeting.client_name}</div>
-            <div style="color:#b91c1c;font-size:10px;">${meeting.agent_name || ''}</div>
-          </div>`;
-        } else {
-          return `<div style="background:#f0fdf4;border-radius:8px;padding:6px 8px;font-size:11px;display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-weight:600;color:#166534;">${time}</span>
-            <span style="color:#16a34a;font-size:10px;">פנוי</span>
-          </div>`;
-        }
-      }).join('');
+      container.innerHTML = allItems.map(item => `
+        <div style="background:${item.type === 'tour' ? '#fffbeb' : '#fee2e2'};border-radius:8px;padding:6px 8px;font-size:11px;">
+          <div style="font-weight:700;color:${item.type === 'tour' ? '#92400e' : '#991b1b'}">${item.time}</div>
+          <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:${item.type === 'tour' ? '#78350f' : '#7f1d1d'}" title="${item.label}">${item.label}</div>
+          <div style="font-size:10px;color:${item.type === 'tour' ? '#b45309' : '#b91c1c'}">${item.agent}</div>
+        </div>
+      `).join('');
     })
     .catch(() => {});
 }
