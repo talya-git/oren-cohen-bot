@@ -65,6 +65,17 @@
       z-index: 10;
     }
 
+    .logo-overlay {
+      position: absolute;
+      top: 10%;
+      left: 10%;
+      width: 25%;
+      z-index: 10;
+      cursor: grab;
+      user-select: none;
+    }
+    .logo-overlay img { width: 100%; display: block; }
+
     .register-btn {
       display: block;
       width: 100%;
@@ -177,6 +188,11 @@
   <div class="img-wrapper">
     <img class="bg-img" src="/static/shishi-bg.png" alt="שישי של פעם" />
 
+    <!-- לוגו מילאנו -->
+    <div class="logo-overlay" id="el-logo">
+      <img src="/static/milano-logo.png" alt="Milano" />
+    </div>
+
     <!-- תאריך חדש -->
     <div class="date-overlay">
       <span class="date-new" id="date-text">יום ראשון כ״ז אלול | 27.09.2025 | 16:30</span>
@@ -187,6 +203,7 @@
       <a href="#" class="register-btn" onclick="openModal(); return false;">הרשמו עכשיו</a>
     </div>
   </div>
+  <div id="pos-bar" style="background:#111;color:#0f0;font-size:11px;padding:5px 10px;font-family:monospace;text-align:center;">🎨 גרור את הלוגו למקום הנכון</div>
 </div>
 
 <!-- מודל הרשמה -->
@@ -228,6 +245,35 @@
 </div>
 
 <script>
+  const wrapper = document.querySelector('.img-wrapper');
+
+  function makeDraggable(el) {
+    let dragging = false, sx, sy, sl, st;
+    el.addEventListener('mousedown', e => {
+      dragging = true;
+      sx = e.clientX; sy = e.clientY;
+      sl = el.offsetLeft; st = el.offsetTop;
+      el.style.left = sl + 'px'; el.style.top = st + 'px';
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove', e => {
+      if (!dragging) return;
+      el.style.left = (sl + e.clientX - sx) + 'px';
+      el.style.top  = (st + e.clientY - sy) + 'px';
+      updateBar();
+    });
+    document.addEventListener('mouseup', () => { dragging = false; });
+  }
+
+  function updateBar() {
+    const ww = wrapper.offsetWidth, wh = wrapper.offsetHeight;
+    const l = document.getElementById('el-logo');
+    document.getElementById('pos-bar').textContent =
+      `🎨 לוגו: top=${(l.offsetTop/wh*100).toFixed(2)}% left=${(l.offsetLeft/ww*100).toFixed(2)}%`;
+  }
+
+  makeDraggable(document.getElementById('el-logo'));
+
   function openModal() { document.getElementById('modal-overlay').classList.add('active'); }
   function closeModal() {
     document.getElementById('modal-overlay').classList.remove('active');
