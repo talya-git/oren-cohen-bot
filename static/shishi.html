@@ -7,176 +7,53 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Sans Hebrew', sans-serif; background: #e6e6e6; margin: 0; padding: 0; }
+    .card { width: 100%; position: relative; }
+    .img-wrapper { position: relative; width: 100%; padding-bottom: 103.05%; overflow: hidden; }
+    .bg-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
 
-    body {
-      font-family: 'Noto Sans Hebrew', sans-serif;
-      background: #e6e6e6;
-      margin: 0;
-      padding: 0;
-    }
-
-    .card {
-      width: 100%;
-      max-width: 100vw;
-      position: relative;
-    }
-
-    .img-wrapper {
-      position: relative;
-      width: 100%;
-      padding-bottom: 103.05%;
-      overflow: hidden;
-    }
-
-    .bg-img {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-    }
-
-    .date-overlay {
-      position: absolute;
-      top: 69.92%;
-      left: 53.36%;
-      z-index: 10;
-      pointer-events: none;
-    }
-
+    /* תאריך — נעול */
+    .date-overlay { position: absolute; top: 69.92%; left: 53.36%; z-index: 10; pointer-events: none; }
     .date-new {
-      display: inline-block;
-      background: #e6e6e6;
-      color: #3a3020;
-      font-size: clamp(13px, 2.4vw, 18px);
-      font-weight: 600;
+      display: inline-block; background: #e6e6e6; color: #3a3020;
+      font-size: clamp(13px, 2.4vw, 18px); font-weight: 600;
       font-family: 'Noto Sans Hebrew', sans-serif;
-      padding: 1px 8px;
-      white-space: nowrap;
-      line-height: 1.6;
+      padding: 1px 8px; white-space: nowrap; line-height: 1.6;
     }
 
-    .register-overlay {
-      position: absolute;
-      top: 95.63%;
-      left: 35.49%;
-      width: 33%;
-      z-index: 10;
-    }
+    /* לוגו 1 — נעול */
+    .logo1-overlay { position: absolute; top: 4.37%; left: 56.92%; width: 25%; z-index: 10; pointer-events: none; }
+    .logo1-overlay img { width: 100%; display: block; }
 
-    .logo-overlay {
-      position: absolute;
-      top: 10%;
-      left: 10%;
-      width: 25%;
-      z-index: 10;
-      cursor: grab;
-      user-select: none;
-    }
-    .logo-overlay img { width: 100%; display: block; }
+    /* לוגו 2 — גרירה */
+    .logo2-overlay { position: absolute; top: 50%; left: 10%; width: 25%; z-index: 10; cursor: grab; user-select: none; }
+    .logo2-overlay img { width: 100%; display: block; }
 
+    /* כפתור — גרירה, גבוה יותר, צר יותר */
+    .register-overlay { position: absolute; top: 95.63%; left: 35.49%; width: 18%; z-index: 10; cursor: grab; user-select: none; }
     .register-btn {
-      display: block;
-      width: 100%;
-      padding: 10px 0;
-      background: #c9a84c;
-      color: white;
-      text-align: center;
-      font-size: clamp(13px, 2.5vw, 16px);
-      font-weight: 700;
+      display: block; width: 100%; padding: 16px 0;
+      background: #c9a84c; color: white; text-align: center;
+      font-size: clamp(11px, 2vw, 14px); font-weight: 700;
       font-family: 'Noto Sans Hebrew', sans-serif;
-      border: none;
-      cursor: pointer;
-      text-decoration: none;
-      border-radius: 3px;
-      transition: background 0.2s;
+      border: none; cursor: pointer; text-decoration: none;
+      border-radius: 3px; transition: background 0.2s;
     }
-
     .register-btn:hover { background: #b8943a; }
 
-    /* מודל */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.65);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
     .modal-overlay.active { display: flex; }
-
-    .modal {
-      background: #f5f0e8;
-      border: 1.5px solid #c9a84c;
-      padding: 28px 24px;
-      width: 100%;
-      max-width: 400px;
-      direction: rtl;
-      border-radius: 4px;
-    }
-
-    .modal h2 {
-      font-size: 20px;
-      color: #c9a84c;
-      margin-bottom: 4px;
-      text-align: center;
-    }
-
-    .modal-sub {
-      text-align: center;
-      font-size: 12px;
-      color: #6a5a48;
-      margin-bottom: 18px;
-    }
-
-    .modal label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: #4a3a28;
-      margin: 10px 0 3px;
-    }
-
-    .modal input, .modal select {
-      width: 100%;
-      padding: 8px 10px;
-      border: 1px solid #c9a84c;
-      background: white;
-      font-size: 13px;
-      font-family: 'Noto Sans Hebrew', sans-serif;
-      color: #2a1f0e;
-      outline: none;
-    }
-
-    .modal-btns {
-      display: flex;
-      gap: 10px;
-      margin-top: 18px;
-    }
-
-    .modal-btns button {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 700;
-      font-family: 'Noto Sans Hebrew', sans-serif;
-      border-radius: 3px;
-    }
-
+    .modal { background: #f5f0e8; border: 1.5px solid #c9a84c; padding: 28px 24px; width: 100%; max-width: 400px; direction: rtl; border-radius: 4px; }
+    .modal h2 { font-size: 20px; color: #c9a84c; margin-bottom: 4px; text-align: center; }
+    .modal-sub { text-align: center; font-size: 12px; color: #6a5a48; margin-bottom: 18px; }
+    .modal label { display: block; font-size: 12px; font-weight: 600; color: #4a3a28; margin: 10px 0 3px; }
+    .modal input, .modal select { width: 100%; padding: 8px 10px; border: 1px solid #c9a84c; background: white; font-size: 13px; font-family: 'Noto Sans Hebrew', sans-serif; color: #2a1f0e; outline: none; }
+    .modal-btns { display: flex; gap: 10px; margin-top: 18px; }
+    .modal-btns button { flex: 1; padding: 10px; border: none; cursor: pointer; font-size: 14px; font-weight: 700; font-family: 'Noto Sans Hebrew', sans-serif; border-radius: 3px; }
     .btn-submit { background: #c9a84c; color: white; }
     .btn-submit:hover { background: #b8943a; }
     .btn-cancel { background: #ddd; color: #555; }
-
-    .success-msg {
-      display: none;
-      text-align: center;
-      padding: 10px;
-    }
+    .success-msg { display: none; text-align: center; padding: 10px; }
     .success-msg .check { font-size: 38px; margin-bottom: 8px; }
     .success-msg h3 { font-size: 17px; color: #c9a84c; margin-bottom: 6px; }
     .success-msg p { font-size: 12px; color: #6a5a48; line-height: 1.6; }
@@ -188,37 +65,39 @@
   <div class="img-wrapper">
     <img class="bg-img" src="/static/shishi-bg.png" alt="שישי של פעם" />
 
-    <!-- לוגו מילאנו -->
-    <div class="logo-overlay" id="el-logo">
+    <!-- לוגו 1 נעול -->
+    <div class="logo1-overlay">
       <img src="/static/milano-logo.png" alt="Milano" />
     </div>
 
-    <!-- תאריך חדש -->
-    <div class="date-overlay">
-      <span class="date-new" id="date-text">יום ראשון כ״ז אלול | 27.09.2025 | 16:30</span>
+    <!-- לוגו 2 גרירה -->
+    <div class="logo2-overlay" id="el-logo2">
+      <img src="/static/milano-logo.png" alt="Milano" />
     </div>
 
-    <!-- כפתור הרשמה -->
-    <div class="register-overlay">
+    <!-- תאריך נעול -->
+    <div class="date-overlay">
+      <span class="date-new">יום ראשון כ״ז תשרי | 27.09.2025 | 16:30</span>
+    </div>
+
+    <!-- כפתור גרירה -->
+    <div class="register-overlay" id="el-btn">
       <a href="#" class="register-btn" onclick="openModal(); return false;">הרשמו עכשיו</a>
     </div>
   </div>
-  <div id="pos-bar" style="background:#111;color:#0f0;font-size:11px;padding:5px 10px;font-family:monospace;text-align:center;">🎨 גרור את הלוגו למקום הנכון</div>
+  <div id="pos-bar" style="background:#111;color:#0f0;font-size:11px;padding:5px 10px;font-family:monospace;text-align:center;">גרור לוגו2 וכפתור למקום הנכון</div>
 </div>
 
-<!-- מודל הרשמה -->
+<!-- מודל -->
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
     <div id="form-section">
       <h2>הרשמה לאירוע</h2>
       <div class="modal-sub">שישי של פעם | יום ראשון 27.09.2025 | 16:30</div>
-
       <label>שם מלא *</label>
       <input type="text" id="reg-name" placeholder="ישראל ישראלי" />
-
       <label>טלפון *</label>
       <input type="tel" id="reg-phone" placeholder="050-0000000" />
-
       <label>מספר משתתפים</label>
       <select id="reg-guests">
         <option value="1">1 משתתף</option>
@@ -227,13 +106,11 @@
         <option value="4">4 משתתפים</option>
         <option value="5">5+</option>
       </select>
-
       <div class="modal-btns">
         <button class="btn-submit" onclick="submitReg()">אישור הגעה ✓</button>
         <button class="btn-cancel" onclick="closeModal()">ביטול</button>
       </div>
     </div>
-
     <div class="success-msg" id="success-msg">
       <div class="check">✅</div>
       <h3>ההרשמה התקבלה!</h3>
@@ -250,6 +127,7 @@
   function makeDraggable(el) {
     let dragging = false, sx, sy, sl, st;
     el.addEventListener('mousedown', e => {
+      if (e.target.tagName === 'A') return;
       dragging = true;
       sx = e.clientX; sy = e.clientY;
       sl = el.offsetLeft; st = el.offsetTop;
@@ -267,12 +145,15 @@
 
   function updateBar() {
     const ww = wrapper.offsetWidth, wh = wrapper.offsetHeight;
-    const l = document.getElementById('el-logo');
+    const l2 = document.getElementById('el-logo2');
+    const b  = document.getElementById('el-btn');
     document.getElementById('pos-bar').textContent =
-      `🎨 לוגו: top=${(l.offsetTop/wh*100).toFixed(2)}% left=${(l.offsetLeft/ww*100).toFixed(2)}%`;
+      `🖼 לוגו2: top=${(l2.offsetTop/wh*100).toFixed(2)}% left=${(l2.offsetLeft/ww*100).toFixed(2)}%` +
+      `   🔘 כפתור: top=${(b.offsetTop/wh*100).toFixed(2)}% left=${(b.offsetLeft/ww*100).toFixed(2)}%`;
   }
 
-  makeDraggable(document.getElementById('el-logo'));
+  makeDraggable(document.getElementById('el-logo2'));
+  makeDraggable(document.getElementById('el-btn'));
 
   function openModal() { document.getElementById('modal-overlay').classList.add('active'); }
   function closeModal() {
