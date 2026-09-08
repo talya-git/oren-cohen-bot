@@ -39,35 +39,30 @@
 
     .date-overlay {
       position: absolute;
-      top: 69.5%;
-      left: 50%;
-      transform: translateX(-50%);
+      top: 70.22%;
+      left: 64.27%;
       z-index: 10;
-      cursor: grab;
-      user-select: none;
+      pointer-events: none;
     }
 
     .date-new {
       display: inline-block;
       background: #e6e6e6;
       color: #3a3020;
-      font-size: clamp(7px, 1.25vw, 10.5px);
-      font-weight: 400;
+      font-size: clamp(9px, 1.6vw, 13px);
+      font-weight: 600;
       font-family: 'Noto Sans Hebrew', sans-serif;
       padding: 1px 8px;
-      letter-spacing: 0;
       white-space: nowrap;
       line-height: 1.6;
     }
 
     .register-overlay {
       position: absolute;
-      top: 68%;
-      left: 3%;
+      top: 95.63%;
+      left: 35.49%;
       width: 33%;
       z-index: 10;
-      cursor: grab;
-      user-select: none;
     }
 
     .register-btn {
@@ -183,16 +178,15 @@
     <img class="bg-img" src="/static/shishi-bg.png" alt="שישי של פעם" />
 
     <!-- תאריך חדש -->
-    <div class="date-overlay" id="el-date">
+    <div class="date-overlay">
       <span class="date-new">יום ראשון כ״ז אלול | 27.09.2025 | 16:30</span>
     </div>
 
     <!-- כפתור הרשמה -->
-    <div class="register-overlay" id="el-btn">
+    <div class="register-overlay">
       <a href="#" class="register-btn" onclick="openModal(); return false;">הרשמו עכשיו</a>
     </div>
   </div>
-  <div id="pos-bar" style="background:#111;color:#0f0;font-size:11px;padding:5px 10px;font-family:monospace;text-align:center;">📅 תאריך: — &nbsp;&nbsp; 🔘 כפתור: —</div>
 </div>
 
 <!-- מודל הרשמה -->
@@ -234,42 +228,6 @@
 </div>
 
 <script>
-  const wrapper = document.querySelector('.img-wrapper');
-
-  function makeDraggable(el, label) {
-    let dragging = false, sx, sy, sl, st;
-    el.addEventListener('mousedown', e => {
-      dragging = true;
-      el.style.cursor = 'grabbing';
-      sx = e.clientX; sy = e.clientY;
-      sl = el.offsetLeft; st = el.offsetTop;
-      el.style.left = sl + 'px';
-      el.style.top  = st + 'px';
-      el.style.transform = 'none';
-      e.preventDefault();
-    });
-    document.addEventListener('mousemove', e => {
-      if (!dragging) return;
-      el.style.left = (sl + e.clientX - sx) + 'px';
-      el.style.top  = (st + e.clientY - sy) + 'px';
-      updateBar();
-    });
-    document.addEventListener('mouseup', () => { dragging = false; el.style.cursor = 'grab'; });
-  }
-
-  function updateBar() {
-    const ww = wrapper.offsetWidth, wh = wrapper.offsetHeight;
-    const d = document.getElementById('el-date');
-    const b = document.getElementById('el-btn');
-    const dt = (d.offsetTop/wh*100).toFixed(2), dl = (d.offsetLeft/ww*100).toFixed(2);
-    const bt = (b.offsetTop/wh*100).toFixed(2), bl = (b.offsetLeft/ww*100).toFixed(2);
-    document.getElementById('pos-bar').innerHTML =
-      `📅 תאריך: top=${dt}% left=${dl}% &nbsp;&nbsp; 🔘 כפתור: top=${bt}% left=${bl}%`;
-  }
-
-  makeDraggable(document.getElementById('el-date'), 'תאריך');
-  makeDraggable(document.getElementById('el-btn'),  'כפתור');
-
   function openModal() {
     document.getElementById('modal-overlay').classList.add('active');
   }
