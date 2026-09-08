@@ -484,16 +484,17 @@ async def _handle_message(phone: str, text: str, _db) -> None:
         # נקה backticks ו-JSON
         import re as _re
         content = _re.sub(r'```(?:json)?', '', content).strip()
-        if content.startswith('{'):
-            # נסה לפרסר JSON ולחלץ רק reply
+        # נקה JSON בכל מקום בתוכן (גם אחרי טקסט רגיל)
+        json_match = _re.search(r'\{[\s\S]*\}', content)
+        if json_match:
             try:
-                parsed = _json.loads(content)
-                if isinstance(parsed, dict):
-                    content = parsed.get('reply', '')
+                parsed = _json.loads(json_match.group())
+                if isinstance(parsed, dict) and 'reply' in parsed:
+                    content = content[:json_match.start()].strip() or parsed.get('reply', '')
                 else:
-                    continue
+                    content = content[:json_match.start()].strip()
             except Exception:
-                continue
+                content = content[:json_match.start()].strip()
         if not content or content.startswith('['):
             continue
         role_label = 'דניאל' if m['role'] == 'assistant' else 'לקוח'
