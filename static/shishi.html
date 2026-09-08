@@ -24,38 +24,50 @@
       position: relative;
     }
 
-    /* התמונה המקורית */
-    .bg-img {
+    /* עוטף התמונה עם יחס גובה-רוחב קבוע */
+    .img-wrapper {
+      position: relative;
       width: 100%;
+      padding-bottom: 140%; /* יחס גובה:רוחב של התמונה */
+      overflow: hidden;
+    }
+
+    .bg-img {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
       display: block;
     }
 
-    /* שכבת התאריך החדש — מודבקת מעל התאריך הישן */
+    /* תאריך חדש — מיקום מדויק לפי % מהגובה */
     .date-overlay {
       position: absolute;
-      top: 63%;
-      right: 6%;
-      left: 6%;
+      top: 61.8%;
+      right: 8%;
+      left: 8%;
       text-align: center;
       pointer-events: none;
     }
 
     .date-new {
       display: inline-block;
-      background: #ece8e0;
+      background: #e9e4da;
       color: #2a1f0e;
-      font-size: clamp(11px, 2.3vw, 13.5px);
+      font-size: clamp(10px, 1.9vw, 13px);
       font-weight: 700;
-      padding: 5px 18px;
+      padding: 4px 16px;
       letter-spacing: 0.3px;
       white-space: nowrap;
     }
 
+    /* כפתור הרשמה */
     .register-overlay {
       position: absolute;
-      top: 72%;
+      top: 68%;
       left: 3%;
-      width: 34%;
+      width: 33%;
     }
 
     .register-btn {
@@ -167,16 +179,18 @@
 <body>
 
 <div class="card">
-  <img class="bg-img" src="/static/shishi-bg.png" alt="שישי של פעם" />
+  <div class="img-wrapper">
+    <img class="bg-img" src="/static/shishi-bg.png" alt="שישי של פעם" />
 
-  <!-- תאריך חדש מודבק מעל הישן -->
-  <div class="date-overlay">
-    <span class="date-new">יום ראשון כ״ז אלול | 27.09.2025 | 16:30</span>
-  </div>
+    <!-- תאריך חדש מודבק מעל הישן -->
+    <div class="date-overlay">
+      <span class="date-new">יום ראשון כ״ז אלול | 27.09.2025 | 16:30</span>
+    </div>
 
-  <!-- כפתור הרשמה עכשיו -->
-  <div class="register-overlay">
-    <a href="#" class="register-btn" onclick="openModal(); return false;">הרשמו עכשיו</a>
+    <!-- כפתור הרשמה עכשיו -->
+    <div class="register-overlay">
+      <a href="#" class="register-btn" onclick="openModal(); return false;">הרשמו עכשיו</a>
+    </div>
   </div>
 </div>
 
