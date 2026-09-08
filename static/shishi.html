@@ -42,14 +42,15 @@
       top: 70.22%;
       left: 64.27%;
       z-index: 10;
-      pointer-events: none;
+      cursor: grab;
+      user-select: none;
     }
 
     .date-new {
       display: inline-block;
       background: #e6e6e6;
       color: #3a3020;
-      font-size: clamp(9px, 1.6vw, 13px);
+      font-size: clamp(11px, 2vw, 16px);
       font-weight: 600;
       font-family: 'Noto Sans Hebrew', sans-serif;
       padding: 1px 8px;
@@ -178,8 +179,8 @@
     <img class="bg-img" src="/static/shishi-bg.png" alt="שישי של פעם" />
 
     <!-- תאריך חדש -->
-    <div class="date-overlay">
-      <span class="date-new">יום ראשון כ״ז אלול | 27.09.2025 | 16:30</span>
+    <div class="date-overlay" id="el-date">
+      <span class="date-new" contenteditable="true" id="date-text">יום ראשון כ״ז אלול | 27.09.2025 | 16:30</span>
     </div>
 
     <!-- כפתור הרשמה -->
@@ -187,6 +188,7 @@
       <a href="#" class="register-btn" onclick="openModal(); return false;">הרשמו עכשיו</a>
     </div>
   </div>
+  <div id="pos-bar" style="background:#111;color:#0f0;font-size:11px;padding:5px 10px;font-family:monospace;text-align:center;">גרור את התאריך | לחץ על הכתב לעריכה</div>
 </div>
 
 <!-- מודל הרשמה -->
@@ -228,9 +230,29 @@
 </div>
 
 <script>
-  function openModal() {
-    document.getElementById('modal-overlay').classList.add('active');
-  }
+  // drag date
+  const wrapper = document.querySelector('.img-wrapper');
+  const dateEl = document.getElementById('el-date');
+  let dragging = false, sx, sy, sl, st;
+  dateEl.addEventListener('mousedown', e => {
+    if (e.target.isContentEditable) return;
+    dragging = true;
+    sx = e.clientX; sy = e.clientY;
+    sl = dateEl.offsetLeft; st = dateEl.offsetTop;
+    dateEl.style.left = sl + 'px'; dateEl.style.top = st + 'px';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    dateEl.style.left = (sl + e.clientX - sx) + 'px';
+    dateEl.style.top  = (st + e.clientY - sy) + 'px';
+    const ww = wrapper.offsetWidth, wh = wrapper.offsetHeight;
+    document.getElementById('pos-bar').textContent =
+      `📅 top=${(dateEl.offsetTop/wh*100).toFixed(2)}% left=${(dateEl.offsetLeft/ww*100).toFixed(2)}%`;
+  });
+  document.addEventListener('mouseup', () => { dragging = false; });
+
+  function openModal() { document.getElementById('modal-overlay').classList.add('active'); }
   function closeModal() {
     document.getElementById('modal-overlay').classList.remove('active');
     document.getElementById('form-section').style.display = 'block';
