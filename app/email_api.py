@@ -74,13 +74,13 @@ def _send_agent_alert(agent_email: str, client_name: str, phone_or_email: str, t
 def _build_greeting(name: str | None) -> str:
     is_hebrew = name and any('\u05d0' <= c <= '\u05ea' for c in name)
     if is_hebrew or not name:
-        greeting = f"שלום{' ' + name if name else ''},\n\n"
+        greeting = f"\u05d4\u05d9\u05d9{' ' + name if name else ''},\n\n"
         greeting += (
-            "מה שלומך? כאן דניאל מאורן כהן גרופ.\n\n"
-            "בהמשך לפנייתך אלינו בעבר, רציתי לעדכן אותך שאנחנו עומדים לצאת בקרוב לשיווק עם מספר פרויקטים ייחודיים באזורים המבוקשים ביותר בירושלים.\n\n"
-            "מכיוון שחיפשת בעבר נכס בירושלים, חשבתי שיהיה נכון לתת לך הצצה מוקדמת ולעדכן אותך לפני שאנחנו פותחים אותם לשיווק הרחב.\n\n"
-            "האם זה יכול לעניין אותך?\n\n"
-            "בברכה,\nדניאל\nאורן כהן גרופ"
+            "\u05db\u05d0\u05df \u05d3\u05e0\u05d9\u05d0\u05dc \u05de\u05d0\u05d5\u05e8\u05df \u05db\u05d4\u05df \u05d2\u05e8\u05d5\u05e4 \u05d1\u05d9\u05e8\u05d5\u05e9\u05dc\u05d9\u05dd.\n"
+            "\u05d0\u05e0\u05d9 \u05e4\u05d5\u05e0\u05d4 \u05d0\u05dc\u05d9\u05da \u05d1\u05d4\u05de\u05e9\u05da \u05dc\u05e4\u05e0\u05d9\u05d9\u05ea\u05da \u05dc\u05de\u05e9\u05e8\u05d3\u05e0\u05d5 \u05d1\u05e2\u05d1\u05e8.\n\n"
+            "\u05d1\u05d9\u05de\u05d9\u05dd \u05d0\u05dc\u05d5 \u05d0\u05e0\u05d7\u05e0\u05d5 \u05de\u05e8\u05db\u05d6\u05d9\u05dd \u05e2\u05d1\u05d5\u05e8 \u05dc\u05e7\u05d5\u05d7\u05d5\u05ea\u05d9\u05e0\u05d5 \u05de\u05e1\u05e4\u05e8 \u05d4\u05d6\u05d3\u05de\u05e0\u05d5\u05d9\u05d5\u05ea \u05e0\u05d3\u05dc\"\u05df \u05de\u05d9\u05d5\u05d7\u05d3\u05d5\u05ea \u05d1\u05e4\u05e8\u05d5\u05d9\u05e7\u05d8\u05d9\u05dd \u05e2\u05ea\u05d9\u05d3\u05d9\u05d9\u05dd \u05d1\u05d9\u05e8\u05d5\u05e9\u05dc\u05d9\u05dd.\n\n"
+            "\u05d4\u05d0\u05dd \u05d4\u05e0\u05d5\u05e9\u05d0 \u05e2\u05d3\u05d9\u05d9\u05df \u05e8\u05dc\u05d5\u05d5\u05e0\u05d8\u05d9 \u05e2\u05d1\u05d5\u05e8\u05da?\n\n"
+            "\u05d1\u05d1\u05e8\u05db\u05d4,\n\u05d3\u05e0\u05d9\u05d0\u05dc\n\u05d0\u05d5\u05e8\u05df \u05db\u05d4\u05df \u05d2\u05e8\u05d5\u05e4"
         )
     else:
         greeting = f"Hi {name},\n\n"

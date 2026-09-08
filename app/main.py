@@ -886,7 +886,8 @@ async def create_tour(request: Request):
         tour_date=data.get("tour_date", ""),
         tour_time=data.get("tour_time", ""),
         notes=data.get("notes", ""),
-        department=data.get("department", "")
+        department=data.get("department", ""),
+        property_agent=data.get("property_agent", "")
     )
     return {"status": "ok", "id": tid}
 

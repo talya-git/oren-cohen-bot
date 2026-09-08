@@ -1,0 +1,5 @@
+done
+def _build_greeting(name: str | None) -> str:
+    is_hebrew = name and any('\u05d0' <= c <= '\u05ea' for c in name)
+    if is_hebrew or not name:
+        greeting = f"\u05d4\u05d9\u05d9{' ' + name if 

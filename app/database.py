@@ -251,6 +251,7 @@ def init_db():
         ("ליסה", None, "agent"),
         ("בועז", None, "agent"),
         ("נתנאל", None, "agent"),
+        ("אייזיק", "Aizik2025", "agent"),
     ]:
         try:
             cur.execute(
