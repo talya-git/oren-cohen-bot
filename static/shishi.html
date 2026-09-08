@@ -4,275 +4,117 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>שישי של פעם — אורן כהן גרופ</title>
-  <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;700;900&family=Noto+Sans+Hebrew:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Noto Sans Hebrew', sans-serif;
-      background: #f5f0e8;
+      background: #1a1a1a;
       min-height: 100vh;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       padding: 20px;
     }
 
     .card {
       width: 100%;
-      max-width: 520px;
-      background: #f5f0e8;
-      border: 1.5px solid #c9a84c;
+      max-width: 540px;
       position: relative;
-      overflow: hidden;
     }
 
-    /* תמונת רקע עליונה */
-    .hero {
-      position: relative;
-      height: 340px;
-      overflow: hidden;
-    }
-
-    .hero-bg {
+    /* התמונה המקורית */
+    .bg-img {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center top;
-      filter: sepia(30%) brightness(0.85);
+      display: block;
     }
 
-    /* לוגו */
-    .logo-area {
+    /* שכבת התאריך החדש — מודבקת מעל התאריך הישן */
+    .date-overlay {
       position: absolute;
-      top: 18px;
-      right: 20px;
-      text-align: right;
-    }
-
-    .logo-circle {
-      width: 64px;
-      height: 64px;
-      border: 2px solid #c9a84c;
-      border-radius: 50%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0,0,0,0.35);
-    }
-
-    .logo-circle .num {
-      font-size: 22px;
-      font-weight: 900;
-      color: #c9a84c;
-      line-height: 1;
-    }
-
-    .logo-circle .sub {
-      font-size: 7px;
-      color: #c9a84c;
-      text-align: center;
-      line-height: 1.2;
-    }
-
-    .brand-name {
-      margin-top: 5px;
-      color: white;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 1.5px;
-      text-align: center;
-    }
-
-    .brand-sub {
-      color: #c9a84c;
-      font-size: 8px;
-      letter-spacing: 1px;
-      text-align: center;
-    }
-
-    /* כותרת גדולה */
-    .title-overlay {
-      position: absolute;
-      bottom: 10px;
-      left: 0;
+      /* מיקום על גבי שורת התאריך בתמונה */
+      bottom: 29.5%;
       right: 0;
+      left: 0;
       text-align: center;
+      pointer-events: none;
     }
 
-    .title-he {
-      font-family: 'Frank Ruhl Libre', serif;
-      font-size: 72px;
-      font-weight: 900;
-      line-height: 0.9;
-      color: #c9a84c;
-      text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
-      letter-spacing: -1px;
-    }
-
-    /* גוף ההזמנה */
-    .body {
-      padding: 24px 28px 20px;
-      background: linear-gradient(to bottom, #f5f0e8 0%, #ede8dc 100%);
-    }
-
-    .invite-text {
-      text-align: center;
-      color: #3a2e1e;
-      line-height: 1.8;
-    }
-
-    .invite-text .salute {
-      font-size: 15px;
-      font-weight: 600;
+    .date-new {
+      display: inline-block;
+      background: #f5f0e8;
       color: #2a1f0e;
-      margin-bottom: 8px;
-    }
-
-    .invite-text p {
-      font-size: 13.5px;
-      color: #4a3a28;
-    }
-
-    .invite-text .highlight {
+      font-size: clamp(11px, 2.2vw, 13px);
       font-weight: 700;
-      color: #2a1f0e;
+      padding: 3px 14px;
+      border-radius: 2px;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
     }
 
-    .divider {
-      width: 60%;
-      height: 1px;
-      background: linear-gradient(to right, transparent, #c9a84c, transparent);
-      margin: 16px auto;
+    /* כפתור הרשמה — מעל כפתור הרשמה בתמונה */
+    .register-overlay {
+      position: absolute;
+      bottom: 13.5%;
+      left: 4%;
+      width: 34%;
     }
 
-    .details {
-      text-align: center;
-      color: #3a2e1e;
-      font-size: 13px;
-      line-height: 2;
-    }
-
-    .details .date-line {
-      font-weight: 700;
-      font-size: 14.5px;
-      color: #2a1f0e;
-    }
-
-    .details .note {
-      font-size: 12px;
-      color: #6a5a48;
-      margin-top: 4px;
-    }
-
-    /* כפתור הרשמה */
     .register-btn {
       display: block;
-      width: 80%;
-      margin: 20px auto 8px;
-      padding: 14px;
+      width: 100%;
+      padding: 10px 0;
       background: #c9a84c;
       color: white;
       text-align: center;
-      font-size: 18px;
+      font-size: clamp(13px, 2.5vw, 16px);
       font-weight: 700;
-      font-family: 'Frank Ruhl Libre', serif;
+      font-family: 'Noto Sans Hebrew', sans-serif;
       border: none;
       cursor: pointer;
       text-decoration: none;
-      letter-spacing: 0.5px;
+      border-radius: 3px;
       transition: background 0.2s;
     }
 
-    .register-btn:hover {
-      background: #b8943a;
-    }
+    .register-btn:hover { background: #b8943a; }
 
-    .dress-code {
-      display: inline-block;
-      border: 1.5px solid #c9a84c;
-      color: #c9a84c;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 4px 16px;
-      margin: 0 auto 20px;
-      display: block;
-      width: fit-content;
-      margin: 6px auto 20px;
-    }
-
-    /* פוטר */
-    .footer {
-      border-top: 1px solid #c9a84c;
-      padding: 16px 28px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 10px;
-      background: #ede8dc;
-    }
-
-    .footer-left {
-      font-size: 11.5px;
-      color: #4a3a28;
-      line-height: 1.9;
-    }
-
-    .footer-left .sign {
-      font-size: 13px;
-      font-weight: 700;
-      color: #2a1f0e;
-      margin-bottom: 4px;
-    }
-
-    .footer-left .sign-sub {
-      font-size: 12px;
-      color: #c9a84c;
-      font-weight: 600;
-    }
-
-    .footer-left a {
-      color: #4a3a28;
-      text-decoration: none;
-    }
-
-    /* מודל הרשמה */
+    /* מודל */
     .modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0,0,0,0.65);
       z-index: 1000;
       justify-content: center;
       align-items: center;
       padding: 20px;
     }
-
     .modal-overlay.active { display: flex; }
 
     .modal {
       background: #f5f0e8;
       border: 1.5px solid #c9a84c;
-      padding: 30px 28px;
+      padding: 28px 24px;
       width: 100%;
-      max-width: 420px;
+      max-width: 400px;
       direction: rtl;
+      border-radius: 4px;
     }
 
     .modal h2 {
-      font-family: 'Frank Ruhl Libre', serif;
-      font-size: 22px;
+      font-size: 20px;
       color: #c9a84c;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       text-align: center;
     }
 
-    .modal .modal-sub {
+    .modal-sub {
       text-align: center;
       font-size: 12px;
       color: #6a5a48;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     .modal label {
@@ -280,13 +122,12 @@
       font-size: 12px;
       font-weight: 600;
       color: #4a3a28;
-      margin-bottom: 4px;
-      margin-top: 12px;
+      margin: 10px 0 3px;
     }
 
     .modal input, .modal select {
       width: 100%;
-      padding: 9px 12px;
+      padding: 8px 10px;
       border: 1px solid #c9a84c;
       background: white;
       font-size: 13px;
@@ -295,24 +136,21 @@
       outline: none;
     }
 
-    .modal input:focus, .modal select:focus {
-      border-color: #b8943a;
-    }
-
     .modal-btns {
       display: flex;
       gap: 10px;
-      margin-top: 20px;
+      margin-top: 18px;
     }
 
     .modal-btns button {
       flex: 1;
-      padding: 11px;
+      padding: 10px;
       border: none;
       cursor: pointer;
       font-size: 14px;
       font-weight: 700;
       font-family: 'Noto Sans Hebrew', sans-serif;
+      border-radius: 3px;
     }
 
     .btn-submit { background: #c9a84c; color: white; }
@@ -322,66 +160,26 @@
     .success-msg {
       display: none;
       text-align: center;
-      padding: 20px;
-      color: #2a1f0e;
+      padding: 10px;
     }
-
-    .success-msg .check { font-size: 40px; margin-bottom: 10px; }
-    .success-msg h3 { font-size: 18px; color: #c9a84c; margin-bottom: 8px; }
-    .success-msg p { font-size: 13px; color: #6a5a48; }
+    .success-msg .check { font-size: 38px; margin-bottom: 8px; }
+    .success-msg h3 { font-size: 17px; color: #c9a84c; margin-bottom: 6px; }
+    .success-msg p { font-size: 12px; color: #6a5a48; line-height: 1.6; }
   </style>
 </head>
 <body>
 
 <div class="card">
-  <!-- תמונת גיבור -->
-  <div class="hero">
-    <img class="hero-bg" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Jerusalem_Old_City_Alley.jpg/800px-Jerusalem_Old_City_Alley.jpg" alt="ירושלים" onerror="this.style.background='linear-gradient(to bottom, #3a2e1e, #6a5a48)';this.style.display='block';" />
-    <div class="logo-area">
-      <div class="logo-circle">
-        <span class="num">30</span>
-        <span class="sub">שנות<br>מצוינות</span>
-      </div>
-      <div class="brand-name">OREN COHEN GROUP</div>
-      <div class="brand-sub">PRIME REAL ESTATE</div>
-    </div>
-    <div class="title-overlay">
-      <div class="title-he">שישי<br>של פעם</div>
-    </div>
+  <img class="bg-img" src="/static/shishi-bg.png" alt="שישי של פעם" />
+
+  <!-- תאריך חדש מודבק מעל הישן -->
+  <div class="date-overlay">
+    <span class="date-new">יום ראשון כ״ז אלול | 27.09.2025 | 16:30</span>
   </div>
 
-  <!-- גוף -->
-  <div class="body">
-    <div class="invite-text">
-      <div class="salute">משפחה וחברים יקרים,</div>
-      <p>אנו מתרגשים.ות להזמין אתכם.ן לסיור ייחודי</p>
-      <p><span class="highlight">"בעקבות שישי של פעם"</span> בהנחיית אורן כהן.</p>
-      <p style="margin-top:6px;">הסיור יכלול בתים ואיזורים של ירושלים ההיסטורית<br>שנכתבו בסקירות השבועיות של ירושלים של פעם.</p>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="details">
-      <div class="date-line">יום ראשון כ״ז אלול | 27.09.2025 | 16:30</div>
-      <div>רחוב הקרן הקיימת לישראל 33 ירושלים, משרדי אורן כהן גרופ.</div>
-      <div class="note">הסיור יערך כשעה - מס׳ המקומות מוגבל נא לאשר הגעה בלינק המצורף<br>או בטלפון 054-5596052</div>
-    </div>
-
+  <!-- כפתור הרשמה עכשיו -->
+  <div class="register-overlay">
     <a href="#" class="register-btn" onclick="openModal(); return false;">הרשמו עכשיו</a>
-    <div class="dress-code">קוד לבוש - לבן</div>
-  </div>
-
-  <!-- פוטר -->
-  <div class="footer">
-    <div class="footer-left">
-      <div class="sign">נשמח מאד לראותכם.</div>
-      <div class="sign-sub">אורן כהן גרופ</div>
-      <div>✉ <a href="mailto:marketing@orencohengroup.com">marketing@orencohengroup.com</a></div>
-      <div>📞 <a href="tel:+972545596052">Tel. +972-54-5596052</a></div>
-      <div>📍 33 Ha'Keren Ha'Kayemet L'Israel St. Rechavia</div>
-      <div>💬 <a href="https://wa.me/97254559605">WhatsApp. +972 54-559-6052</a></div>
-      <div>🌐 <a href="https://www.orencohengroup.com">www.orencohengroup.com</a></div>
-    </div>
   </div>
 </div>
 
@@ -416,7 +214,7 @@
     <div class="success-msg" id="success-msg">
       <div class="check">✅</div>
       <h3>ההרשמה התקבלה!</h3>
-      <p>תודה, נשמח לראותך ביום ראשון ה-27.09 בשעה 16:30<br>במשרדי אורן כהן גרופ, הקרן הקיימת 33 ירושלים.</p>
+      <p>תודה, נשמח לראותך<br>יום ראשון 27.09.2025 בשעה 16:30<br>הקרן הקיימת 33, ירושלים</p>
       <br>
       <button class="btn-submit" style="width:100%;padding:10px;" onclick="closeModal()">סגור</button>
     </div>
@@ -440,13 +238,7 @@
     const name = document.getElementById('reg-name').value.trim();
     const phone = document.getElementById('reg-phone').value.trim();
     const guests = document.getElementById('reg-guests').value;
-
-    if (!name || !phone) {
-      alert('נא למלא שם וטלפון');
-      return;
-    }
-
-    // שליחה ל-API
+    if (!name || !phone) { alert('נא למלא שם וטלפון'); return; }
     try {
       await fetch('/api/shishi/register', {
         method: 'POST',
@@ -454,7 +246,6 @@
         body: JSON.stringify({ name, phone, guests })
       });
     } catch(e) {}
-
     document.getElementById('form-section').style.display = 'none';
     document.getElementById('success-msg').style.display = 'block';
   }
