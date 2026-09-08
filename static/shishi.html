@@ -72,7 +72,7 @@
 
     <!-- לוגו 2 גרירה -->
     <div class="logo2-overlay" id="el-logo2">
-      <img src="/static/milano-logo.png" alt="Milano" />
+      <img src="/static/orchid-logo.png" alt="Orchid" />
     </div>
 
     <!-- תאריך נעול -->
@@ -82,7 +82,7 @@
 
     <!-- כפתור גרירה -->
     <div class="register-overlay" id="el-btn">
-      <a href="#" class="register-btn" onclick="openModal(); return false;">הרשמו עכשיו</a>
+      <a href="#" class="register-btn" id="reg-link">הרשמו עכשיו</a>
     </div>
   </div>
   <div id="pos-bar" style="background:#111;color:#0f0;font-size:11px;padding:5px 10px;font-family:monospace;text-align:center;">גרור לוגו2 וכפתור למקום הנכון</div>
@@ -154,6 +154,15 @@
 
   makeDraggable(document.getElementById('el-logo2'));
   makeDraggable(document.getElementById('el-btn'));
+
+  // כפתור — קליק רק אם לא גררנו
+  let btnMoved = false;
+  document.getElementById('el-btn').addEventListener('mousedown', () => { btnMoved = false; });
+  document.getElementById('el-btn').addEventListener('mousemove', () => { btnMoved = true; });
+  document.getElementById('reg-link').addEventListener('click', e => {
+    e.preventDefault();
+    if (!btnMoved) openModal();
+  });
 
   function openModal() { document.getElementById('modal-overlay').classList.add('active'); }
   function closeModal() {
