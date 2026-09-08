@@ -43,12 +43,15 @@
 
     .date-overlay {
       position: absolute;
-      top: 84.5%;
-      right: 5%;
-      left: 5%;
-      text-align: center;
-      pointer-events: none;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      cursor: grab;
+      z-index: 10;
+      user-select: none;
     }
+
+    .date-overlay.dragging { cursor: grabbing; }
 
     .date-new {
       display: inline-block;
@@ -59,6 +62,7 @@
       padding: 3px 14px;
       letter-spacing: 0.3px;
       white-space: nowrap;
+      outline: 2px dashed red;
     }
 
     .register-overlay {
@@ -66,6 +70,8 @@
       top: 68%;
       left: 3%;
       width: 33%;
+      cursor: grab;
+      z-index: 10;
     }
 
     .register-btn {
@@ -180,8 +186,8 @@
   <div class="img-wrapper">
     <img class="bg-img" src="/static/shishi-bg.png" alt="שישי של פעם" />
 
-    <!-- תאריך חדש מודבק מעל הישן -->
-    <div class="date-overlay">
+    <!-- תאריך חדש — ניתן לגרירה -->
+    <div class="date-overlay" id="date-overlay">
       <span class="date-new">יום ראשון כ״ז אלול | 27.09.2025 | 16:30</span>
     </div>
 
@@ -190,6 +196,8 @@
       <a href="#" class="register-btn" onclick="openModal(); return false;">הרשמו עכשיו</a>
     </div>
   </div>
+  <!-- מד מיקום -->
+  <div style="background:#222;color:#0f0;font-size:12px;padding:6px 10px;font-family:monospace;text-align:center;" id="pos-info">גרור את התאריך למקום הנכון</div>
 </div>
 
 <!-- מודל הרשמה -->
@@ -231,6 +239,52 @@
 </div>
 
 <script>
+  // === DRAG TO POSITION ===
+  const wrapper = document.querySelector('.img-wrapper');
+  const dateEl = document.querySelector('.date-overlay');
+
+  let isDragging = false, startX, startY, startLeft, startTop;
+
+  dateEl.addEventListener('mousedown', e => {
+    isDragging = true;
+    dateEl.classList.add('dragging');
+    const rect = wrapper.getBoundingClientRect();
+    startX = e.clientX;
+    startY = e.clientY;
+    startLeft = dateEl.offsetLeft;
+    startTop = dateEl.offsetTop;
+    // switch to left/top px positioning
+    dateEl.style.left = startLeft + 'px';
+    dateEl.style.top = startTop + 'px';
+    dateEl.style.transform = 'none';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    dateEl.style.left = (startLeft + dx) + 'px';
+    dateEl.style.top  = (startTop  + dy) + 'px';
+    updateInfo();
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    dateEl.classList.remove('dragging');
+    updateInfo();
+  });
+
+  function updateInfo() {
+    const wh = wrapper.offsetHeight;
+    const ww = wrapper.offsetWidth;
+    const topPct  = (parseFloat(dateEl.style.top)  / wh * 100).toFixed(2);
+    const leftPct = (parseFloat(dateEl.style.left) / ww * 100).toFixed(2);
+    document.getElementById('pos-info').textContent = `top: ${topPct}% | left: ${leftPct}%`;
+  }
+
+  // === MODAL ===
   function openModal() {
     document.getElementById('modal-overlay').classList.add('active');
   }
