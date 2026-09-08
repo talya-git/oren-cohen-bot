@@ -772,3 +772,31 @@ def delete_tour(tour_id: int) -> None:
 
 # Initialize on import
 init_db()
+
+
+def save_shishi_registration(name: str, phone: str, guests: int) -> None:
+    conn = get_db()
+    cur = conn.cursor()
+    now = datetime.now(timezone.utc).isoformat()
+    if DATABASE_URL:
+        cur.execute(
+            "CREATE TABLE IF NOT EXISTS shishi_registrations (id SERIAL PRIMARY KEY, name TEXT, phone TEXT, guests INTEGER, created_at TIMESTAMPTZ DEFAULT NOW())"
+        )
+        cur.execute(
+            "INSERT INTO shishi_registrations (name, phone, guests, created_at) VALUES (%s,%s,%s,%s)",
+            (name, phone, guests, now)
+        )
+    else:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS shishi_registrations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT, phone TEXT, guests INTEGER,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        cur.execute(
+            "INSERT INTO shishi_registrations (name, phone, guests, created_at) VALUES (?,?,?,?)",
+            (name, phone, guests, now)
+        )
+    conn.commit()
+    conn.close()

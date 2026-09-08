@@ -801,6 +801,22 @@ def calendar_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "calendar.html")
 
 
+@app.get("/shishi")
+def shishi_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "shishi.html")
+
+
+@app.post("/api/shishi/register")
+async def shishi_register(request: Request):
+    data = await request.json()
+    name = data.get("name", "")
+    phone = data.get("phone", "")
+    guests = data.get("guests", 1)
+    db.save_shishi_registration(name, phone, guests)
+    print(f"[SHISHI] הרשמה: {name} | {phone} | {guests} משתתפים")
+    return {"status": "ok"}
+
+
 @app.get("/הכשרה")
 def training_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "training.html")
