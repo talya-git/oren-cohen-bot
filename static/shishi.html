@@ -39,11 +39,10 @@
 
     .date-overlay {
       position: absolute;
-      top: 70.22%;
-      left: 64.27%;
+      top: 69.92%;
+      left: 53.36%;
       z-index: 10;
-      cursor: grab;
-      user-select: none;
+      pointer-events: none;
     }
 
     .date-new {
@@ -179,7 +178,7 @@
     <img class="bg-img" src="/static/shishi-bg.png" alt="שישי של פעם" />
 
     <!-- תאריך חדש -->
-    <div class="date-overlay" id="el-date">
+    <div class="date-overlay">
       <span class="date-new" id="date-text">יום ראשון כ״ז אלול | 27.09.2025 | 16:30</span>
     </div>
 
@@ -188,7 +187,6 @@
       <a href="#" class="register-btn" onclick="openModal(); return false;">הרשמו עכשיו</a>
     </div>
   </div>
-  <div id="pos-bar" style="background:#111;color:#0f0;font-size:11px;padding:5px 10px;font-family:monospace;text-align:center;">גרור את התאריך | לחץ על הכתב לעריכה</div>
 </div>
 
 <!-- מודל הרשמה -->
@@ -230,38 +228,6 @@
 </div>
 
 <script>
-  // drag date
-  const wrapper = document.querySelector('.img-wrapper');
-  const dateEl = document.getElementById('el-date');
-  let dragging = false, sx, sy, sl, st;
-  dateEl.addEventListener('mousedown', e => {
-    dragging = true;
-    sx = e.clientX; sy = e.clientY;
-    sl = dateEl.offsetLeft; st = dateEl.offsetTop;
-    dateEl.style.left = sl + 'px'; dateEl.style.top = st + 'px';
-    e.preventDefault();
-  });
-
-  // לחיצה כפולה = עריכה
-  document.getElementById('date-text').addEventListener('dblclick', e => {
-    const el = e.target;
-    el.contentEditable = 'true';
-    el.focus();
-    e.stopPropagation();
-  });
-  document.getElementById('date-text').addEventListener('blur', e => {
-    e.target.contentEditable = 'false';
-  });
-  document.addEventListener('mousemove', e => {
-    if (!dragging) return;
-    dateEl.style.left = (sl + e.clientX - sx) + 'px';
-    dateEl.style.top  = (st + e.clientY - sy) + 'px';
-    const ww = wrapper.offsetWidth, wh = wrapper.offsetHeight;
-    document.getElementById('pos-bar').textContent =
-      `📅 top=${(dateEl.offsetTop/wh*100).toFixed(2)}% left=${(dateEl.offsetLeft/ww*100).toFixed(2)}%`;
-  });
-  document.addEventListener('mouseup', () => { dragging = false; });
-
   function openModal() { document.getElementById('modal-overlay').classList.add('active'); }
   function closeModal() {
     document.getElementById('modal-overlay').classList.remove('active');
