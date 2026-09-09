@@ -134,23 +134,23 @@
   <div class="img-wrapper">
     <img class="bg-img" src="/static/shishi-bg.png" alt="שישי של פעם" />
 
-    <div class="logo1-overlay">
+    <div class="logo1-overlay" id="el-logo1">
       <img src="/static/milano-logo.png" alt="Milano" />
     </div>
 
-    <div class="logo2-overlay">
+    <div class="logo2-overlay" id="el-logo2">
       <img src="/static/orchid-logo.png" alt="Orchid" />
     </div>
 
-    <div class="date-overlay">
+    <div class="date-overlay" id="el-date">
       <span class="date-new">יום ראשון כ״ז תשרי | 27.09.2025 | 16:30</span>
     </div>
 
-    <div class="register-overlay">
-      <a href="#" class="register-btn" onclick="openModal(); return false;">הרשמו עכשיו</a>
+    <div class="register-overlay" id="el-btn">
+      <a href="#" class="register-btn" id="reg-link">הרשמו עכשיו</a>
     </div>
 
-    <div class="contact-overlay">
+    <div class="contact-overlay" id="el-contact">
       <div class="contact-box">
         <div class="title">נשמח מאד לראותכם.</div>
         <div class="name">אורן כהן גרופ</div>
@@ -198,9 +198,73 @@
       <button class="btn-submit" style="width:100%;padding:10px;" onclick="closeModal()">סגור</button>
     </div>
   </div>
+  <div id="pos-bar" style="background:#111;color:#0f0;font-size:10px;padding:4px 8px;font-family:monospace;text-align:center;position:fixed;bottom:0;left:0;right:0;z-index:9999;">גרור אלמנטים למיקום</div>
 </div>
 
 <script>
+  const wrapper = document.querySelector('.img-wrapper');
+  const els = ['el-logo1','el-logo2','el-date','el-btn','el-contact'];
+  const labels = {'לוגו מילאנו':'el-logo1','לוגו אורכיד':'el-logo2','תאריך':'el-date','כפתור':'el-btn','מלבן':'el-contact'};
+
+  function makeDraggable(el) {
+    let dragging=false, moved=false, sx, sy, sl, st;
+    el.addEventListener('touchstart', e=>{
+      dragging=true; moved=false;
+      const t=e.touches[0];
+      sx=t.clientX; sy=t.clientY;
+      sl=el.offsetLeft; st=el.offsetTop;
+      el.style.left=sl+'px'; el.style.top=st+'px';
+      e.preventDefault();
+    },{passive:false});
+    el.addEventListener('touchmove', e=>{
+      if(!dragging) return;
+      moved=true;
+      const t=e.touches[0];
+      el.style.left=(sl+t.clientX-sx)+'px';
+      el.style.top=(st+t.clientY-sy)+'px';
+      updateBar();
+      e.preventDefault();
+    },{passive:false});
+    el.addEventListener('touchend', ()=>{
+      dragging=false;
+      if(!moved && el.id==='el-btn') openModal();
+    });
+    // mouse too
+    el.addEventListener('mousedown', e=>{
+      if(e.target.tagName==='A') return;
+      dragging=true; moved=false;
+      sx=e.clientX; sy=e.clientY;
+      sl=el.offsetLeft; st=el.offsetTop;
+      el.style.left=sl+'px'; el.style.top=st+'px';
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove', e=>{
+      if(!dragging) return;
+      moved=true;
+      el.style.left=(sl+e.clientX-sx)+'px';
+      el.style.top=(st+e.clientY-sy)+'px';
+      updateBar();
+    });
+    document.addEventListener('mouseup', ()=>{
+      if(!dragging) return;
+      dragging=false;
+      if(!moved && el.id==='el-btn') openModal();
+    });
+  }
+
+  function updateBar() {
+    const ww=wrapper.offsetWidth, wh=wrapper.offsetHeight;
+    const parts = Object.entries(labels).map(([name,id])=>{
+      const el=document.getElementById(id);
+      return `${name}: ${(el.offsetTop/wh*100).toFixed(1)}%/${(el.offsetLeft/ww*100).toFixed(1)}%`;
+    });
+    document.getElementById('pos-bar').textContent = parts.join('  |  ');
+  }
+
+  els.forEach(id => makeDraggable(document.getElementById(id)));
+
+  document.getElementById('reg-link').addEventListener('click', e=>{ e.preventDefault(); openModal(); });
+
   function openModal() { document.getElementById('modal-overlay').classList.add('active'); }
   function closeModal() {
     document.getElementById('modal-overlay').classList.remove('active');
