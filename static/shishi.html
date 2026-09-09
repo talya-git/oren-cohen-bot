@@ -7,108 +7,34 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Noto+Sans+Hebrew:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Sans Hebrew', sans-serif; background: #e6e6e6; margin: 0; padding: 0; overflow-x: hidden; }
+    .card { width: 100%; position: relative; }
+    .img-wrapper { position: relative; width: 100%; min-height: 100dvh; container-type: inline-size; overflow: hidden; }
+    .bg-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: fill; display: block; }
 
-    body { 
-      font-family: 'Noto Sans Hebrew', sans-serif; 
-      background: #e6e6e6; 
-      margin: 0; 
-      padding: 0; 
-      overflow-x: hidden;
-    }
+    .date-overlay { position: absolute; top: 69.92%; left: 53.36%; z-index: 10; touch-action: none; cursor: grab; }
+    .date-new { display: inline-block; background: #e6e6e6; color: #3a3020; font-size: 2.4cqw; font-weight: 600; font-family: 'Noto Sans Hebrew', sans-serif; padding: 0.2cqw 1.2cqw; white-space: nowrap; line-height: 1.5; }
 
-    .card { 
-      width: 100%; 
-      position: relative; 
-    }
+    .logo1-overlay { position: absolute; top: 4.37%; left: 56.92%; width: 25%; z-index: 10; touch-action: none; cursor: grab; }
+    .logo1-overlay img { width: 100%; display: block; pointer-events: none; }
 
-    .img-wrapper { 
-      position: relative; 
-      width: 100%; 
-      min-height: 100dvh;
-      container-type: inline-size; 
-      overflow: hidden; 
-    }
+    .logo2-overlay { position: absolute; top: 13.51%; left: 58.10%; width: 25%; z-index: 10; touch-action: none; cursor: grab; }
+    .logo2-overlay img { width: 100%; display: block; pointer-events: none; }
 
-    .bg-img { 
-      position: absolute; 
-      top: 0; 
-      left: 0; 
-      width: 100%; 
-      height: 100%; 
-      object-fit: fill; 
-      display: block; 
-    }
-
-    .date-overlay { position: absolute; top: 69.92%; left: 53.36%; z-index: 10; pointer-events: none; }
-    .date-new { 
-      display: inline-block; 
-      background: #e6e6e6; 
-      color: #3a3020; 
-      font-size: 2.4cqw; 
-      font-weight: 600; 
-      font-family: 'Noto Sans Hebrew', sans-serif; 
-      padding: 0.2cqw 1.2cqw; 
-      white-space: nowrap; 
-      line-height: 1.5; 
-    }
-
-    .logo1-overlay { position: absolute; top: 4.37%; left: 56.92%; width: 25%; z-index: 10; pointer-events: none; }
-    .logo1-overlay img { width: 100%; display: block; }
-
-    .logo2-overlay { position: absolute; top: 13.51%; left: 58.10%; width: 25%; z-index: 10; pointer-events: none; }
-    .logo2-overlay img { width: 100%; display: block; }
-
-    .register-overlay { 
-      position: absolute; 
-      top: 78.66%; 
-      left: 58.02%; 
-      width: 22%; 
-      height: 9.2cqw; 
-      z-index: 10; 
-      pointer-events: all; 
-    }
-    .register-btn { 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      width: 100%; 
-      height: 100%; 
-      background: #c9a84c; 
-      color: #000; 
-      text-align: center; 
-      font-size: 2.5cqw; 
-      font-weight: 900; 
-      font-family: 'Noto Sans Hebrew', sans-serif; 
-      letter-spacing: 0.1cqw; 
-      border: none; 
-      cursor: pointer; 
-      text-decoration: none; 
-      transition: background 0.2s; 
-      pointer-events: none; 
-    }
+    .register-overlay { position: absolute; top: 78.66%; left: 58.02%; width: 22%; height: 9.2cqw; z-index: 10; touch-action: none; cursor: grab; }
+    .register-btn { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; background: #c9a84c; color: #000; text-align: center; font-size: 2.5cqw; font-weight: 900; font-family: 'Noto Sans Hebrew', sans-serif; letter-spacing: 0.1cqw; border: none; cursor: pointer; text-decoration: none; transition: background 0.2s; pointer-events: none; }
     .register-btn:hover { background: #b8943a; }
 
-    .contact-overlay { position: absolute; top: 78.89%; left: 19.68%; width: 36%; z-index: 10; pointer-events: none; }
-    .contact-box { background: #e6e6e6; padding: 1.2cqw 1.5cqw; pointer-events: all; }
+    .contact-overlay { position: absolute; top: 78.89%; left: 19.68%; width: 36%; z-index: 10; touch-action: none; cursor: grab; }
+    .contact-box { background: #e6e6e6; padding: 1.2cqw 1.5cqw; }
     .contact-box .title { font-size: 2.1cqw; font-weight: 700; color: #c9a84c; margin-bottom: 0.3cqw; font-family: 'Noto Sans Hebrew', sans-serif; direction: ltr; text-align: left; }
     .contact-box .name { font-size: 2.7cqw; font-weight: 700; color: #c9a84c; margin-bottom: 0.8cqw; font-family: 'Noto Sans Hebrew', sans-serif; direction: ltr; text-align: left; }
     .contact-box .links { border-left: 0.3cqw solid #c9a84c; padding-left: 1cqw; }
-    .contact-box a { 
-      display: flex; 
-      align-items: center; 
-      font-size: 1.6cqw; 
-      font-weight: 700; 
-      color: #c9a84c; 
-      text-decoration: none; 
-      margin: 0.4cqw 0; 
-      font-family: 'Noto Sans Hebrew', sans-serif; 
-      pointer-events: all; 
-      line-height: 1.3; 
-      direction: ltr; 
-      text-align: left; 
-    }
+    .contact-box a { display: flex; align-items: center; font-size: 1.6cqw; font-weight: 700; color: #c9a84c; text-decoration: none; margin: 0.4cqw 0; font-family: 'Noto Sans Hebrew', sans-serif; line-height: 1.3; direction: ltr; text-align: left; }
     .contact-box a:hover { opacity: 0.8; }
     .contact-box svg { width: 1.8cqw !important; height: 1.8cqw !important; flex-shrink: 0; margin-right: 0.6cqw; vertical-align: middle; }
+
+    #pos-bar { background: #111; color: #0f0; font-size: 10px; padding: 6px 8px; font-family: monospace; text-align: center; width: 100%; word-break: break-all; line-height: 1.6; }
 
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
     .modal-overlay.active { display: flex; }
@@ -120,7 +46,6 @@
     .modal-btns { display: flex; gap: 10px; margin-top: 18px; }
     .modal-btns button { flex: 1; padding: 10px; border: none; cursor: pointer; font-size: 14px; font-weight: 700; font-family: 'Noto Sans Hebrew', sans-serif; border-radius: 3px; }
     .btn-submit { background: #c9a84c; color: white; }
-    .btn-submit:hover { background: #b8943a; }
     .btn-cancel { background: #ddd; color: #555; }
     .success-msg { display: none; text-align: center; padding: 10px; }
     .success-msg .check { font-size: 38px; margin-bottom: 8px; }
@@ -137,19 +62,15 @@
     <div class="logo1-overlay" id="el-logo1">
       <img src="/static/milano-logo.png" alt="Milano" />
     </div>
-
     <div class="logo2-overlay" id="el-logo2">
       <img src="/static/orchid-logo.png" alt="Orchid" />
     </div>
-
     <div class="date-overlay" id="el-date">
       <span class="date-new">יום ראשון כ״ז תשרי | 27.09.2025 | 16:30</span>
     </div>
-
     <div class="register-overlay" id="el-btn">
       <a href="#" class="register-btn" id="reg-link">הרשמו עכשיו</a>
     </div>
-
     <div class="contact-overlay" id="el-contact">
       <div class="contact-box">
         <div class="title">נשמח מאד לראותכם.</div>
@@ -163,8 +84,8 @@
         </div>
       </div>
     </div>
-
   </div>
+  <div id="pos-bar">גרור אלמנטים למיקום הנכון</div>
 </div>
 
 <!-- מודל -->
@@ -198,94 +119,71 @@
       <button class="btn-submit" style="width:100%;padding:10px;" onclick="closeModal()">סגור</button>
     </div>
   </div>
-  <div id="pos-bar" style="background:#111;color:#0f0;font-size:10px;padding:4px 8px;font-family:monospace;text-align:center;position:fixed;bottom:0;left:0;right:0;z-index:9999;">גרור אלמנטים למיקום</div>
 </div>
 
 <script>
   const wrapper = document.querySelector('.img-wrapper');
-  const els = ['el-logo1','el-logo2','el-date','el-btn','el-contact'];
-  const labels = {'לוגו מילאנו':'el-logo1','לוגו אורכיד':'el-logo2','תאריך':'el-date','כפתור':'el-btn','מלבן':'el-contact'};
 
   function makeDraggable(el) {
     let dragging=false, moved=false, sx, sy, sl, st;
-    el.addEventListener('touchstart', e=>{
+
+    function start(cx, cy) {
       dragging=true; moved=false;
-      const t=e.touches[0];
-      sx=t.clientX; sy=t.clientY;
       sl=el.offsetLeft; st=el.offsetTop;
       el.style.left=sl+'px'; el.style.top=st+'px';
-      e.preventDefault();
-    },{passive:false});
-    el.addEventListener('touchmove', e=>{
+      sx=cx; sy=cy;
+    }
+    function move(cx, cy) {
       if(!dragging) return;
       moved=true;
-      const t=e.touches[0];
-      el.style.left=(sl+t.clientX-sx)+'px';
-      el.style.top=(st+t.clientY-sy)+'px';
+      el.style.left=(sl+cx-sx)+'px';
+      el.style.top=(st+cy-sy)+'px';
       updateBar();
-      e.preventDefault();
-    },{passive:false});
-    el.addEventListener('touchend', ()=>{
-      dragging=false;
-      if(!moved && el.id==='el-btn') openModal();
-    });
-    // mouse too
-    el.addEventListener('mousedown', e=>{
-      if(e.target.tagName==='A') return;
-      dragging=true; moved=false;
-      sx=e.clientX; sy=e.clientY;
-      sl=el.offsetLeft; st=el.offsetTop;
-      el.style.left=sl+'px'; el.style.top=st+'px';
-      e.preventDefault();
-    });
-    document.addEventListener('mousemove', e=>{
-      if(!dragging) return;
-      moved=true;
-      el.style.left=(sl+e.clientX-sx)+'px';
-      el.style.top=(st+e.clientY-sy)+'px';
-      updateBar();
-    });
-    document.addEventListener('mouseup', ()=>{
+    }
+    function end() {
       if(!dragging) return;
       dragging=false;
       if(!moved && el.id==='el-btn') openModal();
-    });
+    }
+
+    el.addEventListener('touchstart', e=>{ start(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); },{passive:false});
+    el.addEventListener('touchmove',  e=>{ move(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); },{passive:false});
+    el.addEventListener('touchend',   ()=>end());
+
+    el.addEventListener('mousedown', e=>{ if(e.target.tagName==='A') return; start(e.clientX, e.clientY); e.preventDefault(); });
+    document.addEventListener('mousemove', e=>move(e.clientX, e.clientY));
+    document.addEventListener('mouseup', ()=>end());
   }
 
   function updateBar() {
     const ww=wrapper.offsetWidth, wh=wrapper.offsetHeight;
-    const parts = Object.entries(labels).map(([name,id])=>{
-      const el=document.getElementById(id);
-      return `${name}: ${(el.offsetTop/wh*100).toFixed(1)}%/${(el.offsetLeft/ww*100).toFixed(1)}%`;
+    const map = {'מילאנו':'el-logo1','אורכיד':'el-logo2','תאריך':'el-date','כפתור':'el-btn','מלבן':'el-contact'};
+    const parts = Object.entries(map).map(([n,id])=>{
+      const e=document.getElementById(id);
+      return `${n}:${(e.offsetTop/wh*100).toFixed(1)}/${(e.offsetLeft/ww*100).toFixed(1)}`;
     });
-    document.getElementById('pos-bar').textContent = parts.join('  |  ');
+    document.getElementById('pos-bar').textContent = parts.join(' | ');
   }
 
-  els.forEach(id => makeDraggable(document.getElementById(id)));
-
+  ['el-logo1','el-logo2','el-date','el-btn','el-contact'].forEach(id=>makeDraggable(document.getElementById(id)));
   document.getElementById('reg-link').addEventListener('click', e=>{ e.preventDefault(); openModal(); });
 
   function openModal() { document.getElementById('modal-overlay').classList.add('active'); }
   function closeModal() {
     document.getElementById('modal-overlay').classList.remove('active');
-    document.getElementById('form-section').style.display = 'block';
-    document.getElementById('success-msg').style.display = 'none';
-    document.getElementById('reg-name').value = '';
-    document.getElementById('reg-phone').value = '';
+    document.getElementById('form-section').style.display='block';
+    document.getElementById('success-msg').style.display='none';
+    document.getElementById('reg-name').value='';
+    document.getElementById('reg-phone').value='';
   }
   async function submitReg() {
-    const name = document.getElementById('reg-name').value.trim();
-    const phone = document.getElementById('reg-phone').value.trim();
-    const guests = document.getElementById('reg-guests').value;
-    if (!name || !phone) { alert('נא למלא שם וטלפון'); return; }
-    try {
-      await fetch('/api/shishi/register', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phone, guests })
-      });
-    } catch(e) {}
-    document.getElementById('form-section').style.display = 'none';
-    document.getElementById('success-msg').style.display = 'block';
+    const name=document.getElementById('reg-name').value.trim();
+    const phone=document.getElementById('reg-phone').value.trim();
+    const guests=document.getElementById('reg-guests').value;
+    if(!name||!phone){alert('נא למלא שם וטלפון');return;}
+    try{await fetch('/api/shishi/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,guests})});}catch(e){}
+    document.getElementById('form-section').style.display='none';
+    document.getElementById('success-msg').style.display='block';
   }
 </script>
 </body>
