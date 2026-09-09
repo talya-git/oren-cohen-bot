@@ -9,30 +9,51 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Noto Sans Hebrew', sans-serif; background: #e6e6e6; margin: 0; padding: 0; overflow-x: hidden; }
     .card { width: 100%; position: relative; }
-    .img-wrapper { position: relative; width: 100%; min-height: 100dvh; container-type: inline-size; overflow: hidden; }
-    .bg-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: fill; display: block; }
 
-    .date-overlay { position: absolute; top: 70.2%; left: 48.2%; z-index: 10; pointer-events: none; }
-    .date-new { display: inline-block; background: #e6e6e6; color: #3a3020; font-size: 2.4cqw; font-weight: 600; font-family: 'Noto Sans Hebrew', sans-serif; padding: 0.2cqw 1.2cqw; white-space: nowrap; line-height: 1.5; }
+    /* ===== מחשב ===== */
+    .img-wrapper { position: relative; width: 100%; padding-bottom: 103.05%; overflow: hidden; }
+    .bg-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
 
-    .logo1-overlay { position: absolute; top: 3.7%; left: 71.7%; width: 25%; z-index: 10; pointer-events: none; }
+    .date-overlay { position: absolute; top: 69.92%; left: 53.36%; z-index: 10; pointer-events: none; }
+    .date-new { display: inline-block; background: #e6e6e6; color: #3a3020; font-size: clamp(13px, 2.4vw, 18px); font-weight: 600; font-family: 'Noto Sans Hebrew', sans-serif; padding: 1px 8px; white-space: nowrap; line-height: 1.6; }
+
+    .logo1-overlay { position: absolute; top: 4.37%; left: 56.92%; width: 25%; z-index: 10; pointer-events: none; }
     .logo1-overlay img { width: 100%; display: block; }
 
-    .logo2-overlay { position: absolute; top: 9.5%; left: 71.4%; width: 25%; z-index: 10; pointer-events: none; }
+    .logo2-overlay { position: absolute; top: 13.51%; left: 58.10%; width: 25%; z-index: 10; pointer-events: none; }
     .logo2-overlay img { width: 100%; display: block; }
 
-    .register-overlay { position: absolute; top: 78.0%; left: 63.1%; width: 30%; height: 12cqw; z-index: 10; }
-    .register-btn { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; background: #c9a84c; color: #000; text-align: center; font-size: 2.5cqw; font-weight: 900; font-family: 'Noto Sans Hebrew', sans-serif; letter-spacing: 0.1cqw; border: none; cursor: pointer; text-decoration: none; transition: background 0.2s; }
+    .register-overlay { position: absolute; top: 78.66%; left: 58.02%; width: 22%; z-index: 10; }
+    .register-btn { display: block; width: 100%; padding: 26px 16px; background: #c9a84c; color: #000; text-align: center; font-size: clamp(13px, 2vw, 17px); font-weight: 900; font-family: 'Noto Sans Hebrew', sans-serif; letter-spacing: 1px; border: none; cursor: pointer; text-decoration: none; transition: background 0.2s; }
     .register-btn:hover { background: #b8943a; }
 
-    .contact-overlay { position: absolute; top: 79.1%; left: 5.7%; width: 56%; z-index: 10; pointer-events: none; }
-    .contact-box { background: #e6e6e6; padding: 4cqw 1.5cqw; pointer-events: all; }
-    .contact-box .title { font-size: 2.1cqw; font-weight: 700; color: #c9a84c; margin-bottom: 0.3cqw; font-family: 'Noto Sans Hebrew', sans-serif; direction: ltr; text-align: left; }
-    .contact-box .name { font-size: 2.7cqw; font-weight: 700; color: #c9a84c; margin-bottom: 0.8cqw; font-family: 'Noto Sans Hebrew', sans-serif; direction: ltr; text-align: left; }
-    .contact-box .links { border-left: 0.3cqw solid #c9a84c; padding-left: 1cqw; }
-    .contact-box a { display: flex; align-items: center; font-size: 1.6cqw; font-weight: 700; color: #c9a84c; text-decoration: none; margin: 0.4cqw 0; font-family: 'Noto Sans Hebrew', sans-serif; line-height: 1.3; direction: ltr; text-align: left; }
+    .contact-overlay { position: absolute; top: 78.89%; left: 19.68%; width: 36%; z-index: 10; pointer-events: none; }
+    .contact-box { background: #e6e6e6; padding: 10px 12px; pointer-events: all; }
+    .contact-box .title { font-size: clamp(13px, 1.8vw, 16px); font-weight: 700; color: #c9a84c; margin-bottom: 2px; font-family: 'Noto Sans Hebrew', sans-serif; direction: ltr; text-align: left; }
+    .contact-box .name { font-size: clamp(15px, 2.3vw, 20px); font-weight: 700; color: #c9a84c; margin-bottom: 8px; font-family: 'Noto Sans Hebrew', sans-serif; direction: ltr; text-align: left; }
+    .contact-box .links { border-left: 2px solid #c9a84c; padding-left: 8px; }
+    .contact-box a { display: flex; align-items: center; gap: 5px; font-size: clamp(10px, 1.4vw, 13px); font-weight: 700; color: #c9a84c; text-decoration: none; margin: 3px 0; font-family: 'Noto Sans Hebrew', sans-serif; pointer-events: all; line-height: 1.6; direction: ltr; }
     .contact-box a:hover { opacity: 0.8; }
-    .contact-box svg { width: 1.8cqw !important; height: 1.8cqw !important; flex-shrink: 0; margin-right: 0.6cqw; vertical-align: middle; }
+    .contact-box svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+    /* ===== טלפון ===== */
+    @media (max-width: 768px) {
+      .img-wrapper { padding-bottom: 0; min-height: 100dvh; container-type: inline-size; }
+      .bg-img { object-fit: fill; }
+      .date-overlay { top: 70.2%; left: 48.2%; }
+      .date-new { font-size: 2.4cqw; padding: 0.2cqw 1.2cqw; }
+      .logo1-overlay { top: 3.7%; left: 71.7%; }
+      .logo2-overlay { top: 9.5%; left: 71.4%; }
+      .register-overlay { top: 78.0%; left: 63.1%; width: 30%; height: 12cqw; }
+      .register-btn { display: flex; align-items: center; justify-content: center; height: 100%; padding: 0; font-size: 2.5cqw; letter-spacing: 0.1cqw; }
+      .contact-overlay { top: 79.1%; left: 5.7%; width: 56%; }
+      .contact-box { padding: 4cqw 1.5cqw; }
+      .contact-box .title { font-size: 2.1cqw; margin-bottom: 0.3cqw; }
+      .contact-box .name { font-size: 2.7cqw; margin-bottom: 0.8cqw; }
+      .contact-box .links { border-left: 0.3cqw solid #c9a84c; padding-left: 1cqw; }
+      .contact-box a { font-size: 1.6cqw; margin: 0.4cqw 0; }
+      .contact-box svg { width: 1.8cqw !important; height: 1.8cqw !important; }
+    }
 
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
     .modal-overlay.active { display: flex; }
@@ -76,7 +97,7 @@
         <div class="links">
           <a href="mailto:marketing@orencohengroup.com"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg> marketing@orencohengroup.com</a>
           <a href="tel:+972545596052"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 013.09 4.18 2 2 0 015.07 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L9.09 9.91a16 16 0 006.99 7l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg> Tel. +972-54-5596052</a>
-          <a href="https://maps.google.com/?q=33+HaKeren+HaKayemet+Jerusalem" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> 33 Ha'Keren Ha'Kayemet L'Israel St. Rechavia</a>
+          <a href="https://maps.google.com/?q=33+HaKeren+HaKayemet+Jerusalem" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> 33 Ha'Keren Ha'Kayemet L'Israel St. Rechavia - Jerusalem</a>
           <a href="https://wa.me/972545596052" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg> WhatsApp. +972 54-559-6052</a>
           <a href="https://www.orencohengroup.com" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg> www.orencohengroup.com</a>
         </div>
@@ -122,19 +143,24 @@
   function openModal() { document.getElementById('modal-overlay').classList.add('active'); }
   function closeModal() {
     document.getElementById('modal-overlay').classList.remove('active');
-    document.getElementById('form-section').style.display='block';
-    document.getElementById('success-msg').style.display='none';
-    document.getElementById('reg-name').value='';
-    document.getElementById('reg-phone').value='';
+    document.getElementById('form-section').style.display = 'block';
+    document.getElementById('success-msg').style.display = 'none';
+    document.getElementById('reg-name').value = '';
+    document.getElementById('reg-phone').value = '';
   }
   async function submitReg() {
-    const name=document.getElementById('reg-name').value.trim();
-    const phone=document.getElementById('reg-phone').value.trim();
-    const guests=document.getElementById('reg-guests').value;
-    if(!name||!phone){alert('נא למלא שם וטלפון');return;}
-    try{await fetch('/api/shishi/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,guests})});}catch(e){}
-    document.getElementById('form-section').style.display='none';
-    document.getElementById('success-msg').style.display='block';
+    const name = document.getElementById('reg-name').value.trim();
+    const phone = document.getElementById('reg-phone').value.trim();
+    const guests = document.getElementById('reg-guests').value;
+    if (!name || !phone) { alert('נא למלא שם וטלפון'); return; }
+    try {
+      await fetch('/api/shishi/register', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, phone, guests })
+      });
+    } catch(e) {}
+    document.getElementById('form-section').style.display = 'none';
+    document.getElementById('success-msg').style.display = 'block';
   }
 </script>
 </body>
