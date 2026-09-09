@@ -191,7 +191,15 @@ def send_hot_lead_alert(name: str, phone: str, score: str, transcript: str) -> N
 
 
 def send_shishi_registration(name: str, phone: str, guests: str) -> None:
-    """שולח מייל על הרשמה חדשה לשישי של פעם."""
+    """שולח מייל על הרשמה חדשה לשישי של פעם דרך Gmail SMTP."""
+    import smtplib
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+    from email.utils import formataddr
+
+    gmail_user = os.getenv("GMAIL_USER", "orencohengroup2020@gmail.com")
+    gmail_pass = os.getenv("GMAIL_APP_PASSWORD", "").replace(" ", "")
+
     subject = f"🎉 הרשמה חדשה — שישי של פעם | {name}"
     html = (
         "<html><body dir='rtl' style='font-family:Arial,sans-serif;font-size:14px;'>"
@@ -202,28 +210,18 @@ def send_shishi_registration(name: str, phone: str, guests: str) -> None:
         f"<tr><td style='padding:6px 16px;font-weight:bold;'>מספר משתתפים:</td><td style='padding:6px 16px;'>{guests}</td></tr>"
         "</table></body></html>"
     )
-    payload = json.dumps({
-        "Messages": [{
-            "From": {"Email": FROM_EMAIL, "Name": FROM_NAME},
-            "To": [{"Email": "office@orencohengroup.com"}],
-            "Subject": subject,
-            "HTMLPart": html,
-        }]
-    }).encode()
-    credentials = base64.b64encode(f"{MAILJET_API_KEY}:{MAILJET_SECRET_KEY}".encode()).decode()
-    req = urllib.request.Request(
-        "https://api.mailjet.com/v3.1/send",
-        data=payload,
-        headers={"Authorization": f"Basic {credentials}", "Content-Type": "application/json"},
-        method="POST",
-    )
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = formataddr(("בוט אורן כהן גרופ", gmail_user))
+    msg["To"] = "office@orencohengroup.com"
+    msg.attach(MIMEText(html, "html", "utf-8"))
+
     try:
-        with urllib.request.urlopen(req) as resp:
-            print(f"[SHISHI] email sent for {name} {phone}")
-    except urllib.error.HTTPError as e:
-        body = e.read().decode()
-        print(f"[SHISHI EMAIL ERROR] 401 body={body[:300]}")
-        print(f"[SHISHI EMAIL ERROR] api_key_len={len(MAILJET_API_KEY)} secret_len={len(MAILJET_SECRET_KEY)}")
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(gmail_user, gmail_pass)
+            server.sendmail(gmail_user, "office@orencohengroup.com", msg.as_string())
+        print(f"[SHISHI] email sent for {name} {phone}")
     except Exception as e:
         print(f"[SHISHI EMAIL ERROR] {e}")
 
