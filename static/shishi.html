@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>שישי של פעם — אורן כהן גרופ</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Noto+Sans+Hebrew:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Noto Sans Hebrew', sans-serif; background: #e6e6e6; margin: 0; padding: 0; }
@@ -29,15 +29,16 @@
     .logo2-overlay { position: absolute; top: 13.51%; left: 58.10%; width: 25%; z-index: 10; pointer-events: none; }
     .logo2-overlay img { width: 100%; display: block; }
 
-    /* כפתור — גרירה */
-    .register-overlay { position: absolute; top: 95.63%; left: 35.49%; width: 18%; z-index: 10; cursor: grab; user-select: none; }
+    /* כפתור — נעול */
+    .register-overlay { position: absolute; top: 79.59%; left: 60.32%; width: 22%; z-index: 10; pointer-events: all; }
     .register-btn {
-      display: block; width: 100%; padding: 16px 0;
-      background: #c9a84c; color: white; text-align: center;
-      font-size: clamp(11px, 2vw, 14px); font-weight: 700;
-      font-family: 'Noto Sans Hebrew', sans-serif;
+      display: block; width: 100%; padding: 22px 16px;
+      background: #c9a84c; color: #000; text-align: center;
+      font-size: clamp(12px, 1.8vw, 15px); font-weight: 500;
+      font-family: 'Cormorant Garamond', 'Frank Ruhl Libre', Georgia, serif;
+      letter-spacing: 2px;
       border: none; cursor: pointer; text-decoration: none;
-      border-radius: 3px; transition: background 0.2s;
+      transition: background 0.2s;
     }
     .register-btn:hover { background: #b8943a; }
 
@@ -80,9 +81,9 @@
       <span class="date-new">יום ראשון כ״ז תשרי | 27.09.2025 | 16:30</span>
     </div>
 
-    <!-- כפתור גרירה -->
-    <div class="register-overlay" id="el-btn">
-      <a href="#" class="register-btn" id="reg-link" style="pointer-events:none;">הרשמו עכשיו</a>
+    <!-- כפתור נעול -->
+    <div class="register-overlay">
+      <a href="#" class="register-btn" onclick="openModal(); return false;">הרשמו עכשיו</a>
     </div>
   </div>
   <div id="pos-bar" style="background:#111;color:#0f0;font-size:11px;padding:5px 10px;font-family:monospace;text-align:center;">גרור לוגו2 וכפתור למקום הנכון</div>
@@ -152,15 +153,14 @@
       `   🔘 כפתור: top=${(b.offsetTop/wh*100).toFixed(2)}% left=${(b.offsetLeft/ww*100).toFixed(2)}%`;
   }
 
-  makeDraggable(document.getElementById('el-btn'));
+  makeDraggable(document.getElementById('el-logo2'));
 
-  // קליק על הכפתור רק אם לא גררנו
-  let btnMoved = false;
-  document.getElementById('el-btn').addEventListener('mousedown', () => { btnMoved = false; });
-  document.getElementById('el-btn').addEventListener('mousemove', () => { btnMoved = true; });
-  document.getElementById('el-btn').addEventListener('mouseup', () => {
-    if (!btnMoved) openModal();
-  });
+  function updateBar() {
+    const ww = wrapper.offsetWidth, wh = wrapper.offsetHeight;
+    const l2 = document.getElementById('el-logo2');
+    document.getElementById('pos-bar').textContent =
+      `🖼 לוגו2: top=${(l2.offsetTop/wh*100).toFixed(2)}% left=${(l2.offsetLeft/ww*100).toFixed(2)}%`;
+  }
 
   function openModal() { document.getElementById('modal-overlay').classList.add('active'); }
   function closeModal() {
