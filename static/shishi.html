@@ -7,30 +7,55 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Noto+Sans+Hebrew:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Noto Sans Hebrew', sans-serif; background: #e6e6e6; margin: 0; padding: 0; }
 
-    .card { width: 100%; max-width: 650px; margin: 0 auto; position: relative; }
-
-    .img-wrapper {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 100 / 103.05;
-      container-type: inline-size;
-      overflow: hidden;
+    body { 
+      font-family: 'Noto Sans Hebrew', sans-serif; 
+      background: #e6e6e6; 
+      margin: 0; 
+      padding: 0; 
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
     }
 
-    .bg-img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: fill;
-      display: block;
+    .card { 
+      width: 100vw; 
+      max-width: 100%; 
+      position: relative; 
+    }
+
+    .img-wrapper { 
+      position: relative; 
+      width: 100%; 
+      aspect-ratio: 100 / 103.05; 
+      container-type: inline-size; 
+      overflow: hidden; 
+    }
+
+    .bg-img { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      object-fit: fill; 
+      display: block; 
     }
 
     .date-overlay { position: absolute; top: 69.92%; left: 53.36%; z-index: 10; pointer-events: none; }
-    .date-new { display: inline-block; background: #e6e6e6; color: #3a3020; font-size: clamp(9px, 2.7cqw, 18px); font-weight: 600; font-family: 'Noto Sans Hebrew', sans-serif; padding: 1px 6px; white-space: nowrap; line-height: 1.6; }
+    .date-new { 
+      display: inline-block; 
+      background: #e6e6e6; 
+      color: #3a3020; 
+      font-size: 2.4cqw; 
+      font-weight: 600; 
+      font-family: 'Noto Sans Hebrew', sans-serif; 
+      padding: 0.2cqw 1.2cqw; 
+      white-space: nowrap; 
+      line-height: 1.5; 
+    }
 
     .logo1-overlay { position: absolute; top: 4.37%; left: 56.92%; width: 25%; z-index: 10; pointer-events: none; }
     .logo1-overlay img { width: 100%; display: block; }
@@ -38,18 +63,57 @@
     .logo2-overlay { position: absolute; top: 13.51%; left: 58.10%; width: 25%; z-index: 10; pointer-events: none; }
     .logo2-overlay img { width: 100%; display: block; }
 
-    .register-overlay { position: absolute; top: 78.66%; left: 58.02%; width: 22%; z-index: 10; pointer-events: all; }
-    .register-btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 12% 5%; background: #c9a84c; color: #000; text-align: center; font-size: clamp(9px, 2.6cqw, 17px); font-weight: 900; font-family: 'Noto Sans Hebrew', sans-serif; letter-spacing: 0.5px; border: none; cursor: pointer; text-decoration: none; transition: background 0.2s; pointer-events: none; }
+    .register-overlay { 
+      position: absolute; 
+      top: 78.66%; 
+      left: 58.02%; 
+      width: 22%; 
+      height: 9.2cqw; 
+      z-index: 10; 
+      pointer-events: all; 
+    }
+    .register-btn { 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      width: 100%; 
+      height: 100%; 
+      background: #c9a84c; 
+      color: #000; 
+      text-align: center; 
+      font-size: 2.5cqw; 
+      font-weight: 900; 
+      font-family: 'Noto Sans Hebrew', sans-serif; 
+      letter-spacing: 0.1cqw; 
+      border: none; 
+      cursor: pointer; 
+      text-decoration: none; 
+      transition: background 0.2s; 
+      pointer-events: none; 
+    }
     .register-btn:hover { background: #b8943a; }
 
     .contact-overlay { position: absolute; top: 78.89%; left: 19.68%; width: 36%; z-index: 10; pointer-events: none; }
-    .contact-box { background: #e6e6e6; padding: 4% 5%; pointer-events: all; }
-    .contact-box .title { font-size: clamp(8px, 2.3cqw, 16px); font-weight: 700; color: #c9a84c; margin-bottom: 2px; font-family: 'Noto Sans Hebrew', sans-serif; direction: ltr; text-align: left; }
-    .contact-box .name { font-size: clamp(10px, 2.8cqw, 20px); font-weight: 700; color: #c9a84c; margin-bottom: 4px; font-family: 'Noto Sans Hebrew', sans-serif; direction: ltr; text-align: left; }
-    .contact-box .links { border-left: 2px solid #c9a84c; padding-left: 6px; }
-    .contact-box a { display: block; font-size: clamp(7px, 1.8cqw, 13px); font-weight: 700; color: #c9a84c; text-decoration: none; margin: 2px 0; font-family: 'Noto Sans Hebrew', sans-serif; pointer-events: all; line-height: 1.4; direction: ltr; text-align: left; }
+    .contact-box { background: #e6e6e6; padding: 1.2cqw 1.5cqw; pointer-events: all; }
+    .contact-box .title { font-size: 2.1cqw; font-weight: 700; color: #c9a84c; margin-bottom: 0.3cqw; font-family: 'Noto Sans Hebrew', sans-serif; direction: ltr; text-align: left; }
+    .contact-box .name { font-size: 2.7cqw; font-weight: 700; color: #c9a84c; margin-bottom: 0.8cqw; font-family: 'Noto Sans Hebrew', sans-serif; direction: ltr; text-align: left; }
+    .contact-box .links { border-left: 0.3cqw solid #c9a84c; padding-left: 1cqw; }
+    .contact-box a { 
+      display: flex; 
+      align-items: center; 
+      font-size: 1.6cqw; 
+      font-weight: 700; 
+      color: #c9a84c; 
+      text-decoration: none; 
+      margin: 0.4cqw 0; 
+      font-family: 'Noto Sans Hebrew', sans-serif; 
+      pointer-events: all; 
+      line-height: 1.3; 
+      direction: ltr; 
+      text-align: left; 
+    }
     .contact-box a:hover { opacity: 0.8; }
-    .contact-box svg { width: clamp(8px, 2cqw, 14px) !important; height: clamp(8px, 2cqw, 14px) !important; flex-shrink: 0; margin-left: 3px; vertical-align: middle; }
+    .contact-box svg { width: 1.8cqw !important; height: 1.8cqw !important; flex-shrink: 0; margin-right: 0.6cqw; vertical-align: middle; }
 
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
     .modal-overlay.active { display: flex; }
