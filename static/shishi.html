@@ -25,11 +25,11 @@
     .logo1-overlay { position: absolute; top: 4.37%; left: 56.92%; width: 25%; z-index: 10; pointer-events: none; }
     .logo1-overlay img { width: 100%; display: block; }
 
-    /* לוגו 2 — גרירה */
-    .logo2-overlay { position: absolute; top: 50%; left: 10%; width: 25%; z-index: 10; cursor: grab; user-select: none; }
+    /* לוגו 2 — נעול */
+    .logo2-overlay { position: absolute; top: 13.51%; left: 58.10%; width: 25%; z-index: 10; pointer-events: none; }
     .logo2-overlay img { width: 100%; display: block; }
 
-    /* כפתור — גרירה, גבוה יותר, צר יותר */
+    /* כפתור — גרירה */
     .register-overlay { position: absolute; top: 95.63%; left: 35.49%; width: 18%; z-index: 10; cursor: grab; user-select: none; }
     .register-btn {
       display: block; width: 100%; padding: 16px 0;
@@ -82,7 +82,7 @@
 
     <!-- כפתור גרירה -->
     <div class="register-overlay" id="el-btn">
-      <a href="#" class="register-btn" id="reg-link">הרשמו עכשיו</a>
+      <a href="#" class="register-btn" id="reg-link" style="pointer-events:none;">הרשמו עכשיו</a>
     </div>
   </div>
   <div id="pos-bar" style="background:#111;color:#0f0;font-size:11px;padding:5px 10px;font-family:monospace;text-align:center;">גרור לוגו2 וכפתור למקום הנכון</div>
@@ -152,15 +152,13 @@
       `   🔘 כפתור: top=${(b.offsetTop/wh*100).toFixed(2)}% left=${(b.offsetLeft/ww*100).toFixed(2)}%`;
   }
 
-  makeDraggable(document.getElementById('el-logo2'));
   makeDraggable(document.getElementById('el-btn'));
 
-  // כפתור — קליק רק אם לא גררנו
+  // קליק על הכפתור רק אם לא גררנו
   let btnMoved = false;
   document.getElementById('el-btn').addEventListener('mousedown', () => { btnMoved = false; });
   document.getElementById('el-btn').addEventListener('mousemove', () => { btnMoved = true; });
-  document.getElementById('reg-link').addEventListener('click', e => {
-    e.preventDefault();
+  document.getElementById('el-btn').addEventListener('mouseup', () => {
     if (!btnMoved) openModal();
   });
 
