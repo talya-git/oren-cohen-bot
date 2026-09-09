@@ -226,6 +226,54 @@ def send_shishi_registration(name: str, phone: str, guests: str) -> None:
         print(f"[SHISHI EMAIL ERROR] {e}")
 
 
+def send_shishi_daily_report(registrations: list) -> None:
+    """שולח סיכום יומי של הרשמות שישי של פעם ב-16:00."""
+    import smtplib
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+    from email.utils import formataddr
+
+    gmail_user = os.getenv("GMAIL_USER", "orencohengroup2020@gmail.com")
+    gmail_pass = os.getenv("GMAIL_APP_PASSWORD", "").replace(" ", "")
+
+    total_people = sum(int(r.get("guests", 1)) for r in registrations)
+    rows = "".join(
+        f"<tr><td style='padding:8px;border:1px solid #ddd;'>{r.get('name','')}</td>"
+        f"<td style='padding:8px;border:1px solid #ddd;direction:ltr;'>{r.get('phone','')}</td>"
+        f"<td style='padding:8px;border:1px solid #ddd;text-align:center;'>{r.get('guests',1)}</td>"
+        f"<td style='padding:8px;border:1px solid #ddd;font-size:11px;color:#888;'>{r.get('created_at','')[:16]}</td></tr>"
+        for r in registrations
+    )
+    html = f"""
+    <html><body dir="rtl" style="font-family:Arial,sans-serif;font-size:14px;">
+      <h2 style="color:#c9a84c;">סיכום הרשמות — שישי של פעם</h2>
+      <p>סה"כ נרשמו: <strong>{len(registrations)} אנשים</strong> | סה"כ משתתפים: <strong>{total_people}</strong></p>
+      <table style="border-collapse:collapse;width:100%;margin-top:12px;">
+        <thead><tr style="background:#f0f0f0;">
+          <th style="padding:8px;border:1px solid #ddd;">שם</th>
+          <th style="padding:8px;border:1px solid #ddd;">טלפון</th>
+          <th style="padding:8px;border:1px solid #ddd;">משתתפים</th>
+          <th style="padding:8px;border:1px solid #ddd;">זמן הרשמה</th>
+        </tr></thead>
+        <tbody>{rows}</tbody>
+      </table>
+    </body></html>
+    """
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = f"📋 סיכום הרשמות שישי של פעם — {len(registrations)} נרשמו ({total_people} משתתפים)"
+    msg["From"] = formataddr(("בוט אורן כהן גרופ", gmail_user))
+    msg["To"] = "office@orencohengroup.com"
+    msg.attach(MIMEText(html, "html", "utf-8"))
+    try:
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(gmail_user, gmail_pass)
+            server.sendmail(gmail_user, "office@orencohengroup.com", msg.as_string())
+        print(f"[SHISHI REPORT] sent {len(registrations)} regs")
+    except Exception as e:
+        print(f"[SHISHI REPORT ERROR] {e}")
+
+
 def send_bulk_report(agent_label: str, results: list[dict], agent_email: str | None = None) -> None:
     """שולח דוח שליחה מיידי לאדמין עם סיכום מה עבד ומה לא."""
     sent = [r for r in results if r["status"] == "sent"]

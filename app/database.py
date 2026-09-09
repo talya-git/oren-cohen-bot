@@ -800,3 +800,15 @@ def save_shishi_registration(name: str, phone: str, guests: int) -> None:
         )
     conn.commit()
     conn.close()
+
+
+def get_shishi_registrations_today() -> list:
+    conn = get_db()
+    cur = conn.cursor()
+    if DATABASE_URL:
+        cur.execute("SELECT * FROM shishi_registrations ORDER BY created_at DESC")
+    else:
+        cur.execute("SELECT * FROM shishi_registrations ORDER BY created_at DESC")
+    rows = _fetchall(cur)
+    conn.close()
+    return rows
