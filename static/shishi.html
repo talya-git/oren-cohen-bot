@@ -7,12 +7,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Noto+Sans+Hebrew:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Noto Sans Hebrew', sans-serif; background: #e6e6e6; margin: 0; padding: 0; }
+    body { font-family: 'Noto Sans Hebrew', sans-serif; background: #e6e6e6; margin: 0; padding: 0; overflow-x: hidden; }
     .card { width: 100%; position: relative; }
     .img-wrapper { position: relative; width: 100%; padding-bottom: 103.05%; overflow: hidden; }
     .bg-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
-
-    @media (max-width: 600px) {
+    @media (max-width: 768px) {
+      body { background: #000; }
       .bg-img { object-fit: fill; }
     }
 
@@ -80,7 +80,7 @@
 
     <!-- כפתור הרשמה — גרירה -->
     <div class="register-overlay" id="el-btn">
-      <a href="#" class="register-btn" id="reg-link">הרשמו עכשיו</a>
+      <a href="#" class="register-btn" onclick="openModal(); return false;">הרשמו עכשיו</a>
     </div>
 
     <!-- מלבן נשמח לראותכם — גרירה -->
@@ -99,7 +99,6 @@
     </div>
 
   </div>
-  <div id="pos-bar" style="background:#111;color:#0f0;font-size:11px;padding:5px 10px;font-family:monospace;text-align:center;">גרור כפתור ומלבן למקום הנכון</div>
 </div>
 
 <!-- מודל -->
@@ -136,47 +135,6 @@
 </div>
 
 <script>
-  const wrapper = document.querySelector('.img-wrapper');
-
-  function makeDraggable(el) {
-    let dragging = false, moved = false, sx, sy, sl, st;
-    el.addEventListener('mousedown', e => {
-      if (e.target.tagName === 'A') return;
-      dragging = true; moved = false;
-      sx = e.clientX; sy = e.clientY;
-      sl = el.offsetLeft; st = el.offsetTop;
-      el.style.left = sl + 'px'; el.style.top = st + 'px';
-      e.preventDefault();
-    });
-    document.addEventListener('mousemove', e => {
-      if (!dragging) return;
-      moved = true;
-      el.style.left = (sl + e.clientX - sx) + 'px';
-      el.style.top  = (st + e.clientY - sy) + 'px';
-      updateBar();
-    });
-    document.addEventListener('mouseup', e => {
-      if (!dragging) return;
-      dragging = false;
-      if (!moved && el.id === 'el-btn') openModal();
-    });
-  }
-
-  function updateBar() {
-    const ww = wrapper.offsetWidth, wh = wrapper.offsetHeight;
-    const b = document.getElementById('el-btn');
-    const c = document.getElementById('el-contact');
-    document.getElementById('pos-bar').textContent =
-      `🔘 כפתור: top=${(b.offsetTop/wh*100).toFixed(2)}% left=${(b.offsetLeft/ww*100).toFixed(2)}%` +
-      `   📋 מלבן: top=${(c.offsetTop/wh*100).toFixed(2)}% left=${(c.offsetLeft/ww*100).toFixed(2)}%`;
-  }
-
-  makeDraggable(document.getElementById('el-btn'));
-
-  document.getElementById('el-btn').addEventListener('mouseup', e => {
-    if (!moved) openModal();
-  });
-
   function openModal() { document.getElementById('modal-overlay').classList.add('active'); }
   function closeModal() {
     document.getElementById('modal-overlay').classList.remove('active');
