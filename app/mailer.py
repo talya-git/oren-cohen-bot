@@ -222,6 +222,9 @@ def send_shishi_registration(name: str, phone: str, guests: str) -> None:
             print(f"[SHISHI] email sent for {name} {phone}")
     except Exception as e:
         print(f"[SHISHI EMAIL ERROR] {e}")
+
+
+def send_bulk_report(agent_label: str, results: list[dict], agent_email: str | None = None) -> None:
     """שולח דוח שליחה מיידי לאדמין עם סיכום מה עבד ומה לא."""
     sent = [r for r in results if r["status"] == "sent"]
     failed = [r for r in results if r["status"] == "error"]
