@@ -24,18 +24,19 @@
     .logo2-overlay { position: absolute; top: 13.51%; left: 58.10%; width: 25%; z-index: 10; pointer-events: none; }
     .logo2-overlay img { width: 100%; display: block; }
 
-    /* כפתור הרשמה — גרירה */
-    .register-overlay { position: absolute; top: 79.59%; left: 60.32%; width: 22%; z-index: 10; cursor: grab; user-select: none; }
+    /* כפתור נעול */
+    .register-overlay { position: absolute; top: 78.66%; left: 58.02%; width: 22%; z-index: 10; cursor: grab; user-select: none; }
     .register-btn { display: block; width: 100%; padding: 26px 16px; background: #c9a84c; color: #000; text-align: center; font-size: clamp(13px, 2vw, 17px); font-weight: 900; font-family: 'Noto Sans Hebrew', sans-serif; letter-spacing: 1px; border: none; cursor: pointer; text-decoration: none; transition: background 0.2s; pointer-events: none; }
     .register-btn:hover { background: #b8943a; }
 
-    /* מלבן "נשמח לראותכם" — גרירה */
-    .contact-overlay { position: absolute; top: 82%; left: 2%; width: 35%; z-index: 10; cursor: grab; user-select: none; }
-    .contact-box { background: transparent; padding: 14px 16px; }
-    .contact-box .title { font-size: clamp(11px, 1.6vw, 14px); font-weight: 700; color: #3a2e1e; margin-bottom: 8px; font-family: 'Noto Sans Hebrew', sans-serif; }
-    .contact-box .name { font-size: clamp(12px, 1.8vw, 15px); font-weight: 700; color: #c9a84c; margin-bottom: 6px; font-family: 'Cormorant Garamond', Georgia, serif; letter-spacing: 1px; }
-    .contact-box a { display: block; font-size: clamp(9px, 1.3vw, 11px); color: #3a2e1e; text-decoration: none; margin: 2px 0; font-family: 'Noto Sans Hebrew', sans-serif; pointer-events: all; }
-    .contact-box a:hover { text-decoration: underline; }
+    /* מלבן קישורים נעול */
+    .contact-overlay { position: absolute; top: 65.00%; left: 17.47%; width: 38%; z-index: 10; cursor: grab; user-select: none; }
+    .contact-box { background: transparent; padding: 0; }
+    .contact-box .title { font-size: clamp(11px, 1.5vw, 13px); font-weight: 700; color: #c9a84c; margin-bottom: 4px; font-family: 'Noto Sans Hebrew', sans-serif; }
+    .contact-box .name { font-size: clamp(13px, 2vw, 17px); font-weight: 700; color: #c9a84c; margin-bottom: 8px; font-family: 'Noto Sans Hebrew', sans-serif; }
+    .contact-box .links { border-right: 2px solid #c9a84c; padding-right: 8px; }
+    .contact-box a { display: block; font-size: clamp(8px, 1.2vw, 11px); color: #4a4a4a; text-decoration: none; margin: 3px 0; font-family: 'Noto Sans Hebrew', sans-serif; pointer-events: all; line-height: 1.5; }
+    .contact-box a:hover { color: #c9a84c; }
 
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
     .modal-overlay.active { display: flex; }
@@ -83,11 +84,13 @@
       <div class="contact-box">
         <div class="title">נשמח מאד לראותכם.</div>
         <div class="name">אורן כהן גרופ</div>
-        <a href="mailto:marketing@orencohengroup.com">✉ marketing@orencohengroup.com</a>
-        <a href="tel:+972545596052">☎ Tel. +972-54-5596052</a>
-        <a href="https://maps.google.com/?q=33+HaKeren+HaKayemet+Jerusalem" target="_blank">📍 33 Ha'Keren Ha'Kayemet L'Israel St. Rechavia</a>
-        <a href="https://wa.me/972545596052" target="_blank">💬 WhatsApp. +972 54-559-6052</a>
-        <a href="https://www.orencohengroup.com" target="_blank">🌐 www.orencohengroup.com</a>
+        <div class="links">
+          <a href="mailto:marketing@orencohengroup.com">✉ marketing@orencohengroup.com</a>
+          <a href="tel:+972545596052">☎ Tel. +972-54-5596052</a>
+          <a href="https://maps.google.com/?q=33+HaKeren+HaKayemet+Jerusalem" target="_blank">📍 33 Ha'Keren Ha'Kayemet L'Israel St. Rechavia - Jerusalem</a>
+          <a href="https://wa.me/972545596052" target="_blank">💬 WhatsApp. +972 54-559-6052</a>
+          <a href="https://www.orencohengroup.com" target="_blank">🌐 www.orencohengroup.com</a>
+        </div>
       </div>
     </div>
 
