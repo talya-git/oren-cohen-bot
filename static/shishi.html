@@ -7,38 +7,47 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Noto+Sans+Hebrew:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Noto Sans Hebrew', sans-serif; background: #e6e6e6; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: #e6e6e6; }
+    body { font-family: 'Noto Sans Hebrew', sans-serif; }
+
     .card { width: 100%; position: relative; }
-    .img-wrapper { position: relative; width: 100%; padding-bottom: 103.05%; overflow: hidden; }
-    .bg-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
 
-    /* תאריך נעול */
+    /* תמונה רספונסיבית — מלאה לכל רוחב, שומרת יחס */
+    .img-wrapper {
+      position: relative;
+      width: 100%;
+      padding-bottom: 103.05%;
+    }
+    .bg-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: fill; display: block; }
+
+    /* תאריך */
     .date-overlay { position: absolute; top: 69.92%; left: 53.36%; z-index: 10; pointer-events: none; }
-    .date-new { display: inline-block; background: #e6e6e6; color: #3a3020; font-size: clamp(13px, 2.4vw, 18px); font-weight: 600; font-family: 'Noto Sans Hebrew', sans-serif; padding: 1px 8px; white-space: nowrap; line-height: 1.6; }
+    .date-new { display: inline-block; background: #e6e6e6; color: #3a3020; font-size: clamp(10px, 2.4vw, 18px); font-weight: 600; font-family: 'Noto Sans Hebrew', sans-serif; padding: 1px 8px; white-space: nowrap; line-height: 1.6; }
 
-    /* לוגו 1 נעול */
+    /* לוגו 1 */
     .logo1-overlay { position: absolute; top: 4.37%; left: 56.92%; width: 25%; z-index: 10; pointer-events: none; }
     .logo1-overlay img { width: 100%; display: block; }
 
-    /* לוגו 2 נעול */
+    /* לוגו 2 */
     .logo2-overlay { position: absolute; top: 13.51%; left: 58.10%; width: 25%; z-index: 10; pointer-events: none; }
     .logo2-overlay img { width: 100%; display: block; }
 
-    /* כפתור נעול */
-    .register-overlay { position: absolute; top: 78.66%; left: 58.02%; width: 22%; z-index: 10; pointer-events: all; }
-    .register-btn { display: block; width: 100%; padding: 26px 16px; background: #c9a84c; color: #000; text-align: center; font-size: clamp(13px, 2vw, 17px); font-weight: 900; font-family: 'Noto Sans Hebrew', sans-serif; letter-spacing: 1px; border: none; cursor: pointer; text-decoration: none; transition: background 0.2s; pointer-events: none; }
+    /* כפתור */
+    .register-overlay { position: absolute; top: 78.66%; left: 58.02%; width: 22%; z-index: 10; }
+    .register-btn { display: block; width: 100%; padding: 3% 4%; background: #c9a84c; color: #000; text-align: center; font-size: clamp(10px, 2vw, 17px); font-weight: 900; font-family: 'Noto Sans Hebrew', sans-serif; letter-spacing: 1px; border: none; cursor: pointer; text-decoration: none; transition: background 0.2s; }
     .register-btn:hover { background: #b8943a; }
 
-    /* מלבן קישורים נעול */
-    .contact-overlay { position: absolute; top: 78.89%; left: 19.68%; width: 36%; z-index: 10; pointer-events: none; }
-    .contact-box { background: #e6e6e6; padding: 10px 12px; pointer-events: all; }
-    .contact-box .title { font-size: clamp(13px, 1.8vw, 16px); font-weight: 700; color: #c9a84c; margin-bottom: 2px; font-family: 'Noto Sans Hebrew', sans-serif; direction: ltr; text-align: left; }
-    .contact-box .name { font-size: clamp(15px, 2.3vw, 20px); font-weight: 700; color: #c9a84c; margin-bottom: 8px; font-family: 'Noto Sans Hebrew', sans-serif; direction: ltr; text-align: left; }
-    .contact-box .links { border-left: 2px solid #c9a84c; padding-left: 8px; }
-    .contact-box a { display: flex; align-items: center; gap: 6px; font-size: clamp(10px, 1.4vw, 13px); font-weight: 700; color: #c9a84c; text-decoration: none; margin: 3px 0; font-family: 'Noto Sans Hebrew', sans-serif; pointer-events: all; line-height: 1.6; direction: ltr; }
+    /* מלבן קישורים */
+    .contact-overlay { position: absolute; top: 78.89%; left: 19.68%; width: 36%; z-index: 10; }
+    .contact-box { background: #e6e6e6; padding: 1.5% 2%; }
+    .contact-box .title { font-size: clamp(10px, 1.8vw, 16px); font-weight: 700; color: #c9a84c; margin-bottom: 1%; font-family: 'Noto Sans Hebrew', sans-serif; direction: ltr; text-align: left; }
+    .contact-box .name { font-size: clamp(12px, 2.3vw, 20px); font-weight: 700; color: #c9a84c; margin-bottom: 2%; font-family: 'Noto Sans Hebrew', sans-serif; direction: ltr; text-align: left; }
+    .contact-box .links { border-left: 2px solid #c9a84c; padding-left: 6px; }
+    .contact-box a { display: flex; align-items: center; gap: 5px; font-size: clamp(8px, 1.3vw, 12px); font-weight: 700; color: #c9a84c; text-decoration: none; margin: 2px 0; font-family: 'Noto Sans Hebrew', sans-serif; line-height: 1.5; direction: ltr; }
     .contact-box a:hover { opacity: 0.8; }
-    .ico { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid #c9a84c; font-size: 8px; color: #c9a84c; flex-shrink: 0; font-style: normal; }
+    .ico { flex-shrink: 0; width: clamp(10px, 1.4vw, 14px); height: clamp(10px, 1.4vw, 14px); }
 
+    /* מודל */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
     .modal-overlay.active { display: flex; }
     .modal { background: #f5f0e8; border: 1.5px solid #c9a84c; padding: 28px 24px; width: 100%; max-width: 400px; direction: rtl; border-radius: 4px; }
@@ -49,7 +58,6 @@
     .modal-btns { display: flex; gap: 10px; margin-top: 18px; }
     .modal-btns button { flex: 1; padding: 10px; border: none; cursor: pointer; font-size: 14px; font-weight: 700; font-family: 'Noto Sans Hebrew', sans-serif; border-radius: 3px; }
     .btn-submit { background: #c9a84c; color: white; }
-    .btn-submit:hover { background: #b8943a; }
     .btn-cancel { background: #ddd; color: #555; }
     .success-msg { display: none; text-align: center; padding: 10px; }
     .success-msg .check { font-size: 38px; margin-bottom: 8px; }
@@ -59,6 +67,32 @@
 </head>
 <body>
 
+<!-- SVG icons defs — זהב בלבד -->
+<svg style="display:none">
+  <defs>
+    <!-- מייל -->
+    <symbol id="svg-mail" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2">
+      <rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/>
+    </symbol>
+    <!-- טלפון -->
+    <symbol id="svg-phone" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2">
+      <path d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 013.09 4.18 2 2 0 015.07 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L9.09 9.91a16 16 0 006.99 7l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+    </symbol>
+    <!-- מיקום -->
+    <symbol id="svg-location" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2">
+      <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+    </symbol>
+    <!-- וואטסאפ -->
+    <symbol id="svg-whatsapp" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2">
+      <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
+    </symbol>
+    <!-- גלובוס -->
+    <symbol id="svg-globe" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+    </symbol>
+  </defs>
+</svg>
+
 <div class="card">
   <div class="img-wrapper">
     <img class="bg-img" src="/static/shishi-bg.png" alt="שישי של פעם" />
@@ -66,37 +100,42 @@
     <div class="logo1-overlay">
       <img src="/static/milano-logo.png" alt="Milano" />
     </div>
-
     <div class="logo2-overlay">
       <img src="/static/orchid-logo.png" alt="Orchid" />
     </div>
-
     <div class="date-overlay">
       <span class="date-new">יום ראשון כ״ז תשרי | 27.09.2025 | 16:30</span>
     </div>
 
-    <!-- כפתור הרשמה — גרירה -->
-    <div class="register-overlay" id="el-btn">
-      <a href="#" class="register-btn" id="reg-link">הרשמו עכשיו</a>
+    <div class="register-overlay">
+      <a href="#" class="register-btn" onclick="openModal(); return false;">הרשמו עכשיו</a>
     </div>
 
-    <!-- מלבן נשמח לראותכם — גרירה -->
-    <div class="contact-overlay" id="el-contact">
+    <div class="contact-overlay">
       <div class="contact-box">
         <div class="title">נשמח מאד לראותכם.</div>
         <div class="name">אורן כהן גרופ</div>
         <div class="links">
-          <a href="mailto:marketing@orencohengroup.com"><i class="ico">@</i> marketing@orencohengroup.com</a>
-          <a href="tel:+972545596052"><i class="ico">✆</i> Tel. +972-54-5596052</a>
-          <a href="https://maps.google.com/?q=33+HaKeren+HaKayemet+Jerusalem" target="_blank"><i class="ico">○</i> 33 Ha'Keren Ha'Kayemet L'Israel St. Rechavia - Jerusalem</a>
-          <a href="https://wa.me/972545596052" target="_blank"><i class="ico">◌</i> WhatsApp. +972 54-559-6052</a>
-          <a href="https://www.orencohengroup.com" target="_blank"><i class="ico">○</i> www.orencohengroup.com</a>
+          <a href="mailto:marketing@orencohengroup.com">
+            <svg class="ico"><use href="#svg-mail"/></svg> marketing@orencohengroup.com
+          </a>
+          <a href="tel:+972545596052">
+            <svg class="ico"><use href="#svg-phone"/></svg> Tel. +972-54-5596052
+          </a>
+          <a href="https://maps.google.com/?q=33+HaKeren+HaKayemet+Jerusalem" target="_blank">
+            <svg class="ico"><use href="#svg-location"/></svg> 33 Ha'Keren Ha'Kayemet L'Israel St. Rechavia - Jerusalem
+          </a>
+          <a href="https://wa.me/972545596052" target="_blank">
+            <svg class="ico"><use href="#svg-whatsapp"/></svg> WhatsApp. +972 54-559-6052
+          </a>
+          <a href="https://www.orencohengroup.com" target="_blank">
+            <svg class="ico"><use href="#svg-globe"/></svg> www.orencohengroup.com
+          </a>
         </div>
       </div>
     </div>
 
   </div>
-  <div id="pos-bar" style="background:#111;color:#0f0;font-size:11px;padding:5px 10px;font-family:monospace;text-align:center;">גרור כפתור ומלבן למקום הנכון</div>
 </div>
 
 <!-- מודל -->
@@ -133,47 +172,6 @@
 </div>
 
 <script>
-  const wrapper = document.querySelector('.img-wrapper');
-
-  function makeDraggable(el) {
-    let dragging = false, moved = false, sx, sy, sl, st;
-    el.addEventListener('mousedown', e => {
-      if (e.target.tagName === 'A') return;
-      dragging = true; moved = false;
-      sx = e.clientX; sy = e.clientY;
-      sl = el.offsetLeft; st = el.offsetTop;
-      el.style.left = sl + 'px'; el.style.top = st + 'px';
-      e.preventDefault();
-    });
-    document.addEventListener('mousemove', e => {
-      if (!dragging) return;
-      moved = true;
-      el.style.left = (sl + e.clientX - sx) + 'px';
-      el.style.top  = (st + e.clientY - sy) + 'px';
-      updateBar();
-    });
-    document.addEventListener('mouseup', e => {
-      if (!dragging) return;
-      dragging = false;
-      if (!moved && el.id === 'el-btn') openModal();
-    });
-  }
-
-  function updateBar() {
-    const ww = wrapper.offsetWidth, wh = wrapper.offsetHeight;
-    const b = document.getElementById('el-btn');
-    const c = document.getElementById('el-contact');
-    document.getElementById('pos-bar').textContent =
-      `🔘 כפתור: top=${(b.offsetTop/wh*100).toFixed(2)}% left=${(b.offsetLeft/ww*100).toFixed(2)}%` +
-      `   📋 מלבן: top=${(c.offsetTop/wh*100).toFixed(2)}% left=${(c.offsetLeft/ww*100).toFixed(2)}%`;
-  }
-
-  makeDraggable(document.getElementById('el-btn'));
-
-  document.getElementById('el-btn').addEventListener('mouseup', e => {
-    if (!moved) openModal();
-  });
-
   function openModal() { document.getElementById('modal-overlay').classList.add('active'); }
   function closeModal() {
     document.getElementById('modal-overlay').classList.remove('active');
