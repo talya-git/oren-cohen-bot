@@ -190,7 +190,38 @@ def send_hot_lead_alert(name: str, phone: str, score: str, transcript: str) -> N
         print(f"[HOT LEAD ALERT ERROR] {e}")
 
 
-def send_bulk_report(agent_label: str, results: list[dict], agent_email: str | None = None) -> None:
+def send_shishi_registration(name: str, phone: str, guests: str) -> None:
+    """שולח מייל על הרשמה חדשה לשישי של פעם."""
+    subject = f"🎉 הרשמה חדשה — שישי של פעם | {name}"
+    html = (
+        "<html><body dir='rtl' style='font-family:Arial,sans-serif;font-size:14px;'>"
+        "<h2 style='color:#c9a84c;'>הרשמה חדשה — שישי של פעם</h2>"
+        "<table style='border-collapse:collapse;'>"
+        f"<tr><td style='padding:6px 16px;font-weight:bold;'>שם:</td><td style='padding:6px 16px;'>{name}</td></tr>"
+        f"<tr><td style='padding:6px 16px;font-weight:bold;'>טלפון:</td><td style='padding:6px 16px;direction:ltr;'>{phone}</td></tr>"
+        f"<tr><td style='padding:6px 16px;font-weight:bold;'>מספר משתתפים:</td><td style='padding:6px 16px;'>{guests}</td></tr>"
+        "</table></body></html>"
+    )
+    payload = json.dumps({
+        "Messages": [{
+            "From": {"Email": FROM_EMAIL, "Name": FROM_NAME},
+            "To": [{"Email": "office@orencohengroup.com"}],
+            "Subject": subject,
+            "HTMLPart": html,
+        }]
+    }).encode()
+    credentials = base64.b64encode(f"{MAILJET_API_KEY}:{MAILJET_SECRET_KEY}".encode()).decode()
+    req = urllib.request.Request(
+        "https://api.mailjet.com/v3.1/send",
+        data=payload,
+        headers={"Authorization": f"Basic {credentials}", "Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req) as resp:
+            print(f"[SHISHI] email sent for {name} {phone}")
+    except Exception as e:
+        print(f"[SHISHI EMAIL ERROR] {e}")
     """שולח דוח שליחה מיידי לאדמין עם סיכום מה עבד ומה לא."""
     sent = [r for r in results if r["status"] == "sent"]
     failed = [r for r in results if r["status"] == "error"]

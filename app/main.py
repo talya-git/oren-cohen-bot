@@ -814,6 +814,11 @@ async def shishi_register(request: Request):
     guests = data.get("guests", 1)
     db.save_shishi_registration(name, phone, guests)
     print(f"[SHISHI] הרשמה: {name} | {phone} | {guests} משתתפים")
+    try:
+        from .mailer import send_shishi_registration
+        send_shishi_registration(name, phone, str(guests))
+    except Exception as e:
+        print(f"[SHISHI EMAIL ERROR] {e}")
     return {"status": "ok"}
 
 
