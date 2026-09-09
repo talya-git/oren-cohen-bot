@@ -220,6 +220,10 @@ def send_shishi_registration(name: str, phone: str, guests: str) -> None:
     try:
         with urllib.request.urlopen(req) as resp:
             print(f"[SHISHI] email sent for {name} {phone}")
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        print(f"[SHISHI EMAIL ERROR] 401 body={body[:300]}")
+        print(f"[SHISHI EMAIL ERROR] api_key_len={len(MAILJET_API_KEY)} secret_len={len(MAILJET_SECRET_KEY)}")
     except Exception as e:
         print(f"[SHISHI EMAIL ERROR] {e}")
 
