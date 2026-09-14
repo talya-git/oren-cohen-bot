@@ -183,6 +183,8 @@ async def start_stalled_scheduler():
                 stalled = _db.get_stalled_conversations(hours=2)
                 for row in stalled:
                     phone = row.get("phone", "")
+                    if phone.startswith("email:"):
+                        continue
                     try:
                         profile = ExtractedParams(
                             phone=phone,
