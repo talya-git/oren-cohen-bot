@@ -355,7 +355,17 @@
     <label style="display:none">סוכן מטפל</label>
     <input type="text" id="handled-by" placeholder="שם הסוכן המטפל" style="display:none" />
     <label>סוכנים נוספים לפגישה</label>
-    <div id="extra-agents-wrap" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;"></div>
+    <div style="margin-bottom:14px;">
+      <button type="button" onclick="toggleExtraAgents()" id="extra-agents-toggle"
+        style="width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:10px;
+               font-size:14px;background:#f8fafc;color:#475569;text-align:right;cursor:pointer;
+               display:flex;justify-content:space-between;align-items:center;">
+        <span id="extra-agents-label">בחר סוכנים נוספים...</span>
+        <span id="extra-agents-arrow">▼</span>
+      </button>
+      <div id="extra-agents-wrap" style="display:none;border:1.5px solid #e2e8f0;border-top:none;
+           border-radius:0 0 10px 10px;padding:10px;display:none;flex-wrap:wrap;gap:6px;"></div>
+    </div>
     <label>הערות</label>
     <textarea id="meeting-notes" placeholder="פרטים נוספים..."></textarea>
     <label>כיבוד ושתייה</label>
@@ -722,6 +732,20 @@ function _nowTime() {
   return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
 }
 
+function toggleExtraAgents() {
+  const wrap = document.getElementById('extra-agents-wrap');
+  const arrow = document.getElementById('extra-agents-arrow');
+  const open = wrap.style.display === 'none' || wrap.style.display === '';
+  wrap.style.display = open ? 'flex' : 'none';
+  arrow.textContent = open ? '▲' : '▼';
+}
+
+function updateExtraAgentsLabel() {
+  const checked = [...document.querySelectorAll('.extra-agent-cb:checked')].map(cb => cb.value);
+  const label = document.getElementById('extra-agents-label');
+  label.textContent = checked.length ? checked.join(', ') : 'בחר סוכנים נוספים...';
+}
+
 function openAddModal() {
   _editingId = null;
   document.getElementById('modal-title-text').textContent = 'פגישה חדשה';
@@ -744,6 +768,7 @@ function openAddModal() {
     btn.querySelector('input').addEventListener('change', function() {
       btn.style.borderColor = this.checked ? '#6366f1' : '#e2e8f0';
       btn.style.background = this.checked ? '#eef2ff' : '';
+      updateExtraAgentsLabel();
     });
     wrap.appendChild(btn);
   });
