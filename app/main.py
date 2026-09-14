@@ -42,6 +42,34 @@ app.include_router(email_router)
 
 
 @app.on_event("startup")
+async def start_memory_cleanup():
+    import asyncio
+    async def _cleanup():
+        while True:
+            await asyncio.sleep(30 * 60)  # כל 30 דקות
+            try:
+                # נקה train sessions ישנים
+                cutoff = 200
+                if len(_train_sessions) > cutoff:
+                    old_keys = list(_train_sessions.keys())[:-cutoff]
+                    for k in old_keys:
+                        del _train_sessions[k]
+                    print(f"[CLEANUP] removed {len(old_keys)} train sessions")
+                if len(_sessions) > cutoff:
+                    old_keys = list(_sessions.keys())[:-cutoff]
+                    for k in old_keys:
+                        del _sessions[k]
+                    print(f"[CLEANUP] removed {len(old_keys)} sessions")
+                if len(_agent_sessions) > 50:
+                    old_keys = list(_agent_sessions.keys())[:-50]
+                    for k in old_keys:
+                        del _agent_sessions[k]
+            except Exception as e:
+                print(f"[CLEANUP ERROR] {e}")
+    asyncio.create_task(_cleanup())
+
+
+@app.on_event("startup")
 async def start_morning_reminders():
     import asyncio
     from datetime import datetime, timezone, timedelta
