@@ -271,17 +271,27 @@ async def start_meeting_reminders():
                         continue
                     agent = m.get('agent_name', '')
                     phone = AGENT_PHONES.get(agent)
-                    if not phone:
-                        continue
-                    msg = f"תזכורת 🔔\nפגישה עם {m['client_name']} בעוד 15 דקות ({time_str})"
-                    if m.get('meeting_type') == 'zoom' and m.get('zoom_link'):
-                        msg += f"\nקישור זום: {m['zoom_link']}"
-                    try:
-                        send_message(phone, msg)
-                        _sent_reminders.add(key)
-                        print(f"[MEETING REMINDER] {agent} -> {phone} | {m['client_name']} {time_str}")
-                    except Exception as e:
-                        print(f"[MEETING REMINDER ERROR] {e}")
+                    # כל הסוכנים בפגישה
+                    agents_to_notify = [agent]
+                    extra = m.get('extra_agents', '')
+                    if extra:
+                        agents_to_notify += [a.strip() for a in extra.split(',') if a.strip()]
+                    for ag in agents_to_notify:
+                        ph = AGENT_PHONES.get(ag)
+                        if not ph:
+                            continue
+                        akey = f"{m['id']}-{ag}-reminder"
+                        if akey in _sent_reminders:
+                            continue
+                        msg = f"תזכורת 🔔\nפגישה עם {m['client_name']} בעוד 15 דקות ({time_str})"
+                        if m.get('meeting_type') == 'zoom' and m.get('zoom_link'):
+                            msg += f"\nקישור זום: {m['zoom_link']}"
+                        try:
+                            send_message(ph, msg)
+                            _sent_reminders.add(akey)
+                            print(f"[MEETING REMINDER] {ag} -> {ph} | {m['client_name']} {time_str}")
+                        except Exception as e:
+                            print(f"[MEETING REMINDER ERROR] {ag}: {e}")
             except Exception as e:
                 print(f"[MEETING REMINDER LOOP ERROR] {e}")
             await asyncio.sleep(60)
@@ -943,7 +953,9 @@ def check_conflict(date: str, time: str, department: str, agent: str = ""):
 @app.post("/api/meetings")
 async def create_meeting(request: Request):
     from . import database as _db
+    from .whatsapp import send_message
     data = await request.json()
+    extra_agents = data.get("extra_agents", "")
     mid = _db.create_meeting(
         agent_name=data.get("agent_name", ""),
         agent_email=data.get("agent_email", ""),
@@ -955,8 +967,37 @@ async def create_meeting(request: Request):
         zoom_link=data.get("zoom_link", ""),
         notes=data.get("notes", ""),
         department=data.get("department", ""),
-        location=data.get("location", "")
+        location=data.get("location", ""),
+        extra_agents=extra_agents,
     )
+    # שלח התראה מיידית לכל הסוכנים בפגישה
+    AGENT_PHONES = {
+        'יניב':'+972545596052','משה':'+972523873383','מירי':'+972543402018',
+        'מיכאל':'+972584114686','רבקה':'+972586455059','אלחנן':'+972549183150',
+        'אורן':'+972549183150','אריה':'+972552704922','בועז':'+972545596052',
+        'אהרון':'+972549183150','ליסה':'+13055863760','דב':'+972526239608',
+        'נעמי':'+972515528956','אייזיק':'+972535226105','רמי':'+972542315410',
+        'נתנאל':'+972545596052',
+    }
+    booker = data.get("agent_name", "")
+    client = data.get("client_name", "")
+    date = data.get("meeting_date", "")
+    time = data.get("meeting_time", "")
+    zoom = data.get("zoom_link", "")
+    all_agents = [a.strip() for a in extra_agents.split(",") if a.strip()]
+    for agent in all_agents:
+        if agent == booker:
+            continue
+        phone = AGENT_PHONES.get(agent)
+        if not phone:
+            continue
+        msg = f"פגישה נקבעה על ידי {booker} 📅\nלקוח: {client}\nתאריך: {date} | שעה: {time}"
+        if zoom:
+            msg += f"\nזום: {zoom}"
+        try:
+            send_message(phone, msg)
+        except Exception as e:
+            print(f"[MEETING NOTIFY] {agent}: {e}")
     return {"status": "ok", "id": mid}
 
 

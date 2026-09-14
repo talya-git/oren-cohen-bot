@@ -354,6 +354,8 @@
     </div>
     <label style="display:none">סוכן מטפל</label>
     <input type="text" id="handled-by" placeholder="שם הסוכן המטפל" style="display:none" />
+    <label>סוכנים נוספים לפגישה</label>
+    <div id="extra-agents-wrap" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;"></div>
     <label>הערות</label>
     <textarea id="meeting-notes" placeholder="פרטים נוספים..."></textarea>
     <label>כיבוד ושתייה</label>
@@ -732,6 +734,19 @@ function openAddModal() {
   updateLocationLabels();
   document.querySelector('input[name="catering"][value="none"]').checked = true;
   updateCateringLabels();
+  // אתחול כפתורות סוכנים נוספים
+  const wrap = document.getElementById('extra-agents-wrap');
+  wrap.innerHTML = '';
+  AGENTS.filter(a => a.label !== currentAgent?.label).forEach(a => {
+    const btn = document.createElement('label');
+    btn.style.cssText = 'display:flex;align-items:center;gap:5px;padding:6px 10px;border:1.5px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:13px;';
+    btn.innerHTML = `<input type="checkbox" class="extra-agent-cb" value="${a.label}"> ${a.label}`;
+    btn.querySelector('input').addEventListener('change', function() {
+      btn.style.borderColor = this.checked ? '#6366f1' : '#e2e8f0';
+      btn.style.background = this.checked ? '#eef2ff' : '';
+    });
+    wrap.appendChild(btn);
+  });
   document.getElementById('add-modal').classList.add('open');
   updateTypeLabels();
 }
@@ -788,6 +803,7 @@ async function addMeeting() {
   const handledBy = currentAgent.label;
   const zoomLink = document.getElementById('zoom-link').value.trim();
   const notes = document.getElementById('meeting-notes').value.trim();
+  const extraAgents = [...document.querySelectorAll('.extra-agent-cb:checked')].map(cb => cb.value).join(',');
   if (!clientName) { alert('נא להזין שם לקוח'); return; }
   if (!time || !/^\d{1,2}:\d{2}$/.test(time)) { alert('נא להזין שעה בפורמט HH:MM (\u05dcמשל 09:30)'); return; }
   const [hh, mm] = time.split(':').map(Number);
@@ -855,7 +871,7 @@ async function addMeeting() {
   } else {
     await fetch('/api/meetings', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ agent_name: currentAgent.label, agent_email: currentAgent.email, client_name: clientName, meeting_date: formatDate(selectedDate), meeting_time: time, meeting_type: meetingType, handled_by: handledBy, zoom_link: zoomLink, notes, department: currentDept, location })
+      body: JSON.stringify({ agent_name: currentAgent.label, agent_email: currentAgent.email, client_name: clientName, meeting_date: formatDate(selectedDate), meeting_time: time, meeting_type: meetingType, handled_by: handledBy, zoom_link: zoomLink, notes, department: currentDept, location, extra_agents: extraAgents })
     });
   }
   closeModal();
