@@ -241,7 +241,7 @@ def send_shishi_daily_report(registrations: list) -> None:
         f"<tr><td style='padding:8px;border:1px solid #ddd;'>{r.get('name','')}</td>"
         f"<td style='padding:8px;border:1px solid #ddd;direction:ltr;'>{r.get('phone','')}</td>"
         f"<td style='padding:8px;border:1px solid #ddd;text-align:center;'>{r.get('guests',1)}</td>"
-        f"<td style='padding:8px;border:1px solid #ddd;font-size:11px;color:#888;'>{r.get('created_at','')[:16]}</td></tr>"
+        f"<td style='padding:8px;border:1px solid #ddd;font-size:11px;color:#888;'>{str(r.get('created_at',''))[:16]}</td></tr>"
         for r in registrations
     )
     html = f"""
