@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shishi Shel Pa'am — Oren Cohen Group</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Noto+Sans+Hebrew:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Cormorant Garamond', Georgia, serif; background: #e6e6e6; margin: 0; padding: 0; overflow-x: hidden; }
+    .card { width: 100%; position: relative; }
+
+    /* ===== Desktop ===== */
+    .img-wrapper { position: relative; width: 100%; padding-bottom: 150%; overflow: hidden; }
+    .bg-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
+
+    .date-overlay { position: absolute; top: 55%; left: 5%; z-index: 10; pointer-events: none; width: 60%; }
+    .date-new { display: inline-block; background: #e6e6e6; color: #3a3020; font-size: clamp(11px, 1.6vw, 14px); font-weight: 600; font-family: 'Cormorant Garamond', serif; padding: 1px 8px; white-space: nowrap; line-height: 1.6; }
+
+    .register-overlay { position: absolute; top: 72%; left: 55%; width: 22%; z-index: 10; }
+    .register-btn { display: block; width: 100%; padding: 20px 16px; background: #c9a84c; color: #000; text-align: center; font-size: clamp(11px, 1.8vw, 15px); font-weight: 700; font-family: 'Cormorant Garamond', serif; letter-spacing: 1px; border: none; cursor: pointer; text-decoration: none; transition: background 0.2s; }
+    .register-btn:hover { background: #b8943a; }
+
+    .contact-overlay { position: absolute; top: 78%; left: 5%; width: 45%; z-index: 10; pointer-events: none; }
+    .contact-box { background: #e6e6e6; padding: 10px 12px; pointer-events: all; }
+    .contact-box .title { font-size: clamp(11px, 1.5vw, 14px); font-weight: 700; color: #c9a84c; margin-bottom: 2px; font-family: 'Cormorant Garamond', serif; direction: ltr; text-align: left; }
+    .contact-box .name { font-size: clamp(13px, 2vw, 18px); font-weight: 700; color: #c9a84c; margin-bottom: 8px; font-family: 'Cormorant Garamond', serif; direction: ltr; text-align: left; }
+    .contact-box .links { border-left: 2px solid #c9a84c; padding-left: 8px; }
+    .contact-box a { display: flex; align-items: center; gap: 5px; font-size: clamp(9px, 1.3vw, 12px); font-weight: 600; color: #c9a84c; text-decoration: none; margin: 3px 0; font-family: 'Cormorant Garamond', serif; pointer-events: all; line-height: 1.6; direction: ltr; }
+    .contact-box a:hover { opacity: 0.8; }
+    .contact-box svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+    /* ===== Mobile — locked positions ===== */
+    @media (max-width: 768px) {
+      .img-wrapper { padding-bottom: 0; min-height: 100dvh; container-type: inline-size; }
+      .bg-img { object-fit: fill; }
+      .date-overlay { top: 55%; left: 3%; width: 65%; }
+      .date-new { font-size: 2.2cqw; padding: 0.2cqw 1cqw; line-height: 1.5; }
+      .register-overlay { top: 72%; left: 55%; width: 30%; height: 12cqw; }
+      .register-btn { display: flex; align-items: center; justify-content: center; height: 100%; padding: 0; font-size: 2.3cqw; letter-spacing: 0.1cqw; }
+      .contact-overlay { top: 79%; left: 3%; width: 56%; }
+      .contact-box { padding: 4cqw 1.5cqw; }
+      .contact-box .title { font-size: 2.1cqw; margin-bottom: 0.3cqw; }
+      .contact-box .name { font-size: 2.7cqw; margin-bottom: 0.8cqw; }
+      .contact-box .links { border-left: 0.3cqw solid #c9a84c; padding-left: 1cqw; }
+      .contact-box a { font-size: 1.6cqw; margin: 0.4cqw 0; line-height: 1.3; }
+      .contact-box svg { width: 1.8cqw !important; height: 1.8cqw !important; margin-right: 0.6cqw; }
+    }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: #f5f0e8; border: 1.5px solid #c9a84c; padding: 28px 24px; width: 100%; max-width: 400px; direction: ltr; border-radius: 4px; }
+    .modal h2 { font-size: 20px; color: #c9a84c; margin-bottom: 4px; text-align: center; }
+    .modal-sub { text-align: center; font-size: 12px; color: #6a5a48; margin-bottom: 18px; }
+    .modal label { display: block; font-size: 12px; font-weight: 600; color: #4a3a28; margin: 10px 0 3px; }
+    .modal input, .modal select { width: 100%; padding: 8px 10px; border: 1px solid #c9a84c; background: white; font-size: 13px; font-family: 'Cormorant Garamond', serif; color: #2a1f0e; outline: none; }
+    .modal-btns { display: flex; gap: 10px; margin-top: 18px; }
+    .modal-btns button { flex: 1; padding: 10px; border: none; cursor: pointer; font-size: 14px; font-weight: 700; font-family: 'Cormorant Garamond', serif; border-radius: 3px; }
+    .btn-submit { background: #c9a84c; color: white; }
+    .btn-cancel { background: #ddd; color: #555; }
+    .success-msg { display: none; text-align: center; padding: 10px; }
+    .success-msg .check { font-size: 38px; margin-bottom: 8px; }
+    .success-msg h3 { font-size: 17px; color: #c9a84c; margin-bottom: 6px; }
+    .success-msg p { font-size: 12px; color: #6a5a48; line-height: 1.6; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="img-wrapper">
+    <img class="bg-img" src="/static/shishi-en-bg.jpg" alt="Shishi Shel Pa'am" />
+
+    <div class="date-overlay">
+      <span class="date-new">Sunday, 27th of Tishrei | 27.09.2026 | 4:30 PM</span>
+    </div>
+
+    <div class="register-overlay">
+      <a href="#" class="register-btn" onclick="openModal(); return false;">Register Now</a>
+    </div>
+
+    <div class="contact-overlay">
+      <div class="contact-box">
+        <div class="title">We look forward to seeing you.</div>
+        <div class="name">Oren Cohen Group</div>
+        <div class="links">
+          <a href="mailto:marketing@orencohengroup.com"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg> marketing@orencohengroup.com</a>
+          <a href="tel:+972545596052"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 013.09 4.18 2 2 0 015.07 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L9.09 9.91a16 16 0 006.99 7l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg> Tel. +972-54-5596052</a>
+          <a href="https://maps.google.com/?q=33+HaKeren+HaKayemet+Jerusalem" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> 33 Ha'Keren Ha'Kayemet L'Israel St. Rechavia - Jerusalem</a>
+          <a href="https://wa.me/972545596052" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg> WhatsApp. +972 54-559-6052</a>
+          <a href="https://www.orencohengroup.com" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg> www.orencohengroup.com</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div id="form-section">
+      <h2>Register for the Event</h2>
+      <div class="modal-sub">Shishi Shel Pa'am | Sunday 27.09.2026 | 4:30 PM</div>
+      <label>Full Name *</label>
+      <input type="text" id="reg-name" placeholder="John Smith" />
+      <label>Phone *</label>
+      <input type="tel" id="reg-phone" placeholder="+972-50-0000000" />
+      <label>Number of Participants</label>
+      <select id="reg-guests">
+        <option value="1">1 participant</option>
+        <option value="2" selected>2 participants</option>
+        <option value="3">3 participants</option>
+        <option value="4">4 participants</option>
+        <option value="5">5+</option>
+      </select>
+      <div class="modal-btns">
+        <button class="btn-submit" onclick="submitReg()">Confirm ✓</button>
+        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+    <div class="success-msg" id="success-msg">
+      <div class="check">✅</div>
+      <h3>Registration Confirmed!</h3>
+      <p>Thank you, we look forward to seeing you<br>Sunday 27.09.2026 at 4:30 PM<br>33 Keren Kayemet St., Jerusalem</p>
+      <br>
+      <button class="btn-submit" style="width:100%;padding:10px;" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openModal() { document.getElementById('modal-overlay').classList.add('active'); }
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('active');
+    document.getElementById('form-section').style.display = 'block';
+    document.getElementById('success-msg').style.display = 'none';
+    document.getElementById('reg-name').value = '';
+    document.getElementById('reg-phone').value = '';
+  }
+  async function submitReg() {
+    const name = document.getElementById('reg-name').value.trim();
+    const phone = document.getElementById('reg-phone').value.trim();
+    const guests = document.getElementById('reg-guests').value;
+    if (!name || !phone) { alert('Please fill in name and phone'); return; }
+    try {
+      await fetch('/api/shishi/register', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, phone, guests })
+      });
+    } catch(e) {}
+    document.getElementById('form-section').style.display = 'none';
+    document.getElementById('success-msg').style.display = 'block';
+  }
+</script>
+</body>
+</html>

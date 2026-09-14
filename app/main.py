@@ -105,7 +105,6 @@ async def send_morning_reminders():
 
     AGENTS = [
         {"שם": "בועז",   "phone": "+972545596052"},
-        {"שם": "יהודית", "phone": "+972584770646"},
         {"שם": "מוישי",  "phone": "+972523873383"},
         {"שם": "רבקה",   "phone": "+972586455059"},
         {"שם": "מיכאל",  "phone": "+972584114686"},
@@ -115,7 +114,6 @@ async def send_morning_reminders():
         {"שם": "דב",     "phone": "+972526239608"},
         {"שם": "ליסה",    "phone": "+13055863760"},
         {"שם": "נעמי",    "phone": "+972515528956"},
-        {"שם": "אייזיק",  "phone": "+972535226105"},
         {"שם": "רמי",     "phone": "+972542315410"},
     ]
 
@@ -830,6 +828,11 @@ async def start_shishi_daily_report():
 @app.get("/shishi")
 def shishi_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "shishi.html")
+
+
+@app.get("/shishi-en")
+def shishi_en_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "shishi-en.html")
 
 
 @app.post("/api/shishi/register")
