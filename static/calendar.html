@@ -535,7 +535,7 @@ async function loadMonthMeetings() {
   const endDate = formatDate(new Date(year, month+1, 0));
   const url = currentAgent.isManager
     ? `/api/meetings?start=${startDate}&end=${endDate}`
-    : `/api/meetings?start=${startDate}&end=${endDate}&agent=${encodeURIComponent(currentAgent.label)}`;
+    : `/api/meetings?start=${startDate}&end=${endDate}`;
   allMeetings = {};
   allTours = {};
   const data = await fetch(url).then(r => r.json());
@@ -545,7 +545,7 @@ async function loadMonthMeetings() {
   });
   const tourUrl = currentAgent.isManager
     ? `/api/tours?start=${startDate}&end=${endDate}`
-    : `/api/tours?start=${startDate}&end=${endDate}&agent=${encodeURIComponent(currentAgent.label)}`;
+    : `/api/tours?start=${startDate}&end=${endDate}`;
   const tourData = await fetch(tourUrl).then(r => r.json());
   (tourData.tours || []).forEach(t => {
     if (!allTours[t.tour_date]) allTours[t.tour_date] = [];
