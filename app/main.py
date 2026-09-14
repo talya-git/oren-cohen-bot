@@ -225,6 +225,71 @@ async def start_email_poller():
 
 
 @app.on_event("startup")
+async def start_meeting_reminders():
+    import asyncio
+    import zoneinfo
+    from datetime import datetime, timedelta
+
+    AGENT_PHONES = {
+        'יניב':   '+972545596052',
+        'משה':    '+972523873383',
+        'מירי':   '+972543402018',
+        'מיכאל':  '+972584114686',
+        'רבקה':   '+972586455059',
+        'אלחנן':  '+972549183150',
+        'אורן':   '+972549183150',
+        'אריה':   '+972552704922',
+        'בועז':   '+972545596052',
+        'אהרון':  '+972549183150',
+        'ליסה':   '+13055863760',
+        'דב':     '+972526239608',
+        'נעמי':   '+972515528956',
+        'אייזיק': '+972535226105',
+        'רמי':    '+972542315410',
+        'נתנאל':  '+972545596052',
+    }
+
+    _sent_reminders: set = set()
+
+    async def _reminder_loop():
+        while True:
+            try:
+                il_tz = zoneinfo.ZoneInfo("Asia/Jerusalem")
+                now = datetime.now(il_tz)
+                in_15 = now + timedelta(minutes=15)
+                date_str = in_15.strftime('%Y-%m-%d')
+                time_str = in_15.strftime('%H:%M')
+
+                from . import database as _db
+                from .whatsapp import send_message
+                meetings = _db.get_meetings(date_str)
+                for m in meetings:
+                    if m.get('meeting_time') != time_str:
+                        continue
+                    key = f"{m['id']}-reminder"
+                    if key in _sent_reminders:
+                        continue
+                    agent = m.get('agent_name', '')
+                    phone = AGENT_PHONES.get(agent)
+                    if not phone:
+                        continue
+                    msg = f"תזכורת 🔔\nפגישה עם {m['client_name']} בעוד 15 דקות ({time_str})"
+                    if m.get('meeting_type') == 'zoom' and m.get('zoom_link'):
+                        msg += f"\nקישור זום: {m['zoom_link']}"
+                    try:
+                        send_message(phone, msg)
+                        _sent_reminders.add(key)
+                        print(f"[MEETING REMINDER] {agent} -> {phone} | {m['client_name']} {time_str}")
+                    except Exception as e:
+                        print(f"[MEETING REMINDER ERROR] {e}")
+            except Exception as e:
+                print(f"[MEETING REMINDER LOOP ERROR] {e}")
+            await asyncio.sleep(60)
+
+    asyncio.create_task(_reminder_loop())
+
+
+@app.on_event("startup")
 async def start_no_response_scheduler():
     import asyncio
     async def _no_response_scheduler():
