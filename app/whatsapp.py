@@ -39,8 +39,8 @@ def send_template_reengagement(phone: str, name: str | None, lang: str = "he", a
     """שולח template reengagement — עובד גם אחרי 24 שעות."""
     normalized = phone.lstrip("+").replace(" ", "").replace("-", "")
     components = []
-    if name:
-        components = [{"type": "body", "parameters": [{"type": "text", "text": name}]}]
+    display_name = name or ("שלום" if lang == "he" else "Hi")
+    components = [{"type": "body", "parameters": [{"type": "text", "text": display_name}]}]
 
     # מחלקת יד 2 — סוכנים ספציפיים
     YAD2_AGENTS = {
