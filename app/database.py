@@ -730,7 +730,7 @@ def get_reengagement_results(agent_email: str) -> list:
     return results
 
 
-def create_tour(agent_name: str, agent_email: str, client_name: str, apartment_name: str, tour_date: str, tour_time: str, notes: str = "", department: str = "") -> int:
+def create_tour(agent_name: str, agent_email: str, client_name: str, apartment_name: str, tour_date: str, tour_time: str, notes: str = "", department: str = "", property_agent: str = "") -> int:
     conn = get_db()
     cur = conn.cursor()
     now = datetime.now(timezone.utc).isoformat()
