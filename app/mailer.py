@@ -276,8 +276,15 @@ def send_shishi_daily_report(registrations: list) -> None:
 
 def send_bulk_report(agent_label: str, results: list[dict], agent_email: str | None = None) -> None:
     """שולח דוח שליחה מיידי לאדמין עם סיכום מה עבד ומה לא."""
+    import smtplib
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+    from email.utils import formataddr
+
     sent = [r for r in results if r["status"] == "sent"]
     failed = [r for r in results if r["status"] == "error"]
+    if not failed and not sent:
+        return
 
     rows = ""
     for r in results:
@@ -296,52 +303,40 @@ def send_bulk_report(agent_label: str, results: list[dict], agent_email: str | N
       <h2>דוח שליחת WhatsApp — {agent_label}</h2>
       <p>✅ נשלח: <strong>{len(sent)}</strong> &nbsp;|&nbsp; ❌ נכשל: <strong>{len(failed)}</strong></p>
       <table style="border-collapse:collapse;width:100%;">
-        <thead>
-          <tr style="background:#f0f0f0;">
-            <th style="padding:8px;border:1px solid #ddd;">טלפון</th>
-            <th style="padding:8px;border:1px solid #ddd;">סטטוס</th>
-            <th style="padding:8px;border:1px solid #ddd;">סיבה</th>
-          </tr>
-        </thead>
+        <thead><tr style="background:#f0f0f0;">
+          <th style="padding:8px;border:1px solid #ddd;">טלפון</th>
+          <th style="padding:8px;border:1px solid #ddd;">סטטוס</th>
+          <th style="padding:8px;border:1px solid #ddd;">סיבה</th>
+        </tr></thead>
         <tbody>{rows}</tbody>
       </table>
     </body></html>
     """
 
-    to_list = [{"Email": ADMIN_EMAIL}]
+    to_addrs = [ADMIN_EMAIL]
     if ADMIN_EMAIL2 and ADMIN_EMAIL2 != ADMIN_EMAIL:
-        to_list.append({"Email": ADMIN_EMAIL2})
-    if agent_email and agent_email != ADMIN_EMAIL and agent_email != ADMIN_EMAIL2:
-        to_list.append({"Email": agent_email})
-
-    # שלח ל-ADMIN רק אם יש שגיאות
+        to_addrs.append(ADMIN_EMAIL2)
+    if agent_email and agent_email not in to_addrs:
+        to_addrs.append(agent_email)
     if not failed:
-        to_list = [t for t in to_list if t["Email"] != ADMIN_EMAIL]
-    if not to_list:
+        to_addrs = [e for e in to_addrs if e != ADMIN_EMAIL]
+    if not to_addrs:
         return
 
-    payload = json.dumps({
-        "Messages": [{
-            "From": {"Email": FROM_EMAIL, "Name": FROM_NAME},
-            "To": to_list,
-            "Subject": f"דוח שליחת WhatsApp — {agent_label} ({len(sent)}✅ {len(failed)}❌)",
-            "HTMLPart": html,
-        }]
-    }).encode()
+    gmail_user = os.getenv("GMAIL_USER", "orencohengroup2020@gmail.com")
+    gmail_pass = os.getenv("GMAIL_APP_PASSWORD", "").replace(" ", "")
 
-    credentials = base64.b64encode(f"{MAILJET_API_KEY}:{MAILJET_SECRET_KEY}".encode()).decode()
-    req = urllib.request.Request(
-        "https://api.mailjet.com/v3.1/send",
-        data=payload,
-        headers={"Authorization": f"Basic {credentials}", "Content-Type": "application/json"},
-        method="POST",
-    )
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = f"דוח שליחת WhatsApp — {agent_label} ({len(sent)}✅ {len(failed)}❌)"
+    msg["From"] = formataddr(("בוט אורן כהן גרופ", gmail_user))
+    msg["To"] = ", ".join(to_addrs)
+    msg.attach(MIMEText(html, "html", "utf-8"))
     try:
-        with urllib.request.urlopen(req) as resp:
-            body = resp.read().decode()
-            print(f"[ADMIN REPORT] sent to {[t['Email'] for t in to_list]} | response={body[:200]}")
-    except urllib.error.HTTPError as e:
-        body = e.read().decode()
-        print(f"[ADMIN REPORT ERROR] HTTP {e.code}: {body}")
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(gmail_user, gmail_pass)
+            server.sendmail(gmail_user, to_addrs, msg.as_string())
+        print(f"[ADMIN REPORT] sent to {to_addrs}")
     except Exception as e:
         print(f"[ADMIN REPORT ERROR] {e}")
+
