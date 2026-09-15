@@ -154,9 +154,13 @@ async function loadData() {
 
     const total = allConvs.length;
     const replied = allConvs.filter(c => c.replied).length;
+    const pending = total - replied;
     document.getElementById('s-total').textContent = total;
     document.getElementById('s-replied').textContent = replied;
-    document.getElementById('s-pending').textContent = total - replied;
+    document.getElementById('s-pending').textContent = pending;
+    // צבע לפי אחוז
+    const pct = total ? Math.round(replied/total*100) : 0;
+    document.getElementById('s-replied').style.color = pct >= 20 ? '#166534' : pct >= 10 ? '#854d0e' : '#991b1b';
 
     renderTable();
   } catch(e) { console.error(e); }
@@ -183,15 +187,16 @@ function renderTable() {
   tbody.innerHTML = rows.map(c => {
     const email = (c.phone || '').replace('email:', '');
     const badge = c.replied
-      ? '<span class="s-sent">ענה ✓</span>'
-      : '<span class="s-pending">ממתין...</span>';
-    const date = c.sent_at ? new Date(c.sent_at).toLocaleString('he-IL') : '—';
+      ? '<span class="s-sent">✓ ענה</span>'
+      : '<span class="s-pending">⏳ ממתין</span>';
+    const date = c.sent_at ? new Date(c.sent_at).toLocaleString('he-IL', {day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
     const hasTranscript = c.transcript && c.transcript.trim().length > 0;
+    const agentName = (c.agent_email || '').replace('@orencohengroup.com','').replace('@','');
     return `<tr>
       <td><strong>${c.client_name || '—'}</strong></td>
-      <td style="direction:ltr;color:#6b7280">${email}</td>
-      <td style="font-size:12px;color:#6b7280">${c.agent_email || '—'}</td>
-      <td style="font-size:12px">${date}</td>
+      <td style="direction:ltr;color:#6b7280;font-size:12px">${email}</td>
+      <td style="font-size:12px;color:#374151;font-weight:600">${agentName}</td>
+      <td style="font-size:12px;color:#6b7280;white-space:nowrap">${date}</td>
       <td>${badge}</td>
       <td>${hasTranscript
         ? `<button class="btn btn-secondary" style="padding:4px 10px;font-size:12px"
