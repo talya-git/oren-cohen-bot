@@ -240,3 +240,100 @@ if (first < STOPS[lang].length) setTimeout(() => toggle(first), 300);
 </script>
 </body>
 </html>
+const STOPS={
+  he:[
+    {name:'בית ויגאליק',addr:'קרן הקיימת לישראל 20 פינת אוסישקין, רחביה',time:'תחנה 1 — נקודת מפגש',desc:'המבנה שגרם לכל הייקים המעונבים של רחביה להוריד את המשקפיים לקצה האף בתדהמה. תוכנן ע"י האדריכל ההונגרי נתן ברין עבור יעקב פסח וחנה ויגאליק — מתרים מקצועי שתרם לבית היתומים דיסקין. הבית נבנה מאבן אדמדמה ונדירה (מיזי אחמר) בסגנון אקלקטי עם קשתות נאו-מזרחיות ומרפסות קלאסיות. הזוג התמקם בצניעות בדירה שבקומה השנייה. כיום מוגדר כבניין לשימור ברשימת אתרי המורשת.',img:'PLACEHOLDER_1',blog:'https://www.orencohengroup.com/he/blog/beit-vigalik-rechavia/',maps:'https://maps.google.com/?q=Keren+Kayemet+20+Jerusalem',waze:'https://waze.com/ul?q=Keren+Kayemet+20+Jerusalem&navigate=yes'},
+    {name:'בית הנכות הלאומי בצלאל',addr:'רחוב שמואל הנגיד 12 פינת שץ, ירושלים',time:'תחנה 2',desc:'מוזיאון שהוקם ליד בית הספר לאומנות בצלאל — תחילתו כמוזיאון לתולדות החי והצומח בארץ ישראל, חלק מחזונו של בוריס שץ. התצוגה הראשונה נערכה בפסח 1912. ב-1916 ביקר ג'מאל פאשה מבכירי האימפריה העות'מאנית. ב-1925 נפתח לקהל הרחב. עם פתיחת מוזיאון ישראל ב-1965 עבר האוסף לגבעת רם והמבנה הפך לבית האומנים. הרחוב נקרא על שם רבי שמואל הנגיד — משורר עברי גדול ומשנה למלך גרנדה.',img:'https://www.orencohengroup.com/wp-content/uploads/2026/09/עיצוב-ללא-שם-25.jpg',blog:'https://www.orencohengroup.com/he/blog/',maps:'https://maps.google.com/?q=Shmuel+HaNagid+12+Jerusalem',waze:'https://waze.com/ul?q=Shmuel+HaNagid+12+Jerusalem&navigate=yes'},
+    {name:'בית סולל בונה',addr:'רחוב המלך ג׳ורג׳, ירושלים',time:'תחנה 3',desc:'אחד המבנים שסימלו יותר מכל את עלייתה, נפילתה והתחדשותה של הריכוזיות הישראלית. ב-1957 בנתה סולל בונה את מטה ירושלים שלה בלב הציר הלאומי. האדריכל ראובן טרוסטלר תכנן מבנה מודרניסטי עם גגון בטון בצורת מניפה. נמכר ב-1987 ועמד נטוש עשורים — בימי המחאה 2011 פרצו פעילים וקראו לו "בית החזיר". נהרס ב-2016; כיום עולה במקומו פרויקט יוקרה: מלון אינטרקונטיננטל ירושלים ומגדל מגורים.',img:'PLACEHOLDER_3',blog:'https://www.orencohengroup.com/he/blog/',maps:'https://maps.google.com/?q=King+George+Street+Jerusalem',waze:'https://waze.com/ul?q=King+George+Jerusalem&navigate=yes'},
+  ],
+  en:[
+    {name:'Beit Vigalik',addr:'20 Keren Kayemet St. corner Ussishkin, Rehavia',time:'Stop 1 — Meeting Point',desc:'The building that made every intellectual in Rehavia drop their glasses in amazement. Designed by Hungarian architect Natan Brin for Yaakov Pesach and Hana Vigalik — a professional fundraiser who donated to the Diskin Orphanage. Built from rare red stone (Mizi Ahmar) in an eclectic style with neo-Oriental arches and classical balconies. The couple modestly settled in a second-floor apartment. Today it is a listed heritage preservation site.',img:'PLACEHOLDER_1',blog:'https://www.orencohengroup.com/he/blog/beit-vigalik-rechavia/',maps:'https://maps.google.com/?q=Keren+Kayemet+20+Jerusalem',waze:'https://waze.com/ul?q=Keren+Kayemet+20+Jerusalem&navigate=yes'},
+    {name:'Bezalel National Museum',addr:'12 Shmuel HaNagid St. corner Schatz, Jerusalem',time:'Stop 2',desc:"A museum founded next to the Bezalel School of Art — originally a museum of the flora and fauna of the Land of Israel, part of Boris Schatz's vision. The first exhibition was held on Passover 1912. In 1916 Jamal Pasha visited. In 1925 it opened regularly to the public. When the Israel Museum opened in 1965, the collection moved to Givat Ram and the building became the Artists' House. The street is named after Rabbi Shmuel HaNagid — great Hebrew poet and deputy king of Granada.",img:'https://www.orencohengroup.com/wp-content/uploads/2026/09/עיצוב-ללא-שם-25.jpg',blog:'https://www.orencohengroup.com/he/blog/',maps:'https://maps.google.com/?q=Shmuel+HaNagid+12+Jerusalem',waze:'https://waze.com/ul?q=Shmuel+HaNagid+12+Jerusalem&navigate=yes'},
+    {name:'Solel Boneh Building',addr:'King George St., Jerusalem',time:'Stop 3',desc:'One of the buildings that symbolized the rise, fall and renewal of Israeli centralism. In 1957 Solel Boneh built its Jerusalem HQ on the national axis of King George St. Architect Reuven Trostler designed a modernist building with an iconic fan-shaped concrete canopy. Sold in 1987, it stood abandoned for decades — during the 2011 social protests activists broke in and called it "Beit HaHazir". Demolished in 2016; today a luxury project rises: the InterContinental Jerusalem hotel and a residential tower.',img:'PLACEHOLDER_3',blog:'https://www.orencohengroup.com/he/blog/',maps:'https://maps.google.com/?q=King+George+Street+Jerusalem',waze:'https://waze.com/ul?q=King+George+Jerusalem&navigate=yes'},
+  ]
+};
+
+let lang=localStorage.getItem('tour_lang')||'he';
+const done=new Set(JSON.parse(localStorage.getItem('tour_done')||'[]'));
+
+function toggleLang(){lang=lang==='he'?'en':'he';localStorage.setItem('tour_lang',lang);applyLang();render();}
+
+function applyLang(){
+  const t=T[lang];
+  document.documentElement.lang=t.lang;
+  document.documentElement.dir=t.dir;
+  document.getElementById('h-title').textContent=t.title;
+  document.getElementById('h-date').textContent=t.date;
+  document.getElementById('i-title').textContent=t.welcome;
+  document.getElementById('i-text').innerHTML=t.intro;
+  document.getElementById('r-p').textContent=t.route;
+  document.getElementById('r-btn').textContent=t.routeBtn;
+  document.getElementById('lang-btn').textContent=t.flag;
+  updateProgress();
+}
+
+function updateProgress(){
+  const t=T[lang],n=STOPS[lang].length;
+  document.getElementById('pfill').style.width=(done.size/n*100)+'%';
+  document.getElementById('ptxt').textContent=t.progress(done.size,n);
+}
+
+function render(){
+  const t=T[lang],stops=STOPS[lang],c=document.getElementById('stops');
+  c.innerHTML='';
+  stops.forEach((s,i)=>{
+    const isDone=done.has(i),isActive=!isDone&&(i===0||done.has(i-1));
+    const card=document.createElement('div');
+    card.className='card'+(isActive?' active':'')+(isDone?' done':'');
+    const hasImg=s.img&&!s.img.startsWith('PLACEHOLDER');
+    const heroContent=hasImg
+      ?`<img src="${s.img}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=no-img>🏛</div>'"/>`
+      :`<div class="no-img">🏛</div>`;
+    card.innerHTML=`
+      <div class="card-hero" onclick="toggle(${i})">
+        ${heroContent}
+        <div class="hero-overlay">
+          <div class="hero-num">${isDone?'✓':(i+1)}</div>
+          <div class="hero-name">${s.name}</div>
+          <div class="hero-addr">${s.addr}</div>
+          <div class="hero-time">${s.time}</div>
+        </div>
+        <div class="chev-wrap"><div class="chev">▾</div></div>
+      </div>
+      <div class="cbody">
+        <div class="scnt">
+          <p class="sdesc">${s.desc}</p>
+          <div class="acts">
+            <a class="btn bn" href="${s.maps}" target="_blank">📍 ${t.lang==='he'?'מפה':'Maps'}</a>
+            <a class="btn bw" href="${s.waze}" target="_blank">🚗 Waze</a>
+            <a class="btn bb" href="${s.blog}" target="_blank">📖 ${t.blog}</a>
+            <button class="btn ${isDone?'bu':'bd'}" onclick="toggleDone(event,${i})">${isDone?t.undo:t.visited}</button>
+          </div>
+        </div>
+      </div>`;
+    c.appendChild(card);
+  });
+  updateProgress();
+}
+
+function toggle(i){
+  const cards=document.querySelectorAll('.card');
+  const isOpen=cards[i].classList.contains('open');
+  cards.forEach(c=>c.classList.remove('open'));
+  if(!isOpen)cards[i].classList.add('open');
+}
+
+function toggleDone(e,i){
+  e.stopPropagation();
+  if(done.has(i))done.delete(i);else done.add(i);
+  localStorage.setItem('tour_done',JSON.stringify([...done]));
+  render();
+  if(done.has(i)&&i+1<STOPS[lang].length)setTimeout(()=>toggle(i+1),200);
+}
+
+applyLang();render();
+const first=[...done].length;
+if(first<STOPS[lang].length)setTimeout(()=>toggle(first),300);
+</script>
+</body>
+</html>
