@@ -130,6 +130,9 @@ def start_reengagement(phone: str, name: str | None, project_name: str, agent_na
     # מספר אמריקאי ללא קידומת מדינה (10 ספרות, מתחיל בקידומת אזורית)
     elif len(normalized) == 10 and normalized[0] in "23456789" and not normalized.startswith("972"):
         normalized = "1" + normalized
+    # אל תוסיף 1 למספרים ארוכים שכבר יש להם קידומת מדינה
+    elif len(normalized) >= 11 and not normalized.startswith("972"):
+        pass  # כבר עם קידומת מדינה
 
     from . import database as _db
     if _db.get_sent_phones_set(f"+{normalized}"):
