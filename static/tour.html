@@ -6,83 +6,101 @@
 <title>Jerusalem Tour — Oren Cohen Group</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Noto+Sans+Hebrew:wght@400;600;700&display=swap" rel="stylesheet"/>
 <style>
+/* ── TOKENS ── */
 :root{--gold:#c9a84c;--dark:#1a1208;--cream:#f5f0e8;--text:#2a1f0e;--muted:#6a5a48;}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;background:var(--dark);}
-body{font-family:'Noto Sans Hebrew',sans-serif;color:var(--text);}
+html,body{background:var(--dark);font-family:'Noto Sans Hebrew',sans-serif;color:var(--text);}
+
+/* ══════════════════════════════
+   MOBILE BASE  (≤767px)
+══════════════════════════════ */
 
 /* HEADER */
-.hdr{background:var(--dark);padding:12px 16px 10px;text-align:center;border-bottom:1px solid rgba(201,168,76,.25);position:sticky;top:0;z-index:100;}
-.hdr-row{display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:3px;}
-.lang-btn{position:absolute;left:0;background:none;border:none;cursor:pointer;font-size:clamp(28px,8vw,34px);line-height:1;padding:4px;touch-action:manipulation;}
-.logo{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:clamp(12px,3.5vw,15px);letter-spacing:2px;text-transform:uppercase;opacity:.8;}
-.htitle{color:var(--cream);font-family:'Cormorant Garamond',serif;font-size:clamp(22px,6vw,30px);font-weight:500;line-height:1.2;}
-.hdate{color:var(--gold);font-size:clamp(13px,3.8vw,16px);margin-top:4px;opacity:.9;}
+.hdr{background:var(--dark);padding:14px 16px 12px;text-align:center;border-bottom:1px solid rgba(201,168,76,.25);position:sticky;top:0;z-index:100;}
+.hdr-row{display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:4px;}
+.lang-btn{position:absolute;left:0;background:none;border:none;cursor:pointer;font-size:30px;line-height:1;padding:4px;touch-action:manipulation;}
+.logo{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;opacity:.8;}
+.htitle{color:var(--cream);font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:500;line-height:1.2;}
+.hdate{color:var(--gold);font-size:15px;margin-top:4px;}
 
 /* PROGRESS */
-.pbar{background:rgba(201,168,76,.1);padding:8px 16px;display:flex;align-items:center;gap:10px;}
-.ptrack{flex:1;height:2px;background:rgba(201,168,76,.2);border-radius:2px;}
-.pfill{height:100%;background:var(--gold);border-radius:2px;transition:width .5s ease;}
-.ptxt{color:var(--gold);font-size:clamp(13px,4vw,16px);white-space:nowrap;font-weight:600;}
+.pbar{background:rgba(201,168,76,.1);padding:10px 16px;display:flex;align-items:center;gap:12px;}
+.ptrack{flex:1;height:4px;background:rgba(201,168,76,.2);border-radius:4px;}
+.pfill{height:100%;background:var(--gold);border-radius:4px;transition:width .5s ease;}
+.ptxt{color:var(--gold);font-size:15px;white-space:nowrap;font-weight:700;}
 
 /* INTRO */
-.intro{background:linear-gradient(160deg,#1f1508,#2a1f0e);margin:12px;border-radius:10px;padding:16px;text-align:center;border:1px solid rgba(201,168,76,.25);}
-.ititle{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:clamp(20px,5.5vw,26px);margin-bottom:6px;}
+.intro{background:linear-gradient(160deg,#1f1508,#2a1f0e);margin:12px;border-radius:12px;padding:20px 16px;text-align:center;border:1px solid rgba(201,168,76,.25);}
+.ititle{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:6px;}
 .idiv{width:32px;height:1px;background:var(--gold);margin:10px auto;}
-.itext{color:rgba(245,240,232,.85);font-size:clamp(14px,4vw,17px);line-height:1.8;}
+.itext{color:rgba(245,240,232,.85);font-size:16px;line-height:1.8;}
 
 /* STOPS */
-.stops{padding:0 12px 12px;display:flex;flex-direction:column;gap:12px;}
+.stops{padding:0 12px 12px;display:flex;flex-direction:column;gap:14px;}
 
 /* CARD */
-.card{border-radius:12px;overflow:hidden;border:1.5px solid rgba(201,168,76,.15);background:var(--cream);box-shadow:0 4px 16px rgba(0,0,0,.4);}
-.card.active{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,168,76,.2),0 6px 20px rgba(0,0,0,.5);}
+.card{border-radius:14px;overflow:hidden;border:1.5px solid rgba(201,168,76,.15);background:var(--cream);box-shadow:0 4px 20px rgba(0,0,0,.45);}
+.card.active{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,168,76,.25),0 6px 24px rgba(0,0,0,.5);}
 .card.done{opacity:.5;}
 
-/* HERO — 4:3 aspect ratio, full width */
-.hero{position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;cursor:pointer;background:#1a1208;}
-.hero img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;transition:transform .4s ease;}
+/* HERO IMAGE — 3:2 on mobile */
+.hero{position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;cursor:pointer;background:#1a1208;}
+.hero img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;transition:transform .4s ease;}
 .card.open .hero img{transform:scale(1.04);}
-.no-img{width:100%;aspect-ratio:4/3;background:linear-gradient(135deg,#2a1f0e,#1a1208);display:flex;align-items:center;justify-content:center;font-size:56px;cursor:pointer;}
+.no-img{width:100%;aspect-ratio:3/2;background:linear-gradient(135deg,#2a1f0e,#1a1208);display:flex;align-items:center;justify-content:center;font-size:64px;cursor:pointer;}
 
 /* HERO OVERLAY */
-.hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,6,2,.9) 0%,rgba(10,6,2,.3) 50%,transparent 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:14px;}
-.stop-badge{display:inline-flex;align-items:center;gap:6px;margin-bottom:8px;}
-.stop-num{background:var(--gold);color:var(--dark);font-family:'Cormorant Garamond',serif;font-size:clamp(16px,5vw,20px);font-weight:700;width:clamp(36px,10vw,44px);height:clamp(36px,10vw,44px);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,6,2,.92) 0%,rgba(10,6,2,.35) 55%,transparent 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:16px;}
+.stop-badge{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.stop-num{background:var(--gold);color:var(--dark);font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .card.done .stop-num{background:#4a7c59;color:#fff;}
-.stop-label{color:var(--gold);font-size:clamp(13px,3.8vw,16px);font-weight:600;}
-.stop-name{color:#fff;font-weight:700;font-size:clamp(20px,6vw,26px);line-height:1.25;margin-bottom:5px;}
-.stop-addr{color:rgba(255,255,255,.85);font-size:clamp(13px,3.8vw,16px);line-height:1.5;}
+.stop-label{color:var(--gold);font-size:15px;font-weight:700;}
+.stop-name{color:#fff;font-weight:700;font-size:24px;line-height:1.2;margin-bottom:5px;}
+.stop-addr{color:rgba(255,255,255,.85);font-size:15px;line-height:1.5;}
 
 /* CHEVRON */
-.chev-btn{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.15);border-radius:50%;width:clamp(36px,10vw,44px);height:clamp(36px,10vw,44px);display:flex;align-items:center;justify-content:center;cursor:pointer;}
-.chev{color:#fff;font-size:clamp(16px,5vw,20px);transition:transform .25s;display:block;}
+.chev-btn{position:absolute;top:14px;right:14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.chev{color:#fff;font-size:18px;transition:transform .25s;display:block;}
 .card.open .chev{transform:rotate(180deg);}
 
 /* BODY */
 .cbody{display:none;border-top:1px solid rgba(201,168,76,.15);}
 .card.open .cbody{display:block;}
-.scnt{padding:16px;}
-.sdesc{font-size:clamp(15px,4.2vw,18px);line-height:1.9;color:var(--text);margin-bottom:20px;}
+.scnt{padding:18px 16px;}
+.sdesc{font-size:16px;line-height:1.9;color:var(--text);margin-bottom:20px;}
 
-/* ACTIONS */
-.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+/* BUTTONS — 2 col grid */
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .acts .full{grid-column:1/-1;}
-.btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:clamp(14px,4vw,18px) 10px;border-radius:8px;border:none;font-size:clamp(14px,4.2vw,17px);font-weight:700;cursor:pointer;font-family:'Noto Sans Hebrew',sans-serif;text-decoration:none;transition:opacity .15s;touch-action:manipulation;}
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:16px 10px;border-radius:10px;border:none;font-size:16px;font-weight:700;cursor:pointer;font-family:'Noto Sans Hebrew',sans-serif;text-decoration:none;transition:opacity .15s;touch-action:manipulation;-webkit-user-select:none;}
 .btn:active{opacity:.7;}
 .bn{background:var(--gold);color:var(--dark);}
 .bw{background:#00b4d8;color:#fff;}
 .bb{background:#1a6b3c;color:#fff;}
 .bd{background:#4a7c59;color:#fff;}
-.bu{background:#ddd;color:#666;}
+.bu{background:#ccc;color:#666;}
 
 /* ROUTE BOX */
-.rbox{margin:0 12px 12px;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:14px;text-align:center;}
-.rbox p{color:var(--cream);font-size:clamp(14px,4vw,17px);margin-bottom:12px;opacity:.85;}
+.rbox{margin:0 12px 12px;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.25);border-radius:12px;padding:16px;text-align:center;}
+.rbox p{color:var(--cream);font-size:16px;margin-bottom:12px;opacity:.85;}
 
 /* FOOTER */
-.foot{text-align:center;padding:16px 14px 28px;border-top:1px solid rgba(201,168,76,.15);color:var(--muted);font-size:clamp(13px,3.8vw,15px);line-height:2.2;}
+.foot{text-align:center;padding:18px 16px 28px;border-top:1px solid rgba(201,168,76,.15);color:var(--muted);font-size:14px;line-height:2.2;}
 .foot a{color:var(--gold);text-decoration:none;}
+
+/* ══════════════════════════════
+   DESKTOP OVERRIDE  (≥768px)
+══════════════════════════════ */
+@media(min-width:768px){
+  body{max-width:520px;margin:0 auto;}
+  .htitle{font-size:28px;}
+  .hdate{font-size:14px;}
+  .stop-name{font-size:22px;}
+  .sdesc{font-size:15px;}
+  .btn{font-size:14px;padding:14px 10px;}
+  .hero{aspect-ratio:16/9;}
+  .no-img{aspect-ratio:16/9;}
+}
 </style>
 </head>
 <body>
@@ -124,157 +142,107 @@ body{font-family:'Noto Sans Hebrew',sans-serif;color:var(--text);}
 
 <script>
 const T = {
-  he: {
-    title:'שישי של פעם — סיור ירושלים', date:'יום ראשון כ״ז תשרי | 27.09.2025 | 16:30',
-    welcome:'ברוכים הבאים לסיור', intro:'סיור ברחובות ירושלים ההיסטורית — מרחביה ומרכז העיר.<br>לחצו על כל תחנה לפרטים ולניווט.',
-    route:'לצפייה במסלול המלא במפה', routeBtn:'🗺 פתח מסלול מלא',
-    visited:'✓ ביקרתי', undo:'↩ בטל', blog:'לכתבה בבלוג', maps:'מפה',
-    flag:'🇬🇧', dir:'rtl', lang:'he', progress:(d,t)=>d+' / '+t+' תחנות'
-  },
-  en: {
-    title:"Shishi Shel Pa'am — Jerusalem Tour", date:'Sunday 27 Tishrei | 27.09.2025 | 4:30 PM',
-    welcome:'Welcome to the Tour', intro:'A walk through historic Jerusalem — Rehavia and the city center.<br>Tap each stop for details and navigation.',
-    route:'View full route on map', routeBtn:'🗺 Open Full Route',
-    visited:'✓ Visited', undo:'↩ Undo', blog:'Read Blog', maps:'Maps',
-    flag:'🇮🇱', dir:'ltr', lang:'en', progress:(d,t)=>d+' / '+t+' stops'
-  }
+  he:{title:'שישי של פעם — סיור ירושלים',date:'יום ראשון כ״ז תשרי | 27.09.2025 | 16:30',welcome:'ברוכים הבאים לסיור',intro:'סיור ברחובות ירושלים ההיסטורית — מרחביה ומרכז העיר.<br>לחצו על כל תחנה לפרטים ולניווט.',route:'לצפייה במסלול המלא במפה',routeBtn:'🗺 פתח מסלול מלא',visited:'✓ ביקרתי',undo:'↩ בטל',blog:'לכתבה בבלוג',maps:'מפה',flag:'🇬🇧',dir:'rtl',lang:'he',progress:(d,t)=>d+' / '+t+' תחנות'},
+  en:{title:"Shishi Shel Pa'am — Jerusalem Tour",date:'Sunday 27 Tishrei | 27.09.2025 | 4:30 PM',welcome:'Welcome to the Tour',intro:'A walk through historic Jerusalem — Rehavia and the city center.<br>Tap each stop for details and navigation.',route:'View full route on map',routeBtn:'🗺 Open Full Route',visited:'✓ Visited',undo:'↩ Undo',blog:'Read Blog',maps:'Maps',flag:'🇮🇱',dir:'ltr',lang:'en',progress:(d,t)=>d+' / '+t+' stops'}
 };
 
 const STOPS = {
-  he: [
-    {
-      name:'בית ויגאליק', addr:'קרן הקיימת לישראל 20 פינת אוסישקין, רחביה', time:'תחנה 1 — נקודת מפגש',
-      desc:'המבנה שגרם לכל הייקים המעונבים של רחביה להוריד את המשקפיים לקצה האף בתדהמה. תוכנן ע"י האדריכל ההונגרי נתן ברין עבור יעקב פסח וחנה ויגאליק — מתרים מקצועי שתרם לבית היתומים דיסקין. הבית נבנה מאבן אדמדמה ונדירה (מיזי אחמר) בסגנון אקלקטי עם קשתות נאו-מזרחיות ומרפסות קלאסיות. הזוג התמקם בצניעות בדירה שבקומה השנייה. כיום מוגדר כבניין לשימור ברשימת אתרי המורשת.',
-      img:'/static/img/vigalik.jpg', blog:'https://www.orencohengroup.com/he/blog/beit-vigalik-rechavia/',
-      maps:'https://maps.google.com/?q=Keren+Kayemet+20+Jerusalem', waze:'https://waze.com/ul?q=Keren+Kayemet+20+Jerusalem&navigate=yes'
-    },
-    {
-      name:'בית הנכות הלאומי בצלאל', addr:'רחוב שמואל הנגיד 12 פינת שץ, ירושלים', time:'תחנה 2',
-      desc:'מוזיאון שהוקם ליד בית הספר לאומנות בצלאל — תחילתו כמוזיאון לתולדות החי והצומח בארץ ישראל, חלק מחזונו של בוריס שץ. התצוגה הראשונה נערכה בפסח 1912. ב-1916 ביקר ג\'מאל פאשה מבכירי האימפריה העות\'מאנית. ב-1925 נפתח לקהל הרחב. עם פתיחת מוזיאון ישראל ב-1965 עבר האוסף לגבעת רם והמבנה הפך לבית האומנים. הרחוב נקרא על שם רבי שמואל הנגיד — משורר עברי גדול ומשנה למלך גרנדה.',
-      img:'/static/img/bezalel.jpg', blog:'https://www.orencohengroup.com/he/blog/',
-      maps:'https://maps.google.com/?q=Shmuel+HaNagid+12+Jerusalem', waze:'https://waze.com/ul?q=Shmuel+HaNagid+12+Jerusalem&navigate=yes'
-    },
-    {
-      name:'בית סולל בונה', addr:'רחוב המלך ג\'ורג\', ירושלים', time:'תחנה 3',
-      desc:'אחד המבנים שסימלו יותר מכל את עלייתה, נפילתה והתחדשותה של הריכוזיות הישראלית. ב-1957 בנתה סולל בונה את מטה ירושלים שלה בלב הציר הלאומי. האדריכל ראובן טרוסטלר תכנן מבנה מודרניסטי עם גגון בטון בצורת מניפה. נמכר ב-1987 ועמד נטוש עשורים — בימי המחאה 2011 פרצו פעילים וקראו לו "בית החזיר". נהרס ב-2016; כיום עולה במקומו פרויקט יוקרה: מלון אינטרקונטיננטל ירושלים ומגדל מגורים.',
-      img:'', blog:'https://www.orencohengroup.com/he/blog/',
-      maps:'https://maps.google.com/?q=King+George+Street+Jerusalem', waze:'https://waze.com/ul?q=King+George+Jerusalem&navigate=yes'
-    }
+  he:[
+    {name:'בית ויגאליק',addr:'קרן הקיימת לישראל 20 פינת אוסישקין, רחביה',time:'תחנה 1 — נקודת מפגש',desc:'המבנה שגרם לכל הייקים המעונבים של רחביה להוריד את המשקפיים לקצה האף בתדהמה. תוכנן ע"י האדריכל ההונגרי נתן ברין עבור יעקב פסח וחנה ויגאליק — מתרים מקצועי שתרם לבית היתומים דיסקין. הבית נבנה מאבן אדמדמה ונדירה (מיזי אחמר) בסגנון אקלקטי עם קשתות נאו-מזרחיות ומרפסות קלאסיות. הזוג התמקם בצניעות בדירה שבקומה השנייה. כיום מוגדר כבניין לשימור ברשימת אתרי המורשת.',img:'/static/img/vigalik.jpg',blog:'https://www.orencohengroup.com/he/blog/beit-vigalik-rechavia/',maps:'https://maps.google.com/?q=Keren+Kayemet+20+Jerusalem',waze:'https://waze.com/ul?q=Keren+Kayemet+20+Jerusalem&navigate=yes'},
+    {name:'בית הנכות הלאומי בצלאל',addr:'רחוב שמואל הנגיד 12 פינת שץ, ירושלים',time:'תחנה 2',desc:'מוזיאון שהוקם ליד בית הספר לאומנות בצלאל — תחילתו כמוזיאון לתולדות החי והצומח בארץ ישראל, חלק מחזונו של בוריס שץ. התצוגה הראשונה נערכה בפסח 1912. ב-1916 ביקר ג\'מאל פאשה מבכירי האימפריה העות\'מאנית. ב-1925 נפתח לקהל הרחב. עם פתיחת מוזיאון ישראל ב-1965 עבר האוסף לגבעת רם והמבנה הפך לבית האומנים. הרחוב נקרא על שם רבי שמואל הנגיד — משורר עברי גדול ומשנה למלך גרנדה.',img:'/static/img/bezalel.jpg',blog:'https://www.orencohengroup.com/he/blog/',maps:'https://maps.google.com/?q=Shmuel+HaNagid+12+Jerusalem',waze:'https://waze.com/ul?q=Shmuel+HaNagid+12+Jerusalem&navigate=yes'},
+    {name:'בית סולל בונה',addr:'רחוב המלך ג\'ורג\', ירושלים',time:'תחנה 3',desc:'אחד המבנים שסימלו יותר מכל את עלייתה, נפילתה והתחדשותה של הריכוזיות הישראלית. ב-1957 בנתה סולל בונה את מטה ירושלים שלה בלב הציר הלאומי. האדריכל ראובן טרוסטלר תכנן מבנה מודרניסטי עם גגון בטון בצורת מניפה. נמכר ב-1987 ועמד נטוש עשורים — בימי המחאה 2011 פרצו פעילים וקראו לו "בית החזיר". נהרס ב-2016; כיום עולה במקומו פרויקט יוקרה: מלון אינטרקונטיננטל ירושלים ומגדל מגורים.',img:'',blog:'https://www.orencohengroup.com/he/blog/',maps:'https://maps.google.com/?q=King+George+Street+Jerusalem',waze:'https://waze.com/ul?q=King+George+Jerusalem&navigate=yes'}
   ],
-  en: [
-    {
-      name:'Beit Vigalik', addr:'20 Keren Kayemet St. corner Ussishkin, Rehavia', time:'Stop 1 — Meeting Point',
-      desc:"The building that made every intellectual in Rehavia drop their glasses in amazement. Designed by Hungarian architect Natan Brin for Yaakov Pesach and Hana Vigalik — a professional fundraiser who donated to the Diskin Orphanage. Built from rare red stone (Mizi Ahmar) in an eclectic style with neo-Oriental arches and classical balconies. The couple modestly settled in a second-floor apartment. Today it is a listed heritage preservation site.",
-      img:'/static/img/vigalik.jpg', blog:'https://www.orencohengroup.com/he/blog/beit-vigalik-rechavia/',
-      maps:'https://maps.google.com/?q=Keren+Kayemet+20+Jerusalem', waze:'https://waze.com/ul?q=Keren+Kayemet+20+Jerusalem&navigate=yes'
-    },
-    {
-      name:'Bezalel National Museum', addr:'12 Shmuel HaNagid St. corner Schatz, Jerusalem', time:'Stop 2',
-      desc:"A museum founded next to the Bezalel School of Art — originally a museum of the flora and fauna of the Land of Israel, part of Boris Schatz's vision. The first exhibition was held on Passover 1912. In 1916 Jamal Pasha visited. In 1925 it opened regularly to the public. When the Israel Museum opened in 1965, the collection moved to Givat Ram and the building became the Artists' House. The street is named after Rabbi Shmuel HaNagid — great Hebrew poet and deputy king of Granada.",
-      img:'/static/img/bezalel.jpg', blog:'https://www.orencohengroup.com/he/blog/',
-      maps:'https://maps.google.com/?q=Shmuel+HaNagid+12+Jerusalem', waze:'https://waze.com/ul?q=Shmuel+HaNagid+12+Jerusalem&navigate=yes'
-    },
-    {
-      name:'Solel Boneh Building', addr:'King George St., Jerusalem', time:'Stop 3',
-      desc:'One of the buildings that symbolized the rise, fall and renewal of Israeli centralism. In 1957 Solel Boneh built its Jerusalem HQ on the national axis of King George St. Architect Reuven Trostler designed a modernist building with an iconic fan-shaped concrete canopy. Sold in 1987, it stood abandoned for decades — during the 2011 social protests activists broke in and called it "Beit HaHazir". Demolished in 2016; today a luxury project rises: the InterContinental Jerusalem hotel and a residential tower.',
-      img:'', blog:'https://www.orencohengroup.com/he/blog/',
-      maps:'https://maps.google.com/?q=King+George+Street+Jerusalem', waze:'https://waze.com/ul?q=King+George+Jerusalem&navigate=yes'
-    }
+  en:[
+    {name:'Beit Vigalik',addr:'20 Keren Kayemet St. corner Ussishkin, Rehavia',time:'Stop 1 — Meeting Point',desc:"The building that made every intellectual in Rehavia drop their glasses in amazement. Designed by Hungarian architect Natan Brin for Yaakov Pesach and Hana Vigalik — a professional fundraiser who donated to the Diskin Orphanage. Built from rare red stone (Mizi Ahmar) in an eclectic style with neo-Oriental arches and classical balconies. The couple modestly settled in a second-floor apartment. Today it is a listed heritage preservation site.",img:'/static/img/vigalik.jpg',blog:'https://www.orencohengroup.com/he/blog/beit-vigalik-rechavia/',maps:'https://maps.google.com/?q=Keren+Kayemet+20+Jerusalem',waze:'https://waze.com/ul?q=Keren+Kayemet+20+Jerusalem&navigate=yes'},
+    {name:'Bezalel National Museum',addr:'12 Shmuel HaNagid St. corner Schatz, Jerusalem',time:'Stop 2',desc:"A museum founded next to the Bezalel School of Art — originally a museum of the flora and fauna of the Land of Israel, part of Boris Schatz's vision. The first exhibition was held on Passover 1912. In 1916 Jamal Pasha visited. In 1925 it opened regularly to the public. When the Israel Museum opened in 1965, the collection moved to Givat Ram and the building became the Artists' House. The street is named after Rabbi Shmuel HaNagid — great Hebrew poet and deputy king of Granada.",img:'/static/img/bezalel.jpg',blog:'https://www.orencohengroup.com/he/blog/',maps:'https://maps.google.com/?q=Shmuel+HaNagid+12+Jerusalem',waze:'https://waze.com/ul?q=Shmuel+HaNagid+12+Jerusalem&navigate=yes'},
+    {name:'Solel Boneh Building',addr:'King George St., Jerusalem',time:'Stop 3',desc:'One of the buildings that symbolized the rise, fall and renewal of Israeli centralism. In 1957 Solel Boneh built its Jerusalem HQ on the national axis of King George St. Architect Reuven Trostler designed a modernist building with an iconic fan-shaped concrete canopy. Sold in 1987, it stood abandoned for decades — during the 2011 social protests activists broke in and called it "Beit HaHazir". Demolished in 2016; today a luxury project rises: the InterContinental Jerusalem hotel and a residential tower.',img:'',blog:'https://www.orencohengroup.com/he/blog/',maps:'https://maps.google.com/?q=King+George+Street+Jerusalem',waze:'https://waze.com/ul?q=King+George+Jerusalem&navigate=yes'}
   ]
 };
 
 let lang = localStorage.getItem('tour_lang') || 'he';
 const done = new Set(JSON.parse(localStorage.getItem('tour_done') || '[]'));
 
-function toggleLang() {
-  lang = lang === 'he' ? 'en' : 'he';
-  localStorage.setItem('tour_lang', lang);
-  applyLang(); render();
-}
+function toggleLang(){lang=lang==='he'?'en':'he';localStorage.setItem('tour_lang',lang);applyLang();render();}
 
-function applyLang() {
-  const t = T[lang];
-  document.documentElement.lang = t.lang;
-  document.documentElement.dir = t.dir;
-  document.getElementById('h-title').textContent = t.title;
-  document.getElementById('h-date').textContent = t.date;
-  document.getElementById('i-title').textContent = t.welcome;
-  document.getElementById('i-text').innerHTML = t.intro;
-  document.getElementById('r-p').textContent = t.route;
-  document.getElementById('r-btn').textContent = t.routeBtn;
-  document.getElementById('lang-btn').textContent = t.flag;
+function applyLang(){
+  const t=T[lang];
+  document.documentElement.lang=t.lang;
+  document.documentElement.dir=t.dir;
+  document.getElementById('h-title').textContent=t.title;
+  document.getElementById('h-date').textContent=t.date;
+  document.getElementById('i-title').textContent=t.welcome;
+  document.getElementById('i-text').innerHTML=t.intro;
+  document.getElementById('r-p').textContent=t.route;
+  document.getElementById('r-btn').textContent=t.routeBtn;
+  document.getElementById('lang-btn').textContent=t.flag;
   updateProgress();
 }
 
-function updateProgress() {
-  const t = T[lang], n = STOPS[lang].length;
-  document.getElementById('pfill').style.width = (done.size / n * 100) + '%';
-  document.getElementById('ptxt').textContent = t.progress(done.size, n);
+function updateProgress(){
+  const t=T[lang],n=STOPS[lang].length;
+  document.getElementById('pfill').style.width=(done.size/n*100)+'%';
+  document.getElementById('ptxt').textContent=t.progress(done.size,n);
 }
 
-function render() {
-  const t = T[lang], stops = STOPS[lang];
-  const container = document.getElementById('stops');
-  container.innerHTML = '';
-  stops.forEach((s, i) => {
-    const isDone = done.has(i);
-    const isActive = !isDone && (i === 0 || done.has(i - 1));
-    const card = document.createElement('div');
-    card.className = 'card' + (isActive ? ' active' : '') + (isDone ? ' done' : '');
-
-    const heroInner = s.img
-      ? `<img src="${s.img}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=no-img>🏛</div>'"/>`
-      : `<div class="no-img">🏛</div>`;
-
-    card.innerHTML =
-      `<div class="hero" onclick="toggle(${i})">` +
-        heroInner +
-        `<div class="hero-overlay">` +
-          `<div class="stop-badge">` +
-            `<div class="stop-num">${isDone ? '✓' : (i + 1)}</div>` +
-            `<div class="stop-label">${s.time}</div>` +
-          `</div>` +
-          `<div class="stop-name">${s.name}</div>` +
-          `<div class="stop-addr">${s.addr}</div>` +
-        `</div>` +
-        `<div class="chev-btn"><span class="chev">▾</span></div>` +
-      `</div>` +
-      `<div class="cbody">` +
-        `<div class="scnt">` +
-          `<p class="sdesc">${s.desc}</p>` +
-          `<div class="acts">` +
-            `<a class="btn bn" href="${s.maps}" target="_blank">📍 ${t.maps}</a>` +
-            `<a class="btn bw" href="${s.waze}" target="_blank">🚗 Waze</a>` +
-            `<a class="btn bb" href="${s.blog}" target="_blank">📖 ${t.blog}</a>` +
-            `<button class="btn ${isDone ? 'bu' : 'bd'}" onclick="toggleDone(event,${i})">${isDone ? t.undo : t.visited}</button>` +
-          `</div>` +
-        `</div>` +
+function render(){
+  const t=T[lang],stops=STOPS[lang],container=document.getElementById('stops');
+  container.innerHTML='';
+  stops.forEach((s,i)=>{
+    const isDone=done.has(i),isActive=!isDone&&(i===0||done.has(i-1));
+    const card=document.createElement('div');
+    card.className='card'+(isActive?' active':'')+(isDone?' done':'');
+    const heroImg=s.img
+      ?`<img src="${s.img}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=no-img>🏛</div>'"/>`
+      :`<div class="no-img">🏛</div>`;
+    card.innerHTML=
+      `<div class="hero" onclick="toggle(${i})">`+
+        heroImg+
+        `<div class="hero-overlay">`+
+          `<div class="stop-badge">`+
+            `<div class="stop-num">${isDone?'✓':(i+1)}</div>`+
+            `<div class="stop-label">${s.time}</div>`+
+          `</div>`+
+          `<div class="stop-name">${s.name}</div>`+
+          `<div class="stop-addr">${s.addr}</div>`+
+        `</div>`+
+        `<div class="chev-btn"><span class="chev">▾</span></div>`+
+      `</div>`+
+      `<div class="cbody">`+
+        `<div class="scnt">`+
+          `<p class="sdesc">${s.desc}</p>`+
+          `<div class="acts">`+
+            `<a class="btn bn" href="${s.maps}" target="_blank">📍 ${t.maps}</a>`+
+            `<a class="btn bw" href="${s.waze}" target="_blank">🚗 Waze</a>`+
+            `<a class="btn bb" href="${s.blog}" target="_blank">📖 ${t.blog}</a>`+
+            `<button class="btn ${isDone?'bu':'bd'}" onclick="toggleDone(event,${i})">${isDone?t.undo:t.visited}</button>`+
+          `</div>`+
+        `</div>`+
       `</div>`;
     container.appendChild(card);
   });
   updateProgress();
 }
 
-function toggle(i) {
-  const cards = document.querySelectorAll('.card');
-  if (!cards[i]) return;
-  const isOpen = cards[i].classList.contains('open');
-  cards.forEach(c => c.classList.remove('open'));
-  if (!isOpen) cards[i].classList.add('open');
+function toggle(i){
+  const cards=document.querySelectorAll('.card');
+  if(!cards[i])return;
+  const isOpen=cards[i].classList.contains('open');
+  cards.forEach(c=>c.classList.remove('open'));
+  if(!isOpen)cards[i].classList.add('open');
 }
 
-function toggleDone(e, i) {
+function toggleDone(e,i){
   e.stopPropagation();
-  if (done.has(i)) done.delete(i); else done.add(i);
-  localStorage.setItem('tour_done', JSON.stringify([...done]));
+  if(done.has(i))done.delete(i);else done.add(i);
+  localStorage.setItem('tour_done',JSON.stringify([...done]));
   render();
-  if (done.has(i) && i + 1 < STOPS[lang].length) setTimeout(() => toggle(i + 1), 200);
+  if(done.has(i)&&i+1<STOPS[lang].length)setTimeout(()=>toggle(i+1),200);
 }
 
 applyLang();
 render();
-const first = [...done].length;
-if (first < STOPS[lang].length) setTimeout(() => toggle(first), 300);
+const first=[...done].length;
+if(first<STOPS[lang].length)setTimeout(()=>toggle(first),300);
 </script>
 </body>
 </html>
