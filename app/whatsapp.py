@@ -57,9 +57,10 @@ def send_template_reengagement(phone: str, name: str | None, lang: str = "he", a
     else:
         template_name = "bothebrew" if lang == "he" else "botenglish"
 
-    # מספרים אמריקאים
-    if normalized.startswith("1") and len(normalized) == 11:
-        template_name = "secendenglish" if is_yad2 else "botenglish"
+    # מספרים אמריקאים ומספרי חול
+    is_foreign = not (normalized.startswith("972") or normalized.startswith("05"))
+    if is_foreign:
+        template_name = "secendenglish" if is_yad2 else "botenglish_utility"
     lang_code = "he" if lang == "he" else "en"
     resp = requests.post(
         f"https://graph.facebook.com/{META_API_VERSION}/{META_PHONE_NUMBER_ID}/messages",
