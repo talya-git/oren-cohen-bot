@@ -147,7 +147,7 @@ async def send_morning_reminders():
 
     for agent in AGENTS:
         try:
-            status = _send_wa_template(agent["phone"], "agent_morning_reminder", [agent["שם"]])
+            status = _send_wa_template(agent["phone"], "agent_morning_utility", [agent["שם"]])
             print(f"[REMINDER WA] {agent['שם']} -> {status}")
         except Exception as e:
             print(f"[REMINDER WA ERROR] {agent['שם']}: {e}")
@@ -318,7 +318,26 @@ async def start_meeting_reminders():
                         if m.get('meeting_type') == 'zoom' and m.get('zoom_link'):
                             msg += f"\nקישור זום: {m['zoom_link']}"
                         try:
-                            send_message(ph, msg)
+                            # שלח כ-template utility
+                            import requests as _req
+                            _req.post(
+                                f"https://graph.facebook.com/v19.0/{os.getenv('META_PHONE_NUMBER_ID','1285155738009042')}/messages",
+                                headers={"Authorization": f"Bearer {os.getenv('META_ACCESS_TOKEN','')}", "Content-Type": "application/json"},
+                                json={
+                                    "messaging_product": "whatsapp",
+                                    "to": ph.lstrip("+"),
+                                    "type": "template",
+                                    "template": {
+                                        "name": "meeting_reminder",
+                                        "language": {"code": "he"},
+                                        "components": [{"type": "body", "parameters": [
+                                            {"type": "text", "text": m['client_name']},
+                                            {"type": "text", "text": time_str}
+                                        ]}]
+                                    }
+                                },
+                                timeout=10
+                            )
                             _sent_reminders.add(akey)
                             print(f"[MEETING REMINDER] {ag} -> {ph} | {m['client_name']} {time_str}")
                         except Exception as e:
