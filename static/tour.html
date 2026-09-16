@@ -9,8 +9,9 @@
 /* ── TOKENS ── */
 :root{--gold:#c9a84c;--dark:#1a1208;--cream:#f5f0e8;--text:#2a1f0e;--muted:#6a5a48;}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html{font-size:16px;-webkit-text-size-adjust:100%;}
-html,body{width:100%;max-width:100%;background:var(--dark);font-family:'Noto Sans Hebrew',sans-serif;color:var(--text);overflow-x:hidden;margin:0;padding:0;}
+html{font-size:16px;-webkit-text-size-adjust:100%;overflow-x:hidden;}
+html,body{width:100%;max-width:100vw;background:var(--dark);font-family:'Noto Sans Hebrew',sans-serif;color:var(--text);overflow-x:hidden;margin:0;padding:0;}
+*{max-width:100%;}
 
 /* ══════════════════════════════
    MOBILE BASE  (≤767px)
@@ -46,7 +47,7 @@ html,body{width:100%;max-width:100%;background:var(--dark);font-family:'Noto San
 
 /* HERO IMAGE — 3:2 on mobile */
 .hero{position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;cursor:pointer;background:#1a1208;}
-.hero img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;transition:transform .4s ease;}
+.hero img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;object-position:center top;display:block;transition:transform .4s ease;}
 .card.open .hero img{transform:scale(1.04);}
 .no-img{width:100%;aspect-ratio:3/2;background:linear-gradient(135deg,#2a1f0e,#1a1208);display:flex;align-items:center;justify-content:center;font-size:64px;cursor:pointer;}
 
@@ -86,8 +87,8 @@ html,body{width:100%;max-width:100%;background:var(--dark);font-family:'Noto San
 .rbox p{color:var(--cream);font-size:1rem;margin-bottom:12px;opacity:.85;}
 
 /* LOGOS */
-.logos{display:flex;align-items:center;justify-content:center;gap:16px;padding:14px 16px;}
-.logos img{height:40px;width:auto;max-width:110px;object-fit:contain;opacity:.92;filter:brightness(1.05);}
+.logos{display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 16px;width:100%;overflow:hidden;}
+.logos img{height:36px;width:auto;max-width:28vw;object-fit:contain;opacity:.92;flex-shrink:1;}
 /* FOOTER */
 .foot{text-align:center;padding:10px 16px 28px;color:var(--muted);font-size:0.9rem;line-height:2.2;}
 .foot a{color:var(--gold);text-decoration:none;}
