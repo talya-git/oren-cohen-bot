@@ -9,31 +9,32 @@
 /* ── TOKENS ── */
 :root{--gold:#c9a84c;--dark:#1a1208;--cream:#f5f0e8;--text:#2a1f0e;--muted:#6a5a48;}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{background:var(--dark);font-family:'Noto Sans Hebrew',sans-serif;color:var(--text);}
+html{font-size:16px;-webkit-text-size-adjust:100%;}
+html,body{width:100%;background:var(--dark);font-family:'Noto Sans Hebrew',sans-serif;color:var(--text);overflow-x:hidden;}
 
 /* ══════════════════════════════
    MOBILE BASE  (≤767px)
 ══════════════════════════════ */
 
 /* HEADER */
-.hdr{background:var(--dark);padding:14px 16px 12px;text-align:center;border-bottom:1px solid rgba(201,168,76,.25);position:sticky;top:0;z-index:100;}
+.hdr{background:var(--dark);padding:14px 16px 12px;text-align:center;border-bottom:1px solid rgba(201,168,76,.25);position:sticky;top:0;z-index:100;width:100%;}
 .hdr-row{display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:4px;}
 .lang-btn{position:absolute;left:0;background:none;border:none;cursor:pointer;font-size:30px;line-height:1;padding:4px;touch-action:manipulation;}
-.logo{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;opacity:.8;}
-.htitle{color:var(--cream);font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:500;line-height:1.2;}
-.hdate{color:var(--gold);font-size:15px;margin-top:4px;}
+.logo{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;opacity:.8;}
+.htitle{color:var(--cream);font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:500;line-height:1.2;}
+.hdate{color:var(--gold);font-size:1rem;margin-top:4px;}
 
 /* PROGRESS */
 .pbar{background:rgba(201,168,76,.1);padding:10px 16px;display:flex;align-items:center;gap:12px;}
 .ptrack{flex:1;height:4px;background:rgba(201,168,76,.2);border-radius:4px;}
 .pfill{height:100%;background:var(--gold);border-radius:4px;transition:width .5s ease;}
-.ptxt{color:var(--gold);font-size:15px;white-space:nowrap;font-weight:700;}
+.ptxt{color:var(--gold);font-size:1rem;white-space:nowrap;font-weight:700;}
 
 /* INTRO */
 .intro{background:linear-gradient(160deg,#1f1508,#2a1f0e);margin:12px;border-radius:12px;padding:20px 16px;text-align:center;border:1px solid rgba(201,168,76,.25);}
-.ititle{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:6px;}
+.ititle{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.4rem;margin-bottom:6px;}
 .idiv{width:32px;height:1px;background:var(--gold);margin:10px auto;}
-.itext{color:rgba(245,240,232,.85);font-size:16px;line-height:1.8;}
+.itext{color:rgba(245,240,232,.85);font-size:1rem;line-height:1.8;}
 
 /* STOPS */
 .stops{padding:0 12px 12px;display:flex;flex-direction:column;gap:14px;}
@@ -52,27 +53,27 @@ html,body{background:var(--dark);font-family:'Noto Sans Hebrew',sans-serif;color
 /* HERO OVERLAY */
 .hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,6,2,.92) 0%,rgba(10,6,2,.35) 55%,transparent 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:16px;}
 .stop-badge{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-.stop-num{background:var(--gold);color:var(--dark);font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.stop-num{background:var(--gold);color:var(--dark);font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:700;width:2.5rem;height:2.5rem;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .card.done .stop-num{background:#4a7c59;color:#fff;}
-.stop-label{color:var(--gold);font-size:15px;font-weight:700;}
-.stop-name{color:#fff;font-weight:700;font-size:24px;line-height:1.2;margin-bottom:5px;}
-.stop-addr{color:rgba(255,255,255,.85);font-size:15px;line-height:1.5;}
+.stop-label{color:var(--gold);font-size:0.95rem;font-weight:700;}
+.stop-name{color:#fff;font-weight:700;font-size:1.5rem;line-height:1.2;margin-bottom:5px;}
+.stop-addr{color:rgba(255,255,255,.85);font-size:0.95rem;line-height:1.5;}
 
 /* CHEVRON */
-.chev-btn{position:absolute;top:14px;right:14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
-.chev{color:#fff;font-size:18px;transition:transform .25s;display:block;}
+.chev-btn{position:absolute;top:14px;right:14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);border-radius:50%;width:2.5rem;height:2.5rem;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.chev{color:#fff;font-size:1.1rem;transition:transform .25s;display:block;}
 .card.open .chev{transform:rotate(180deg);}
 
 /* BODY */
 .cbody{display:none;border-top:1px solid rgba(201,168,76,.15);}
 .card.open .cbody{display:block;}
 .scnt{padding:18px 16px;}
-.sdesc{font-size:16px;line-height:1.9;color:var(--text);margin-bottom:20px;}
+.sdesc{font-size:1rem;line-height:1.9;color:var(--text);margin-bottom:20px;}
 
 /* BUTTONS — 2 col grid */
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .acts .full{grid-column:1/-1;}
-.btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:16px 10px;border-radius:10px;border:none;font-size:16px;font-weight:700;cursor:pointer;font-family:'Noto Sans Hebrew',sans-serif;text-decoration:none;transition:opacity .15s;touch-action:manipulation;-webkit-user-select:none;}
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:1rem 0.6rem;border-radius:10px;border:none;font-size:1rem;font-weight:700;cursor:pointer;font-family:'Noto Sans Hebrew',sans-serif;text-decoration:none;transition:opacity .15s;touch-action:manipulation;-webkit-user-select:none;min-height:3rem;}
 .btn:active{opacity:.7;}
 .bn{background:var(--gold);color:var(--dark);}
 .bw{background:#00b4d8;color:#fff;}
@@ -82,22 +83,21 @@ html,body{background:var(--dark);font-family:'Noto Sans Hebrew',sans-serif;color
 
 /* ROUTE BOX */
 .rbox{margin:0 12px 12px;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.25);border-radius:12px;padding:16px;text-align:center;}
-.rbox p{color:var(--cream);font-size:16px;margin-bottom:12px;opacity:.85;}
+.rbox p{color:var(--cream);font-size:1rem;margin-bottom:12px;opacity:.85;}
 
+/* LOGOS */
+.logos{display:flex;align-items:center;justify-content:center;gap:20px;padding:18px 16px 6px;border-top:1px solid rgba(201,168,76,.15);}
+.logos img{height:44px;width:auto;object-fit:contain;mix-blend-mode:screen;filter:brightness(1.1);opacity:.9;}
 /* FOOTER */
-.foot{text-align:center;padding:18px 16px 28px;border-top:1px solid rgba(201,168,76,.15);color:var(--muted);font-size:14px;line-height:2.2;}
+.foot{text-align:center;padding:10px 16px 28px;color:var(--muted);font-size:0.9rem;line-height:2.2;}
 .foot a{color:var(--gold);text-decoration:none;}
 
 /* ══════════════════════════════
    DESKTOP OVERRIDE  (≥768px)
 ══════════════════════════════ */
 @media(min-width:768px){
-  body{max-width:520px;margin:0 auto;}
-  .htitle{font-size:28px;}
-  .hdate{font-size:14px;}
-  .stop-name{font-size:22px;}
-  .sdesc{font-size:15px;}
-  .btn{font-size:14px;padding:14px 10px;}
+  body{max-width:540px;margin:0 auto;}
+  html{font-size:15px;}
   .hero{aspect-ratio:16/9;}
   .no-img{aspect-ratio:16/9;}
 }
@@ -132,6 +132,11 @@ html,body{background:var(--dark);font-family:'Noto Sans Hebrew',sans-serif;color
   <a class="btn bn full" id="r-btn" href="https://maps.google.com/maps/dir/31.7767,35.2345/31.7801,35.2197/31.7769,35.2213" target="_blank" style="display:flex;">🗺 פתח מסלול מלא</a>
 </div>
 
+<div class="logos">
+  <img src="/static/img/logo1.png" alt="logo 1"/>
+  <img src="/static/img/logo2.png" alt="logo 2"/>
+  <img src="/static/img/logo3.png" alt="logo 3"/>
+</div>
 <div class="foot">
   <strong style="color:var(--gold)">Oren Cohen Group</strong><br>
   הקרן הקיימת לישראל 33, רחביה, ירושלים<br>
