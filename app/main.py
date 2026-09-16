@@ -955,6 +955,11 @@ def shishi_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "shishi.html")
 
 
+@app.get("/tour")
+def tour_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "tour.html")
+
+
 @app.get("/shishi-en")
 def shishi_en_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "shishi-en.html")
