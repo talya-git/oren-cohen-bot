@@ -90,7 +90,7 @@ html,body{width:100%;background:var(--dark);font-family:'Noto Sans Hebrew',sans-
 .logos{display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 16px;width:100%;overflow:hidden;}
 .logos img{height:38px;width:auto;max-width:28vw;object-fit:contain;opacity:.92;flex-shrink:1;}
 .logos img:nth-child(2){filter:brightness(0) invert(1) sepia(1) saturate(2) hue-rotate(5deg) brightness(1.8);opacity:1;}
-.logos img:nth-child(3){height:80px;}
+.logos img:nth-child(3){height:80px;width:80px;border-radius:50%;object-fit:cover;object-position:center;}
 /* FOOTER */
 .foot{text-align:center;padding:10px 16px 28px;color:var(--muted);font-size:0.9rem;line-height:2.2;}
 .foot a{color:var(--gold);text-decoration:none;}
@@ -172,7 +172,7 @@ const STOPS = {
 };
 
 let lang = localStorage.getItem('tour_lang') || 'he';
-const done = new Set(JSON.parse(localStorage.getItem('tour_done') || '[]'));
+const done = new Set();
 
 function toggleLang(){lang=lang==='he'?'en':'he';localStorage.setItem('tour_lang',lang);applyLang();render();}
 
@@ -246,15 +246,14 @@ function toggle(i){
 function toggleDone(e,i){
   e.stopPropagation();
   if(done.has(i))done.delete(i);else done.add(i);
-  localStorage.setItem('tour_done',JSON.stringify([...done]));
+  // done state not persisted
   render();
   if(done.has(i)&&i+1<STOPS[lang].length)setTimeout(()=>toggle(i+1),200);
 }
 
 applyLang();
 render();
-const first=[...done].length;
-if(first<STOPS[lang].length)setTimeout(()=>toggle(first),300);
+setTimeout(()=>toggle(0),300);
 </script>
 </body>
 </html>
