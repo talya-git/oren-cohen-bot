@@ -10,8 +10,8 @@
 :root{--gold:#c9a84c;--dark:#1a1208;--cream:#f5f0e8;--text:#2a1f0e;--muted:#6a5a48;}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html{font-size:16px;-webkit-text-size-adjust:100%;overflow-x:hidden;}
-html,body{width:100%;max-width:100vw;background:var(--dark);font-family:'Noto Sans Hebrew',sans-serif;color:var(--text);overflow-x:hidden;margin:0;padding:0;}
-*{max-width:100%;}
+html,body{width:100%;background:var(--dark);font-family:'Noto Sans Hebrew',sans-serif;color:var(--text);overflow-x:hidden;margin:0;padding:0;}
+*{box-sizing:border-box;}
 
 /* ══════════════════════════════
    MOBILE BASE  (≤767px)
@@ -38,7 +38,7 @@ html,body{width:100%;max-width:100vw;background:var(--dark);font-family:'Noto Sa
 .itext{color:rgba(245,240,232,.85);font-size:1rem;line-height:1.8;}
 
 /* STOPS */
-.stops{padding:0 12px 12px;display:flex;flex-direction:column;gap:14px;}
+.stops{padding:0 12px 12px;display:flex;flex-direction:column;gap:14px;width:100%;}
 
 /* CARD */
 .card{border-radius:14px;overflow:hidden;border:1.5px solid rgba(201,168,76,.15);background:var(--cream);box-shadow:0 4px 20px rgba(0,0,0,.45);}
@@ -97,8 +97,6 @@ html,body{width:100%;max-width:100vw;background:var(--dark);font-family:'Noto Sa
    DESKTOP OVERRIDE  (≥768px)
 ══════════════════════════════ */
 @media(min-width:768px){
-  .stops,.rbox,.intro{max-width:600px;margin-left:auto;margin-right:auto;}
-  .hdr{max-width:100%;}
   html{font-size:15px;}
   .hero{aspect-ratio:16/9;}
   .no-img{aspect-ratio:16/9;}
