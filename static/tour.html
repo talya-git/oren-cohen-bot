@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Jerusalem Tour — Oren Cohen Group</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Noto+Sans+Hebrew:wght@400;600;700&display=swap" rel="stylesheet"/>
 <style>
@@ -14,22 +14,22 @@ body{font-family:'Noto Sans Hebrew',sans-serif;color:var(--text);}
 /* HEADER */
 .hdr{background:var(--dark);padding:12px 16px 10px;text-align:center;border-bottom:1px solid rgba(201,168,76,.25);position:sticky;top:0;z-index:100;}
 .hdr-row{display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:3px;}
-.lang-btn{position:absolute;left:0;background:none;border:none;cursor:pointer;font-size:26px;line-height:1;padding:4px;touch-action:manipulation;}
-.logo{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:12px;letter-spacing:2.5px;text-transform:uppercase;opacity:.8;}
-.htitle{color:var(--cream);font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:500;line-height:1.2;}
-.hdate{color:var(--gold);font-size:14px;margin-top:3px;opacity:.9;}
+.lang-btn{position:absolute;left:0;background:none;border:none;cursor:pointer;font-size:clamp(28px,8vw,34px);line-height:1;padding:4px;touch-action:manipulation;}
+.logo{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:clamp(12px,3.5vw,15px);letter-spacing:2px;text-transform:uppercase;opacity:.8;}
+.htitle{color:var(--cream);font-family:'Cormorant Garamond',serif;font-size:clamp(22px,6vw,30px);font-weight:500;line-height:1.2;}
+.hdate{color:var(--gold);font-size:clamp(13px,3.8vw,16px);margin-top:4px;opacity:.9;}
 
 /* PROGRESS */
 .pbar{background:rgba(201,168,76,.1);padding:8px 16px;display:flex;align-items:center;gap:10px;}
 .ptrack{flex:1;height:2px;background:rgba(201,168,76,.2);border-radius:2px;}
 .pfill{height:100%;background:var(--gold);border-radius:2px;transition:width .5s ease;}
-.ptxt{color:var(--gold);font-size:14px;white-space:nowrap;font-weight:600;}
+.ptxt{color:var(--gold);font-size:clamp(13px,4vw,16px);white-space:nowrap;font-weight:600;}
 
 /* INTRO */
 .intro{background:linear-gradient(160deg,#1f1508,#2a1f0e);margin:12px;border-radius:10px;padding:16px;text-align:center;border:1px solid rgba(201,168,76,.25);}
-.ititle{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:5px;}
-.idiv{width:32px;height:1px;background:var(--gold);margin:8px auto;}
-.itext{color:rgba(245,240,232,.85);font-size:15px;line-height:1.7;}
+.ititle{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:clamp(20px,5.5vw,26px);margin-bottom:6px;}
+.idiv{width:32px;height:1px;background:var(--gold);margin:10px auto;}
+.itext{color:rgba(245,240,232,.85);font-size:clamp(14px,4vw,17px);line-height:1.8;}
 
 /* STOPS */
 .stops{padding:0 12px 12px;display:flex;flex-direction:column;gap:12px;}
@@ -48,27 +48,27 @@ body{font-family:'Noto Sans Hebrew',sans-serif;color:var(--text);}
 /* HERO OVERLAY */
 .hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,6,2,.9) 0%,rgba(10,6,2,.3) 50%,transparent 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:14px;}
 .stop-badge{display:inline-flex;align-items:center;gap:6px;margin-bottom:8px;}
-.stop-num{background:var(--gold);color:var(--dark);font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.stop-num{background:var(--gold);color:var(--dark);font-family:'Cormorant Garamond',serif;font-size:clamp(16px,5vw,20px);font-weight:700;width:clamp(36px,10vw,44px);height:clamp(36px,10vw,44px);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .card.done .stop-num{background:#4a7c59;color:#fff;}
-.stop-label{color:var(--gold);font-size:14px;font-weight:600;letter-spacing:.5px;}
-.stop-name{color:#fff;font-weight:700;font-size:22px;line-height:1.25;margin-bottom:4px;}
-.stop-addr{color:rgba(255,255,255,.8);font-size:14px;line-height:1.4;}
+.stop-label{color:var(--gold);font-size:clamp(13px,3.8vw,16px);font-weight:600;}
+.stop-name{color:#fff;font-weight:700;font-size:clamp(20px,6vw,26px);line-height:1.25;margin-bottom:5px;}
+.stop-addr{color:rgba(255,255,255,.85);font-size:clamp(13px,3.8vw,16px);line-height:1.5;}
 
 /* CHEVRON */
-.chev-btn{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.15);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
-.chev{color:#fff;font-size:14px;transition:transform .25s;display:block;}
+.chev-btn{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.15);border-radius:50%;width:clamp(36px,10vw,44px);height:clamp(36px,10vw,44px);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.chev{color:#fff;font-size:clamp(16px,5vw,20px);transition:transform .25s;display:block;}
 .card.open .chev{transform:rotate(180deg);}
 
 /* BODY */
 .cbody{display:none;border-top:1px solid rgba(201,168,76,.15);}
 .card.open .cbody{display:block;}
 .scnt{padding:16px;}
-.sdesc{font-size:16px;line-height:1.9;color:var(--text);margin-bottom:18px;}
+.sdesc{font-size:clamp(15px,4.2vw,18px);line-height:1.9;color:var(--text);margin-bottom:20px;}
 
 /* ACTIONS */
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .acts .full{grid-column:1/-1;}
-.btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:15px 10px;border-radius:8px;border:none;font-size:15px;font-weight:700;cursor:pointer;font-family:'Noto Sans Hebrew',sans-serif;text-decoration:none;transition:opacity .15s;touch-action:manipulation;}
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:clamp(14px,4vw,18px) 10px;border-radius:8px;border:none;font-size:clamp(14px,4.2vw,17px);font-weight:700;cursor:pointer;font-family:'Noto Sans Hebrew',sans-serif;text-decoration:none;transition:opacity .15s;touch-action:manipulation;}
 .btn:active{opacity:.7;}
 .bn{background:var(--gold);color:var(--dark);}
 .bw{background:#00b4d8;color:#fff;}
@@ -78,10 +78,10 @@ body{font-family:'Noto Sans Hebrew',sans-serif;color:var(--text);}
 
 /* ROUTE BOX */
 .rbox{margin:0 12px 12px;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:14px;text-align:center;}
-.rbox p{color:var(--cream);font-size:15px;margin-bottom:10px;opacity:.85;}
+.rbox p{color:var(--cream);font-size:clamp(14px,4vw,17px);margin-bottom:12px;opacity:.85;}
 
 /* FOOTER */
-.foot{text-align:center;padding:16px 14px 24px;border-top:1px solid rgba(201,168,76,.15);color:var(--muted);font-size:13px;line-height:2.2;}
+.foot{text-align:center;padding:16px 14px 28px;border-top:1px solid rgba(201,168,76,.15);color:var(--muted);font-size:clamp(13px,3.8vw,15px);line-height:2.2;}
 .foot a{color:var(--gold);text-decoration:none;}
 </style>
 </head>
