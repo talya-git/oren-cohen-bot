@@ -19,40 +19,43 @@ body{font-family:'Noto Sans Hebrew',sans-serif;background:var(--dark);color:var(
 .ptrack{flex:1;height:3px;background:rgba(201,168,76,.2);border-radius:2px;}
 .pfill{height:100%;background:var(--gold);border-radius:2px;transition:width .4s;}
 .ptxt{color:var(--gold);font-size:11px;white-space:nowrap;}
-.intro{background:linear-gradient(135deg,#1a1208,#2a1f0e);margin:14px;border-radius:4px;padding:18px;text-align:center;border:1px solid rgba(201,168,76,.3);}
-.ititle{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:19px;margin-bottom:6px;}
+.intro{background:linear-gradient(135deg,#1a1208,#2a1f0e);margin:14px;border-radius:6px;padding:18px;text-align:center;border:1px solid rgba(201,168,76,.3);}
+.ititle{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:20px;margin-bottom:6px;}
 .idiv{width:36px;height:1px;background:var(--gold);margin:10px auto;}
 .itext{color:var(--cream);font-size:13px;line-height:1.7;}
-.stops{padding:14px;display:flex;flex-direction:column;gap:11px;}
-.card{background:var(--cream);border-radius:4px;overflow:hidden;border:1px solid rgba(201,168,76,.2);}
-.card.active{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,168,76,.25);}
-.card.done{opacity:.6;}
-.chead{display:flex;align-items:center;gap:11px;padding:13px 14px;cursor:pointer;}
-.num{width:31px;height:31px;border-radius:50%;background:var(--dark);color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:600;}
-.card.active .num{background:var(--gold);color:var(--dark);}
-.card.done .num{background:#4a7c59;color:#fff;font-size:13px;}
-.info{flex:1;min-width:0;}
-.sname{font-weight:700;font-size:14px;color:var(--dark);line-height:1.3;}
-.saddr{font-size:12px;color:var(--muted);margin-top:2px;}
-.stime{font-size:11px;color:var(--gold);font-weight:600;margin-top:2px;}
-.chev{color:var(--muted);font-size:17px;flex-shrink:0;transition:transform .2s;}
+.stops{padding:14px;display:flex;flex-direction:column;gap:14px;}
+.card{background:var(--cream);border-radius:8px;overflow:hidden;border:1px solid rgba(201,168,76,.2);box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.card.active{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,168,76,.3),0 4px 12px rgba(0,0,0,.4);}
+.card.done{opacity:.55;}
+.card-hero{position:relative;width:100%;height:200px;overflow:hidden;background:#2a1f0e;cursor:pointer;}
+.card-hero img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s;}
+.card.open .card-hero img{transform:scale(1.03);}
+.hero-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(26,18,8,.85));padding:14px 14px 10px;}
+.hero-num{display:inline-block;background:var(--gold);color:var(--dark);font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:700;padding:2px 8px;border-radius:2px;margin-bottom:5px;}
+.card.done .hero-num{background:#4a7c59;color:#fff;}
+.hero-name{color:#fff;font-weight:700;font-size:16px;line-height:1.3;}
+.hero-addr{color:rgba(255,255,255,.75);font-size:12px;margin-top:2px;}
+.hero-time{color:var(--gold);font-size:11px;font-weight:600;margin-top:3px;}
+.chev-wrap{position:absolute;top:10px;right:10px;background:rgba(26,18,8,.6);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;}
+.chev{color:#fff;font-size:14px;transition:transform .2s;}
 .card.open .chev{transform:rotate(180deg);}
-.cbody{display:none;border-top:1px solid rgba(201,168,76,.2);}
+.cbody{display:none;border-top:1px solid rgba(201,168,76,.15);}
 .card.open .cbody{display:block;}
-.simg{width:100%;height:175px;object-fit:cover;display:block;}
-.scnt{padding:13px 14px;}
-.sdesc{font-size:13px;line-height:1.7;color:var(--text);margin-bottom:13px;}
+.scnt{padding:14px 16px;}
+.sdesc{font-size:13px;line-height:1.8;color:var(--text);margin-bottom:14px;}
 .acts{display:flex;gap:7px;flex-wrap:wrap;}
-.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 13px;border-radius:3px;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans Hebrew',sans-serif;text-decoration:none;transition:opacity .15s;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border-radius:4px;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans Hebrew',sans-serif;text-decoration:none;transition:opacity .15s;}
 .btn:active{opacity:.75;}
 .bn{background:var(--gold);color:var(--dark);}
 .bw{background:#33ccff;color:#000;}
+.bb{background:#1a6b3c;color:#fff;}
 .bd{background:#4a7c59;color:#fff;}
 .bu{background:var(--warm);color:var(--muted);}
-.rbox{margin:0 14px 14px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.3);border-radius:4px;padding:13px;text-align:center;}
+.rbox{margin:0 14px 14px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.3);border-radius:6px;padding:13px;text-align:center;}
 .rbox p{color:var(--cream);font-size:13px;margin-bottom:9px;}
 .foot{text-align:center;padding:18px 14px;border-top:1px solid rgba(201,168,76,.2);color:var(--muted);font-size:11px;line-height:1.9;}
 .foot a{color:var(--gold);text-decoration:none;}
+.no-img{width:100%;height:200px;background:linear-gradient(135deg,#2a1f0e,#1a1208);display:flex;align-items:center;justify-content:center;color:rgba(201,168,76,.4);font-size:48px;}
 </style>
 </head>
 <body>
@@ -68,20 +71,20 @@ body{font-family:'Noto Sans Hebrew',sans-serif;background:var(--dark);color:var(
 
 <div class="pbar">
   <div class="ptrack"><div class="pfill" id="pfill" style="width:0%"></div></div>
-  <div class="ptxt" id="ptxt">0 / 8</div>
+  <div class="ptxt" id="ptxt">0 / 3</div>
 </div>
 
 <div class="intro">
   <div class="ititle" id="i-title">ברוכים הבאים לסיור</div>
   <div class="idiv"></div>
-  <div class="itext" id="i-text">סיור ברחובות ירושלים ההיסטורית — מרחביה ועד העיר העתיקה.<br>לחצו על כל תחנה לפרטים ולניווט.</div>
+  <div class="itext" id="i-text">סיור ברחובות ירושלים ההיסטורית — מרחביה ומרכז העיר.<br>לחצו על כל תחנה לפרטים ולניווט.</div>
 </div>
 
 <div class="stops" id="stops"></div>
 
 <div class="rbox">
   <p id="r-p">לצפייה במסלול המלא במפה</p>
-  <a class="btn bn" id="r-btn" href="https://maps.google.com/maps/dir/31.7767,35.2345/31.7801,35.2197/31.7789,35.2178/31.7756,35.2201/31.7748,35.2189/31.7741,35.2183/31.7769,35.2213/31.7776,35.2228" target="_blank">🗺 פתח מסלול מלא</a>
+  <a class="btn bn" id="r-btn" href="https://maps.google.com/maps/dir/31.7767,35.2345/31.7801,35.2197/31.7769,35.2213" target="_blank">🗺 פתח מסלול מלא</a>
 </div>
 
 <div class="foot">
@@ -98,56 +101,98 @@ const T = {
     title: 'שישי של פעם — סיור ירושלים',
     date: 'יום ראשון כ״ז תשרי | 27.09.2025 | 16:30',
     welcome: 'ברוכים הבאים לסיור',
-    intro: 'סיור ברחובות ירושלים ההיסטורית — מרחביה ועד העיר העתיקה.<br>לחצו על כל תחנה לפרטים ולניווט.',
+    intro: 'סיור ברחובות ירושלים ההיסטורית — מרחביה ומרכז העיר.<br>לחצו על כל תחנה לפרטים ולניווט.',
     route: 'לצפייה במסלול המלא במפה',
     routeBtn: '🗺 פתח מסלול מלא',
-    maps: '📍 מפה',
-    waze: '🚗 Waze',
     visited: '✓ ביקרתי',
     undo: '↩ בטל',
+    blog: 'לכתבה בבלוג',
     flag: '🇬🇧',
     dir: 'rtl',
     lang: 'he',
-    progress: (d,t) => d+' / '+t+' תחנות',
+    progress: (d, t) => d + ' / ' + t + ' תחנות',
   },
   en: {
-    title: 'Shishi Shel Pa\'am — Jerusalem Tour',
-    date: 'Sunday, 27th of Tishrei | 27.09.2025 | 4:30 PM',
+    title: "Shishi Shel Pa'am — Jerusalem Tour",
+    date: 'Sunday 27th of Tishrei | 27.09.2025 | 4:30 PM',
     welcome: 'Welcome to the Tour',
-    intro: 'A walk through historic Jerusalem — from Rehavia to the Old City.<br>Tap each stop for details and navigation.',
+    intro: 'A walk through historic Jerusalem — Rehavia and the city center.<br>Tap each stop for details and navigation.',
     route: 'View full route on map',
     routeBtn: '🗺 Open Full Route',
-    maps: '📍 Maps',
-    waze: '🚗 Waze',
     visited: '✓ Visited',
     undo: '↩ Undo',
+    blog: 'Read in Blog',
     flag: '🇮🇱',
     dir: 'ltr',
     lang: 'en',
-    progress: (d,t) => d+' / '+t+' stops',
+    progress: (d, t) => d + ' / ' + t + ' stops',
   }
 };
 
 const STOPS = {
   he: [
-    {name:'בית ויגאליק',addr:'קרן הקיימת לישראל 20, רחביה',time:'תחנה 1 — נקודת מפגש',desc:'בניין מ-1936 בסגנון אקלקטי עם קשתות נאו-מזרחיות ואבן אדמדמה נדירה. נבנה ע"י האדריכל נתן ברין עבור יעקב פסח וחנה ויגאליק. מוגדר כבניין לשימור.',img:'https://www.orencohengroup.com/wp-content/uploads/2026/09/%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%9C%D7%9C%D7%90-%D7%A9%D7%9D-25.jpg',maps:'https://maps.google.com/?q=Keren+Kayemet+20+Jerusalem',waze:'https://waze.com/ul?q=Keren+Kayemet+20+Jerusalem&navigate=yes'},
-    {name:'בית תבור',addr:'רחוב הנביאים 58',time:'תחנה 2',desc:'פנינה אדריכלית מ-1889 שתכנן קונרד שיק. שילוב גאוני של סגנון גרמני עם ארכיטקטורה מזרחית. טדי קולק: "אם הייתי יכול לבחור בית אחד בירושלים לגור בו — זה הבית".',img:'https://www.orencohengroup.com/wp-content/uploads/2026/06/%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%9C%D7%9C%D7%90-%D7%A9%D7%9D-31.jpg',maps:'https://maps.google.com/?q=HaNeviim+58+Jerusalem',waze:'https://waze.com/ul?q=HaNeviim+58+Jerusalem&navigate=yes'},
-    {name:'בית הנסן',addr:'רחוב דובנוב, טלביה',time:'תחנה 3',desc:'בית חולים למצורעים שנחנך ב-1887, תוכנן ע"י קונרד שיק ותיאודור זנדל. שכן על 40 דונם עם גינות ירק ומשק עופות. כיום מרכז עיצוב ואקדמיה לאומנות בצלאל.',img:'https://www.orencohengroup.com/wp-content/uploads/2026/02/%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%9C%D7%9C%D7%90-%D7%A9%D7%9D-19.jpg',maps:'https://maps.google.com/?q=Hansen+House+Jerusalem',waze:'https://waze.com/ul?q=Hansen+House+Jerusalem&navigate=yes'},
-    {name:'בית אגיון',addr:'פינת בלפור וסמולנסקין, טלביה',time:'תחנה 4',desc:'מ-1938, תכנן ריכרד קאופמן עבור אדוארד אגיון — מייסד בורסת הכותנה במצרים. בית ראש הממשלה מ-1973. רבין, בגין, שמיר ופרס גרו כאן.',img:'https://www.orencohengroup.com/wp-content/uploads/2026/08/%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%9C%D7%9C%D7%90-%D7%A9%D7%9D-22.jpg',maps:'https://maps.google.com/?q=Balfour+Jerusalem',waze:'https://waze.com/ul?q=Balfour+Jerusalem&navigate=yes'},
-    {name:'תחנת הרוח',addr:'רחוב רמב"ן 8, רחביה',time:'תחנה 5',desc:'תחנת רוח מ-1882 שהוקמה ע"י הכנסייה היוונית-אורתודוקסית. נרכשה ב-1922 ועליה נבנתה שכונת רחביה. ב-1935 רכש אותה האדריכל אריך מנדלסון. שוקמה ב-1987.',img:'https://www.orencohengroup.com/wp-content/uploads/2026/02/%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%9C%D7%9C%D7%90-%D7%A9%D7%9D-17.jpg',maps:'https://maps.google.com/?q=Ramban+8+Jerusalem',waze:'https://waze.com/ul?q=Ramban+8+Jerusalem&navigate=yes'},
-    {name:'בית מולכו',addr:'רחוב רמב"ן 20, רחביה',time:'תחנה 6',desc:'מ-1929. כאן שכן קפה רחביה שבו ישבו ש"י עגנון ומרטין בובר. כיום מלון בוטיק יוקרתי עם מסעדת אסף גרניט.',img:'https://www.orencohengroup.com/wp-content/uploads/2026/01/%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%9C%D7%9C%D7%90-%D7%A9%D7%9D-8.jpg',maps:'https://maps.google.com/?q=Ramban+20+Jerusalem',waze:'https://waze.com/ul?q=Ramban+20+Jerusalem&navigate=yes'},
-    {name:'מלון עדן',addr:'רחוב הלל, ירושלים',time:'תחנה 7',desc:'נפתח 1938. בן גוריון גר כאן שנה וחצי. כיום פרויקט מגורים יוקרתי של יוסי אברהמי — אטריום פנימי, בריכה ומרפסות הפונות לנוף העיר העתיקה.',img:'https://www.orencohengroup.com/wp-content/uploads/2026/07/%D7%A6%D7%99%D7%9C%D7%95%D7%9D-%D7%A4%D7%A8%D7%99%D7%A5-%D7%9B%D7%94%D7%9F.-3.jpg',maps:'https://maps.google.com/?q=Hillel+Street+Jerusalem',waze:'https://waze.com/ul?q=Hillel+Jerusalem&navigate=yes'},
-    {name:'גן העצמאות',addr:"בין המלך ג'ורג', הלל ואגרון",time:'תחנה 8 — סיום',desc:'הריאה הירוקה של ירושלים. בריכת ממילא מהתקופה הביזנטית שימשה כמאגר מים לבריכת חזקיהו. נחנך 1958 ביום העצמאות ה-10.',img:'https://www.orencohengroup.com/wp-content/uploads/2026/03/%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%9C%D7%9C%D7%90-%D7%A9%D7%9D.jpg',maps:'https://maps.google.com/?q=Independence+Park+Jerusalem',waze:'https://waze.com/ul?q=Independence+Park+Jerusalem&navigate=yes'},
+    {
+      name: 'בית ויגאליק',
+      addr: 'קרן הקיימת לישראל 20 פינת אוסישקין, רחביה',
+      time: 'תחנה 1 — נקודת מפגש',
+      desc: 'המבנה שגרם לכל הייקים המעונבים של רחביה להוריד את המשקפיים לקצה האף בתדהמה. תוכנן ע"י האדריכל ההונגרי נתן ברין עבור יעקב פסח וחנה ויגאליק — מתרים מקצועי שתרם לבית היתומים דיסקין. הבית נבנה מאבן אדמדמה ונדירה (מיזי אחמר) בסגנון אקלקטי עם קשתות נאו-מזרחיות ומרפסות קלאסיות. הזוג התמקם בצניעות בדירה שבקומה השנייה. כיום מוגדר כבניין לשימור ברשימת אתרי המורשת.',
+      img: '/static/img/vigalik.jpg',
+      blog: 'https://www.orencohengroup.com/he/blog/beit-vigalik-rechavia/',
+      maps: 'https://maps.google.com/?q=Keren+Kayemet+20+Jerusalem',
+      waze: 'https://waze.com/ul?q=Keren+Kayemet+20+Jerusalem&navigate=yes'
+    },
+    {
+      name: 'בית הנכות הלאומי בצלאל',
+      addr: 'רחוב שמואל הנגיד 12 פינת שץ, ירושלים',
+      time: 'תחנה 2',
+      desc: 'מוזיאון שהוקם ליד בית הספר לאומנות בצלאל — תחילתו כמוזיאון לתולדות החי והצומח בארץ ישראל, חלק מחזונו של בוריס שץ. התצוגה הראשונה נערכה בפסח 1912. ב-1916 ביקר ג\'מאל פאשה מבכירי האימפריה העות\'מאנית. ב-1925 נפתח לקהל הרחב. עם פתיחת מוזיאון ישראל ב-1965 עבר האוסף לגבעת רם והמבנה הפך לבית האומנים. הרחוב נקרא על שם רבי שמואל הנגיד — משורר עברי גדול ומשנה למלך גרנדה.',
+      img: '/static/img/bezalel.jpg',
+      blog: 'https://www.orencohengroup.com/he/blog/',
+      maps: 'https://maps.google.com/?q=Shmuel+HaNagid+12+Jerusalem',
+      waze: 'https://waze.com/ul?q=Shmuel+HaNagid+12+Jerusalem&navigate=yes'
+    },
+    {
+      name: 'בית סולל בונה',
+      addr: 'רחוב המלך ג\'ורג\', ירושלים',
+      time: 'תחנה 3',
+      desc: 'אחד המבנים שסימלו יותר מכל את עלייתה, נפילתה והתחדשותה של הריכוזיות הישראלית. ב-1957 בנתה סולל בונה את מטה ירושלים שלה בלב הציר הלאומי. האדריכל ראובן טרוסטלר תכנן מבנה מודרניסטי עם גגון בטון בצורת מניפה. נמכר ב-1987 ועמד נטוש עשורים — בימי המחאה 2011 פרצו פעילים וקראו לו "בית החזיר". נהרס ב-2016; כיום עולה במקומו פרויקט יוקרה: מלון אינטרקונטיננטל ירושלים ומגדל מגורים.',
+      img: '',
+      blog: 'https://www.orencohengroup.com/he/blog/',
+      maps: 'https://maps.google.com/?q=King+George+Street+Jerusalem',
+      waze: 'https://waze.com/ul?q=King+George+Jerusalem&navigate=yes'
+    }
   ],
   en: [
-    {name:'Beit Vigalik',addr:'20 Keren Kayemet St., Rehavia',time:'Stop 1 — Meeting Point',desc:'A stunning 1936 eclectic building with neo-Oriental arches and rare red stone (Mizi Ahmar). Designed by architect Natan Brin. Listed as a heritage preservation site.',img:'https://www.orencohengroup.com/wp-content/uploads/2026/09/%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%9C%D7%9C%D7%90-%D7%A9%D7%9D-25.jpg',maps:'https://maps.google.com/?q=Keren+Kayemet+20+Jerusalem',waze:'https://waze.com/ul?q=Keren+Kayemet+20+Jerusalem&navigate=yes'},
-    {name:'Tabor House',addr:'58 HaNeviim St.',time:'Stop 2',desc:'An 1889 architectural gem designed by Conrad Schick — a genius blend of German and Oriental styles. Teddy Kollek said: "If I could choose one house in Jerusalem to live in, this is it."',img:'https://www.orencohengroup.com/wp-content/uploads/2026/06/%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%9C%D7%9C%D7%90-%D7%A9%D7%9D-31.jpg',maps:'https://maps.google.com/?q=HaNeviim+58+Jerusalem',waze:'https://waze.com/ul?q=HaNeviim+58+Jerusalem&navigate=yes'},
-    {name:'Hansen House',addr:'Dubnov St., Talbiyeh',time:'Stop 3',desc:'A leper hospital inaugurated in 1887, designed by Conrad Schick. Set on 40 dunams with gardens and a farmyard. Today it houses a design center and the Bezalel Academy of Arts.',img:'https://www.orencohengroup.com/wp-content/uploads/2026/02/%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%9C%D7%9C%D7%90-%D7%A9%D7%9D-19.jpg',maps:'https://maps.google.com/?q=Hansen+House+Jerusalem',waze:'https://waze.com/ul?q=Hansen+House+Jerusalem&navigate=yes'},
-    {name:'Aghion House',addr:'Corner Balfour & Smolenskin, Talbiyeh',time:'Stop 4',desc:'Built 1938 by Richard Kaufmann for Eduard Aghion — founder of the Egyptian Cotton Exchange. Official PM residence from 1973. Rabin, Begin, Shamir and Peres all lived here.',img:'https://www.orencohengroup.com/wp-content/uploads/2026/08/%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%9C%D7%9C%D7%90-%D7%A9%D7%9D-22.jpg',maps:'https://maps.google.com/?q=Balfour+Jerusalem',waze:'https://waze.com/ul?q=Balfour+Jerusalem&navigate=yes'},
-    {name:'The Windmill',addr:'8 Ramban St., Rehavia',time:'Stop 5',desc:'A windmill from 1882 built by the Greek Orthodox Church. In 1935 architect Erich Mendelsohn purchased and redesigned it as a luxury home. Restored in 1987.',img:'https://www.orencohengroup.com/wp-content/uploads/2026/02/%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%9C%D7%9C%D7%90-%D7%A9%D7%9D-17.jpg',maps:'https://maps.google.com/?q=Ramban+8+Jerusalem',waze:'https://waze.com/ul?q=Ramban+8+Jerusalem&navigate=yes'},
-    {name:'Molcho House',addr:'20 Ramban St., Rehavia',time:'Stop 6',desc:'Built 1929. Home of the legendary Cafe Rehavia where S.Y. Agnon and Martin Buber sat. Today a luxury boutique hotel with Assaf Granit\'s restaurant.',img:'https://www.orencohengroup.com/wp-content/uploads/2026/01/%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%9C%D7%9C%D7%90-%D7%A9%D7%9D-8.jpg',maps:'https://maps.google.com/?q=Ramban+20+Jerusalem',waze:'https://waze.com/ul?q=Ramban+20+Jerusalem&navigate=yes'},
-    {name:'Eden Hotel',addr:'Hillel St., Jerusalem',time:'Stop 7',desc:'Opened 1938. Ben-Gurion lived here for a year and a half. Now being transformed into a luxury residential project by Yossi Avrahami — internal atrium, pool and views of the Old City.',img:'https://www.orencohengroup.com/wp-content/uploads/2026/07/%D7%A6%D7%99%D7%9C%D7%95%D7%9D-%D7%A4%D7%A8%D7%99%D7%A5-%D7%9B%D7%94%D7%9F.-3.jpg',maps:'https://maps.google.com/?q=Hillel+Street+Jerusalem',waze:'https://waze.com/ul?q=Hillel+Jerusalem&navigate=yes'},
-    {name:'Independence Park',addr:'Between King George, Hillel & Agron',time:'Stop 8 — Finale',desc:"Jerusalem's green lung. The Mamilla Pool dates to the Byzantine era and fed the Hezekiah Pool in the Old City. Inaugurated in 1958 on Israel's 10th Independence Day.",img:'https://www.orencohengroup.com/wp-content/uploads/2026/03/%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%9C%D7%9C%D7%90-%D7%A9%D7%9D.jpg',maps:'https://maps.google.com/?q=Independence+Park+Jerusalem',waze:'https://waze.com/ul?q=Independence+Park+Jerusalem&navigate=yes'},
+    {
+      name: 'Beit Vigalik',
+      addr: '20 Keren Kayemet St. corner Ussishkin, Rehavia',
+      time: 'Stop 1 — Meeting Point',
+      desc: "The building that made every intellectual in Rehavia drop their glasses in amazement. Designed by Hungarian architect Natan Brin for Yaakov Pesach and Hana Vigalik — a professional fundraiser who donated to the Diskin Orphanage. Built from rare red stone (Mizi Ahmar) in an eclectic style with neo-Oriental arches and classical balconies. The couple modestly settled in a second-floor apartment. Today it is a listed heritage preservation site.",
+      img: '/static/img/vigalik.jpg',
+      blog: 'https://www.orencohengroup.com/he/blog/beit-vigalik-rechavia/',
+      maps: 'https://maps.google.com/?q=Keren+Kayemet+20+Jerusalem',
+      waze: 'https://waze.com/ul?q=Keren+Kayemet+20+Jerusalem&navigate=yes'
+    },
+    {
+      name: 'Bezalel National Museum',
+      addr: '12 Shmuel HaNagid St. corner Schatz, Jerusalem',
+      time: 'Stop 2',
+      desc: "A museum founded next to the Bezalel School of Art — originally a museum of the flora and fauna of the Land of Israel, part of Boris Schatz's vision. The first exhibition was held on Passover 1912. In 1916 Jamal Pasha visited. In 1925 it opened regularly to the public. When the Israel Museum opened in 1965, the collection moved to Givat Ram and the building became the Artists' House. The street is named after Rabbi Shmuel HaNagid — great Hebrew poet and deputy king of Granada.",
+      img: '/static/img/bezalel.jpg',
+      blog: 'https://www.orencohengroup.com/he/blog/',
+      maps: 'https://maps.google.com/?q=Shmuel+HaNagid+12+Jerusalem',
+      waze: 'https://waze.com/ul?q=Shmuel+HaNagid+12+Jerusalem&navigate=yes'
+    },
+    {
+      name: 'Solel Boneh Building',
+      addr: 'King George St., Jerusalem',
+      time: 'Stop 3',
+      desc: 'One of the buildings that symbolized the rise, fall and renewal of Israeli centralism. In 1957 Solel Boneh built its Jerusalem HQ on the national axis of King George St. Architect Reuven Trostler designed a modernist building with an iconic fan-shaped concrete canopy. Sold in 1987, it stood abandoned for decades — during the 2011 social protests activists broke in and called it "Beit HaHazir". Demolished in 2016; today a luxury project rises: the InterContinental Jerusalem hotel and a residential tower.',
+      img: '',
+      blog: 'https://www.orencohengroup.com/he/blog/',
+      maps: 'https://maps.google.com/?q=King+George+Street+Jerusalem',
+      waze: 'https://waze.com/ul?q=King+George+Jerusalem&navigate=yes'
+    }
   ]
 };
 
@@ -176,15 +221,13 @@ function applyLang() {
 }
 
 function updateProgress() {
-  const t = T[lang];
-  const n = STOPS[lang].length;
+  const t = T[lang], n = STOPS[lang].length;
   document.getElementById('pfill').style.width = (done.size / n * 100) + '%';
   document.getElementById('ptxt').textContent = t.progress(done.size, n);
 }
 
 function render() {
-  const t = T[lang];
-  const stops = STOPS[lang];
+  const t = T[lang], stops = STOPS[lang];
   const container = document.getElementById('stops');
   container.innerHTML = '';
   stops.forEach((s, i) => {
@@ -192,27 +235,31 @@ function render() {
     const isActive = !isDone && (i === 0 || done.has(i - 1));
     const card = document.createElement('div');
     card.className = 'card' + (isActive ? ' active' : '') + (isDone ? ' done' : '');
+    const heroImg = s.img
+      ? `<img src="${s.img}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=no-img>🏛</div>'"/>`
+      : `<div class="no-img">🏛</div>`;
     card.innerHTML =
-      '<div class="chead" onclick="toggle(' + i + ')">' +
-        '<div class="num">' + (isDone ? '✓' : (i + 1)) + '</div>' +
-        '<div class="info">' +
-          '<div class="sname">' + s.name + '</div>' +
-          '<div class="saddr">' + s.addr + '</div>' +
-          '<div class="stime">' + s.time + '</div>' +
-        '</div>' +
-        '<div class="chev">▾</div>' +
-      '</div>' +
-      '<div class="cbody">' +
-        '<img class="simg" src="' + s.img + '" loading="lazy" onerror="this.style.display=\'none\'"/>' +
-        '<div class="scnt">' +
-          '<p class="sdesc">' + s.desc + '</p>' +
-          '<div class="acts">' +
-            '<a class="btn bn" href="' + s.maps + '" target="_blank">📍 ' + t.maps + '</a>' +
-            '<a class="btn bw" href="' + s.waze + '" target="_blank">🚗 Waze</a>' +
-            '<button class="btn ' + (isDone ? 'bu' : 'bd') + '" onclick="toggleDone(event,' + i + ')">' + (isDone ? t.undo : t.visited) + '</button>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
+      `<div class="card-hero" onclick="toggle(${i})">` +
+        heroImg +
+        `<div class="hero-overlay">` +
+          `<div class="hero-num">${isDone ? '✓' : (i + 1)}</div>` +
+          `<div class="hero-name">${s.name}</div>` +
+          `<div class="hero-addr">${s.addr}</div>` +
+          `<div class="hero-time">${s.time}</div>` +
+        `</div>` +
+        `<div class="chev-wrap"><div class="chev">▾</div></div>` +
+      `</div>` +
+      `<div class="cbody">` +
+        `<div class="scnt">` +
+          `<p class="sdesc">${s.desc}</p>` +
+          `<div class="acts">` +
+            `<a class="btn bn" href="${s.maps}" target="_blank">📍 ${t.lang === 'he' ? 'מפה' : 'Maps'}</a>` +
+            `<a class="btn bw" href="${s.waze}" target="_blank">🚗 Waze</a>` +
+            `<a class="btn bb" href="${s.blog}" target="_blank">📖 ${t.blog}</a>` +
+            `<button class="btn ${isDone ? 'bu' : 'bd'}" onclick="toggleDone(event,${i})">${isDone ? t.undo : t.visited}</button>` +
+          `</div>` +
+        `</div>` +
+      `</div>`;
     container.appendChild(card);
   });
   updateProgress();
@@ -220,6 +267,7 @@ function render() {
 
 function toggle(i) {
   const cards = document.querySelectorAll('.card');
+  if (!cards[i]) return;
   const isOpen = cards[i].classList.contains('open');
   cards.forEach(c => c.classList.remove('open'));
   if (!isOpen) cards[i].classList.add('open');
@@ -237,103 +285,6 @@ applyLang();
 render();
 const first = [...done].length;
 if (first < STOPS[lang].length) setTimeout(() => toggle(first), 300);
-</script>
-</body>
-</html>
-const STOPS={
-  he:[
-    {name:'בית ויגאליק',addr:'קרן הקיימת לישראל 20 פינת אוסישקין, רחביה',time:'תחנה 1 — נקודת מפגש',desc:'המבנה שגרם לכל הייקים המעונבים של רחביה להוריד את המשקפיים לקצה האף בתדהמה. תוכנן ע"י האדריכל ההונגרי נתן ברין עבור יעקב פסח וחנה ויגאליק — מתרים מקצועי שתרם לבית היתומים דיסקין. הבית נבנה מאבן אדמדמה ונדירה (מיזי אחמר) בסגנון אקלקטי עם קשתות נאו-מזרחיות ומרפסות קלאסיות. הזוג התמקם בצניעות בדירה שבקומה השנייה. כיום מוגדר כבניין לשימור ברשימת אתרי המורשת.',img:'PLACEHOLDER_1',blog:'https://www.orencohengroup.com/he/blog/beit-vigalik-rechavia/',maps:'https://maps.google.com/?q=Keren+Kayemet+20+Jerusalem',waze:'https://waze.com/ul?q=Keren+Kayemet+20+Jerusalem&navigate=yes'},
-    {name:'בית הנכות הלאומי בצלאל',addr:'רחוב שמואל הנגיד 12 פינת שץ, ירושלים',time:'תחנה 2',desc:'מוזיאון שהוקם ליד בית הספר לאומנות בצלאל — תחילתו כמוזיאון לתולדות החי והצומח בארץ ישראל, חלק מחזונו של בוריס שץ. התצוגה הראשונה נערכה בפסח 1912. ב-1916 ביקר ג'מאל פאשה מבכירי האימפריה העות'מאנית. ב-1925 נפתח לקהל הרחב. עם פתיחת מוזיאון ישראל ב-1965 עבר האוסף לגבעת רם והמבנה הפך לבית האומנים. הרחוב נקרא על שם רבי שמואל הנגיד — משורר עברי גדול ומשנה למלך גרנדה.',img:'https://www.orencohengroup.com/wp-content/uploads/2026/09/עיצוב-ללא-שם-25.jpg',blog:'https://www.orencohengroup.com/he/blog/',maps:'https://maps.google.com/?q=Shmuel+HaNagid+12+Jerusalem',waze:'https://waze.com/ul?q=Shmuel+HaNagid+12+Jerusalem&navigate=yes'},
-    {name:'בית סולל בונה',addr:'רחוב המלך ג׳ורג׳, ירושלים',time:'תחנה 3',desc:'אחד המבנים שסימלו יותר מכל את עלייתה, נפילתה והתחדשותה של הריכוזיות הישראלית. ב-1957 בנתה סולל בונה את מטה ירושלים שלה בלב הציר הלאומי. האדריכל ראובן טרוסטלר תכנן מבנה מודרניסטי עם גגון בטון בצורת מניפה. נמכר ב-1987 ועמד נטוש עשורים — בימי המחאה 2011 פרצו פעילים וקראו לו "בית החזיר". נהרס ב-2016; כיום עולה במקומו פרויקט יוקרה: מלון אינטרקונטיננטל ירושלים ומגדל מגורים.',img:'PLACEHOLDER_3',blog:'https://www.orencohengroup.com/he/blog/',maps:'https://maps.google.com/?q=King+George+Street+Jerusalem',waze:'https://waze.com/ul?q=King+George+Jerusalem&navigate=yes'},
-  ],
-  en:[
-    {name:'Beit Vigalik',addr:'20 Keren Kayemet St. corner Ussishkin, Rehavia',time:'Stop 1 — Meeting Point',desc:'The building that made every intellectual in Rehavia drop their glasses in amazement. Designed by Hungarian architect Natan Brin for Yaakov Pesach and Hana Vigalik — a professional fundraiser who donated to the Diskin Orphanage. Built from rare red stone (Mizi Ahmar) in an eclectic style with neo-Oriental arches and classical balconies. The couple modestly settled in a second-floor apartment. Today it is a listed heritage preservation site.',img:'PLACEHOLDER_1',blog:'https://www.orencohengroup.com/he/blog/beit-vigalik-rechavia/',maps:'https://maps.google.com/?q=Keren+Kayemet+20+Jerusalem',waze:'https://waze.com/ul?q=Keren+Kayemet+20+Jerusalem&navigate=yes'},
-    {name:'Bezalel National Museum',addr:'12 Shmuel HaNagid St. corner Schatz, Jerusalem',time:'Stop 2',desc:"A museum founded next to the Bezalel School of Art — originally a museum of the flora and fauna of the Land of Israel, part of Boris Schatz's vision. The first exhibition was held on Passover 1912. In 1916 Jamal Pasha visited. In 1925 it opened regularly to the public. When the Israel Museum opened in 1965, the collection moved to Givat Ram and the building became the Artists' House. The street is named after Rabbi Shmuel HaNagid — great Hebrew poet and deputy king of Granada.",img:'https://www.orencohengroup.com/wp-content/uploads/2026/09/עיצוב-ללא-שם-25.jpg',blog:'https://www.orencohengroup.com/he/blog/',maps:'https://maps.google.com/?q=Shmuel+HaNagid+12+Jerusalem',waze:'https://waze.com/ul?q=Shmuel+HaNagid+12+Jerusalem&navigate=yes'},
-    {name:'Solel Boneh Building',addr:'King George St., Jerusalem',time:'Stop 3',desc:'One of the buildings that symbolized the rise, fall and renewal of Israeli centralism. In 1957 Solel Boneh built its Jerusalem HQ on the national axis of King George St. Architect Reuven Trostler designed a modernist building with an iconic fan-shaped concrete canopy. Sold in 1987, it stood abandoned for decades — during the 2011 social protests activists broke in and called it "Beit HaHazir". Demolished in 2016; today a luxury project rises: the InterContinental Jerusalem hotel and a residential tower.',img:'PLACEHOLDER_3',blog:'https://www.orencohengroup.com/he/blog/',maps:'https://maps.google.com/?q=King+George+Street+Jerusalem',waze:'https://waze.com/ul?q=King+George+Jerusalem&navigate=yes'},
-  ]
-};
-
-let lang=localStorage.getItem('tour_lang')||'he';
-const done=new Set(JSON.parse(localStorage.getItem('tour_done')||'[]'));
-
-function toggleLang(){lang=lang==='he'?'en':'he';localStorage.setItem('tour_lang',lang);applyLang();render();}
-
-function applyLang(){
-  const t=T[lang];
-  document.documentElement.lang=t.lang;
-  document.documentElement.dir=t.dir;
-  document.getElementById('h-title').textContent=t.title;
-  document.getElementById('h-date').textContent=t.date;
-  document.getElementById('i-title').textContent=t.welcome;
-  document.getElementById('i-text').innerHTML=t.intro;
-  document.getElementById('r-p').textContent=t.route;
-  document.getElementById('r-btn').textContent=t.routeBtn;
-  document.getElementById('lang-btn').textContent=t.flag;
-  updateProgress();
-}
-
-function updateProgress(){
-  const t=T[lang],n=STOPS[lang].length;
-  document.getElementById('pfill').style.width=(done.size/n*100)+'%';
-  document.getElementById('ptxt').textContent=t.progress(done.size,n);
-}
-
-function render(){
-  const t=T[lang],stops=STOPS[lang],c=document.getElementById('stops');
-  c.innerHTML='';
-  stops.forEach((s,i)=>{
-    const isDone=done.has(i),isActive=!isDone&&(i===0||done.has(i-1));
-    const card=document.createElement('div');
-    card.className='card'+(isActive?' active':'')+(isDone?' done':'');
-    const hasImg=s.img&&!s.img.startsWith('PLACEHOLDER');
-    const heroContent=hasImg
-      ?`<img src="${s.img}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=no-img>🏛</div>'"/>`
-      :`<div class="no-img">🏛</div>`;
-    card.innerHTML=`
-      <div class="card-hero" onclick="toggle(${i})">
-        ${heroContent}
-        <div class="hero-overlay">
-          <div class="hero-num">${isDone?'✓':(i+1)}</div>
-          <div class="hero-name">${s.name}</div>
-          <div class="hero-addr">${s.addr}</div>
-          <div class="hero-time">${s.time}</div>
-        </div>
-        <div class="chev-wrap"><div class="chev">▾</div></div>
-      </div>
-      <div class="cbody">
-        <div class="scnt">
-          <p class="sdesc">${s.desc}</p>
-          <div class="acts">
-            <a class="btn bn" href="${s.maps}" target="_blank">📍 ${t.lang==='he'?'מפה':'Maps'}</a>
-            <a class="btn bw" href="${s.waze}" target="_blank">🚗 Waze</a>
-            <a class="btn bb" href="${s.blog}" target="_blank">📖 ${t.blog}</a>
-            <button class="btn ${isDone?'bu':'bd'}" onclick="toggleDone(event,${i})">${isDone?t.undo:t.visited}</button>
-          </div>
-        </div>
-      </div>`;
-    c.appendChild(card);
-  });
-  updateProgress();
-}
-
-function toggle(i){
-  const cards=document.querySelectorAll('.card');
-  const isOpen=cards[i].classList.contains('open');
-  cards.forEach(c=>c.classList.remove('open'));
-  if(!isOpen)cards[i].classList.add('open');
-}
-
-function toggleDone(e,i){
-  e.stopPropagation();
-  if(done.has(i))done.delete(i);else done.add(i);
-  localStorage.setItem('tour_done',JSON.stringify([...done]));
-  render();
-  if(done.has(i)&&i+1<STOPS[lang].length)setTimeout(()=>toggle(i+1),200);
-}
-
-applyLang();render();
-const first=[...done].length;
-if(first<STOPS[lang].length)setTimeout(()=>toggle(first),300);
 </script>
 </body>
 </html>
