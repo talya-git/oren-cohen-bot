@@ -511,7 +511,14 @@ async def _handle_message(phone: str, text: str, _db) -> None:
 
     if turn.handoff_to_human:
         # רלוונטי = כל handoff שאינו תגובה שלילית
-        negative_in_transcript = any(w in transcript_text.lower() for w in ["נשמח שתשמור", "we'd love to stay", "לא רלוונט", "לא מעוניין", "not relevant", "not interested", "no thanks"])
+        negative_in_transcript = any(w in transcript_text.lower() for w in [
+            "נשמח שתשמור", "we'd love to stay", "לא רלוונט", "לא מעוניין",
+            "not relevant", "not interested", "no thanks", "no thank you",
+            "not a good time", "health problem", "health issue", "not the right time",
+            "can't right now", "cannot right now", "not currently", "not at this time",
+            "לא עכשיו", "לא הזמן", "בעיות בריאות", "לא מתאים כרגע",
+            "unfortunately", "outside what i can", "feel free to reach out",
+        ])
         is_relevant = not negative_in_transcript
         if is_relevant:
             _db.mark_reengagement_handoff(f"+{phone}")
