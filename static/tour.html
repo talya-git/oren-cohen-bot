@@ -224,9 +224,9 @@ function render(){
   const t=T[lang],stops=STOPS[lang],container=document.getElementById('stops');
   container.innerHTML='';
   stops.forEach((s,i)=>{
-    const isDone=done.has(i),isActive=!isDone&&(i===0||done.has(i-1));
+    const isDone=done.has(i),isActive=true;
     const card=document.createElement('div');
-    card.className='card'+(isActive?' active':'')+(isDone?' done':'');
+    card.className='card active'+(isDone?' done':'');
     const heroImg=s.img
       ?`<img src="${s.img}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=no-img>🏛</div>'"/>`
       :`<div class="no-img">🏛</div>`;
