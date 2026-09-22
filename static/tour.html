@@ -13,6 +13,12 @@ html{font-size:16px;-webkit-text-size-adjust:100%;overflow-x:hidden;}
 html,body{width:100%;background:var(--dark);font-family:'Noto Sans Hebrew',sans-serif;color:var(--text);overflow-x:hidden;margin:0;padding:0;}
 *{box-sizing:border-box;}
 
+/* VIDEO BG */
+.video-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;overflow:hidden;pointer-events:none;}
+.video-bg video{width:100%;height:100%;object-fit:cover;opacity:0.12;filter:brightness(0.4) saturate(0.6);}
+.video-bg::after{content:'';position:absolute;inset:0;background:rgba(26,18,8,0.75);}
+body>*:not(.video-bg){position:relative;z-index:1;}
+
 /* ══════════════════════════════
    MOBILE BASE  (≤767px)
 ══════════════════════════════ */
@@ -108,6 +114,12 @@ html,body{width:100%;background:var(--dark);font-family:'Noto Sans Hebrew',sans-
 </head>
 <body>
 
+<div class="video-bg">
+  <video autoplay muted loop playsinline>
+    <source src="/static/img/bg.mp4" type="video/mp4"/>
+  </video>
+</div>
+
 <div class="hdr">
   <div class="logos" style="padding:10px 16px 6px;border-bottom:none;">
     <img src="/static/img/logo1.png" alt="logo 1"/>
@@ -118,7 +130,7 @@ html,body{width:100%;background:var(--dark);font-family:'Noto Sans Hebrew',sans-
     <button class="lang-btn" id="lang-btn" onclick="toggleLang()">🇮🇱</button>
     <div class="logo">Oren Cohen Group</div>
   </div>
-  <div class="htitle" id="h-title">שישי של פעם - סיור בירושלים</div>
+  <div class="htitle" id="h-title">שישי של פעם — סיור בירושלים</div>
   <div class="hdate" id="h-date">יום ראשון כ״ז תשרי | 27.09.2025 | 16:30</div>
 </div>
 
@@ -155,8 +167,8 @@ html,body{width:100%;background:var(--dark);font-family:'Noto Sans Hebrew',sans-
 
 <script>
 const T = {
-  he:{title:'שישי של פעם - סיור בירושלים',date:'יום ראשון כ״ז תשרי | 27.09.2025 | 16:30',welcome:'ברוכים הבאים',intro:'סיור ברחובות ירושלים ההיסטורית .<br>לחצו על כל תחנה לפרטים ולניווט.',route:'לצפייה במסלול המלא במפה',routeBtn:'🗺 פתח מסלול מלא',visited:'✓ ביקרתי',undo:'↩ בטל',blog:'לכתבה בבלוג',maps:'מפה',flag:'🇬🇧',dir:'rtl',lang:'he',progress:(d,t)=>d+' / '+t+' תחנות'},
-  en:{title:"Shishi Shel Pa'am — Jerusalem Tour",date:'Sunday 27 Tishrei | 27.09.2025 | 4:30 PM',welcome:'Welcome',intro:'A walk through historic Jerusalem — Rehavia.<br>Tap each stop for details and navigation.',route:'View full route on map',routeBtn:'🗺 Open Full Route',visited:'✓ Visited',undo:'↩ Undo',blog:'Read Blog',maps:'Maps',flag:'🇮🇱',dir:'ltr',lang:'en',progress:(d,t)=>d+' / '+t+' stops'}
+  he:{title:'שישי של פעם — סיור בירושלים',date:'יום ראשון כ״ז תשרי | 27.09.2025 | 16:30',welcome:'ברוכים הבאים',intro:'סיור ברחובות ירושלים ההיסטורית .<br>לחצו על כל תחנה לפרטים ולניווט.',route:'לצפייה במסלול המלא במפה',routeBtn:'🗺 פתח מסלול מלא',visited:'✓ ביקרתי',undo:'↩ בטל',blog:'לכתבה בבלוג',maps:'מפה',flag:'🇬🇧',dir:'rtl',lang:'he',progress:(d,t)=>d+' / '+t+' תחנות'},
+  en:{title:"Shishi Shel Pa'am - Jerusalem Tour",date:'Sunday 27 Tishrei | 27.09.2025 | 4:30 PM',welcome:'Welcome',intro:'A walk through the historic streets of Jerusalem.<br>Tap each stop for details and navigation.',route:'View full route on map',routeBtn:'🗺 Open Full Route',visited:'✓ Visited',undo:'↩ Undo',blog:'Read Blog',maps:'Maps',flag:'🇮🇱',dir:'ltr',lang:'en',progress:(d,t)=>d+' / '+t+' stops'}
 };
 
 const STOPS = {
