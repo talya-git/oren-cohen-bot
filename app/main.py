@@ -634,6 +634,12 @@ def agent_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "agent.html")
 
 
+@app.get("/website-chat")
+def website_chat_demo() -> FileResponse:
+    """עמוד demo להטמעת ה-widget באתר."""
+    return FileResponse(STATIC_DIR / "website-chat-demo.html")
+
+
 @app.get("/greeting")
 def greeting() -> dict:
     return {"reply": GREETING}
@@ -960,9 +966,51 @@ def tour_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "tour.html")
 
 
+@app.get("/jerusalem-map")
+def jerusalem_map_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "jerusalem-map" / "index.html")
+
+
+@app.get("/api/overpass")
+async def overpass_proxy():
+    import httpx
+    query = """
+[out:json][timeout:90];
+(
+  relation["admin_level"="10"]["boundary"="administrative"]
+    (31.70,35.15,31.87,35.30);
+  relation["admin_level"="8"]["boundary"="administrative"]
+    (31.70,35.15,31.87,35.30);
+);
+out geom;
+"""
+    servers = [
+        "https://overpass-api.de/api/interpreter",
+        "https://overpass.kumi.systems/api/interpreter",
+        "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+    ]
+    async with httpx.AsyncClient(verify=False, timeout=100) as client:
+        for server in servers:
+            try:
+                r = await client.post(server, data={"data": query},
+                                      headers={"User-Agent": "jerusalem-map/1.0"})
+                if r.status_code == 200:
+                    from fastapi.responses import Response
+                    return Response(content=r.content, media_type="application/json")
+            except Exception as e:
+                print(f"[OVERPASS] {server} failed: {e}")
+    from fastapi.responses import JSONResponse
+    return JSONResponse({"error": "all servers failed"}, status_code=503)
+
+
 @app.get("/shishi-en")
 def shishi_en_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "shishi-en.html")
+
+
+@app.get("/clients")
+def clients_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "overseas-buyers.html")
 
 
 @app.post("/api/shishi/register")

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>אורן כהן גרופ — Widget Demo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Noto Sans Hebrew', sans-serif;
+      background: #f5f5f0;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+    header {
+      background: #1a3c2e;
+      color: #fff;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    header img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+    header h1 { font-size: 22px; font-weight: 600; }
+    header p { font-size: 13px; opacity: .7; }
+    .hero {
+      background: linear-gradient(135deg, #1a3c2e 0%, #2d6a4f 100%);
+      color: #fff;
+      padding: 60px 40px;
+      text-align: center;
+    }
+    .hero h2 { font-size: 32px; font-weight: 600; margin-bottom: 12px; }
+    .hero p { font-size: 16px; opacity: .85; max-width: 500px; margin: 0 auto; line-height: 1.6; }
+    .content { max-width: 800px; margin: 40px auto; padding: 0 24px; }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+    }
+    .card h3 { font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1a3c2e; }
+    .code-block {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-x: auto;
+      position: relative;
+    }
+    .code-block .comment { color: #6a9955; }
+    .code-block .tag { color: #569cd6; }
+    .code-block .attr { color: #9cdcfe; }
+    .code-block .val { color: #ce9178; }
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: #3a3a3a;
+      color: #ccc;
+      border: none;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .copy-btn:hover { background: #555; }
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    .feature {
+      background: #f8faf8;
+      border: 1px solid #e0ebe5;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+    }
+    .feature .icon { font-size: 28px; margin-bottom: 8px; }
+    .feature h4 { font-size: 14px; font-weight: 600; color: #1a3c2e; margin-bottom: 4px; }
+    .feature p { font-size: 12px; color: #666; line-height: 1.5; }
+    .badge {
+      display: inline-block;
+      background: #e8f5e9;
+      color: #2d6a4f;
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .arrow-hint {
+      position: fixed;
+      bottom: 100px;
+      left: 100px;
+      background: #1a3c2e;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      pointer-events: none;
+      animation: pulse 2s infinite;
+    }
+    .arrow-hint::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 20px;
+      border: 8px solid transparent;
+      border-top-color: #1a3c2e;
+      border-bottom: none;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.7} }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="/static/img/logo1.png" onerror="this.style.display='none'" alt="logo">
+    <div>
+      <h1>אורן כהן גרופ</h1>
+      <p>סוכן וירטואלי לאתר</p>
+    </div>
+  </header>
+
+  <div class="hero">
+    <h2>הסוכן הוירטואלי שלך מוכן 🎉</h2>
+    <p>לחץ על הכפתור הירוק בפינה השמאלית התחתונה כדי לדבר עם דניאל — הסוכן הוירטואלי של אורן כהן גרופ.</p>
+  </div>
+
+  <div class="content">
+
+    <div class="card">
+      <div class="badge">✅ מוכן להטמעה</div>
+      <h3>איך להטמיע באתר שלך</h3>
+      <p style="font-size:14px; color:#555; margin-bottom:16px; line-height:1.6;">
+        הוסף שורה אחת לפני סגירת תג <code>&lt;/body&gt;</code> בכל עמוד באתר:
+      </p>
+      <div class="code-block" id="embed-code">
+        <button class="copy-btn" onclick="copyCode()">העתק</button>
+        <span class="comment">&lt;!-- אורן כהן גרופ — סוכן וירטואלי --&gt;</span><br>
+        <span class="tag">&lt;script</span>
+        <span class="attr"> src=</span><span class="val">"https://YOUR_DOMAIN/static/website-widget.js"</span>
+        <span class="attr"> data-base=</span><span class="val">"https://YOUR_DOMAIN"</span>
+        <span class="tag"> defer&gt;&lt;/script&gt;</span>
+      </div>
+      <p style="font-size:12px; color:#888; margin-top:10px;">החלף <code>YOUR_DOMAIN</code> בכתובת השרת שלך (למשל: <code>oren-cohen-bot.onrender.com</code>)</p>
+    </div>
+
+    <div class="card">
+      <h3>יכולות הסוכן</h3>
+      <div class="features">
+        <div class="feature">
+          <div class="icon">💬</div>
+          <h4>שיחה טבעית</h4>
+          <p>עונה בעברית ואנגלית, מותאם לנדל"ן יוקרה</p>
+        </div>
+        <div class="feature">
+          <div class="icon">🎯</div>
+          <h4>סיווג לידים</h4>
+          <p>מזהה High / Medium / Low אוטומטית</p>
+        </div>
+        <div class="feature">
+          <div class="icon">📋</div>
+          <h4>חילוץ פרמטרים</h4>
+          <p>תקציב, אזור, חדרים, ציר זמן</p>
+        </div>
+        <div class="feature">
+          <div class="icon">🔗</div>
+          <h4>העברה לסוכן</h4>
+          <p>כפתור WhatsApp כשהליד מוכן</p>
+        </div>
+        <div class="feature">
+          <div class="icon">📱</div>
+          <h4>מותאם מובייל</h4>
+          <p>עובד על כל מסך ומכשיר</p>
+        </div>
+        <div class="feature">
+          <div class="icon">🏠</div>
+          <h4>מאגר נכסים</h4>
+          <p>מכיר את הפרויקטים הפעילים</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>התאמה אישית</h3>
+      <p style="font-size:14px; color:#555; margin-bottom:16px; line-height:1.6;">
+        ניתן להגדיר פרמטרים נוספים לפני טעינת ה-script:
+      </p>
+      <div class="code-block">
+        <span class="tag">&lt;script&gt;</span><br>
+        &nbsp;&nbsp;<span class="comment">// כתובת השרת (חובה אם הסוכן על דומיין שונה)</span><br>
+        &nbsp;&nbsp;<span class="attr">window.OCG_BASE_URL</span> = <span class="val">"https://YOUR_DOMAIN"</span>;<br>
+        <span class="tag">&lt;/script&gt;</span><br>
+        <span class="tag">&lt;script</span> <span class="attr">src=</span><span class="val">"https://YOUR_DOMAIN/static/website-widget.js"</span> <span class="tag">defer&gt;&lt;/script&gt;</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="arrow-hint">👈 לחץ כאן לדבר עם דניאל</div>
+
+  <!-- ה-Widget עצמו -->
+  <script>window.OCG_BASE_URL = "";</script>
+  <script src="/static/website-widget.js" defer></script>
+
+  <script>
+    function copyCode() {
+      const domain = window.location.origin;
+      const code = `<!-- אורן כהן גרופ — סוכן וירטואלי -->\n<script src="${domain}/static/website-widget.js" defer><\/script>`;
+      navigator.clipboard.writeText(code).then(() => {
+        const btn = document.querySelector('.copy-btn');
+        btn.textContent = '✓ הועתק!';
+        setTimeout(() => btn.textContent = 'העתק', 2000);
+      });
+    }
+  </script>
+</body>
+</html>
