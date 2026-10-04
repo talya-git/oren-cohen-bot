@@ -4,8 +4,8 @@
  */
 (function () {
   const BASE_URL = (window.OCG_BASE_URL || "").replace(/\/$/, "");
-  const GREETING = "היי! אני דניאל מאורן כהן גרופ 👋\nאשמח לעזור לך למצוא את הנכס המושלם בירושלים.\nמה אתה מחפש?";
-  const LOGO = BASE_URL + "/static/img/logo1.png";
+  const GREETING = "היי, איך אוכל לעזור? 😊";
+  const LOGO = "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg";
 
   // ── Styles ──────────────────────────────────────────────────────────────────
   const css = `
@@ -18,7 +18,7 @@
       transition: transform .2s;
     }
     #ocg-widget-btn:hover { transform: scale(1.08); }
-    #ocg-widget-btn img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
+    #ocg-widget-btn img { width: 38px; height: 38px; object-fit: contain; }
     #ocg-widget-btn .ocg-badge {
       position: absolute; top: 0; right: 0;
       width: 14px; height: 14px; border-radius: 50%;
