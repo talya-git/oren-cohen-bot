@@ -186,7 +186,7 @@
     input.style.height = "auto";
     showTyping();
     try {
-      const res = await fetch(BASE_URL + "/agent-chat", {
+      const res = await fetch(BASE_URL + "/website-agent-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ session_id: sessionId, message: text }),

@@ -634,6 +634,63 @@ def agent_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "agent.html")
 
 
+# === Website Widget — New Leads ===
+_website_sessions: dict[str, Conversation] = {}
+
+_WEBSITE_PROMPT_HE = (Path(__file__).resolve().parent / "prompts" / "prompt_website_he.md").read_text(encoding="utf-8")
+_WEBSITE_PROMPT_EN = (Path(__file__).resolve().parent / "prompts" / "prompt_website_en.md").read_text(encoding="utf-8")
+
+
+@app.post("/website-agent-chat")
+def website_agent_chat(req: AgentChatRequest) -> dict:
+    """Widget לאתר — לידים חדשים."""
+    if req.session_id and req.session_id in _website_sessions:
+        sid = req.session_id
+    else:
+        sid = str(uuid4())
+        _website_sessions[sid] = Conversation()
+
+    convo = _website_sessions[sid]
+
+    # החלפ את ה-system prompt לפרומפט של ה-widget
+    if not convo._system_built:
+        lang = "en" if Conversation._is_english(req.message) else "he"
+        prompt = _WEBSITE_PROMPT_EN if lang == "en" else _WEBSITE_PROMPT_HE
+        prompt += (
+            "\n\n--- Output format ---\n"
+            "Return valid JSON only: {reply, stage, extracted, handoff_to_human, notes}\n"
+            "extracted fields: budget_ils, timeline, financing, intent, area, city, neighborhood, property_type, rooms, engagement, contact_name, phone.\n"
+            "Unknown fields -> null. No text outside the JSON.\n"
+        )
+        convo.messages.insert(0, {"role": "system", "content": prompt})
+        convo._system_built = True
+        convo._language = lang
+
+    turn, score = convo.send(req.message)
+
+    # שמירת ליד ל-DB כשיש handoff
+    if turn.handoff_to_human and convo.profile.phone:
+        try:
+            from . import database as _db
+            _db.save_conversation(
+                phone=convo.profile.phone,
+                client_name=convo.profile.contact_name or "",
+                transcript="\n".join([f"{m['role']}: {m['content']}" for m in convo.messages[1:]]),
+                source="website",
+            )
+        except Exception:
+            pass
+
+    return {
+        "session_id": sid,
+        "reply": turn.reply,
+        "stage": turn.stage,
+        "level": score.level,
+        "score": score.score,
+        "handoff_to_human": turn.handoff_to_human,
+    }
+
+
 @app.get("/website-chat")
 def website_chat_demo() -> FileResponse:
     """עמוד demo להטמעת ה-widget באתר."""
