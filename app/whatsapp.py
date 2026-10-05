@@ -351,7 +351,8 @@ async def _handle_message(phone: str, text: str, _db) -> None:
         # בדוק אם זו תשובה שלילית אחרי סיום השיחה
         intent_after = _classify_response(text)
         if intent_after == "not_relevant":
-            lang_check = _detect_language(f"+{phone}", None)
+            eng_chars = sum(1 for c in text if 'a' <= c.lower() <= 'z')
+            lang_check = "en" if eng_chars > len(text.strip()) * 0.3 else _detect_language(f"+{phone}", None)
             if lang_check == "he":
                 reply_msg = "נשמח להישאר אצלכם בזיכרון 😊\nאם בעתיד תתעניין בנכס בירושלים , אנחנו תמיד כאן: https://www.orencohengroup.com/he/"
             else:
@@ -402,7 +403,9 @@ async def _handle_message(phone: str, text: str, _db) -> None:
             if "הסר" in msg_lower or "remove" in msg_lower or "unsubscribe" in msg_lower or "stop" in msg_lower:
                 reply_msg = "אוקי, סליחה על ההטרדה! נשמח לעזור לך תמיד אם תצטרך 😊"
             else:
-                lang_check = _detect_language(f"+{phone}", None)
+                eng_chars = sum(1 for c in text if 'a' <= c.lower() <= 'z')
+                is_eng = eng_chars > len(text.strip()) * 0.3
+                lang_check = "en" if is_eng else _detect_language(f"+{phone}", None)
                 if lang_check == "he":
                     reply_msg = "נשמח להישאר אצלכם בזיכרון 😊\nאם בעתיד תתעניין בנכס בירושלים , אנחנו תמיד כאן: https://www.orencohengroup.com/he/"
                 else:
