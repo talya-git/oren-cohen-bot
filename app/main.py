@@ -697,6 +697,92 @@ def website_chat_demo() -> FileResponse:
     return FileResponse(STATIC_DIR / "website-chat-demo.html")
 
 
+@app.get("/export-leads")
+def export_leads():
+    """ייצוא כל הלידים ל-Excel — הורדה ישירה."""
+    import io
+    try:
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill, Alignment
+    except ImportError:
+        return {"error": "openpyxl not installed"}
+
+    conn = db.get_db()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT rs.phone, rs.client_name, rs.agent_email, rs.replied, rs.handoff,
+               rs.sent_at, rs.read_at, rs.transcript, rb.agent_label
+        FROM reengagement_sent rs
+        LEFT JOIN reengagement_batches rb ON rs.batch_id = rb.id
+        WHERE rs.phone NOT LIKE 'email:%'
+        ORDER BY rs.sent_at DESC
+    """)
+    rows = db._fetchall(cur)
+    conn.close()
+
+    EMAIL_TO_NAME = {
+        'yaniv@orencohengroup.com': 'יניב', 'moshe@orencohengroup.com': 'משה',
+        'miri@orencohengroup.com': 'מירי', 'michael@orencohengroup.com': 'מיכאל',
+        'rivka@orencohengroup.com': 'רבקה', 'elchanan@orencohengroup.com': 'אלחנן',
+        'oren@orencohengroup.com': 'אורן', 'aryeh@orencohengroup.com': 'אריה',
+        'office@orencohengroup.com': 'בועז', 'aaron@orencohengroup.com': 'אהרון',
+        'lisa@orencohengroup.com': 'ליסה', 'dovr@orencohengroup.com': 'דב',
+        'naomi@orencohengroup.com': 'נעמי',
+    }
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "לידים"
+    ws.sheet_view.rightToLeft = True
+
+    HEADERS = ["טלפון", "שם", "סוכן", "נשלח", "נקרא", "ענה", "הועבר לסוכן", "תמליל"]
+    WIDTHS  = [18, 16, 12, 20, 20, 8, 16, 60]
+    hfill = PatternFill("solid", fgColor="1a3c2e")
+    hfont = Font(bold=True, color="FFFFFF", size=11)
+    for col, (h, w) in enumerate(zip(HEADERS, WIDTHS), 1):
+        cell = ws.cell(row=1, column=col, value=h)
+        cell.font = hfont
+        cell.fill = hfill
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.column_dimensions[cell.column_letter].width = w
+    ws.row_dimensions[1].height = 22
+
+    green  = PatternFill("solid", fgColor="d9fdd3")
+    yellow = PatternFill("solid", fgColor="fff9c4")
+    red    = PatternFill("solid", fgColor="fde8e8")
+
+    for i, row in enumerate(rows, 2):
+        agent = row.get("agent_label") or EMAIL_TO_NAME.get((row.get("agent_email") or "").lower(), row.get("agent_email") or "")
+        replied = bool(row.get("replied"))
+        handoff = bool(row.get("handoff"))
+        transcript = (row.get("transcript") or "").replace("\n", " | ")[:500]
+        fill = green if handoff else (yellow if replied else red)
+        for col, val in enumerate([
+            row.get("phone") or "", row.get("client_name") or "", agent,
+            str(row.get("sent_at") or ""), str(row.get("read_at") or ""),
+            "כן" if replied else "לא", "כן" if handoff else "לא", transcript
+        ], 1):
+            cell = ws.cell(row=i, column=col, value=val)
+            cell.fill = fill
+            cell.alignment = Alignment(vertical="center", wrap_text=(col == 8))
+
+    ws.freeze_panes = "A2"
+    ws.auto_filter.ref = "A1:H1"
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+
+    from fastapi.responses import StreamingResponse
+    from datetime import datetime as _dt
+    fname = f"leads_{_dt.now().strftime('%Y%m%d_%H%M')}.xlsx"
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={fname}"}
+    )
+
+
 @app.get("/greeting")
 def greeting() -> dict:
     return {"reply": GREETING}
