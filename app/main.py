@@ -1104,6 +1104,33 @@ def shishi_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "shishi.html")
 
 
+@app.post("/api/florida/import-leads")
+async def florida_import_leads(request: Request):
+    data = await request.json()
+    if data.get("secret") != "florida2025import":
+        return {"error": "unauthorized"}
+    leads = data.get("leads", [])
+    imported = db.import_florida_leads(leads)
+    return {"imported": imported}
+
+
+@app.get("/api/florida/leads")
+def florida_leads_list(search: str = "", sent: str = "", location: str = ""):
+    return db.get_florida_leads(search=search, sent=sent, location=location)
+
+
+@app.post("/api/florida/leads/{lead_id}/mark-sent")
+def florida_mark_sent(lead_id: int):
+    db.mark_florida_lead_sent(lead_id)
+    return {"status": "ok"}
+
+
+@app.post("/api/florida/leads/{lead_id}/unmark-sent")
+def florida_unmark_sent(lead_id: int):
+    db.unmark_florida_lead_sent(lead_id)
+    return {"status": "ok"}
+
+
 @app.get("/florida-admin")
 def florida_admin_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "florida-admin.html")

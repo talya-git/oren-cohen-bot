@@ -878,3 +878,98 @@ def update_florida_registration(reg_id: int, data: dict) -> None:
     except Exception:
         pass
     conn.close()
+
+
+def import_florida_leads(leads: list) -> int:
+    conn = get_db()
+    cur = conn.cursor()
+    if DATABASE_URL:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS florida_leads (
+                id SERIAL PRIMARY KEY,
+                name TEXT, phone1 TEXT, phone2 TEXT, email TEXT,
+                project TEXT, agent TEXT, created_date TEXT,
+                area_code TEXT, florida_location TEXT,
+                sent BOOLEAN DEFAULT FALSE, sent_at TIMESTAMPTZ,
+                registered BOOLEAN DEFAULT FALSE
+            )
+        """)
+    else:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS florida_leads (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT, phone1 TEXT, phone2 TEXT, email TEXT,
+                project TEXT, agent TEXT, created_date TEXT,
+                area_code TEXT, florida_location TEXT,
+                sent INTEGER DEFAULT 0, sent_at TEXT,
+                registered INTEGER DEFAULT 0
+            )
+        """)
+    conn.commit()
+    imported = 0
+    for lead in leads:
+        try:
+            cur.execute(
+                f"INSERT INTO florida_leads (name,phone1,phone2,email,project,agent,created_date,area_code,florida_location) VALUES ({PH},{PH},{PH},{PH},{PH},{PH},{PH},{PH},{PH})",
+                (lead.get('name'), lead.get('phone1'), lead.get('phone2') or None,
+                 lead.get('email') or None, lead.get('project') or None,
+                 lead.get('agent') or None, lead.get('created_date') or None,
+                 lead.get('area_code') or None, lead.get('florida_location') or None)
+            )
+            imported += 1
+        except Exception:
+            pass
+    conn.commit()
+    conn.close()
+    return imported
+
+
+def get_florida_leads(search: str = "", sent: str = "", location: str = "") -> list:
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        q = "SELECT * FROM florida_leads WHERE 1=1"
+        params = []
+        if search:
+            q += f" AND (name ILIKE {PH} OR phone1 ILIKE {PH} OR email ILIKE {PH})"
+            s = f"%{search}%"
+            params += [s, s, s]
+        if sent == 'yes':
+            q += " AND sent=TRUE" if DATABASE_URL else " AND sent=1"
+        elif sent == 'no':
+            q += " AND (sent=FALSE OR sent IS NULL)" if DATABASE_URL else " AND (sent=0 OR sent IS NULL)"
+        if location:
+            q += f" AND florida_location ILIKE {PH}"
+            params.append(f"%{location}%")
+        q += " ORDER BY id"
+        cur.execute(q, params)
+        rows = _fetchall(cur)
+    except Exception:
+        rows = []
+    conn.close()
+    return rows
+
+
+def mark_florida_lead_sent(lead_id: int) -> None:
+    conn = get_db()
+    cur = conn.cursor()
+    now = datetime.now(timezone.utc).isoformat()
+    try:
+        cur.execute(f"UPDATE florida_leads SET sent={PH}, sent_at={PH} WHERE id={PH}",
+                    (True if DATABASE_URL else 1, now, lead_id))
+        conn.commit()
+    except Exception:
+        pass
+    conn.close()
+
+
+def unmark_florida_lead_sent(lead_id: int) -> None:
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute(f"UPDATE florida_leads SET sent={PH}, sent_at=NULL WHERE id={PH}",
+                    (False if DATABASE_URL else 0, lead_id))
+        conn.commit()
+    except Exception:
+        pass
+    conn.close()

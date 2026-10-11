@@ -1,383 +1,261 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Florida Meeting — Oren Cohen Group</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;600;700&display=swap" rel="stylesheet" />
+  <title>Florida 2025 — Oren Cohen Group</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Noto Sans Hebrew', sans-serif;
-      background: linear-gradient(135deg, #0f1923 0%, #1a2c1e 100%);
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(160deg, #0a1628 0%, #0f2318 60%, #0a1628 100%);
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px 16px;
     }
     .card {
-      background: #f5f0e8;
-      border: 2px solid #c9a84c;
-      border-radius: 8px;
-      width: 100%;
-      max-width: 480px;
+      background: #faf8f3;
+      border: 1px solid #c9a84c;
+      border-radius: 12px;
+      width: 100%; max-width: 500px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
       overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
     }
     .card-header {
-      background: linear-gradient(135deg, #1a2c1e, #0f1923);
-      padding: 28px 24px 20px;
+      background: linear-gradient(135deg, #0f2318, #0a1628);
+      padding: 32px 28px 24px;
       text-align: center;
+      position: relative;
     }
-    .card-header img { height: 44px; margin-bottom: 14px; }
+    .card-header::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #c9a84c 30%, #e8c96a 50%, #c9a84c 70%, transparent);
+    }
+    .card-header img { height: 40px; margin-bottom: 16px; opacity: .95; }
     .card-header h1 {
-      color: #c9a84c;
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 4px;
-      direction: ltr;
+      font-family: 'Cormorant Garamond', serif;
+      color: #c9a84c; font-size: 28px; font-weight: 600;
+      letter-spacing: 1px; margin-bottom: 6px;
     }
-    .card-header .sub {
-      color: #a0b0a0;
-      font-size: 13px;
-      direction: ltr;
-    }
-    .gold-line { height: 2px; background: linear-gradient(90deg, transparent, #c9a84c, transparent); }
-    .card-body { padding: 24px; }
+    .card-header .sub { color: #8a9e8a; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; }
 
-    .lang-toggle {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-      background: #e8e0d0;
-      border-radius: 6px;
-      padding: 4px;
-    }
-    .lang-btn {
-      flex: 1;
-      padding: 7px;
-      border: none;
-      border-radius: 4px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      background: transparent;
-      color: #6a5a48;
-      transition: all .2s;
-    }
-    .lang-btn.active {
-      background: #c9a84c;
-      color: #fff;
-    }
+    .card-body { padding: 28px; }
 
-    .section-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: #4a3a28;
-      margin: 16px 0 8px;
-      padding-bottom: 4px;
-      border-bottom: 1px solid #e0d5c0;
+    .section-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: #c9a84c;
+      margin: 22px 0 10px;
     }
-    label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: #4a3a28;
-      margin: 10px 0 3px;
+    .field-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field-group.full { grid-template-columns: 1fr; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label { font-size: 11px; font-weight: 600; color: #5a4a38; letter-spacing: 0.5px; }
+    .field input, .field textarea {
+      padding: 10px 13px;
+      border: 1px solid #ddd; border-radius: 6px;
+      background: #fff; font-size: 13px; font-family: 'Inter', sans-serif;
+      color: #1a1a1a; outline: none;
+      transition: border-color .2s, box-shadow .2s;
     }
-    input, select, textarea {
-      width: 100%;
-      padding: 9px 11px;
-      border: 1px solid #c9a84c;
-      background: white;
-      font-size: 13px;
-      font-family: 'Noto Sans Hebrew', sans-serif;
-      color: #2a1f0e;
-      outline: none;
-      border-radius: 3px;
-      transition: border-color .2s;
+    .field input:focus, .field textarea:focus {
+      border-color: #c9a84c;
+      box-shadow: 0 0 0 3px rgba(201,168,76,.12);
     }
-    input:focus, select:focus, textarea:focus { border-color: #a07830; }
+    .req { color: #c9a84c; }
 
-    .meeting-options { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
-    .meeting-opt {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 10px 12px;
-      border: 1.5px solid #ddd;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all .2s;
-      background: white;
+    /* Meeting type cards */
+    .meeting-cards { display: flex; flex-direction: column; gap: 10px; }
+    .meeting-card {
+      display: flex; align-items: center; gap: 0;
+      border: 1.5px solid #e0d8c8; border-radius: 10px;
+      cursor: pointer; overflow: hidden;
+      transition: border-color .2s, box-shadow .2s;
+      background: #fff;
     }
-    .meeting-opt:hover { border-color: #c9a84c; background: #fdf8f0; }
-    .meeting-opt.selected { border-color: #c9a84c; background: #fdf8f0; }
-    .meeting-opt input[type=radio] { margin-top: 2px; accent-color: #c9a84c; flex-shrink: 0; }
-    .meeting-opt .opt-icon { font-size: 20px; flex-shrink: 0; }
-    .meeting-opt .opt-text { flex: 1; }
-    .meeting-opt .opt-title { font-size: 13px; font-weight: 700; color: #2a1f0e; }
-    .meeting-opt .opt-desc { font-size: 11px; color: #6a5a48; margin-top: 2px; line-height: 1.4; }
+    .meeting-card:hover { border-color: #c9a84c; box-shadow: 0 2px 12px rgba(201,168,76,.15); }
+    .meeting-card.selected { border-color: #c9a84c; box-shadow: 0 2px 16px rgba(201,168,76,.2); }
+    .meeting-card input[type=radio] { display: none; }
+    .mc-color {
+      width: 6px; align-self: stretch; flex-shrink: 0;
+      background: #e0d8c8; transition: background .2s;
+    }
+    .meeting-card.selected .mc-color { background: #c9a84c; }
+    .mc-body { padding: 14px 16px; flex: 1; }
+    .mc-title { font-size: 14px; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; }
+    .mc-desc { font-size: 11px; color: #7a6a58; line-height: 1.5; }
+    .mc-tag {
+      font-size: 10px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; padding: 3px 10px;
+      border-radius: 20px; margin-right: 16px; flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .tag-personal  { background: #dcfce7; color: #166534; }
+    .tag-community { background: #fef9c3; color: #854d0e; }
+    .tag-webinar   { background: #e0f2fe; color: #0369a1; }
 
-    .interest-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+    /* Interest checkboxes */
+    .interest-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .interest-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 10px;
-      border: 1.5px solid #ddd;
-      border-radius: 6px;
-      cursor: pointer;
-      background: white;
-      transition: all .2s;
-      font-size: 12px;
-      font-weight: 600;
-      color: #2a1f0e;
+      display: flex; align-items: center; gap: 9px;
+      padding: 9px 12px; border: 1.5px solid #e0d8c8; border-radius: 8px;
+      cursor: pointer; background: #fff; transition: all .2s;
+      font-size: 12px; font-weight: 600; color: #2a1f0e;
     }
     .interest-item:hover { border-color: #c9a84c; background: #fdf8f0; }
-    .interest-item input[type=checkbox] { accent-color: #c9a84c; }
+    .interest-item input { accent-color: #c9a84c; }
 
     .btn-submit {
-      width: 100%;
-      padding: 13px;
-      background: #c9a84c;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 15px;
-      font-weight: 700;
-      font-family: 'Noto Sans Hebrew', sans-serif;
-      cursor: pointer;
-      margin-top: 20px;
-      transition: background .2s;
-      letter-spacing: 0.5px;
+      width: 100%; padding: 14px;
+      background: linear-gradient(135deg, #c9a84c, #b8943a);
+      color: #fff; border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 700; font-family: 'Inter', sans-serif;
+      letter-spacing: 1px; text-transform: uppercase;
+      cursor: pointer; margin-top: 24px;
+      transition: opacity .2s, transform .1s;
     }
-    .btn-submit:hover { background: #b8943a; }
+    .btn-submit:hover { opacity: .92; transform: translateY(-1px); }
+    .btn-submit:active { transform: translateY(0); }
+
+    .footer-note { text-align: center; font-size: 11px; color: #9a8a78; margin-top: 14px; }
 
     .success-screen {
-      display: none;
-      text-align: center;
-      padding: 40px 24px;
+      display: none; text-align: center; padding: 48px 28px;
     }
-    .success-screen .check { font-size: 52px; margin-bottom: 12px; }
-    .success-screen h3 { font-size: 20px; color: #c9a84c; margin-bottom: 8px; }
-    .success-screen p { font-size: 13px; color: #6a5a48; line-height: 1.7; }
-
-    .required { color: #c9a84c; }
-    .footer-note {
-      text-align: center;
-      font-size: 11px;
-      color: #9a8a78;
-      margin-top: 16px;
-      direction: ltr;
+    .success-screen .check { font-size: 56px; margin-bottom: 16px; }
+    .success-screen h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px; color: #c9a84c; margin-bottom: 10px;
     }
+    .success-screen p { font-size: 13px; color: #6a5a48; line-height: 1.8; }
+    .success-screen a { color: #c9a84c; }
   </style>
 </head>
 <body>
-
 <div class="card">
   <div class="card-header">
     <img src="/static/img/logo1.png" onerror="this.style.display='none'" alt="Oren Cohen Group" />
-    <h1>🇺🇸 Florida — 2025</h1>
-    <div class="sub">Oren Cohen Group · Jerusalem Real Estate & Aliyah</div>
+    <h1>Florida 2025</h1>
+    <div class="sub">Oren Cohen Group &nbsp;·&nbsp; Jerusalem Real Estate &amp; Aliyah</div>
   </div>
-  <div class="gold-line"></div>
 
   <div class="card-body">
-
-    <!-- Language Toggle -->
-    <div class="lang-toggle">
-      <button class="lang-btn" id="btn-en" onclick="setLang('en')">English</button>
-      <button class="lang-btn active" id="btn-he" onclick="setLang('he')">עברית</button>
-    </div>
-
-    <!-- Form -->
     <div id="form-section">
 
-      <!-- Personal Details -->
-      <div class="section-title" id="lbl-personal">פרטים אישיים</div>
+      <div class="section-label">Your Details</div>
+      <div class="field-group">
+        <div class="field">
+          <label>Full Name <span class="req">*</span></label>
+          <input type="text" id="f-name" placeholder="David Cohen" />
+        </div>
+        <div class="field">
+          <label>Phone <span class="req">*</span></label>
+          <input type="tel" id="f-phone" placeholder="+1 (305) 000-0000" />
+        </div>
+      </div>
+      <div class="field-group" style="margin-top:12px">
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" id="f-email" placeholder="david@email.com" />
+        </div>
+        <div class="field">
+          <label>City, State</label>
+          <input type="text" id="f-city" placeholder="Miami, FL" />
+        </div>
+      </div>
 
-      <label id="lbl-name">שם מלא <span class="required">*</span></label>
-      <input type="text" id="f-name" placeholder="ישראל ישראלי" />
-
-      <label id="lbl-phone">טלפון <span class="required">*</span></label>
-      <input type="tel" id="f-phone" placeholder="+1 (305) 000-0000" dir="ltr" />
-
-      <label id="lbl-email">אימייל</label>
-      <input type="email" id="f-email" placeholder="email@example.com" dir="ltr" />
-
-      <label id="lbl-city">עיר מגורים</label>
-      <input type="text" id="f-city" placeholder="Miami, FL" dir="ltr" />
-
-      <!-- Meeting Type -->
-      <div class="section-title" id="lbl-meeting-title">סוג המפגש המועדף <span class="required">*</span></div>
-      <div class="meeting-options">
-        <label class="meeting-opt" id="opt1">
-          <input type="radio" name="meeting" value="personal" onchange="selectOpt(this)" />
-          <span class="opt-icon">🤝</span>
-          <span class="opt-text">
-            <div class="opt-title" id="opt1-title">פגישה אישית 1 על 1</div>
-            <div class="opt-desc" id="opt1-desc">פגישה פרטית עם רוני ואורן — מותאמת אישית לצרכים שלך</div>
-          </span>
+      <div class="section-label">Preferred Format <span class="req">*</span></div>
+      <div class="meeting-cards">
+        <label class="meeting-card" id="mc1" onclick="selectCard(this,'personal')">
+          <input type="radio" name="meeting" value="personal" />
+          <div class="mc-color"></div>
+          <div class="mc-body">
+            <div class="mc-title">Private Consultation</div>
+            <div class="mc-desc">A dedicated one-on-one session with Roni &amp; Oren, tailored exclusively to your investment goals and timeline.</div>
+          </div>
+          <span class="mc-tag tag-personal">1-on-1</span>
         </label>
-        <label class="meeting-opt" id="opt2">
-          <input type="radio" name="meeting" value="community" onchange="selectOpt(this)" />
-          <span class="opt-icon">🏛️</span>
-          <span class="opt-text">
-            <div class="opt-title" id="opt2-title">כנס / מפגש קהילתי</div>
-            <div class="opt-desc" id="opt2-desc">מפגש קבוצתי עם הרצאה, שאלות ותשובות ונטוורקינג</div>
-          </span>
+        <label class="meeting-card" id="mc2" onclick="selectCard(this,'community')">
+          <input type="radio" name="meeting" value="community" />
+          <div class="mc-color"></div>
+          <div class="mc-body">
+            <div class="mc-title">Community Gathering</div>
+            <div class="mc-desc">An intimate group event featuring a market presentation, live Q&amp;A, and the opportunity to connect with fellow investors.</div>
+          </div>
+          <span class="mc-tag tag-community">In-Person</span>
         </label>
-        <label class="meeting-opt" id="opt3">
-          <input type="radio" name="meeting" value="webinar" onchange="selectOpt(this)" />
-          <span class="opt-icon">💻</span>
-          <span class="opt-text">
-            <div class="opt-title" id="opt3-title">וובינר אונליין — Zoom</div>
-            <div class="opt-desc" id="opt3-desc">השתתפות מרחוק בזום — נוח מכל מקום בעולם</div>
-          </span>
+        <label class="meeting-card" id="mc3" onclick="selectCard(this,'webinar')">
+          <input type="radio" name="meeting" value="webinar" />
+          <div class="mc-color"></div>
+          <div class="mc-body">
+            <div class="mc-title">Live Zoom Webinar</div>
+            <div class="mc-desc">Join our exclusive online session from anywhere in the world — interactive, informative, and fully live.</div>
+          </div>
+          <span class="mc-tag tag-webinar">Online</span>
         </label>
       </div>
 
-      <!-- Interests -->
-      <div class="section-title" id="lbl-interest-title">במה אתה מתעניין? (ניתן לבחור יותר מאחד)</div>
+      <div class="section-label">Areas of Interest</div>
       <div class="interest-grid">
-        <label class="interest-item">
-          <input type="checkbox" value="realestate" />
-          <span id="int1">🏠 רכישת נדל"ן</span>
-        </label>
-        <label class="interest-item">
-          <input type="checkbox" value="aliyah" />
-          <span id="int2">✈️ עלייה לישראל</span>
-        </label>
-        <label class="interest-item">
-          <input type="checkbox" value="timing" />
-          <span id="int3">📅 תזמון ושוק</span>
-        </label>
-        <label class="interest-item">
-          <input type="checkbox" value="dollar" />
-          <span id="int4">💵 שער הדולר</span>
-        </label>
+        <label class="interest-item"><input type="checkbox" value="realestate" /> 🏠 Jerusalem Real Estate</label>
+        <label class="interest-item"><input type="checkbox" value="aliyah" /> ✈️ Aliyah to Israel</label>
+        <label class="interest-item"><input type="checkbox" value="timing" /> 📅 Market Timing</label>
+        <label class="interest-item"><input type="checkbox" value="dollar" /> 💵 Dollar / Shekel Rate</label>
       </div>
 
-      <label id="lbl-notes">הערות / שאלות</label>
-      <textarea id="f-notes" rows="2" placeholder="כל שאלה או בקשה מיוחדת..."></textarea>
+      <div class="section-label" style="margin-top:20px">Questions or Special Requests</div>
+      <div class="field field-group full">
+        <textarea id="f-notes" rows="2" placeholder="Feel free to share anything you'd like us to know in advance…"></textarea>
+      </div>
 
-      <button class="btn-submit" onclick="submitForm()" id="btn-submit">שלח הרשמה ✓</button>
-      <div class="footer-note" id="footer-note">Oren Cohen Group · Jerusalem · +972-54-559-6052</div>
+      <button class="btn-submit" id="btn-submit" onclick="submitForm()">Reserve My Spot</button>
+      <div class="footer-note">Oren Cohen Group · Jerusalem · +972-54-559-6052 · <a href="https://www.orencohengroup.com" style="color:#c9a84c">orencohengroup.com</a></div>
     </div>
 
-    <!-- Success -->
     <div class="success-screen" id="success-screen">
       <div class="check">✅</div>
-      <h3 id="success-title">ההרשמה התקבלה!</h3>
-      <p id="success-body">תודה רבה! נחזור אליך בהקדם לאישור הפגישה.<br><br>
-        לשאלות: <a href="mailto:marketing@orencohengroup.com" style="color:#c9a84c">marketing@orencohengroup.com</a><br>
-        <a href="https://wa.me/972545596052" style="color:#c9a84c">WhatsApp: +972-54-559-6052</a>
+      <h3>You're Registered!</h3>
+      <p>
+        Thank you for your interest. A member of our team will be in touch shortly to confirm the details of your meeting.<br><br>
+        We look forward to connecting with you in Florida.<br><br>
+        <a href="mailto:marketing@orencohengroup.com">marketing@orencohengroup.com</a><br>
+        <a href="https://wa.me/972545596052">WhatsApp: +972-54-559-6052</a>
       </p>
     </div>
-
   </div>
 </div>
 
 <script>
-const TEXTS = {
-  he: {
-    personal: 'פרטים אישיים',
-    name: 'שם מלא', phone: 'טלפון', email: 'אימייל', city: 'עיר מגורים',
-    meetingTitle: 'סוג המפגש המועדף *',
-    opt1Title: 'פגישה אישית 1 על 1', opt1Desc: 'פגישה פרטית עם רוני ואורן — מותאמת אישית לצרכים שלך',
-    opt2Title: 'כנס / מפגש קהילתי', opt2Desc: 'מפגש קבוצתי עם הרצאה, שאלות ותשובות ונטוורקינג',
-    opt3Title: 'וובינר אונליין — Zoom', opt3Desc: 'השתתפות מרחוק בזום — נוח מכל מקום בעולם',
-    interestTitle: 'במה אתה מתעניין? (ניתן לבחור יותר מאחד)',
-    int1: '🏠 רכישת נדל"ן', int2: '✈️ עלייה לישראל', int3: '📅 תזמון ושוק', int4: '💵 שער הדולר',
-    notes: 'הערות / שאלות', notesPh: 'כל שאלה או בקשה מיוחדת...',
-    submit: 'שלח הרשמה ✓',
-    successTitle: 'ההרשמה התקבלה!',
-    successBody: 'תודה רבה! נחזור אליך בהקדם לאישור הפגישה.',
-    namePh: 'ישראל ישראלי', alert: 'נא למלא שם, טלפון וסוג פגישה',
-  },
-  en: {
-    personal: 'Personal Details',
-    name: 'Full Name', phone: 'Phone', email: 'Email', city: 'City',
-    meetingTitle: 'Preferred Meeting Type *',
-    opt1Title: 'Personal 1-on-1 Meeting', opt1Desc: 'Private meeting with Roni & Oren — tailored to your needs',
-    opt2Title: 'Community Event / Conference', opt2Desc: 'Group session with presentation, Q&A and networking',
-    opt3Title: 'Online Webinar — Zoom', opt3Desc: 'Join remotely from anywhere in the world',
-    interestTitle: 'What are you interested in? (multiple choice)',
-    int1: '🏠 Real Estate Purchase', int2: '✈️ Aliyah to Israel', int3: '📅 Market Timing', int4: '💵 Dollar Exchange Rate',
-    notes: 'Notes / Questions', notesPh: 'Any questions or special requests...',
-    submit: 'Register Now ✓',
-    successTitle: 'Registration Received!',
-    successBody: 'Thank you! We will be in touch shortly to confirm your meeting.',
-    namePh: 'John Smith', alert: 'Please fill in name, phone and meeting type',
-  }
-};
-
-let lang = 'he';
-
-function setLang(l) {
-  lang = l;
-  document.documentElement.lang = l;
-  document.documentElement.dir = l === 'he' ? 'rtl' : 'ltr';
-  document.getElementById('btn-he').classList.toggle('active', l === 'he');
-  document.getElementById('btn-en').classList.toggle('active', l === 'en');
-  const t = TEXTS[l];
-  document.getElementById('lbl-personal').textContent = t.personal;
-  document.getElementById('lbl-name').innerHTML = t.name + ' <span class="required">*</span>';
-  document.getElementById('lbl-phone').innerHTML = t.phone + ' <span class="required">*</span>';
-  document.getElementById('lbl-email').textContent = t.email;
-  document.getElementById('lbl-city').textContent = t.city;
-  document.getElementById('lbl-meeting-title').innerHTML = t.meetingTitle;
-  document.getElementById('opt1-title').textContent = t.opt1Title;
-  document.getElementById('opt1-desc').textContent = t.opt1Desc;
-  document.getElementById('opt2-title').textContent = t.opt2Title;
-  document.getElementById('opt2-desc').textContent = t.opt2Desc;
-  document.getElementById('opt3-title').textContent = t.opt3Title;
-  document.getElementById('opt3-desc').textContent = t.opt3Desc;
-  document.getElementById('lbl-interest-title').textContent = t.interestTitle;
-  document.getElementById('int1').textContent = t.int1;
-  document.getElementById('int2').textContent = t.int2;
-  document.getElementById('int3').textContent = t.int3;
-  document.getElementById('int4').textContent = t.int4;
-  document.getElementById('lbl-notes').textContent = t.notes;
-  document.getElementById('f-notes').placeholder = t.notesPh;
-  document.getElementById('f-name').placeholder = t.namePh;
-  document.getElementById('btn-submit').textContent = t.submit;
-  document.getElementById('success-title').textContent = t.successTitle;
-}
-
-function selectOpt(radio) {
-  document.querySelectorAll('.meeting-opt').forEach(el => el.classList.remove('selected'));
-  radio.closest('.meeting-opt').classList.add('selected');
+function selectCard(el, val) {
+  document.querySelectorAll('.meeting-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  el.querySelector('input[type=radio]').checked = true;
 }
 
 async function submitForm() {
-  const name = document.getElementById('f-name').value.trim();
+  const name  = document.getElementById('f-name').value.trim();
   const phone = document.getElementById('f-phone').value.trim();
   const email = document.getElementById('f-email').value.trim();
-  const city = document.getElementById('f-city').value.trim();
+  const city  = document.getElementById('f-city').value.trim();
   const meeting = document.querySelector('input[name="meeting"]:checked')?.value;
   const notes = document.getElementById('f-notes').value.trim();
-  const interests = [...document.querySelectorAll('.interest-item input:checked')].map(c => c.value);
+  const interests = [...document.querySelectorAll('.interest-grid input:checked')].map(c => c.value);
 
   if (!name || !phone || !meeting) {
-    alert(TEXTS[lang].alert);
+    alert('Please fill in your name, phone number, and preferred meeting format.');
     return;
   }
-
   const btn = document.getElementById('btn-submit');
-  btn.disabled = true;
-  btn.textContent = '...';
-
+  btn.disabled = true; btn.textContent = 'Submitting…';
   try {
     await fetch('/api/florida/register', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, phone, email, city, meeting, interests, notes, lang })
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ name, phone, email, city, meeting, interests, notes, lang: 'en' })
     });
   } catch(e) {}
-
   document.getElementById('form-section').style.display = 'none';
   document.getElementById('success-screen').style.display = 'block';
 }
