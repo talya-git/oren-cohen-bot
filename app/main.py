@@ -1121,7 +1121,7 @@ def florida_emails():
 @app.post("/api/florida/import-leads")
 async def florida_import_leads(request: Request):
     data = await request.json()
-    if data.get("secret") != "florida2025import":
+    if data.get("secret") != "florida2026import":
         return {"error": "unauthorized"}
     leads = data.get("leads", [])
     imported = db.import_florida_leads(leads)

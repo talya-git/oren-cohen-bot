@@ -61,7 +61,7 @@ async function upload() {
     const res = await fetch('/api/florida/import-leads', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ leads, secret: 'florida2025import' })
+      body: JSON.stringify({ leads, secret: 'florida2026import' })
     });
     const data = await res.json();
     if (data.imported !== undefined) {
