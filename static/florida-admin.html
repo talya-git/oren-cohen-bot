@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ניהול נרשמים — פלורידה 2025</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Noto Sans Hebrew', sans-serif; background: #f0f2f5; color: #222; }
+
+    .header {
+      background: linear-gradient(135deg, #1a2c1e, #0f1923);
+      color: #fff; padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+    }
+    .header h1 { font-size: 18px; color: #c9a84c; }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+    .btn-export {
+      background: #c9a84c; color: #fff; border: none; border-radius: 6px;
+      padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer;
+      font-family: inherit; text-decoration: none; display: inline-block;
+    }
+    .btn-export:hover { background: #b8943a; }
+
+    .stats {
+      display: flex; gap: 12px; padding: 16px 20px; flex-wrap: wrap;
+    }
+    .stat {
+      background: #fff; border-radius: 10px; padding: 12px 18px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08); text-align: center; min-width: 100px;
+    }
+    .stat .num { font-size: 26px; font-weight: 700; }
+    .stat .lbl { font-size: 11px; color: #6b7280; margin-top: 2px; }
+    .stat.personal .num { color: #16a34a; }
+    .stat.community .num { color: #d97706; }
+    .stat.webinar .num { color: #0369a1; }
+    .stat.total .num { color: #1a2c1e; }
+
+    .filters {
+      background: #fff; padding: 10px 20px;
+      display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .filters select, .filters input {
+      padding: 7px 11px; border: 1px solid #ddd; border-radius: 7px;
+      font-size: 13px; font-family: inherit; outline: none;
+    }
+    .filters select:focus, .filters input:focus { border-color: #c9a84c; }
+
+    .main { padding: 16px 20px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    thead { background: #1a2c1e; color: #fff; }
+    th { padding: 11px 14px; text-align: right; font-size: 12px; font-weight: 600; }
+    td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafa; }
+
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 700;
+    }
+    .b-personal  { background: #dcfce7; color: #166534; }
+    .b-community { background: #fef9c3; color: #854d0e; }
+    .b-webinar   { background: #e0f2fe; color: #0369a1; }
+
+    .status-select {
+      padding: 4px 8px; border: 1px solid #ddd; border-radius: 6px;
+      font-size: 12px; font-family: inherit; outline: none; cursor: pointer;
+    }
+    .status-select:focus { border-color: #c9a84c; }
+
+    .notes-input {
+      width: 100%; padding: 4px 8px; border: 1px solid #ddd; border-radius: 6px;
+      font-size: 12px; font-family: inherit; outline: none;
+    }
+    .notes-input:focus { border-color: #c9a84c; }
+
+    .empty { text-align: center; padding: 60px; color: #9ca3af; font-size: 15px; }
+
+    @media (max-width: 768px) {
+      table, thead, tbody, th, td, tr { display: block; }
+      thead { display: none; }
+      tr { background: #fff; border-radius: 10px; margin-bottom: 12px; padding: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+      td { border: none; padding: 4px 0; display: flex; justify-content: space-between; align-items: center; }
+      td::before { content: attr(data-label); font-weight: 600; color: #6b7280; font-size: 11px; flex-shrink: 0; margin-left: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Login -->
+<div id="login-screen" style="min-height:100vh;background:linear-gradient(135deg,#0f1923,#1a2c1e);display:flex;align-items:center;justify-content:center;">
+  <div style="background:rgba(255,255,255,0.08);border:1px solid #c9a84c;border-radius:16px;padding:40px 32px;width:320px;text-align:center;color:#fff;">
+    <div style="font-size:40px;margin-bottom:12px">🇺🇸</div>
+    <h2 style="color:#c9a84c;margin-bottom:6px">פלורידה 2025</h2>
+    <p style="font-size:13px;color:#a0b0a0;margin-bottom:20px">ניהול נרשמים</p>
+    <input type="password" id="pw" placeholder="סיסמה" onkeydown="if(event.key==='Enter')login()"
+      style="width:100%;padding:11px;border-radius:8px;border:1px solid #c9a84c;background:rgba(255,255,255,0.1);color:#fff;font-size:15px;text-align:center;outline:none;margin-bottom:12px;font-family:inherit;" />
+    <button onclick="login()"
+      style="width:100%;padding:11px;border-radius:8px;border:none;background:#c9a84c;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">כניסה</button>
+    <div id="pw-err" style="color:#f87171;font-size:12px;margin-top:8px;display:none">סיסמה שגויה</div>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard" style="display:none">
+
+<div class="header">
+  <h1>🇺🇸 פלורידה 2025 — ניהול נרשמים</h1>
+  <div class="header-actions">
+    <a href="/export-florida" class="btn-export">⬇️ ייצוא Excel</a>
+    <button onclick="fetchData()" class="btn-export" style="background:#1a2c1e;border:1px solid #c9a84c;">🔄 רענן</button>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat total"><div class="num" id="s-total">0</div><div class="lbl">סה"כ נרשמים</div></div>
+  <div class="stat personal"><div class="num" id="s-personal">0</div><div class="lbl">🤝 פגישה אישית</div></div>
+  <div class="stat community"><div class="num" id="s-community">0</div><div class="lbl">🏛️ כנס קהילתי</div></div>
+  <div class="stat webinar"><div class="num" id="s-webinar">0</div><div class="lbl">💻 וובינר Zoom</div></div>
+</div>
+
+<div class="filters">
+  <select id="f-meeting" onchange="render()">
+    <option value="">כל סוגי הפגישות</option>
+    <option value="personal">🤝 פגישה אישית</option>
+    <option value="community">🏛️ כנס קהילתי</option>
+    <option value="webinar">💻 וובינר Zoom</option>
+  </select>
+  <select id="f-status" onchange="render()">
+    <option value="">כל הסטטוסים</option>
+    <option value="לטיפול">לטיפול</option>
+    <option value="בתיאום">בתיאום</option>
+    <option value="נקבע">נקבע</option>
+    <option value="בוצע">בוצע</option>
+  </select>
+  <input id="f-search" type="text" placeholder="חיפוש שם / טלפון..." oninput="render()" />
+</div>
+
+<div class="main">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>שם</th>
+        <th>טלפון</th>
+        <th>אימייל</th>
+        <th>עיר</th>
+        <th>סוג פגישה</th>
+        <th>תחומי עניין</th>
+        <th>הערות לקוח</th>
+        <th>סטטוס</th>
+        <th>הערות פנימיות</th>
+        <th>תאריך</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div class="empty" id="empty" style="display:none">אין נרשמים עדיין</div>
+</div>
+
+</div>
+
+<script>
+const PW = 'florida2025';
+let data = [];
+
+const MEETING_LABEL = { personal: '🤝 פגישה אישית', community: '🏛️ כנס קהילתי', webinar: '💻 וובינר Zoom' };
+const MEETING_CLS   = { personal: 'b-personal', community: 'b-community', webinar: 'b-webinar' };
+const INTEREST_HE   = { realestate: 'נדל"ן', aliyah: 'עלייה', timing: 'תזמון', dollar: 'דולר' };
+const STATUSES = ['לטיפול', 'בתיאום', 'נקבע', 'בוצע'];
+
+function login() {
+  if (document.getElementById('pw').value === PW) {
+    sessionStorage.setItem('fl_auth', '1');
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    fetchData();
+    setInterval(fetchData, 30000);
+  } else {
+    document.getElementById('pw-err').style.display = 'block';
+    document.getElementById('pw').value = '';
+  }
+}
+if (sessionStorage.getItem('fl_auth')) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  fetchData();
+  setInterval(fetchData, 30000);
+}
+
+async function fetchData() {
+  try {
+    const res = await fetch('/api/florida/registrations');
+    if (!res.ok) return;
+    data = await res.json();
+    updateStats();
+    render();
+  } catch(e) {}
+}
+
+function updateStats() {
+  document.getElementById('s-total').textContent = data.length;
+  document.getElementById('s-personal').textContent  = data.filter(r => r.meeting === 'personal').length;
+  document.getElementById('s-community').textContent = data.filter(r => r.meeting === 'community').length;
+  document.getElementById('s-webinar').textContent   = data.filter(r => r.meeting === 'webinar').length;
+}
+
+function render() {
+  const fm = document.getElementById('f-meeting').value;
+  const fs = document.getElementById('f-status').value;
+  const fq = document.getElementById('f-search').value.toLowerCase();
+  const rows = data.filter(r =>
+    (!fm || r.meeting === fm) &&
+    (!fs || r.status === fs) &&
+    (!fq || (r.name||'').toLowerCase().includes(fq) || (r.phone||'').includes(fq))
+  );
+  const tbody = document.getElementById('tbody');
+  const empty = document.getElementById('empty');
+  if (!rows.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  const interests_str = (r) => (r.interests || '').split(',').map(x => INTEREST_HE[x.trim()] || x.trim()).filter(Boolean).join(' · ');
+  tbody.innerHTML = rows.map((r, i) => `
+    <tr>
+      <td data-label="#">${i + 1}</td>
+      <td data-label="שם"><strong>${r.name || '—'}</strong></td>
+      <td data-label="טלפון" style="direction:ltr;color:#6b7280">${r.phone || '—'}</td>
+      <td data-label="אימייל" style="font-size:12px;color:#6b7280">${r.email || '—'}</td>
+      <td data-label="עיר">${r.city || '—'}</td>
+      <td data-label="סוג פגישה"><span class="badge ${MEETING_CLS[r.meeting] || ''}">${MEETING_LABEL[r.meeting] || r.meeting}</span></td>
+      <td data-label="עניין" style="font-size:12px">${interests_str(r)}</td>
+      <td data-label="הערות לקוח" style="font-size:12px;color:#6b7280;max-width:160px">${r.notes || '—'}</td>
+      <td data-label="סטטוס">
+        <select class="status-select" onchange="updateStatus(${r.id}, this.value)">
+          ${STATUSES.map(s => `<option value="${s}" ${r.status === s ? 'selected' : ''}>${s}</option>`).join('')}
+        </select>
+      </td>
+      <td data-label="הערות פנימיות">
+        <input class="notes-input" value="${r.internal_notes || ''}" placeholder="הערה..."
+          onblur="updateNotes(${r.id}, this.value)" style="width:140px" />
+      </td>
+      <td data-label="תאריך" style="font-size:11px;color:#9ca3af">${formatDate(r.created_at)}</td>
+    </tr>
+  `).join('');
+}
+
+function formatDate(str) {
+  if (!str) return '—';
+  const d = new Date(str);
+  return d.toLocaleDateString('he-IL') + ' ' + d.toLocaleTimeString('he-IL', {hour:'2-digit',minute:'2-digit'});
+}
+
+async function updateStatus(id, status) {
+  await fetch(`/api/florida/update/${id}`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ status })
+  });
+  const r = data.find(x => x.id === id);
+  if (r) r.status = status;
+}
+
+async function updateNotes(id, notes) {
+  await fetch(`/api/florida/update/${id}`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ internal_notes: notes })
+  });
+  const r = data.find(x => x.id === id);
+  if (r) r.internal_notes = notes;
+}
+</script>
+</body>
+</html>

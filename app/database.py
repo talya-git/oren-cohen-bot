@@ -813,3 +813,68 @@ def get_shishi_registrations_today() -> list:
     rows = _fetchall(cur)
     conn.close()
     return rows
+
+
+def save_florida_registration(name: str, phone: str, email: str, city: str, meeting: str, interests: str, notes: str, lang: str) -> None:
+    conn = get_db()
+    cur = conn.cursor()
+    now = datetime.now(timezone.utc).isoformat()
+    if DATABASE_URL:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS florida_registrations (
+                id SERIAL PRIMARY KEY, name TEXT, phone TEXT, email TEXT, city TEXT,
+                meeting TEXT, interests TEXT, notes TEXT, lang TEXT,
+                status TEXT DEFAULT 'לטיפול', created_at TIMESTAMPTZ DEFAULT NOW()
+            )
+        """)
+        cur.execute(
+            "INSERT INTO florida_registrations (name,phone,email,city,meeting,interests,notes,lang,created_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+            (name, phone, email, city, meeting, interests, notes, lang, now)
+        )
+    else:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS florida_registrations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, phone TEXT, email TEXT, city TEXT,
+                meeting TEXT, interests TEXT, notes TEXT, lang TEXT,
+                status TEXT DEFAULT 'לטיפול', created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        cur.execute(
+            "INSERT INTO florida_registrations (name,phone,email,city,meeting,interests,notes,lang,created_at) VALUES (?,?,?,?,?,?,?,?,?)",
+            (name, phone, email, city, meeting, interests, notes, lang, now)
+        )
+    conn.commit()
+    conn.close()
+
+
+def get_florida_registrations() -> list:
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT * FROM florida_registrations ORDER BY created_at DESC")
+        rows = _fetchall(cur)
+    except Exception:
+        rows = []
+    conn.close()
+    return rows
+
+
+def update_florida_registration(reg_id: int, data: dict) -> None:
+    conn = get_db()
+    cur = conn.cursor()
+    allowed = {"status", "internal_notes"}
+    sets, vals = [], []
+    for k, v in data.items():
+        if k in allowed:
+            sets.append(f"{k}={PH}")
+            vals.append(v)
+    if not sets:
+        conn.close()
+        return
+    vals.append(reg_id)
+    try:
+        cur.execute(f"UPDATE florida_registrations SET {', '.join(sets)} WHERE id={PH}", vals)
+        conn.commit()
+    except Exception:
+        pass
+    conn.close()

@@ -1104,6 +1104,107 @@ def shishi_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "shishi.html")
 
 
+@app.get("/florida-admin")
+def florida_admin_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "florida-admin.html")
+
+
+@app.get("/api/florida/registrations")
+def florida_registrations():
+    return db.get_florida_registrations()
+
+
+@app.post("/api/florida/update/{reg_id}")
+async def florida_update(reg_id: int, request: Request):
+    data = await request.json()
+    db.update_florida_registration(reg_id, data)
+    return {"status": "ok"}
+
+
+@app.get("/florida")
+def florida_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "florida.html")
+
+
+@app.post("/api/florida/register")
+async def florida_register(request: Request):
+    data = await request.json()
+    db.save_florida_registration(
+        name=data.get("name", ""),
+        phone=data.get("phone", ""),
+        email=data.get("email", ""),
+        city=data.get("city", ""),
+        meeting=data.get("meeting", ""),
+        interests=", ".join(data.get("interests", [])),
+        notes=data.get("notes", ""),
+        lang=data.get("lang", "he"),
+    )
+    print(f"[FLORIDA] {data.get('name')} | {data.get('phone')} | {data.get('meeting')}")
+    return {"status": "ok"}
+
+
+@app.get("/export-florida")
+def export_florida():
+    """ייצוא רשימת נרשמים לפלורידה לאקסל."""
+    import io
+    try:
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill, Alignment
+    except ImportError:
+        return {"error": "openpyxl not installed"}
+
+    rows = db.get_florida_registrations()
+    MEETING_HE = {"personal": "פגישה אישית", "community": "כנס קהילתי", "webinar": "וובינר Zoom"}
+    INTEREST_HE = {"realestate": 'נדל"ן', "aliyah": "עלייה", "timing": "תזמון", "dollar": "דולר"}
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "נרשמים פלורידה"
+    ws.sheet_view.rightToLeft = True
+
+    HEADERS = ["שם", "טלפון", "אימייל", "עיר", "סוג פגישה", "תחומי עניין", "הערות", "שפה", "תאריך הרשמה", "סטטוס"]
+    WIDTHS   = [20, 16, 24, 14, 16, 24, 30, 8, 18, 14]
+    hfill = PatternFill("solid", fgColor="1a3c2e")
+    hfont = Font(bold=True, color="FFFFFF", size=11)
+    for col, (h, w) in enumerate(zip(HEADERS, WIDTHS), 1):
+        cell = ws.cell(row=1, column=col, value=h)
+        cell.font = hfont; cell.fill = hfill
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.column_dimensions[cell.column_letter].width = w
+    ws.row_dimensions[1].height = 22
+
+    fills = {
+        "personal":  PatternFill("solid", fgColor="d9fdd3"),
+        "community": PatternFill("solid", fgColor="fff9c4"),
+        "webinar":   PatternFill("solid", fgColor="e0f2fe"),
+    }
+    for i, row in enumerate(rows, 2):
+        meeting = row.get("meeting", "")
+        interests_raw = row.get("interests", "")
+        interests_he = ", ".join(INTEREST_HE.get(x.strip(), x.strip()) for x in interests_raw.split(",") if x.strip())
+        fill = fills.get(meeting, PatternFill("solid", fgColor="f5f5f5"))
+        vals = [
+            row.get("name", ""), row.get("phone", ""), row.get("email", ""), row.get("city", ""),
+            MEETING_HE.get(meeting, meeting), interests_he, row.get("notes", ""),
+            row.get("lang", ""), str(row.get("created_at", "")), "לטיפול",
+        ]
+        for col, val in enumerate(vals, 1):
+            cell = ws.cell(row=i, column=col, value=val)
+            cell.fill = fill
+            cell.alignment = Alignment(vertical="center")
+
+    ws.freeze_panes = "A2"
+    ws.auto_filter.ref = "A1:J1"
+    buf = io.BytesIO()
+    wb.save(buf); buf.seek(0)
+    from fastapi.responses import StreamingResponse
+    from datetime import datetime as _dt
+    fname = f"florida_{_dt.now().strftime('%Y%m%d_%H%M')}.xlsx"
+    return StreamingResponse(buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={fname}"})
+
+
 @app.get("/tour")
 def tour_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "tour.html")
