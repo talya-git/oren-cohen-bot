@@ -1104,6 +1104,20 @@ def shishi_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "shishi.html")
 
 
+@app.get("/api/florida/whatsapp")
+def florida_whatsapp():
+    """שיחות וואטסאפ רק של לקוחות פלורידה."""
+    all_convos = db.get_all_florida_conversations()
+    return {"conversations": all_convos}
+
+
+@app.get("/api/florida/emails")
+def florida_emails():
+    """מיילים רק של לקוחות פלורידה."""
+    emails = db.get_florida_emails()
+    return {"emails": emails}
+
+
 @app.post("/api/florida/import-leads")
 async def florida_import_leads(request: Request):
     data = await request.json()

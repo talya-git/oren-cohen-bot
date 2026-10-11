@@ -973,3 +973,90 @@ def unmark_florida_lead_sent(lead_id: int) -> None:
     except Exception:
         pass
     conn.close()
+
+
+def _get_florida_phones_and_emails() -> tuple[set, set]:
+    """מחזיר סט של טלפונים ומיילים של לקוחות פלורידה."""
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT phone1, phone2, email FROM florida_leads")
+        rows = _fetchall(cur)
+        phones = set()
+        emails = set()
+        for r in rows:
+            for p in [r.get('phone1'), r.get('phone2')]:
+                if p:
+                    clean = str(p).strip().lstrip('+').replace('-','').replace(' ','')
+                    phones.add(clean)
+            if r.get('email'):
+                emails.add(str(r['email']).strip().lower())
+    except Exception:
+        phones, emails = set(), set()
+    conn.close()
+    return phones, emails
+
+
+def get_all_florida_conversations() -> list:
+    """שיחות וואטסאפ רק של לקוחות פלורידה + סימון sent אוטומטי."""
+    florida_phones, _ = _get_florida_phones_and_emails()
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            SELECT rs.phone, rs.client_name, rs.agent_email, rs.replied, rs.handoff,
+                   rs.transcript, rs.sent_at, rs.read_at, rb.agent_label
+            FROM reengagement_sent rs
+            LEFT JOIN reengagement_batches rb ON rs.batch_id = rb.id
+            WHERE rs.phone NOT LIKE 'email:%'
+            ORDER BY rs.sent_at DESC
+        """)
+        rows = _fetchall(cur)
+    except Exception:
+        rows = []
+
+    result = []
+    for r in rows:
+        phone_clean = str(r.get('phone','')).lstrip('+').replace('-','').replace(' ','')
+        if phone_clean not in florida_phones:
+            continue
+        # סמן sent=true אוטומטי
+        try:
+            cur.execute(
+                f"UPDATE florida_leads SET sent={PH}, sent_at=COALESCE(sent_at,{PH}) WHERE (phone1={PH} OR phone2={PH}) AND sent=FALSE",
+                (True if DATABASE_URL else 1, r.get('sent_at'), phone_clean, phone_clean)
+            )
+        except Exception:
+            pass
+        result.append({
+            'phone': r.get('phone',''),
+            'client_name': r.get('client_name',''),
+            'agent_label': r.get('agent_label',''),
+            'replied': bool(r.get('replied')),
+            'handoff': bool(r.get('handoff')),
+            'transcript': r.get('transcript',''),
+            'sent_at': str(r.get('sent_at','')),
+            'read_at': str(r.get('read_at','')),
+        })
+    conn.commit()
+    conn.close()
+    return result
+
+
+def get_florida_emails() -> list:
+    """מיילים רק של לקוחות פלורידה."""
+    _, florida_emails = _get_florida_phones_and_emails()
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT * FROM email_sent ORDER BY created_at DESC")
+        rows = _fetchall(cur)
+    except Exception:
+        rows = []
+    conn.close()
+    result = []
+    for r in rows:
+        email = str(r.get('to_email','')).strip().lower()
+        if email in florida_emails:
+            result.append(r)
+    return result

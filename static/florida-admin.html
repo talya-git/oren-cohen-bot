@@ -351,8 +351,8 @@ async function fetchAll() {
   try {
     const [r1, r2, r3] = await Promise.all([
       fetch('/api/florida/registrations'),
-      fetch('/api/whatsapp/conversations/all'),
-      fetch('/api/email/sent'),
+      fetch('/api/florida/whatsapp'),
+      fetch('/api/florida/emails'),
     ]);
     if (r1.ok) regData = await r1.json();
     if (r2.ok) { const d = await r2.json(); waData = d.conversations || []; }
