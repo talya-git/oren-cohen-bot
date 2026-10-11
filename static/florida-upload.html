@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>העלאת לקוחות פלורידה</title>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #1a2c1e; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    .box { background: #faf8f3; border: 2px solid #c9a84c; border-radius: 12px; padding: 32px; width: 420px; text-align: center; }
+    h2 { color: #c9a84c; margin-bottom: 8px; }
+    p { color: #6b7280; font-size: 13px; margin-bottom: 20px; }
+    input[type=file] { display: block; width: 100%; margin-bottom: 16px; font-size: 13px; }
+    button { background: #c9a84c; color: #fff; border: none; border-radius: 8px; padding: 12px 24px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; }
+    button:hover { background: #b8943a; }
+    #status { margin-top: 16px; font-size: 14px; font-weight: 600; }
+    .ok { color: #16a34a; }
+    .err { color: #dc2626; }
+  </style>
+</head>
+<body>
+<div class="box">
+  <h2>🇺🇸 העלאת לקוחות פלורידה</h2>
+  <p>בחר את קובץ <strong>florida_leads_fixed.xlsx</strong> מהמחשב</p>
+  <input type="file" id="file" accept=".xlsx,.xls" />
+  <button onclick="upload()">העלה לשרת</button>
+  <div id="status"></div>
+</div>
+<script>
+async function upload() {
+  const file = document.getElementById('file').files[0];
+  if (!file) { alert('בחר קובץ'); return; }
+  const status = document.getElementById('status');
+  status.textContent = 'קורא קובץ...';
+  status.className = '';
+
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf);
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+  const leads = [];
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r[0] && !r[1]) continue;
+    leads.push({
+      name:             String(r[0] || '').trim(),
+      phone1:           String(r[1] || '').trim().replace(/^'+/, ''),
+      phone2:           String(r[2] || '').trim().replace(/^'+/, ''),
+      email:            String(r[3] || '').trim(),
+      project:          String(r[4] || '').trim(),
+      agent:            String(r[5] || '').trim(),
+      created_date:     String(r[6] || '').trim(),
+      area_code:        String(r[8] || '').trim(),
+      florida_location: String(r[9] || '').trim(),
+    });
+  }
+
+  status.textContent = `שולח ${leads.length} לקוחות...`;
+
+  try {
+    const res = await fetch('/api/florida/import-leads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ leads, secret: 'florida2025import' })
+    });
+    const data = await res.json();
+    if (data.imported !== undefined) {
+      status.textContent = `✅ יובאו ${data.imported} לקוחות בהצלחה!`;
+      status.className = 'ok';
+    } else {
+      status.textContent = `שגיאה: ${JSON.stringify(data)}`;
+      status.className = 'err';
+    }
+  } catch(e) {
+    status.textContent = `שגיאה: ${e.message}`;
+    status.className = 'err';
+  }
+}
+</script>
+</body>
+</html>

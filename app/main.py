@@ -1136,6 +1136,11 @@ def florida_admin_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "florida-admin.html")
 
 
+@app.get("/florida-upload")
+def florida_upload_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "florida-upload.html")
+
+
 @app.get("/api/florida/registrations")
 def florida_registrations():
     return db.get_florida_registrations()
