@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zoom Webinar Registration — Oren Cohen Group</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(160deg, #0a1628 0%, #0f2318 60%, #0a1628 100%);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px 16px;
+    }
+    .card {
+      background: #faf8f3;
+      border: 1px solid #c9a84c;
+      border-radius: 12px;
+      width: 100%; max-width: 520px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+      overflow: hidden;
+    }
+    .card-header {
+      background: linear-gradient(135deg, #0f2318, #0a1628);
+      padding: 28px 28px 22px;
+      text-align: center;
+      position: relative;
+    }
+    .card-header::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, #c9a84c 30%, #e8c96a 50%, #c9a84c 70%, transparent);
+    }
+    .card-header img { height: 80px; margin-bottom: 14px; }
+    .card-header h1 {
+      font-family: 'Cormorant Garamond', serif;
+      color: #c9a84c; font-size: 26px; font-weight: 600;
+      letter-spacing: 0.5px; margin-bottom: 6px;
+    }
+    .card-header .sub { color: #8a9e8a; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; }
+    .webinar-info {
+      background: rgba(201,168,76,.08);
+      border: 1px solid rgba(201,168,76,.25);
+      border-radius: 8px; margin: 0 28px 4px;
+      padding: 12px 16px; font-size: 13px; color: #4a3a28;
+      line-height: 1.7;
+    }
+    .card-body { padding: 20px 28px 28px; }
+    .section-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: #c9a84c; margin: 20px 0 10px;
+    }
+    .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+    .field label { font-size: 11px; font-weight: 600; color: #5a4a38; letter-spacing: 0.5px; }
+    .field input, .field textarea {
+      padding: 10px 13px; border: 1px solid #ddd; border-radius: 6px;
+      background: #fff; font-size: 13px; font-family: 'Inter', sans-serif;
+      color: #1a1a1a; outline: none; transition: border-color .2s, box-shadow .2s;
+    }
+    .field input:focus, .field textarea:focus {
+      border-color: #c9a84c; box-shadow: 0 0 0 3px rgba(201,168,76,.12);
+    }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .req { color: #c9a84c; }
+
+    .radio-group, .check-group { display: flex; flex-direction: column; gap: 7px; margin-top: 4px; }
+    .radio-item, .check-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 13px; border: 1.5px solid #e0d8c8; border-radius: 8px;
+      cursor: pointer; background: #fff; transition: all .2s;
+      font-size: 13px; color: #2a1f0e;
+    }
+    .radio-item:hover, .check-item:hover { border-color: #c9a84c; background: #fdf8f0; }
+    .radio-item input, .check-item input { accent-color: #c9a84c; flex-shrink: 0; }
+    .radio-item.selected, .check-item.selected { border-color: #c9a84c; background: #fdf8f0; }
+
+    .other-input {
+      margin-top: 6px; padding: 8px 12px;
+      border: 1px solid #ddd; border-radius: 6px;
+      font-size: 13px; font-family: 'Inter', sans-serif;
+      width: 100%; outline: none; display: none;
+    }
+    .other-input:focus { border-color: #c9a84c; }
+    .other-input.show { display: block; }
+
+    .btn-submit {
+      width: 100%; padding: 14px;
+      background: linear-gradient(135deg, #c9a84c, #b8943a);
+      color: #fff; border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 700; font-family: 'Inter', sans-serif;
+      letter-spacing: 1px; text-transform: uppercase;
+      cursor: pointer; margin-top: 24px; transition: opacity .2s, transform .1s;
+    }
+    .btn-submit:hover { opacity: .92; transform: translateY(-1px); }
+    .footer-note { text-align: center; font-size: 11px; color: #9a8a78; margin-top: 14px; }
+
+    .success-screen {
+      display: none; text-align: center; padding: 48px 28px;
+    }
+    .success-screen .check { font-size: 56px; margin-bottom: 16px; }
+    .success-screen h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px; color: #c9a84c; margin-bottom: 10px;
+    }
+    .success-screen p { font-size: 13px; color: #6a5a48; line-height: 1.8; }
+    .success-screen a { color: #c9a84c; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="card-header">
+    <img src="/static/img/logo-florida.png" onerror="this.style.display='none'" alt="Oren Cohen Group" />
+    <h1>💻 Live Zoom Webinar</h1>
+    <div class="sub">Oren Cohen Group &nbsp;·&nbsp; Jerusalem Real Estate</div>
+  </div>
+
+  <div class="webinar-info">
+    📅 <strong>Date:</strong> TBD &nbsp;&nbsp;
+    🕐 <strong>Time:</strong> TBD &nbsp;&nbsp;
+    💻 <strong>Live on Zoom</strong><br>
+    <span style="font-size:12px;color:#6b7280">Space is limited — register below to secure your spot.</span>
+  </div>
+
+  <div class="card-body">
+    <div id="form-section">
+
+      <div class="section-label">Your Details</div>
+      <div class="field-row">
+        <div class="field">
+          <label>First & Last Name <span class="req">*</span></label>
+          <input type="text" id="f-name" placeholder="David Cohen" />
+        </div>
+        <div class="field">
+          <label>Phone Number <span class="req">*</span></label>
+          <input type="tel" id="f-phone" placeholder="+1 (305) 000-0000" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Email Address <span class="req">*</span></label>
+        <input type="email" id="f-email" placeholder="david@email.com" />
+      </div>
+
+      <div class="section-label">About Your Interest</div>
+
+      <div class="field">
+        <label>Are you currently considering purchasing a property in Jerusalem? <span class="req">*</span></label>
+        <div class="radio-group" id="rg-jerusalem">
+          <label class="radio-item" onclick="selectRadio(this,'jerusalem')"><input type="radio" name="jerusalem" value="actively" /> Yes, actively looking</label>
+          <label class="radio-item" onclick="selectRadio(this,'jerusalem')"><input type="radio" name="jerusalem" value="exploring" /> Possibly / Exploring options</label>
+          <label class="radio-item" onclick="selectRadio(this,'jerusalem')"><input type="radio" name="jerusalem" value="learning" /> Not at the moment, but interested in learning more</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Would you be interested in meeting personally with Oren and Roni during their visit to Florida? <span class="req">*</span></label>
+        <div class="radio-group" id="rg-meeting">
+          <label class="radio-item" onclick="selectRadio(this,'meeting')"><input type="radio" name="meeting" value="yes" /> Yes</label>
+          <label class="radio-item" onclick="selectRadio(this,'meeting')"><input type="radio" name="meeting" value="maybe" /> Maybe</label>
+          <label class="radio-item" onclick="selectRadio(this,'meeting')"><input type="radio" name="meeting" value="no" /> Not at this stage</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Are you also interested in properties in other cities in Israel besides Jerusalem?</label>
+        <div class="radio-group" id="rg-other-cities">
+          <label class="radio-item" onclick="selectRadio(this,'other-cities'); toggleCities(true)"><input type="radio" name="other-cities" value="yes" /> Yes</label>
+          <label class="radio-item" onclick="selectRadio(this,'other-cities'); toggleCities(false)"><input type="radio" name="other-cities" value="no" /> No</label>
+          <label class="radio-item" onclick="selectRadio(this,'other-cities'); toggleCities(false)"><input type="radio" name="other-cities" value="maybe" /> Maybe / Open to exploring options</label>
+        </div>
+        <input type="text" id="f-cities" class="other-input" placeholder="Which cities are you interested in?" />
+      </div>
+
+      <div class="field">
+        <label>Would you be interested in professional advice or assistance in any of the following areas?</label>
+        <div class="check-group">
+          <label class="check-item"><input type="checkbox" value="financial" /> Financial advice / Mortgage financing</label>
+          <label class="check-item"><input type="checkbox" value="legal" /> Legal advice</label>
+          <label class="check-item"><input type="checkbox" value="design" /> Interior design</label>
+          <label class="check-item" id="other-check-item"><input type="checkbox" value="other" onchange="toggleOtherService(this)" /> Other</label>
+          <input type="text" id="f-other-service" class="other-input" placeholder="Please specify..." />
+          <label class="check-item"><input type="checkbox" value="none" /> Not at the moment</label>
+        </div>
+      </div>
+
+      <button class="btn-submit" id="btn-submit" onclick="submitForm()">Register for the Webinar</button>
+      <div class="footer-note">Oren Cohen Group · Jerusalem · <a href="https://www.orencohengroup.com" style="color:#c9a84c">orencohengroup.com</a></div>
+    </div>
+
+    <div class="success-screen" id="success-screen">
+      <div class="check">✅</div>
+      <h3>You're Registered!</h3>
+      <p>
+        Thank you for registering for our upcoming Zoom webinar.<br>
+        We will send you the Zoom link and full details shortly.<br><br>
+        We look forward to seeing you online!<br><br>
+        <a href="mailto:marketing@orencohengroup.com">marketing@orencohengroup.com</a><br>
+        <a href="https://wa.me/972545596052">WhatsApp: +972-54-559-6052</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+function selectRadio(el, group) {
+  document.querySelectorAll(`#rg-${group} .radio-item`).forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function toggleCities(show) {
+  document.getElementById('f-cities').classList.toggle('show', show);
+}
+function toggleOtherService(cb) {
+  document.getElementById('f-other-service').classList.toggle('show', cb.checked);
+}
+
+async function submitForm() {
+  const name  = document.getElementById('f-name').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const jerusalem   = document.querySelector('input[name="jerusalem"]:checked')?.value;
+  const meeting     = document.querySelector('input[name="meeting"]:checked')?.value;
+  const otherCities = document.querySelector('input[name="other-cities"]:checked')?.value;
+  const citiesText  = document.getElementById('f-cities').value.trim();
+  const services    = [...document.querySelectorAll('.check-group input[type=checkbox]:checked')].map(c => c.value);
+  const otherService = document.getElementById('f-other-service').value.trim();
+
+  if (!name || !phone || !email || !jerusalem || !meeting) {
+    alert('Please fill in all required fields.');
+    return;
+  }
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+
+  try {
+    await fetch('/api/florida/register', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        name, phone, email,
+        meeting: 'webinar',
+        interests: services,
+        notes: [
+          jerusalem ? `Jerusalem interest: ${jerusalem}` : '',
+          meeting   ? `Personal meeting: ${meeting}` : '',
+          otherCities ? `Other cities: ${otherCities}${citiesText ? ' — ' + citiesText : ''}` : '',
+          otherService ? `Other service: ${otherService}` : '',
+        ].filter(Boolean).join(' | '),
+        lang: 'en'
+      })
+    });
+  } catch(e) {}
+
+  document.getElementById('form-section').style.display = 'none';
+  document.getElementById('success-screen').style.display = 'block';
+}
+</script>
+</body>
+</html>

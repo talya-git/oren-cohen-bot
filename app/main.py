@@ -1167,6 +1167,11 @@ async def florida_update(reg_id: int, request: Request):
     return {"status": "ok"}
 
 
+@app.get("/florida-webinar")
+def florida_webinar_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "florida-webinar.html")
+
+
 @app.get("/florida")
 def florida_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "florida.html")
