@@ -340,3 +340,27 @@ def send_bulk_report(agent_label: str, results: list[dict], agent_email: str | N
     except Exception as e:
         print(f"[ADMIN REPORT ERROR] {e}")
 
+
+
+def send_email(to: str, subject: str, body: str) -> None:
+    """שולח מייל פשוט דרך Gmail SMTP."""
+    import smtplib
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+    from email.utils import formataddr
+
+    gmail_user = os.getenv("GMAIL_USER", "orencohengroup2020@gmail.com")
+    gmail_pass = os.getenv("GMAIL_APP_PASSWORD", "").replace(" ", "")
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = formataddr(("Oren Cohen Group", gmail_user))
+    msg["To"] = to
+    html_body = f"<html><body style='font-family:Arial,sans-serif;font-size:14px;white-space:pre-wrap;'>{body.replace(chr(10), '<br>')}</body></html>"
+    msg.attach(MIMEText(html_body, "html", "utf-8"))
+
+    with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        server.starttls()
+        server.login(gmail_user, gmail_pass)
+        server.sendmail(gmail_user, to, msg.as_string())
+    print(f"[EMAIL] sent to {to} | {subject}")
