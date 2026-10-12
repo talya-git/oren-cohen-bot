@@ -41,6 +41,10 @@
       border-color: #c9a84c; box-shadow: 0 0 0 3px rgba(201,168,76,.12);
     }
     .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 500px) {
+      .field-row { grid-template-columns: 1fr; }
+      .mc-tag { margin-right: 10px; font-size: 9px; padding: 2px 8px; }
+    }
     .req { color: #c9a84c; }
     .radio-group { display: flex; flex-direction: column; gap: 7px; margin-top: 4px; }
     .radio-item {
