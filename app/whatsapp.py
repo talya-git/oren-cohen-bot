@@ -215,6 +215,8 @@ async def _handle_florida_message(phone: str, text: str, _db) -> None:
 
 
 
+from fastapi import APIRouter, Request
+
 router = APIRouter(prefix="/api/whatsapp", tags=["whatsapp"])
 
 
