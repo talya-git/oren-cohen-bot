@@ -213,6 +213,11 @@ async def _handle_florida_message(phone: str, text: str, _db) -> None:
         print(f"[FLORIDA HANDOFF] {phone}")
 
 
+
+
+router = APIRouter(prefix="/api/whatsapp", tags=["whatsapp"])
+
+
 @router.post("/florida/start")
 async def florida_start_endpoint(request: Request):
     """שולח הודעת פתיחה לרשימת לקוחות פלורידה."""
@@ -236,10 +241,6 @@ async def florida_start_endpoint(request: Request):
     failed = sum(1 for r in results if r["status"] == "error")
     return {"sent": sent, "failed": failed, "results": results}
 
-
-
-
-router = APIRouter(prefix="/api/whatsapp", tags=["whatsapp"])
 
 _wa_sessions: dict = {}
 _wa_done: set[str] = set()
