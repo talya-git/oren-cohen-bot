@@ -156,6 +156,7 @@
   <button class="tab-btn" id="tab-email" onclick="switchTab('email')">📧 מיילים</button>
   <button class="tab-btn" id="tab-leads" onclick="switchTab('leads')">👥 לקוחות פלורידה</button>
   <button class="tab-btn" id="tab-invite" onclick="switchTab('invite')">📨 שליחת זימונים</button>
+  <button class="tab-btn" id="tab-cal" onclick="switchTab('cal')">📅 לוח שנה</button>
 </div>
 
 <!-- Tab: נרשמים -->
@@ -341,6 +342,72 @@
 </div>
 </div>
 
+<!-- Tab: לוח שנה -->
+<div class="tab-content" id="content-cal">
+<div class="main">
+
+  <!-- כותרת לוח -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <div>
+      <h2 style="font-size:20px;color:#1a2c1e">November 2026 🇺🇸</h2>
+      <p style="font-size:13px;color:#6b7280;margin-top:2px">לוח פגישות פלורידה</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <span style="display:flex;align-items:center;gap:5px;font-size:12px">
+        <span style="width:12px;height:12px;border-radius:3px;background:#dcfce7;border:1px solid #16a34a;display:inline-block"></span>🤝 אישית
+      </span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:12px">
+        <span style="width:12px;height:12px;border-radius:3px;background:#fef9c3;border:1px solid #d97706;display:inline-block"></span>🏛️ כנס
+      </span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:12px">
+        <span style="width:12px;height:12px;border-radius:3px;background:#e0f2fe;border:1px solid #0369a1;display:inline-block"></span>💻 Zoom
+      </span>
+      <button onclick="openCalEventModal()" style="background:#c9a84c;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">+ הוסף אירוע</button>
+    </div>
+  </div>
+
+  <!-- גריד לוח שנה -->
+  <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+    <!-- ימי שבוע -->
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);background:#1a2c1e">
+      <div style="padding:10px;text-align:center;font-size:12px;font-weight:700;color:#c9a84c">Sun</div>
+      <div style="padding:10px;text-align:center;font-size:12px;font-weight:700;color:#c9a84c">Mon</div>
+      <div style="padding:10px;text-align:center;font-size:12px;font-weight:700;color:#c9a84c">Tue</div>
+      <div style="padding:10px;text-align:center;font-size:12px;font-weight:700;color:#c9a84c">Wed</div>
+      <div style="padding:10px;text-align:center;font-size:12px;font-weight:700;color:#c9a84c">Thu</div>
+      <div style="padding:10px;text-align:center;font-size:12px;font-weight:700;color:#c9a84c">Fri</div>
+      <div style="padding:10px;text-align:center;font-size:12px;font-weight:700;color:#c9a84c">Sat</div>
+    </div>
+    <!-- תאים -->
+    <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid #e5e7eb"></div>
+  </div>
+
+</div>
+</div>
+
+<!-- Cal Event Modal -->
+<div class="modal-overlay" id="cal-event-modal">
+  <div class="modal" style="max-width:420px">
+    <h3>📅 הוסף אירוע ללוח</h3>
+    <label>תאריך *</label>
+    <input type="date" id="cal-date" min="2026-11-01" max="2026-11-30" />
+    <label>שעה</label>
+    <input type="text" id="cal-time" placeholder="e.g. 7:00 PM" />
+    <label>סוג אירוע *</label>
+    <select id="cal-type">
+      <option value="personal">🤝 פגישה אישית</option>
+      <option value="community">🏛️ כנס קהילתי</option>
+      <option value="webinar">💻 וובינר Zoom</option>
+    </select>
+    <label>תיאור / מיקום</label>
+    <input type="text" id="cal-desc" placeholder="e.g. Miami Beach Community Center" />
+    <div class="modal-btns">
+      <button class="btn-save" onclick="saveCalEvent()">שמור</button>
+      <button class="btn-cancel" onclick="closeCalModal()">ביטול</button>
+    </div>
+  </div>
+</div>
+
 <!-- Transcript Modal -->
 <div class="modal-overlay" id="transcript-modal">
   <div class="modal transcript-modal">
@@ -440,12 +507,13 @@ async function fetchAll() {
 
 // ── Tabs ──
 function switchTab(tab) {
-  ['reg','wa','email','leads','invite'].forEach(t => {
+  ['reg','wa','email','leads','invite','cal'].forEach(t => {
     document.getElementById('tab-'+t).classList.toggle('active', t===tab);
     document.getElementById('content-'+t).classList.toggle('active', t===tab);
   });
   if (tab === 'leads' && leadsData.length === 0) fetchLeads();
   if (tab === 'invite') updateInviteCounts();
+  if (tab === 'cal') renderCalendar();
 }
 
 // ── Registrations ──
@@ -680,6 +748,89 @@ async function sendInvites(type, channel) {
     btn.disabled = false;
     btn.textContent = btn.textContent.replace('שולח...', channel === 'wa' ? '💬 שלח בוואטסאפ' : '📧 שלח במייל');
   }
+}
+
+// ── Calendar ──
+let calEvents = JSON.parse(localStorage.getItem('fl_cal_events') || '[]');
+
+const CAL_COLORS = {
+  personal:  { bg: '#dcfce7', border: '#16a34a', text: '#166534' },
+  community: { bg: '#fef9c3', border: '#d97706', text: '#854d0e' },
+  webinar:   { bg: '#e0f2fe', border: '#0369a1', text: '#0369a1' },
+};
+const CAL_ICONS = { personal: '🤝', community: '🏛️', webinar: '💻' };
+
+function renderCalendar() {
+  const grid = document.getElementById('cal-grid');
+  // נובמבר 2026 מתחיל ביום ראשון (0=Sun)
+  const firstDay = new Date(2026, 10, 1).getDay(); // 0
+  const daysInMonth = 30;
+
+  // אסוף אירועים מהנרשמים
+  const regEvents = regData
+    .filter(r => r.meeting && r.internal_notes && r.internal_notes.match(/\d{4}-11-\d{2}/))
+    .map(r => {
+      const m = r.internal_notes.match(/(\d{4}-11-(\d{2}))/);
+      return m ? { day: parseInt(m[2]), type: r.meeting, label: r.name, time: '' } : null;
+    }).filter(Boolean);
+
+  // אירועים מהזימונים (שמורים ב-localStorage)
+  const allEvents = [...calEvents, ...regEvents];
+
+  let html = '';
+  // תאים ריקים לפני היום הראשון
+  for (let i = 0; i < firstDay; i++) {
+    html += `<div style="min-height:100px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;background:#fafafa"></div>`;
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dayEvents = allEvents.filter(e => e.day === d);
+    const isWeekend = (firstDay + d - 1) % 7 === 0 || (firstDay + d - 1) % 7 === 6;
+    const evHtml = dayEvents.map(e => {
+      const c = CAL_COLORS[e.type] || CAL_COLORS.personal;
+      return `<div style="background:${c.bg};border-right:3px solid ${c.border};color:${c.text};
+        font-size:11px;padding:2px 5px;border-radius:3px;margin-top:2px;
+        white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer"
+        title="${e.label}${e.time ? ' · ' + e.time : ''}" onclick="removeCalEvent(${e._id !== undefined ? e._id : -1})">
+        ${CAL_ICONS[e.type] || ''} ${e.label}${e.time ? ' ' + e.time : ''}
+      </div>`;
+    }).join('');
+    html += `<div style="min-height:100px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;
+      padding:6px;background:${isWeekend ? '#fafafa' : '#fff'};vertical-align:top;position:relative">
+      <div style="font-size:13px;font-weight:${dayEvents.length ? '700' : '400'};color:${dayEvents.length ? '#1a2c1e' : '#9ca3af'}">${d}</div>
+      ${evHtml}
+    </div>`;
+  }
+  grid.innerHTML = html;
+}
+
+function openCalEventModal() {
+  document.getElementById('cal-event-modal').classList.add('open');
+}
+function closeCalModal() {
+  document.getElementById('cal-event-modal').classList.remove('open');
+  ['cal-date','cal-time','cal-desc'].forEach(id => document.getElementById(id).value = '');
+}
+function saveCalEvent() {
+  const dateVal = document.getElementById('cal-date').value;
+  if (!dateVal) { alert('נא לבחור תאריך'); return; }
+  const day = parseInt(dateVal.split('-')[2]);
+  const type = document.getElementById('cal-type').value;
+  const time = document.getElementById('cal-time').value.trim();
+  const desc = document.getElementById('cal-desc').value.trim();
+  const label = desc || (type === 'personal' ? 'פגישה אישית' : type === 'community' ? 'כנס' : 'Zoom');
+  const newEvent = { _id: Date.now(), day, type, label, time };
+  calEvents.push(newEvent);
+  localStorage.setItem('fl_cal_events', JSON.stringify(calEvents));
+  closeCalModal();
+  renderCalendar();
+}
+function removeCalEvent(id) {
+  if (id < 0) return;
+  if (!confirm('להסיר אירוע זה?')) return;
+  calEvents = calEvents.filter(e => e._id !== id);
+  localStorage.setItem('fl_cal_events', JSON.stringify(calEvents));
+  renderCalendar();
 }
 
 // ── Utils ──
