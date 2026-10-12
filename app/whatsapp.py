@@ -4,6 +4,7 @@ import asyncio
 import os
 import time
 import requests
+from pathlib import Path
 
 from . import sehel
 
@@ -82,8 +83,161 @@ def send_template_reengagement(phone: str, name: str | None, lang: str = "he", a
     return result
 
 
-# === FastAPI router ===
-from fastapi import APIRouter, Request
+# === Florida Channel ===
+_florida_sessions: dict = {}
+_florida_done: set[str] = set()
+_FLORIDA_PROMPT = (Path(__file__).resolve().parent / "prompts" / "prompt_florida_en.md").read_text(encoding="utf-8")
+
+
+def send_template_florida(phone: str, name: str) -> dict:
+    """שולח את תבנית הפלורידה."""
+    normalized = phone.lstrip("+").replace(" ", "").replace("-", "")
+    display_name = name or "there"
+    resp = requests.post(
+        f"https://graph.facebook.com/{META_API_VERSION}/{META_PHONE_NUMBER_ID}/messages",
+        headers={"Authorization": f"Bearer {_token()}", "Content-Type": "application/json"},
+        json={
+            "messaging_product": "whatsapp",
+            "to": normalized,
+            "type": "template",
+            "template": {
+                "name": "floridatemplate",
+                "language": {"code": "en"},
+                "components": [{"type": "body", "parameters": [{"type": "text", "text": display_name}]}],
+            },
+        },
+        timeout=15,
+    )
+    result = resp.json()
+    print(f"[FLORIDA TEMPLATE] phone={normalized} status={resp.status_code} result={result}")
+    return result
+
+
+def start_florida_reengagement(phone: str, name: str | None) -> None:
+    """שולח הודעת פתיחה לערוץ פלורידה."""
+    from . import database as _db
+    from pathlib import Path
+
+    normalized = phone.lstrip("+").replace(" ", "").replace("-", "")
+    if normalized.startswith("05"):
+        normalized = "972" + normalized[1:]
+    elif len(normalized) == 10 and normalized[0] in "23456789" and not normalized.startswith("972"):
+        normalized = "1" + normalized
+
+    if _db.get_florida_sent(f"+{normalized}"):
+        print(f"[FLORIDA SKIP DUPLICATE] {normalized}")
+        raise Exception("DUPLICATE")
+
+    if name:
+        try:
+            fixed = name.encode("latin1").decode("utf-8")
+            name = fixed
+        except Exception:
+            pass
+    if name and not any(c.isalpha() for c in name):
+        name = None
+
+    result = send_template_florida(f"+{normalized}", name or "")
+    if result.get("error"):
+        raise Exception(result["error"].get("message", "Meta error"))
+
+    _db.mark_florida_sent(f"+{normalized}", name or "")
+    print(f"[FLORIDA SENT] {normalized} | {name}")
+
+
+async def _handle_florida_message(phone: str, text: str, _db) -> None:
+    """מעבד תגובה מלקוח פלורידה."""
+    from openai import OpenAI
+    import httpx as _hx
+    import json as _json
+
+    if phone in _florida_done:
+        send_message(f"+{phone}", "We look forward to seeing you in Florida! Have a good day 😊")
+        return
+
+    # בנה session אם לא קיים
+    if phone not in _florida_sessions:
+        client = OpenAI(
+            api_key=os.getenv("OPENAI_API_KEY"),
+            http_client=_hx.Client(verify=False, timeout=60.0),
+        )
+        system = _FLORIDA_PROMPT + (
+            "\n\n--- Output format ---\n"
+            "Return valid JSON only: {reply, handoff_to_human}\n"
+            "No text outside the JSON."
+        )
+        _florida_sessions[phone] = {
+            "client": client,
+            "messages": [{"role": "system", "content": system}],
+        }
+
+    session = _florida_sessions[phone]
+    session["messages"].append({"role": "user", "content": text})
+
+    try:
+        resp = session["client"].chat.completions.create(
+            model="gpt-4o",
+            messages=session["messages"],
+            temperature=0.5,
+        )
+        raw = resp.choices[0].message.content.strip()
+        session["messages"].append({"role": "assistant", "content": raw})
+
+        # חילוץ JSON
+        import re as _re
+        m = _re.search(r'\{[\s\S]*\}', raw)
+        data = _json.loads(m.group()) if m else {}
+        reply = data.get("reply", raw)
+        handoff = data.get("handoff_to_human", False)
+    except Exception as e:
+        print(f"[FLORIDA GPT ERROR] {e}")
+        reply = "Thank you for your message! Please fill out our form and we'll be in touch: https://oren-cohen-bot.onrender.com/florida"
+        handoff = False
+
+    # ניקוי markdown
+    import re as _re2
+    reply = _re2.sub(r'\*{1,3}([^*]+)\*{1,3}', r'\1', reply).strip()
+
+    # שמירת תמליל
+    record = _db.get_florida_record(f"+{phone}")
+    old_transcript = (record.get("transcript") or "") if record else ""
+    new_transcript = old_transcript + f"\nClient: {text}\nDaniel: {reply}"
+    _db.update_florida_transcript(f"+{phone}", new_transcript.strip())
+
+    time.sleep(3)
+    send_message(f"+{phone}", reply)
+
+    if handoff:
+        _florida_done.add(phone)
+        _florida_sessions.pop(phone, None)
+        print(f"[FLORIDA HANDOFF] {phone}")
+
+
+@router.post("/florida/start")
+async def florida_start_endpoint(request: Request):
+    """שולח הודעת פתיחה לרשימת לקוחות פלורידה."""
+    data = await request.json()
+    if data.get("secret") != "florida2026send":
+        return {"error": "unauthorized"}
+    leads = data.get("leads", [])
+    results = []
+    for lead in leads:
+        phone = str(lead.get("phone", "")).strip()
+        name  = lead.get("name") or None
+        if not phone:
+            continue
+        try:
+            start_florida_reengagement(phone, name)
+            results.append({"phone": phone, "status": "sent"})
+        except Exception as e:
+            results.append({"phone": phone, "status": "error", "reason": str(e)})
+        time.sleep(2)
+    sent  = sum(1 for r in results if r["status"] == "sent")
+    failed = sum(1 for r in results if r["status"] == "error")
+    return {"sent": sent, "failed": failed, "results": results}
+
+
+
 
 router = APIRouter(prefix="/api/whatsapp", tags=["whatsapp"])
 
@@ -285,10 +439,18 @@ async def whatsapp_webhook(request: Request):
                 from . import database as _db
                 conn = _db.get_db()
                 cur = conn.cursor()
-                cur.execute(f"DELETE FROM reengagement_sent WHERE phone={_db.PH}", (f"+{recipient}",))
+                error_code = ""
+                try:
+                    error_code = str(status_update.get("errors", [{}])[0].get("code", ""))
+                except Exception:
+                    pass
+                cur.execute(
+                    f"UPDATE reengagement_sent SET error={_db.PH} WHERE phone={_db.PH}",
+                    (f"failed:{error_code}", f"+{recipient}")
+                )
                 conn.commit()
                 conn.close()
-                print(f"[FAILED-DELETED] {recipient}")
+                print(f"[FAILED-MARKED] {recipient} code={error_code}")
             return {"status": "status_update"}
         msg = change["messages"][0]
         phone = msg["from"]
@@ -337,7 +499,14 @@ async def whatsapp_webhook(request: Request):
             return
         combined = " | ".join(msgs) if len(msgs) > 1 else msgs[0]
         print(f"[DEBOUNCE] {p} — {len(msgs)} הודעות: {combined[:80]}")
-        await _handle_message(p, combined, _db)
+        # נתב לערוץ פלורידה אם המספר ברשימה
+        from . import database as _db2
+        fl_phones, _ = _db2._get_florida_phones_and_emails()
+        p_clean = p.lstrip('+').replace('-','').replace(' ','')
+        if p_clean in fl_phones and p not in _wa_sessions:
+            await _handle_florida_message(p_clean, combined, _db2)
+        else:
+            await _handle_message(p, combined, _db)
 
     task = asyncio.create_task(_process_after_delay(phone))
     _wa_debounce_tasks[phone] = task

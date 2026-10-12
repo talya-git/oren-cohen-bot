@@ -118,7 +118,7 @@
           <input type="email" id="f-email" placeholder="david@email.com" />
         </div>
         <div class="field">
-          <label>City / Area in Florida</label>
+          <label>City, State <span class="req">*</span></label>
           <input type="text" id="f-city" placeholder="Miami, FL" />
         </div>
       </div>
@@ -226,11 +226,12 @@ async function submitForm() {
   const name   = document.getElementById('f-name').value.trim();
   const phone  = document.getElementById('f-phone').value.trim();
   const email  = document.getElementById('f-email').value.trim();
+  const city   = document.getElementById('f-city').value.trim();
   const meeting = document.querySelector('input[name="meeting"]:checked')?.value;
   const status  = document.querySelector('input[name="status"]:checked')?.value;
 
-  if (!name || !phone || !email || !meeting || !status) {
-    alert('Please fill in all required fields.');
+  if (!name || !phone || !email || !city || !meeting || !status) {
+    alert('Please fill in all required fields (Name, Phone, Email, City/State, Meeting type, and Purchase status).');
     return;
   }
 
