@@ -155,6 +155,7 @@
   <button class="tab-btn" id="tab-wa" onclick="switchTab('wa')">💬 שיחות וואטסאפ</button>
   <button class="tab-btn" id="tab-email" onclick="switchTab('email')">📧 מיילים</button>
   <button class="tab-btn" id="tab-leads" onclick="switchTab('leads')">👥 לקוחות פלורידה</button>
+  <button class="tab-btn" id="tab-invite" onclick="switchTab('invite')">📨 שליחת זימונים</button>
 </div>
 
 <!-- Tab: נרשמים -->
@@ -262,6 +263,82 @@
 </div>
 </div>
 
+<!-- Tab: שליחת זימונים -->
+<div class="tab-content" id="content-invite">
+<div class="main">
+
+  <!-- כרטיסיית זום -->
+  <div style="background:#fff;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-right:4px solid #0369a1">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <h3 style="font-size:16px;color:#0369a1">💻 זימון לוובינר Zoom</h3>
+      <span id="webinar-count" style="font-size:13px;color:#6b7280"></span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div>
+        <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">תאריך *</label>
+        <input type="text" id="zoom-date" placeholder="e.g. November 18, 2026" style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none" />
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">שעה *</label>
+        <input type="text" id="zoom-time" placeholder="e.g. 7:00 PM EST" style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none" />
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">קישור Zoom *</label>
+      <input type="url" id="zoom-link" placeholder="https://zoom.us/j/..." style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none" />
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">הודעה אישית (אופציונלי)</label>
+      <textarea id="zoom-msg" rows="3" placeholder="Hi {{name}}, You're invited to our exclusive Zoom webinar..." style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none;resize:vertical"></textarea>
+      <div style="font-size:11px;color:#9ca3af;margin-top:4px">אם ריק — תישלח הודעה ברירת מחדל</div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button onclick="sendInvites('webinar','wa')" style="background:#25d366;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
+        💬 שלח בוואטסאפ לכל נרשמי זום
+      </button>
+      <button onclick="sendInvites('webinar','email')" style="background:#6366f1;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
+        📧 שלח במייל לכל נרשמי זום
+      </button>
+    </div>
+  </div>
+
+  <!-- כרטיסיית כנס -->
+  <div style="background:#fff;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-right:4px solid #d97706">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <h3 style="font-size:16px;color:#d97706">🏛️ זימון לכנס קהילתי</h3>
+      <span id="community-count" style="font-size:13px;color:#6b7280"></span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div>
+        <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">תאריך *</label>
+        <input type="text" id="conf-date" placeholder="e.g. November 20, 2026" style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none" />
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">שעה *</label>
+        <input type="text" id="conf-time" placeholder="e.g. 7:30 PM" style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none" />
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">מיקום / כתובת *</label>
+      <input type="text" id="conf-location" placeholder="e.g. 123 Collins Ave, Miami Beach, FL" style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none" />
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">הודעה אישית (אופציונלי)</label>
+      <textarea id="conf-msg" rows="3" placeholder="Hi {{name}}, You're invited to our community gathering..." style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none;resize:vertical"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button onclick="sendInvites('community','wa')" style="background:#25d366;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
+        💬 שלח בוואטסאפ לכל נרשמי כנס
+      </button>
+      <button onclick="sendInvites('community','email')" style="background:#6366f1;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
+        📧 שלח במייל לכל נרשמי כנס
+      </button>
+    </div>
+  </div>
+
+  <div id="invite-result" style="display:none;background:#dcfce7;border:1px solid #16a34a;border-radius:8px;padding:14px;font-size:14px;color:#166534"></div>
+
+</div>
 </div>
 
 <!-- Transcript Modal -->
@@ -363,11 +440,12 @@ async function fetchAll() {
 
 // ── Tabs ──
 function switchTab(tab) {
-  ['reg','wa','email','leads'].forEach(t => {
+  ['reg','wa','email','leads','invite'].forEach(t => {
     document.getElementById('tab-'+t).classList.toggle('active', t===tab);
     document.getElementById('content-'+t).classList.toggle('active', t===tab);
   });
   if (tab === 'leads' && leadsData.length === 0) fetchLeads();
+  if (tab === 'invite') updateInviteCounts();
 }
 
 // ── Registrations ──
@@ -550,6 +628,58 @@ async function toggleSent(id, sent) {
   const r = leadsData.find(x=>x.id===id);
   if (r) { r.sent = sent; r.sent_at = sent ? new Date().toISOString() : null; }
   renderLeads();
+}
+
+// ── Invites ──
+function updateInviteCounts() {
+  const webinar   = regData.filter(r => r.meeting === 'webinar').length;
+  const community = regData.filter(r => r.meeting === 'community').length;
+  document.getElementById('webinar-count').textContent   = `${webinar} נרשמים`;
+  document.getElementById('community-count').textContent = `${community} נרשמים`;
+}
+
+async function sendInvites(type, channel) {
+  const isZoom = type === 'webinar';
+  const date     = document.getElementById(isZoom ? 'zoom-date'     : 'conf-date').value.trim();
+  const time     = document.getElementById(isZoom ? 'zoom-time'     : 'conf-time').value.trim();
+  const link     = isZoom ? document.getElementById('zoom-link').value.trim() : '';
+  const location = isZoom ? '' : document.getElementById('conf-location').value.trim();
+  const customMsg = document.getElementById(isZoom ? 'zoom-msg' : 'conf-msg').value.trim();
+
+  if (!date || !time || (isZoom && !link) || (!isZoom && !location)) {
+    alert('נא למלא את כל השדות הנדרשים'); return;
+  }
+
+  const recipients = regData.filter(r => r.meeting === type);
+  if (!recipients.length) { alert('אין נרשמים לסוג זה'); return; }
+
+  const typeLabel = isZoom ? 'Zoom Webinar' : 'Community Gathering';
+  const confirmed = confirm(`שליחת זימון ל-${recipients.length} נרשמים ב${channel === 'wa' ? 'וואטסאפ' : 'מייל'}?`);
+  if (!confirmed) return;
+
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = 'שולח...';
+
+  try {
+    const res = await fetch('/api/florida/send-invites', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        type, channel, date, time, link, location, customMsg,
+        secret: 'florida2026send'
+      })
+    });
+    const data = await res.json();
+    const resultEl = document.getElementById('invite-result');
+    resultEl.style.display = 'block';
+    resultEl.textContent = `✅ נשלחו ${data.sent} זימונים בהצלחה${data.failed ? ` | נכשלו ${data.failed}` : ''}`;
+    setTimeout(() => resultEl.style.display = 'none', 5000);
+  } catch(e) {
+    alert('שגיאה בשליחה');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = btn.textContent.replace('שולח...', channel === 'wa' ? '💬 שלח בוואטסאפ' : '📧 שלח במייל');
+  }
 }
 
 // ── Utils ──

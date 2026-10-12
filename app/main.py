@@ -1119,6 +1119,100 @@ def florida_unmark_sent(lead_id: int):
     return {"status": "ok"}
 
 
+@app.post("/api/florida/send-invites")
+async def florida_send_invites(request: Request):
+    data = await request.json()
+    if data.get("secret") != "florida2026send":
+        return {"error": "unauthorized"}
+
+    type_     = data.get("type")      # webinar / community
+    channel   = data.get("channel")   # wa / email
+    date      = data.get("date", "")
+    time_     = data.get("time", "")
+    link      = data.get("link", "")
+    location  = data.get("location", "")
+    custom    = data.get("customMsg", "")
+
+    # בנה הודעה
+    if type_ == "webinar":
+        default_msg = (
+            f"Hi {{name}},\n\n"
+            f"You're invited to our exclusive live Zoom webinar with Oren Cohen Group.\n\n"
+            f"📅 Date: {date}\n"
+            f"🕐 Time: {time_}\n"
+            f"💻 Zoom Link: {link}\n\n"
+            f"We look forward to seeing you there!\n"
+            f"Oren Cohen Group"
+        )
+    else:
+        default_msg = (
+            f"Hi {{name}},\n\n"
+            f"You're invited to our exclusive community gathering in Florida.\n\n"
+            f"📅 Date: {date}\n"
+            f"🕐 Time: {time_}\n"
+            f"📍 Location: {location}\n\n"
+            f"We look forward to seeing you there!\n"
+            f"Oren Cohen Group"
+        )
+
+    message_template = custom if custom else default_msg
+
+    # שלוף נרשמים
+    registrations = db.get_florida_registrations()
+    recipients = [r for r in registrations if r.get("meeting") == type_]
+
+    sent, failed = 0, 0
+
+    if channel == "wa":
+        from .whatsapp import send_message
+        for r in recipients:
+            phone = r.get("phone", "")
+            name  = r.get("name", "there")
+            if not phone:
+                continue
+            msg = message_template.replace("{name}", name.split()[0] if name else "there")
+            try:
+                send_message(phone, msg)
+                sent += 1
+            except Exception as e:
+                print(f"[INVITE WA ERROR] {phone}: {e}")
+                failed += 1
+            import asyncio
+            await asyncio.sleep(1)
+
+    elif channel == "email":
+        from .mailer import send_email
+        for r in recipients:
+            email = r.get("email", "")
+            name  = r.get("name", "")
+            if not email:
+                continue
+            subject = f"You're Invited — Oren Cohen Group {'Zoom Webinar' if type_ == 'webinar' else 'Community Gathering'}"
+            msg = message_template.replace("{name}", name.split()[0] if name else "there")
+            try:
+                send_email(to=email, subject=subject, body=msg)
+                sent += 1
+            except Exception as e:
+                print(f"[INVITE EMAIL ERROR] {email}: {e}")
+                failed += 1
+
+    print(f"[INVITES] type={type_} channel={channel} sent={sent} failed={failed}")
+    return {"sent": sent, "failed": failed}
+
+
+@app.get("/api/florida/event-info")
+def florida_event_info():
+    """מחזיר פרטי האירוע הנוכחי לבוט."""
+    return db.get_florida_event_info()
+
+
+@app.post("/api/florida/event-info")
+async def florida_save_event_info(request: Request):
+    data = await request.json()
+    db.save_florida_event_info(data)
+    return {"status": "ok"}
+
+
 @app.get("/florida-admin")
 def florida_admin_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "florida-admin.html")

@@ -1060,3 +1060,112 @@ def get_florida_emails() -> list:
         if email in florida_emails:
             result.append(r)
     return result
+
+
+def get_florida_sent(phone: str) -> bool:
+    """בודק אם נשלחה הודעת פלורידה למספר."""
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            f"SELECT 1 FROM florida_leads WHERE (phone1={PH} OR phone2={PH}) AND sent=TRUE LIMIT 1",
+            (phone, phone)
+        )
+        exists = _fetchone(cur) is not None
+    except Exception:
+        exists = False
+    conn.close()
+    return exists
+
+
+def mark_florida_sent(phone: str, name: str) -> None:
+    """מסמן שנשלחה הודעת פלורידה."""
+    conn = get_db()
+    cur = conn.cursor()
+    now = datetime.now(timezone.utc).isoformat()
+    try:
+        cur.execute(
+            f"UPDATE florida_leads SET sent={PH}, sent_at={PH} WHERE phone1={PH} OR phone2={PH}",
+            (True if DATABASE_URL else 1, now, phone, phone)
+        )
+        conn.commit()
+    except Exception:
+        pass
+    conn.close()
+
+
+def get_florida_record(phone: str) -> dict | None:
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            f"SELECT * FROM florida_leads WHERE phone1={PH} OR phone2={PH} LIMIT 1",
+            (phone, phone)
+        )
+        row = _fetchone(cur)
+    except Exception:
+        row = None
+    conn.close()
+    return row
+
+
+def update_florida_transcript(phone: str, transcript: str) -> None:
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            f"UPDATE florida_leads SET transcript={PH} WHERE phone1={PH} OR phone2={PH}",
+            (transcript, phone, phone)
+        )
+        conn.commit()
+    except Exception:
+        pass
+    conn.close()
+
+
+def save_florida_event_info(data: dict) -> None:
+    """שומר פרטי אירוע פלורידה (תאריך, שעה, קישור זום וכו')."""
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        if DATABASE_URL:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS florida_event_info (
+                    key TEXT PRIMARY KEY, value TEXT, updated_at TIMESTAMPTZ DEFAULT NOW()
+                )
+            """)
+            for k, v in data.items():
+                cur.execute("""
+                    INSERT INTO florida_event_info (key, value, updated_at)
+                    VALUES (%s, %s, NOW())
+                    ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value, updated_at=NOW()
+                """, (k, str(v)))
+        else:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS florida_event_info (
+                    key TEXT PRIMARY KEY, value TEXT, updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            for k, v in data.items():
+                cur.execute(
+                    "INSERT OR REPLACE INTO florida_event_info (key, value) VALUES (?, ?)",
+                    (k, str(v))
+                )
+        conn.commit()
+    except Exception as e:
+        print(f"[FLORIDA EVENT INFO ERROR] {e}")
+    conn.close()
+
+
+def get_florida_event_info() -> dict:
+    """מחזיר פרטי אירוע פלורידה."""
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT key, value FROM florida_event_info")
+        rows = _fetchall(cur)
+        result = {r['key']: r['value'] for r in rows}
+    except Exception:
+        result = {}
+    conn.close()
+    return result
