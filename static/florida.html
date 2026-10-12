@@ -10,14 +10,12 @@
     body {
       font-family: 'Inter', sans-serif;
       background: linear-gradient(160deg, #0a1628 0%, #0f2318 60%, #0a1628 100%);
-      min-height: 100vh;
-      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
       padding: 24px 16px;
     }
     .card {
-      background: #faf8f3; border: 1px solid #c9a84c;
-      border-radius: 12px; width: 100%; max-width: 520px;
-      box-shadow: 0 24px 80px rgba(0,0,0,0.6); overflow: hidden;
+      background: #faf8f3; border: 1px solid #c9a84c; border-radius: 12px;
+      width: 100%; max-width: 520px; box-shadow: 0 24px 80px rgba(0,0,0,0.6); overflow: hidden;
     }
     .card-header {
       background: linear-gradient(135deg, #0f2318, #0a1628);
@@ -28,16 +26,10 @@
       background: linear-gradient(90deg, transparent, #c9a84c 30%, #e8c96a 50%, #c9a84c 70%, transparent);
     }
     .card-header img { height: 110px; margin-bottom: 14px; }
-    .card-header h1 {
-      font-family: 'Cormorant Garamond', serif;
-      color: #c9a84c; font-size: 26px; font-weight: 600; margin-bottom: 6px;
-    }
+    .card-header h1 { font-family: 'Cormorant Garamond', serif; color: #c9a84c; font-size: 26px; font-weight: 600; margin-bottom: 6px; }
     .card-header .sub { color: #8a9e8a; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; }
     .card-body { padding: 24px 28px 32px; }
-    .section-label {
-      font-size: 10px; font-weight: 700; letter-spacing: 2px;
-      text-transform: uppercase; color: #c9a84c; margin: 22px 0 10px;
-    }
+    .section-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #c9a84c; margin: 22px 0 10px; }
     .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
     .field label { font-size: 11px; font-weight: 600; color: #5a4a38; letter-spacing: 0.5px; }
     .field input, .field textarea, .field select {
@@ -54,12 +46,33 @@
     .radio-item {
       display: flex; align-items: center; gap: 10px;
       padding: 9px 13px; border: 1.5px solid #e0d8c8; border-radius: 8px;
-      cursor: pointer; background: #fff; transition: all .2s;
-      font-size: 13px; color: #2a1f0e;
+      cursor: pointer; background: #fff; transition: all .2s; font-size: 13px; color: #2a1f0e;
     }
     .radio-item:hover { border-color: #c9a84c; background: #fdf8f0; }
     .radio-item.selected { border-color: #c9a84c; background: #fdf8f0; }
     .radio-item input { accent-color: #c9a84c; flex-shrink: 0; }
+
+    /* Meeting cards */
+    .meeting-cards { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+    .meeting-card {
+      display: flex; align-items: center; gap: 0;
+      border: 1.5px solid #e0d8c8; border-radius: 10px;
+      cursor: pointer; overflow: hidden; transition: border-color .2s, box-shadow .2s; background: #fff;
+    }
+    .meeting-card:hover { border-color: #c9a84c; box-shadow: 0 2px 12px rgba(201,168,76,.15); }
+    .meeting-card.selected { border-color: #c9a84c; box-shadow: 0 2px 16px rgba(201,168,76,.2); }
+    .meeting-card input[type=radio] { display: none; }
+    .mc-color { width: 6px; align-self: stretch; flex-shrink: 0; background: #e0d8c8; transition: background .2s; }
+    .meeting-card.selected .mc-color { background: #c9a84c; }
+    .mc-body { padding: 12px 14px; flex: 1; }
+    .mc-title { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-bottom: 2px; }
+    .mc-desc { font-size: 11px; color: #7a6a58; line-height: 1.4; }
+    .mc-tag { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 20px; margin-right: 14px; flex-shrink: 0; white-space: nowrap; }
+    .tag-personal  { background: #dcfce7; color: #166534; }
+    .tag-community { background: #fef9c3; color: #854d0e; }
+    .tag-webinar   { background: #e0f2fe; color: #0369a1; }
+
     .btn-submit {
       width: 100%; padding: 14px;
       background: linear-gradient(135deg, #c9a84c, #b8943a);
@@ -72,10 +85,7 @@
     .footer-note { text-align: center; font-size: 11px; color: #9a8a78; margin-top: 14px; }
     .success-screen { display: none; text-align: center; padding: 48px 28px; }
     .success-screen .check { font-size: 56px; margin-bottom: 16px; }
-    .success-screen h3 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 26px; color: #c9a84c; margin-bottom: 10px;
-    }
+    .success-screen h3 { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: #c9a84c; margin-bottom: 10px; }
     .success-screen p { font-size: 13px; color: #6a5a48; line-height: 1.8; }
     .success-screen a { color: #c9a84c; }
   </style>
@@ -113,6 +123,37 @@
         </div>
       </div>
 
+      <div class="section-label">How Would You Like to Connect? <span class="req">*</span></div>
+      <div class="meeting-cards">
+        <label class="meeting-card" id="mc1" onclick="selCard(this,'personal')">
+          <input type="radio" name="meeting" value="personal" />
+          <div class="mc-color"></div>
+          <div class="mc-body">
+            <div class="mc-title">Private Consultation</div>
+            <div class="mc-desc">A dedicated one-on-one session with Oren & Roni, tailored to your goals.</div>
+          </div>
+          <span class="mc-tag tag-personal">1-on-1</span>
+        </label>
+        <label class="meeting-card" id="mc2" onclick="selCard(this,'community')">
+          <input type="radio" name="meeting" value="community" />
+          <div class="mc-color"></div>
+          <div class="mc-body">
+            <div class="mc-title">Community Gathering</div>
+            <div class="mc-desc">Group event with presentation, live Q&A and networking.</div>
+          </div>
+          <span class="mc-tag tag-community">In-Person</span>
+        </label>
+        <label class="meeting-card" id="mc3" onclick="selCard(this,'webinar')">
+          <input type="radio" name="meeting" value="webinar" />
+          <div class="mc-color"></div>
+          <div class="mc-body">
+            <div class="mc-title">Live Zoom Webinar</div>
+            <div class="mc-desc">Join our exclusive online session from anywhere in the world.</div>
+          </div>
+          <span class="mc-tag tag-webinar">Online</span>
+        </label>
+      </div>
+
       <div class="section-label">About Your Interest</div>
 
       <div class="field">
@@ -121,23 +162,6 @@
           <label class="radio-item" onclick="sel(this,'rg-status')"><input type="radio" name="status" value="actively" /> Actively looking to buy</label>
           <label class="radio-item" onclick="sel(this,'rg-status')"><input type="radio" name="status" value="future" /> Considering a purchase in the future</label>
           <label class="radio-item" onclick="sel(this,'rg-status')"><input type="radio" name="status" value="info" /> Interested in gathering more information</label>
-        </div>
-      </div>
-
-      <div class="field-row">
-        <div class="field">
-          <label>Approximate Budget</label>
-          <input type="text" id="f-budget" placeholder="e.g. $500,000" />
-        </div>
-        <div class="field">
-          <label>Currency</label>
-          <select id="f-currency">
-            <option value="">Select currency</option>
-            <option value="USD">USD — US Dollar</option>
-            <option value="ILS">ILS — Israeli Shekel</option>
-            <option value="EUR">EUR — Euro</option>
-            <option value="GBP">GBP — British Pound</option>
-          </select>
         </div>
       </div>
 
@@ -192,14 +216,20 @@ function sel(el, group) {
   document.querySelectorAll(`#${group} .radio-item`).forEach(i => i.classList.remove('selected'));
   el.classList.add('selected');
 }
+function selCard(el, val) {
+  document.querySelectorAll('.meeting-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  el.querySelector('input[type=radio]').checked = true;
+}
 
 async function submitForm() {
   const name   = document.getElementById('f-name').value.trim();
   const phone  = document.getElementById('f-phone').value.trim();
   const email  = document.getElementById('f-email').value.trim();
-  const status = document.querySelector('input[name="status"]:checked')?.value;
+  const meeting = document.querySelector('input[name="meeting"]:checked')?.value;
+  const status  = document.querySelector('input[name="status"]:checked')?.value;
 
-  if (!name || !phone || !email || !status) {
+  if (!name || !phone || !email || !meeting || !status) {
     alert('Please fill in all required fields.');
     return;
   }
@@ -207,16 +237,13 @@ async function submitForm() {
   const btn = document.getElementById('btn-submit');
   btn.disabled = true; btn.textContent = 'Submitting…';
 
-  const budget   = document.getElementById('f-budget').value.trim();
-  const currency = document.getElementById('f-currency').value;
-  const proptype = document.querySelector('input[name="proptype"]:checked')?.value || '';
+  const proptype  = document.querySelector('input[name="proptype"]:checked')?.value || '';
   const community = document.getElementById('f-community').value.trim();
-  const referral = document.querySelector('input[name="referral"]:checked')?.value || '';
-  const notes    = document.getElementById('f-notes').value.trim();
+  const referral  = document.querySelector('input[name="referral"]:checked')?.value || '';
+  const notes     = document.getElementById('f-notes').value.trim();
 
   const notesArr = [
-    status    ? `Purchase status: ${status}` : '',
-    budget    ? `Budget: ${budget} ${currency}` : '',
+    `Purchase status: ${status}`,
     proptype  ? `Property type: ${proptype}` : '',
     community ? `Community: ${community}` : '',
     referral  ? `Referrals: ${referral}` : '',
@@ -230,10 +257,7 @@ async function submitForm() {
       body: JSON.stringify({
         name, phone, email,
         city: document.getElementById('f-city').value.trim(),
-        meeting: 'personal',
-        interests: [],
-        notes: notesArr,
-        lang: 'en'
+        meeting, interests: [], notes: notesArr, lang: 'en'
       })
     });
   } catch(e) {}
