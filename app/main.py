@@ -1073,32 +1073,6 @@ def calendar_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "calendar.html")
 
 
-@app.on_event("startup")
-async def start_shishi_daily_report():
-    import asyncio
-    async def _shishi_report_loop():
-        while True:
-            try:
-                import zoneinfo
-                il_tz = zoneinfo.ZoneInfo("Asia/Jerusalem")
-                from datetime import datetime, timedelta
-                now = datetime.now(il_tz)
-                target = now.replace(hour=16, minute=0, second=0, microsecond=0)
-                if now >= target:
-                    target += timedelta(days=1)
-                await asyncio.sleep((target - now).total_seconds())
-                from . import database as _db
-                from .mailer import send_shishi_daily_report
-                regs = _db.get_shishi_registrations_today()
-                if regs:
-                    send_shishi_daily_report(regs)
-                    print(f"[SHISHI REPORT] sent {len(regs)} registrations")
-            except Exception as e:
-                print(f"[SHISHI REPORT ERROR] {e}")
-                await asyncio.sleep(3600)
-    asyncio.create_task(_shishi_report_loop())
-
-
 @app.get("/shishi")
 def shishi_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "shishi.html")
@@ -1316,11 +1290,6 @@ async def shishi_register(request: Request):
     guests = data.get("guests", 1)
     db.save_shishi_registration(name, phone, guests)
     print(f"[SHISHI] הרשמה: {name} | {phone} | {guests} משתתפים")
-    try:
-        from .mailer import send_shishi_registration
-        send_shishi_registration(name, phone, str(guests))
-    except Exception as e:
-        print(f"[SHISHI EMAIL ERROR] {e}")
     return {"status": "ok"}
 
 
