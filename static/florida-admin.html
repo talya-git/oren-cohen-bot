@@ -151,16 +151,16 @@
 
 <!-- Tabs -->
 <div style="background:#fff;border-bottom:2px solid #e5e7eb;display:flex;gap:0;">
-  <button class="tab-btn active" id="tab-reg" onclick="switchTab('reg')">📋 נרשמים</button>
+  <button class="tab-btn" id="tab-reg" onclick="switchTab('reg')">📋 נרשמים</button>
   <button class="tab-btn" id="tab-wa" onclick="switchTab('wa')">💬 שיחות וואטסאפ</button>
   <button class="tab-btn" id="tab-email" onclick="switchTab('email')">📧 מיילים</button>
   <button class="tab-btn" id="tab-leads" onclick="switchTab('leads')">👥 לקוחות פלורידה</button>
   <button class="tab-btn" id="tab-invite" onclick="switchTab('invite')">📨 שליחת זימונים</button>
-  <button class="tab-btn" id="tab-cal" onclick="switchTab('cal')">📅 לוח שנה</button>
+  <button class="tab-btn active" id="tab-cal" onclick="switchTab('cal')">📅 לוח שנה</button>
 </div>
 
 <!-- Tab: נרשמים -->
-<div class="tab-content active" id="content-reg">
+<div class="tab-content" id="content-reg">
 
 <div class="stats">
   <div class="stat total"><div class="num" id="s-total">0</div><div class="lbl">סה"כ</div></div>
@@ -274,16 +274,11 @@
       <h3 style="font-size:16px;color:#0369a1">💻 זימון לוובינר Zoom</h3>
       <span id="webinar-count" style="font-size:13px;color:#6b7280"></span>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-      <div>
-        <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">תאריך *</label>
-        <input type="text" id="zoom-date" placeholder="e.g. November 18, 2026" style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none" />
-      </div>
-      <div>
-        <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">שעה *</label>
-        <input type="text" id="zoom-time" placeholder="e.g. 7:00 PM EST" style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none" />
-      </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">תאריך מדויק *</label>
+      <input type="date" id="zoom-exact-date" min="2026-11-01" max="2026-11-30" style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none" />
     </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
     <div style="margin-bottom:12px">
       <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">קישור Zoom *</label>
       <input type="url" id="zoom-link" placeholder="https://zoom.us/j/..." style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none" />
@@ -309,9 +304,13 @@
       <h3 style="font-size:16px;color:#d97706">🏛️ זימון לכנס קהילתי</h3>
       <span id="community-count" style="font-size:13px;color:#6b7280"></span>
     </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">תאריך מדויק *</label>
+      <input type="date" id="conf-exact-date" min="2026-11-01" max="2026-11-30" style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none" />
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
       <div>
-        <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">תאריך *</label>
+        <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">תאריך לתצוגה (טקסט)</label>
         <input type="text" id="conf-date" placeholder="e.g. November 20, 2026" style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none" />
       </div>
       <div>
@@ -343,7 +342,7 @@
 </div>
 
 <!-- Tab: לוח שנה -->
-<div class="tab-content" id="content-cal">
+<div class="tab-content active" id="content-cal">
 <div class="main">
 
   <!-- כותרת לוח -->
@@ -708,7 +707,8 @@ function updateInviteCounts() {
 
 async function sendInvites(type, channel) {
   const isZoom = type === 'webinar';
-  const date     = document.getElementById(isZoom ? 'zoom-date'     : 'conf-date').value.trim();
+  const exactDate = document.getElementById(isZoom ? 'zoom-exact-date' : 'conf-exact-date').value;
+  const date     = exactDate ? new Date(exactDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : document.getElementById(isZoom ? 'zoom-date' : 'conf-date').value.trim();
   const time     = document.getElementById(isZoom ? 'zoom-time'     : 'conf-time').value.trim();
   const link     = isZoom ? document.getElementById('zoom-link').value.trim() : '';
   const location = isZoom ? '' : document.getElementById('conf-location').value.trim();
@@ -716,6 +716,15 @@ async function sendInvites(type, channel) {
 
   if (!date || !time || (isZoom && !link) || (!isZoom && !location)) {
     alert('נא למלא את כל השדות הנדרשים'); return;
+  }
+
+  // הוסף ללוח שנה אוטומטית אם יש תאריך מדויק
+  if (exactDate) {
+    const day = parseInt(exactDate.split('-')[2]);
+    const label = isZoom ? `Zoom Webinar · ${time}` : `כנס · ${time}`;
+    const newEvent = { _id: Date.now(), day, type, label, time };
+    calEvents.push(newEvent);
+    localStorage.setItem('fl_cal_events', JSON.stringify(calEvents));
   }
 
   const recipients = regData.filter(r => r.meeting === type);
