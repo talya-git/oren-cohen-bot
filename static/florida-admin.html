@@ -891,6 +891,8 @@ async function saveManual() {
   });
   closeModal(); await fetchAll();
 }
+// render calendar on first load
+if (document.getElementById("cal-grid")) renderCalendar();
 </script>
 </body>
 </html>
