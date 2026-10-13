@@ -142,6 +142,8 @@ def start_florida_reengagement(phone: str, name: str | None) -> None:
         raise Exception(result["error"].get("message", "Meta error"))
 
     _db.mark_florida_sent(f"+{normalized}", name or "")
+    # סמן בזיכרון שזה ערוץ פלורידה
+    _florida_sessions[normalized] = None  # placeholder עד שיענה
     print(f"[FLORIDA SENT] {normalized} | {name}")
 
 
@@ -502,11 +504,12 @@ async def whatsapp_webhook(request: Request):
             return
         combined = " | ".join(msgs) if len(msgs) > 1 else msgs[0]
         print(f"[DEBOUNCE] {p} — {len(msgs)} הודעות: {combined[:80]}")
-        # נתב לערוץ פלורידה אם המספר ברשימה
+        # נתב לערוץ פלורידה אם המספר ברשימה או ב-session
         from . import database as _db2
         fl_phones, _ = _db2._get_florida_phones_and_emails()
         p_clean = p.lstrip('+').replace('-','').replace(' ','')
-        if p_clean in fl_phones and p not in _wa_sessions:
+        is_florida = p_clean in fl_phones or p_clean in _florida_sessions or p in _florida_sessions
+        if is_florida and p not in _wa_sessions:
             await _handle_florida_message(p_clean, combined, _db2)
         else:
             await _handle_message(p, combined, _db)
