@@ -147,6 +147,7 @@
     <a href="/export-florida" class="btn">⬇️ Excel</a>
     <button onclick="fetchAll()" class="btn btn-dark">🔄 רענן</button>
     <button onclick="sendTest()" class="btn" style="background:#dc2626">🧪 שלח ניסיון</button>
+    <button onclick="resetSession()" class="btn" style="background:#7c3aed">🔄 אפס Session</button>
   </div>
 </div>
 
@@ -769,6 +770,18 @@ async function sendInvites(type, channel) {
 }
 
 // ── Test Send ──
+async function resetSession() {
+  const phone = prompt('טלפון לאיפוס session:', '0504183337');
+  if (!phone) return;
+  const res = await fetch('/api/whatsapp/florida/reset', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({phone})
+  });
+  const data = await res.json();
+  alert('Session אופס: ' + JSON.stringify(data));
+}
+
 async function sendTest() {
   const phone = prompt('טלפון לניסיון:', '0504183337');
   if (!phone) return;

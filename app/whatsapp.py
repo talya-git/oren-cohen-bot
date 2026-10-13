@@ -220,6 +220,20 @@ from fastapi import APIRouter, Request
 router = APIRouter(prefix="/api/whatsapp", tags=["whatsapp"])
 
 
+@router.post("/florida/reset")
+async def florida_reset(request: Request):
+    """מאפס session פלורידה למספר."""
+    data = await request.json()
+    phone = str(data.get("phone", "")).lstrip("+").replace("-","").replace(" ","")
+    _florida_sessions.pop(phone, None)
+    _florida_done.discard(phone)
+    _wa_sessions.pop(phone, None)
+    _wa_sessions.pop(f"+{phone}", None)
+    _wa_done.discard(phone)
+    print(f"[FLORIDA RESET] {phone}")
+    return {"status": "reset", "phone": phone}
+
+
 @router.post("/florida/start")
 async def florida_start_endpoint(request: Request):
     """שולח הודעת פתיחה לרשימת לקוחות פלורידה."""
