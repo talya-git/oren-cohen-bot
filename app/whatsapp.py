@@ -447,11 +447,14 @@ async def whatsapp_webhook(request: Request):
                     error_code = str(status_update.get("errors", [{}])[0].get("code", ""))
                 except Exception:
                     pass
-                cur.execute(
-                    f"UPDATE reengagement_sent SET error={_db.PH} WHERE phone={_db.PH}",
-                    (f"failed:{error_code}", f"+{recipient}")
-                )
-                conn.commit()
+                try:
+                    cur.execute(
+                        f"UPDATE reengagement_sent SET error={_db.PH} WHERE phone={_db.PH}",
+                        (f"failed:{error_code}", f"+{recipient}")
+                    )
+                    conn.commit()
+                except Exception:
+                    conn.rollback()
                 conn.close()
                 print(f"[FAILED-MARKED] {recipient} code={error_code}")
             return {"status": "status_update"}
