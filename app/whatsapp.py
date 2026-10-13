@@ -142,8 +142,6 @@ def start_florida_reengagement(phone: str, name: str | None) -> None:
         raise Exception(result["error"].get("message", "Meta error"))
 
     _db.mark_florida_sent(f"+{normalized}", name or "")
-    # סמן בזיכרון שזה ערוץ פלורידה
-    _florida_sessions[normalized] = None  # placeholder עד שיענה
     print(f"[FLORIDA SENT] {normalized} | {name}")
 
 
@@ -158,7 +156,7 @@ async def _handle_florida_message(phone: str, text: str, _db) -> None:
         return
 
     # בנה session אם לא קיים
-    if phone not in _florida_sessions:
+    if phone not in _florida_sessions or _florida_sessions[phone] is None:
         client = OpenAI(
             api_key=os.getenv("OPENAI_API_KEY"),
             http_client=_hx.Client(verify=False, timeout=60.0),
