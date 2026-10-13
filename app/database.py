@@ -1067,9 +1067,11 @@ def get_florida_sent(phone: str) -> bool:
     conn = get_db()
     cur = conn.cursor()
     try:
+        clean = phone.lstrip('+').replace('-','').replace(' ','')
+        with_plus = f'+{clean}'
         cur.execute(
-            f"SELECT 1 FROM florida_leads WHERE (phone1={PH} OR phone2={PH}) AND sent=TRUE LIMIT 1",
-            (phone, phone)
+            f"SELECT 1 FROM florida_leads WHERE (phone1={PH} OR phone2={PH} OR phone1={PH} OR phone2={PH}) AND sent=TRUE LIMIT 1",
+            (clean, clean, with_plus, with_plus)
         )
         exists = _fetchone(cur) is not None
     except Exception:

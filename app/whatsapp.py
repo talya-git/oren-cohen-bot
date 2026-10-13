@@ -512,6 +512,7 @@ async def whatsapp_webhook(request: Request):
             p_clean in _florida_sessions or
             p in _florida_sessions or
             _db2.get_florida_sent(f"+{p_clean}") or
+            _db2.get_florida_sent(p_clean) or
             _db2.get_florida_sent(f"+972{p_clean[2:]}" if p_clean.startswith('05') else f"+{p_clean}")
         )
         if is_florida and p not in _wa_sessions:
