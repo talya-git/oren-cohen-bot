@@ -481,7 +481,7 @@ function login() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     fetchAll(); setInterval(fetchAll, 30000);
-    switchTab('cal');
+    setTimeout(() => switchTab('cal'), 50);
   } else {
     document.getElementById('pw-err').style.display = 'block';
     document.getElementById('pw').value = '';
@@ -491,7 +491,7 @@ if (sessionStorage.getItem('fl_auth')) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   fetchAll(); setInterval(fetchAll, 30000);
-  switchTab('cal');
+  setTimeout(() => switchTab('cal'), 50);
 }
 
 async function fetchAll() {
