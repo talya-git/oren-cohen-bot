@@ -146,6 +146,7 @@
     <button class="btn btn-green" onclick="openAddModal()">+ הוסף פגישה</button>
     <a href="/export-florida" class="btn">⬇️ Excel</a>
     <button onclick="fetchAll()" class="btn btn-dark">🔄 רענן</button>
+    <button onclick="sendTest()" class="btn" style="background:#dc2626">🧪 שלח ניסיון</button>
   </div>
 </div>
 
@@ -479,7 +480,7 @@ function login() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     fetchAll(); setInterval(fetchAll, 30000);
-    renderCalendar();
+    setTimeout(renderCalendar, 100);
   } else {
     document.getElementById('pw-err').style.display = 'block';
     document.getElementById('pw').value = '';
@@ -489,7 +490,7 @@ if (sessionStorage.getItem('fl_auth')) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   fetchAll(); setInterval(fetchAll, 30000);
-  renderCalendar();
+  setTimeout(renderCalendar, 100);
 }
 
 async function fetchAll() {
@@ -759,6 +760,20 @@ async function sendInvites(type, channel) {
     btn.disabled = false;
     btn.textContent = btn.textContent.replace('שולח...', channel === 'wa' ? '💬 שלח בוואטסאפ' : '📧 שלח במייל');
   }
+}
+
+// ── Test Send ──
+async function sendTest() {
+  const phone = prompt('טלפון לניסיון:', '0504183337');
+  if (!phone) return;
+  const name = prompt('שם:', 'Test');
+  const res = await fetch('/api/whatsapp/florida/start', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({secret: 'florida2026send', leads: [{phone, name}]})
+  });
+  const data = await res.json();
+  alert(JSON.stringify(data));
 }
 
 // ── Calendar ──
