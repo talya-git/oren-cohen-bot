@@ -479,6 +479,7 @@ function login() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     fetchAll(); setInterval(fetchAll, 30000);
+    renderCalendar();
   } else {
     document.getElementById('pw-err').style.display = 'block';
     document.getElementById('pw').value = '';
@@ -488,6 +489,7 @@ if (sessionStorage.getItem('fl_auth')) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   fetchAll(); setInterval(fetchAll, 30000);
+  renderCalendar();
 }
 
 async function fetchAll() {
