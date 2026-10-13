@@ -469,6 +469,7 @@
 <script>
 const PW = 'florida2026';
 let regData = [], waData = [], emailData = [];
+let calEvents = JSON.parse(localStorage.getItem('fl_cal_events') || '[]');
 const MEETING_LABEL = { personal:'🤝 פגישה אישית', community:'🏛️ כנס קהילתי', webinar:'💻 Zoom', manual:'✏️ ידני' };
 const MEETING_CLS   = { personal:'b-personal', community:'b-community', webinar:'b-webinar', manual:'b-manual' };
 const INTEREST_HE   = { realestate:'נדל"ן', aliyah:'עלייה', timing:'תזמון', dollar:'דולר' };
@@ -777,7 +778,6 @@ async function sendTest() {
 }
 
 // ── Calendar ──
-let calEvents = JSON.parse(localStorage.getItem('fl_cal_events') || '[]');
 
 const CAL_COLORS = {
   personal:  { bg: '#dcfce7', border: '#16a34a', text: '#166534' },
