@@ -860,6 +860,63 @@ function removeCalEvent(id) {
   renderCalendar();
 }
 
+// ── Calendar ──
+const CAL_COLORS = {
+  personal:  { bg: '#dcfce7', border: '#16a34a', text: '#166534' },
+  community: { bg: '#fef9c3', border: '#d97706', text: '#854d0e' },
+  webinar:   { bg: '#e0f2fe', border: '#0369a1', text: '#0369a1' },
+};
+const CAL_ICONS = { personal: '🤝', community: '🏛️', webinar: '💻' };
+
+function renderCalendar() {
+  const grid = document.getElementById('cal-grid');
+  if (!grid) { setTimeout(renderCalendar, 200); return; }
+  const firstDay = new Date(2026, 10, 1).getDay();
+  const daysInMonth = 30;
+  const allEvents = [...calEvents];
+  let html = '';
+  for (let i = 0; i < firstDay; i++) {
+    html += `<div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;background:#fafafa"></div>`;
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dayEvents = allEvents.filter(e => e.day === d);
+    const col = (firstDay + d - 1) % 7;
+    const isWeekend = col === 0 || col === 6;
+    const evHtml = dayEvents.map(e => {
+      const c = CAL_COLORS[e.type] || CAL_COLORS.personal;
+      return `<div style="background:${c.bg};border-right:3px solid ${c.border};color:${c.text};font-size:11px;padding:2px 5px;border-radius:3px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer" title="${e.label}${e.time?' · '+e.time:''}" onclick="removeCalEvent(${e._id??-1})">${CAL_ICONS[e.type]||''} ${e.label}${e.time?' '+e.time:''}</div>`;
+    }).join('');
+    html += `<div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:${isWeekend?'#fafafa':'#fff'}"><div style="font-size:13px;font-weight:${dayEvents.length?'700':'400'};color:${dayEvents.length?'#1a2c1e':'#9ca3af'}">${d}</div>${evHtml}</div>`;
+  }
+  grid.innerHTML = html;
+}
+
+function openCalEventModal() { document.getElementById('cal-event-modal').classList.add('open'); }
+function closeCalModal() {
+  document.getElementById('cal-event-modal').classList.remove('open');
+  ['cal-date','cal-time','cal-desc'].forEach(id => document.getElementById(id).value = '');
+}
+function saveCalEvent() {
+  const dateVal = document.getElementById('cal-date').value;
+  if (!dateVal) { alert('נא לבחור תאריך'); return; }
+  const day = parseInt(dateVal.split('-')[2]);
+  const type = document.getElementById('cal-type').value;
+  const time = document.getElementById('cal-time').value.trim();
+  const desc = document.getElementById('cal-desc').value.trim();
+  const label = desc || (type==='personal'?'פגישה אישית':type==='community'?'כנס':'Zoom');
+  calEvents.push({ _id: Date.now(), day, type, label, time });
+  localStorage.setItem('fl_cal_events', JSON.stringify(calEvents));
+  closeCalModal();
+  renderCalendar();
+}
+function removeCalEvent(id) {
+  if (id < 0) return;
+  if (!confirm('להסיר אירוע זה?')) return;
+  calEvents = calEvents.filter(e => e._id !== id);
+  localStorage.setItem('fl_cal_events', JSON.stringify(calEvents));
+  renderCalendar();
+}
+
 // ── Utils ──
 function fmtDate(s) {
   if (!s) return '—';
