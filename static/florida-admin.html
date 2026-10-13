@@ -481,7 +481,7 @@ function login() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     fetchAll(); setInterval(fetchAll, 30000);
-    requestAnimationFrame(() => requestAnimationFrame(renderCalendar));
+    switchTab('cal');
   } else {
     document.getElementById('pw-err').style.display = 'block';
     document.getElementById('pw').value = '';
@@ -491,7 +491,7 @@ if (sessionStorage.getItem('fl_auth')) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   fetchAll(); setInterval(fetchAll, 30000);
-  requestAnimationFrame(() => requestAnimationFrame(renderCalendar));
+  switchTab('cal');
 }
 
 async function fetchAll() {
@@ -901,8 +901,7 @@ async function saveManual() {
   });
   closeModal(); await fetchAll();
 }
-// render calendar on first load
-if (document.getElementById("cal-grid")) renderCalendar();
+
 </script>
 </body>
 </html>
