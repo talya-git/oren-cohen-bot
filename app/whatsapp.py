@@ -508,12 +508,13 @@ async def whatsapp_webhook(request: Request):
         from . import database as _db2
         fl_phones, _ = _db2._get_florida_phones_and_emails()
         p_clean = p.lstrip('+').replace('-','').replace(' ','')
-        # בדוק ברשימה, ב-session, או ב-DB (אחרי restart)
+        # בדוק ברשימה, ב-session, או ב-DB
         is_florida = (
             p_clean in fl_phones or
             p_clean in _florida_sessions or
             p in _florida_sessions or
-            _db2.get_florida_sent(f"+{p_clean}")
+            _db2.get_florida_sent(f"+{p_clean}") or
+            _db2.get_florida_sent(f"+972{p_clean[2:]}" if p_clean.startswith('05') else f"+{p_clean}")
         )
         if is_florida and p not in _wa_sessions:
             await _handle_florida_message(p_clean, combined, _db2)

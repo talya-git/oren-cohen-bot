@@ -343,7 +343,7 @@
 </div>
 
 <!-- Tab: לוח שנה -->
-<div class="tab-content active" id="content-cal">
+<div id="content-cal" style="display:block">
 <div class="main">
 
   <!-- כותרת לוח -->
@@ -512,7 +512,11 @@ async function fetchAll() {
 function switchTab(tab) {
   ['reg','wa','email','leads','invite','cal'].forEach(t => {
     document.getElementById('tab-'+t).classList.toggle('active', t===tab);
-    document.getElementById('content-'+t).classList.toggle('active', t===tab);
+    if (t === 'cal') {
+      document.getElementById('content-cal').style.display = (tab === 'cal') ? 'block' : 'none';
+    } else {
+      document.getElementById('content-'+t).classList.toggle('active', t===tab);
+    }
   });
   if (tab === 'leads' && leadsData.length === 0) fetchLeads();
   if (tab === 'invite') updateInviteCounts();
