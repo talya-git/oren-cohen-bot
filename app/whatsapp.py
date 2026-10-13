@@ -647,6 +647,11 @@ async def _handle_message(phone: str, text: str, _db) -> None:
 
         # שחזור session מה-DB אם השרת נרדם
         db_record = _db.get_reengagement_record(f"+{phone}")
+        # בדוק אם זה לקוח פלורידה — אם כן, נתב לשם
+        from . import database as _db3
+        if _db3.get_florida_sent(f"+{phone}") or _db3.get_florida_sent(phone):
+            await _handle_florida_message(phone, text, _db3)
+            return
         conv = Conversation()
         if db_record and db_record.get("transcript"):
             # שחזור ההיסטוריה מהתמליל
