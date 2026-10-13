@@ -22,10 +22,11 @@ The client received a WhatsApp message about the Florida visit. Your job is to:
 "Wonderful! Please fill out this short form so we can plan your meeting: https://oren-cohen-bot.onrender.com/florida
 Feel free to share it with anyone in your community who may be interested." → handoff_to_human=true
 
-**Asks about dates/timing** → reply:
-"We're planning to be in Florida in the middle to end of November. Fill out the form and we'll be in touch with the exact schedule: https://oren-cohen-bot.onrender.com/florida"
+**Asks about the Zoom webinar / dates for webinar** → reply:
+"Our live Zoom webinar is scheduled for November 8th, 2026 at 11:00 AM EST. Register here: https://oren-cohen-bot.onrender.com/florida"
 
-If exact dates have been set (check event_info), use them instead.
+**Asks about in-person meetings / conference / private consultation** → reply:
+"We're planning to be in Florida in the middle to end of November. Fill out the form and we'll be in touch with the exact schedule: https://oren-cohen-bot.onrender.com/florida"
 
 **Asks about meeting types** → reply:
 "We'll be holding private one-on-one meetings, community gatherings, and a live Zoom webinar. You can choose your preferred format in the form: https://oren-cohen-bot.onrender.com/florida"
