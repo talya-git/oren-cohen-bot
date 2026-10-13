@@ -481,7 +481,7 @@ function login() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     fetchAll(); setInterval(fetchAll, 30000);
-    setTimeout(renderCalendar, 100);
+    requestAnimationFrame(() => requestAnimationFrame(renderCalendar));
   } else {
     document.getElementById('pw-err').style.display = 'block';
     document.getElementById('pw').value = '';
@@ -491,7 +491,7 @@ if (sessionStorage.getItem('fl_auth')) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   fetchAll(); setInterval(fetchAll, 30000);
-  setTimeout(renderCalendar, 100);
+  requestAnimationFrame(() => requestAnimationFrame(renderCalendar));
 }
 
 async function fetchAll() {
@@ -788,6 +788,7 @@ const CAL_ICONS = { personal: '🤝', community: '🏛️', webinar: '💻' };
 
 function renderCalendar() {
   const grid = document.getElementById('cal-grid');
+  if (!grid) { setTimeout(renderCalendar, 200); return; }
   // נובמבר 2026 מתחיל ביום ראשון (0=Sun)
   const firstDay = new Date(2026, 10, 1).getDay(); // 0
   const daysInMonth = 30;
