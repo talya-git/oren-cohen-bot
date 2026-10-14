@@ -245,12 +245,13 @@
     <option value="Tampa">Tampa</option>
   </select>
   <input id="fl-search" type="text" placeholder="חיפוש שם / טלפון..." oninput="renderLeads()" />
+  <button onclick="sendToAll()" style="background:#1a2c1e;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📤 שלח לכולם שלא נשלח</button>
   <span id="fl-stats" style="font-size:13px;color:#6b7280;margin-right:8px"></span>
 </div>
 <div class="main">
   <table>
     <thead><tr>
-      <th>#</th><th>שם</th><th>טלפון</th><th>אימייל</th><th>מיקום בפלורידה</th><th>סוכן</th><th>נשלח?</th><th>תאריך שליחה</th>
+      <th>#</th><th>שם</th><th>טלפון</th><th>אימייל</th><th>מיקום בפלורידה</th><th>סוכן</th><th>נשלח?</th><th>תאריך שליחה</th><th>פעולה</th>
     </tr></thead>
     <tbody id="leads-tbody"></tbody>
   </table>
@@ -682,7 +683,7 @@ function renderLeads() {
       : `<span class="badge" style="background:#fef9c3;color:#854d0e">⏳ לא נשלח</span>`;
     const btn = r.sent
       ? `<button class="btn-view" style="background:#dc2626" onclick="toggleSent(${r.id},false)">❌ בטל</button>`
-      : `<button class="btn-view" style="background:#16a34a" onclick="toggleSent(${r.id},true)">✅ סמן נשלח</button>`;
+      : `<button class="btn-view" style="background:#16a34a" onclick="sendToOne(${r.id},'${(r.phone1||'').replace(/'/g,"\'")}','${(r.name||'').replace(/'/g,"\'")}')">📤 שלח</button>`;
     return `<tr style="${r.sent?'opacity:.65':''}">
       <td>${start+i+1}</td>
       <td><strong>${r.name||'—'}</strong></td>
@@ -889,6 +890,52 @@ function removeCalEvent(id) {
 }
 
 // ── Calendar ──
+// ── Florida Send ──
+async function sendToOne(id, phone, name) {
+  if (!confirm(`שלח הודעת פלורידה ל-${name} (${phone})?`)) return;
+  const res = await fetch('/api/whatsapp/florida/start', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({secret: 'florida2026send', leads: [{phone, name}]})
+  });
+  const data = await res.json();
+  if (data.results && data.results[0]?.status === 'sent') {
+    const r = leadsData.find(x => x.id === id);
+    if (r) { r.sent = true; r.sent_at = new Date().toISOString(); }
+    renderLeads();
+    alert('✅ נשלח בהצלחה!');
+  } else {
+    alert('שגיאה: ' + JSON.stringify(data.results?.[0]?.reason || data));
+  }
+}
+
+async function sendToAll() {
+  const unsent = leadsData.filter(r => !r.sent && r.phone1);
+  if (!unsent.length) { alert('כולם כבר קיבלו הודעה!'); return; }
+  if (!confirm(`שלח הודעת פלורידה ל-${unsent.length} לקוחות שלא קיבלו עדיין?`)) return;
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = 'שולח...';
+  const leads = unsent.map(r => ({phone: r.phone1, name: r.name}));
+  // שלח ב-batches של 50
+  let sent = 0, failed = 0;
+  for (let i = 0; i < leads.length; i += 50) {
+    const batch = leads.slice(i, i + 50);
+    const res = await fetch('/api/whatsapp/florida/start', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({secret: 'florida2026send', leads: batch})
+    });
+    const data = await res.json();
+    sent += data.sent || 0;
+    failed += data.failed || 0;
+    btn.textContent = `שולח... ${sent}/${leads.length}`;
+    await new Promise(r => setTimeout(r, 2000));
+  }
+  btn.disabled = false; btn.textContent = '📤 שלח לכולם שלא נשלח';
+  await fetchLeads();
+  alert(`✅ נשלחו ${sent} | ❌ נכשלו ${failed}`);
+}
+
 // ── Utils ──
 function fmtDate(s) {
   if (!s) return '—';
