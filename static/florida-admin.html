@@ -694,7 +694,7 @@ function renderLeads() {
       <td>${sentBadge}</td>
       <td style="font-size:11px;color:#9ca3af">${r.sent_at ? fmtDate(r.sent_at) : '—'}</td>
       <td>${btn}</td>
-      <td>${r.email ? `<button class="btn-view" style="background:#6366f1" onclick="sendEmailToOne(${r.id},'${(r.email||'').replace(/'/g,\"\\'\")}',' ${(r.name||'').replace(/'/g,\"\\'\")}')">📧 Mail</button>` : '—'}</td>
+      <td>${r.email ? '<button class="btn-view" style="background:#6366f1" onclick="sendEmailToOne(' + r.id + ',\'' + (r.email||'').replace(/'/g,"\\'") + '\',\'' + (r.name||'').replace(/'/g,"\\'") + '\')">Mail</button>' : '-'}</td>
     </tr>`;
   }).join('');
 }
