@@ -1102,6 +1102,40 @@ async def florida_import_leads(request: Request):
     return {"imported": imported}
 
 
+@app.post("/api/florida/send-email-lead")
+async def florida_send_email_lead(request: Request):
+    data = await request.json()
+    if data.get("secret") != "florida2026send":
+        return {"error": "unauthorized"}
+    email = data.get("email", "")
+    name  = data.get("name", "there")
+    if not email:
+        return {"error": "no email"}
+    subject = "You're Invited — Oren Cohen Group Florida Visit"
+    body = f"""Hi {name},
+
+As part of the Oren Cohen Group VIP network, we wanted you to be among the first to know that we'll be in Florida over the coming months.
+
+Whether you're considering a purchase, thinking about Aliyah, concerned about the dollar's purchasing power, or simply want to know where to start, we'd love to meet with you and discuss your options.
+
+We'll be meeting privately with individuals, families, and community groups interested in prime Jerusalem real estate, sharing off-market opportunities and exclusive new construction projects.
+
+To help us plan our Florida meetings, please complete this short form:
+https://oren-cohen-bot.onrender.com/florida
+
+Feel free to share it with friends, family, or anyone in your community who may be interested.
+
+Looking forward to seeing you in Florida!
+
+Oren Cohen Group"""
+    try:
+        from .mailer import send_email
+        send_email(to=email, subject=subject, body=body)
+        return {"status": "ok"}
+    except Exception as e:
+        return {"status": "error", "reason": str(e)}
+
+
 @app.get("/api/florida/leads")
 def florida_leads_list(search: str = "", sent: str = "", location: str = ""):
     return db.get_florida_leads(search=search, sent=sent, location=location)

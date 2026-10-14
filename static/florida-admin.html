@@ -694,6 +694,7 @@ function renderLeads() {
       <td>${sentBadge}</td>
       <td style="font-size:11px;color:#9ca3af">${r.sent_at ? fmtDate(r.sent_at) : '—'}</td>
       <td>${btn}</td>
+      <td>${r.email ? `<button class="btn-view" style="background:#6366f1" onclick="sendEmailToOne(${r.id},'${(r.email||'').replace(/'/g,\"\\'\")}',' ${(r.name||'').replace(/'/g,\"\\'\")}')">📧 Mail</button>` : '—'}</td>
     </tr>`;
   }).join('');
 }
@@ -891,12 +892,45 @@ function removeCalEvent(id) {
 
 // ── Calendar ──
 // ── Florida Send ──
+// מפת שמות עברית לאנגלית
+const HE_TO_EN = {
+  'אביגיל':'Abigail','אברהם':'Abraham','אדיר':'Adir','אהרון':'Aaron','אורי':'Uri','אורן':'Oren','אורית':'Orit',
+  'אילן':'Ilan','אילנה':'Ilana','איתן':'Itan','אלי':'Eli','אליעזר':'Eliezer','אלישע':'Elisha',
+  'אלקסנדר':'Alexander','אמיר':'Amir','אסתר':'Esther','אריאל':'Ariel','אריה':'Aryeh','ארית':'Arit',
+  'אשר':'Asher','בתשבע':'Batsheva','בנימין':'Benjamin','ברך':'Baruch','ברקה':'Bracha',
+  'גבריאל':'Gabriel','דבורה':'Devorah','דוד':'David','דינה':'Dina','דניאל':'Daniel',
+  'הדסה':'Hadassah','הנה':'Hannah','ורד':'Vered','זאב':'Zeev','זוהר':'Zohar','זכריה':'Zechariah',
+  'חיים':'Chaim','חנה':'Chana','חנן':'Chanan','טוביה':'Tovia','יאיר':'Yair','יהודה':'Yehuda',
+  'יהושע':'Yehoshua','יוסף':'Yosef','יונתן':'Yonatan','יוני':'Yoni','יחיאל':'Yechiel',
+  'יצחק':'Yitzchak','יעקב':'Yaakov','יעל':'Yael','ירדן':'Yarden','ישראל':'Yisrael',
+  'כלב':'Caleb','לאה':'Leah','ליאור':'Lior','ליאורה':'Liora','ליאנה':'Liana','ליבי':'Libi',
+  'לילי':'Lily','לינור':'Linor','מיכאל':'Michael','מירי':'Miri','מנחם':'Menachem','משה':'Moshe',
+  'נחום':'Nachum','נטע':'Neta','ניר':'Nir','נירית':'Nirit','נעמה':'Naama','נעמי':'Naomi',
+  'נתן':'Natan','נתנאל':'Netanel','סוניא':'Sonia','סורין':'Sorin','עדי':'Adi','עירית':'Irit',
+  'עמית':'Amit','עמנואל':'Emanuel','פיליפ':'Philip','פנינה':'Penina','צבי':'Tzvi','ציפורה':'Tzipora',
+  'צלמן':'Zalman','קרן':'Keren','רבקה':'Rivka','רחל':'Rachel','רוני':'Roni','רות':'Ruth',
+  'רינה':'Rina','רינת':'Rinat','שאול':'Shaul','שירה':'Shira','שלומית':'Shlomit','שלומו':'Shlomo',
+  'שמואל':'Shmuel','שרה':'Sarah','תמר':'Tamar','תפארה':'Tifara'
+};
+
+function translateName(hebrewName) {
+  if (!hebrewName) return 'there';
+  // אם כבר אנגלית — שמור כמו שהוא
+  if (/^[a-zA-Z\s]+$/.test(hebrewName)) return hebrewName.split(' ')[0];
+  // נסה לתרגם את השם הראשון
+  const first = hebrewName.trim().split(/[\s|]+/)[0];
+  return HE_TO_EN[first] || first;
+}
+
 async function sendToOne(id, phone, name) {
-  if (!confirm(`שלח הודעת פלורידה ל-${name} (${phone})?`)) return;
+  const engName = translateName(name);
+  const editedName = prompt(`שם באנגלית (ניתן לערוך):`, engName);
+  if (editedName === null) return;
+  if (!confirm(`שלח הודעת פלורידה ל-${editedName} (${phone})?`)) return;
   const res = await fetch('/api/whatsapp/florida/start', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({secret: 'florida2026send', leads: [{phone, name}]})
+    body: JSON.stringify({secret: 'florida2026send', leads: [{phone, name: editedName}]})
   });
   const data = await res.json();
   if (data.results && data.results[0]?.status === 'sent') {
@@ -909,14 +943,33 @@ async function sendToOne(id, phone, name) {
   }
 }
 
+async function sendEmailToOne(id, email, name) {
+  const engName = translateName(name);
+  const editedName = prompt(`שם באנגלית:`, engName);
+  if (editedName === null) return;
+  const res = await fetch('/api/florida/send-email-lead', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({email, name: editedName, secret: 'florida2026send'})
+  });
+  const data = await res.json();
+  if (data.status === 'ok') {
+    const r = leadsData.find(x => x.id === id);
+    if (r) { r.sent = true; r.sent_at = new Date().toISOString(); }
+    renderLeads();
+    alert('✅ מייל נשלח!');
+  } else {
+    alert('שגיאה: ' + JSON.stringify(data));
+  }
+}
+
 async function sendToAll() {
   const unsent = leadsData.filter(r => !r.sent && r.phone1);
   if (!unsent.length) { alert('כולם כבר קיבלו הודעה!'); return; }
   if (!confirm(`שלח הודעת פלורידה ל-${unsent.length} לקוחות שלא קיבלו עדיין?`)) return;
   const btn = event.target;
   btn.disabled = true; btn.textContent = 'שולח...';
-  const leads = unsent.map(r => ({phone: r.phone1, name: r.name}));
-  // שלח ב-batches של 50
+  const leads = unsent.map(r => ({phone: r.phone1, name: translateName(r.name)}));
   let sent = 0, failed = 0;
   for (let i = 0; i < leads.length; i += 50) {
     const batch = leads.slice(i, i + 50);
@@ -928,7 +981,7 @@ async function sendToAll() {
     const data = await res.json();
     sent += data.sent || 0;
     failed += data.failed || 0;
-    btn.textContent = `שולח... ${sent}/${leads.length}`;
+    btn.textContent = `שולח... ${sent+failed}/${leads.length}`;
     await new Promise(r => setTimeout(r, 2000));
   }
   btn.disabled = false; btn.textContent = '📤 שלח לכולם שלא נשלח';
