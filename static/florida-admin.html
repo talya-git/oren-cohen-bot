@@ -681,9 +681,11 @@ function renderLeads() {
     const sentBadge = r.sent
       ? `<span class="badge b-personal">✅ נשלח</span>`
       : `<span class="badge" style="background:#fef9c3;color:#854d0e">⏳ לא נשלח</span>`;
-    const btn = r.sent
+    const waBtn = `<button class="btn-view" style="background:#16a34a" onclick="sendToOne(${r.id},'${(r.phone1||'').replace(/'/g,"\\'")}',' ${(r.name||'').replace(/'/g,"\\'")}')">📤 WA</button>`;
+    const markBtn = r.sent
       ? `<button class="btn-view" style="background:#dc2626" onclick="toggleSent(${r.id},false)">❌ בטל</button>`
-      : `<button class="btn-view" style="background:#16a34a" onclick="sendToOne(${r.id},'${(r.phone1||'').replace(/'/g,"\'")}','${(r.name||'').replace(/'/g,"\'")}')">📤 שלח</button>`;
+      : `<button class="btn-view" style="background:#6b7280" onclick="toggleSent(${r.id},true)">✅ סמן</button>`;
+    const btn = waBtn + ' ' + markBtn;
     return `<tr style="${r.sent?'opacity:.65':''}">
       <td>${start+i+1}</td>
       <td><strong>${r.name||'—'}</strong></td>

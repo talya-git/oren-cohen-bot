@@ -469,6 +469,19 @@ async def whatsapp_webhook(request: Request):
                     conn.commit()
                 except Exception:
                     conn.rollback()
+                # סמן לקוח פלורידה כלא נשלח אם נכשל
+                try:
+                    cur.execute(
+                        f"UPDATE florida_leads SET sent=FALSE, sent_at=NULL WHERE (phone1={_db.PH} OR phone2={_db.PH})",
+                        (f"+{recipient}", f"+{recipient}")
+                    )
+                    cur.execute(
+                        f"UPDATE florida_leads SET sent=FALSE, sent_at=NULL WHERE (phone1={_db.PH} OR phone2={_db.PH})",
+                        (recipient, recipient)
+                    )
+                    conn.commit()
+                except Exception:
+                    conn.rollback()
                 conn.close()
                 print(f"[FAILED-MARKED] {recipient} code={error_code}")
             return {"status": "status_update"}
