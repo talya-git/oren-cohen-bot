@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ניהול נרשמים — פלורידה 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Noto Sans Hebrew', sans-serif; background: #f0f2f5; color: #222; }
+
+    .header {
+      background: linear-gradient(135deg, #1a2c1e, #0f1923);
+      color: #fff; padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+    }
+    .header h1 { font-size: 18px; color: #c9a84c; }
+    .header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .btn { background: #c9a84c; color: #fff; border: none; border-radius: 6px;
+      padding: 8px 14px; font-size: 13px; font-weight: 700; cursor: pointer;
+      font-family: inherit; text-decoration: none; display: inline-block; white-space: nowrap; }
+    .btn:hover { opacity: .88; }
+    .btn-dark { background: rgba(255,255,255,.1); border: 1px solid #c9a84c; }
+    .btn-green { background: #16a34a; }
+
+    .stats { display: flex; gap: 12px; padding: 14px 20px; flex-wrap: wrap; }
+    .stat { background: #fff; border-radius: 10px; padding: 12px 18px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08); text-align: center; min-width: 90px; }
+    .stat .num { font-size: 26px; font-weight: 700; }
+    .stat .lbl { font-size: 11px; color: #6b7280; margin-top: 2px; }
+    .stat.total .num { color: #1a2c1e; }
+    .stat.personal .num { color: #16a34a; }
+    .stat.community .num { color: #d97706; }
+    .stat.webinar .num { color: #0369a1; }
+
+    .filters { background: #fff; padding: 10px 20px;
+      display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+      border-bottom: 1px solid #e5e7eb; }
+    .filters select, .filters input { padding: 7px 11px; border: 1px solid #ddd; border-radius: 7px;
+      font-size: 13px; font-family: inherit; outline: none; }
+    .filters select:focus, .filters input:focus { border-color: #c9a84c; }
+
+    .main { padding: 16px 20px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px;
+      overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    thead { background: #1a2c1e; color: #fff; }
+    th { padding: 11px 12px; text-align: right; font-size: 12px; font-weight: 600; }
+    td { padding: 9px 12px; font-size: 13px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafa; }
+
+    .badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .b-personal  { background: #dcfce7; color: #166534; }
+    .b-community { background: #fef9c3; color: #854d0e; }
+    .b-webinar   { background: #e0f2fe; color: #0369a1; }
+    .b-manual    { background: #f3e8ff; color: #6b21a8; }
+
+    .status-select { padding: 4px 8px; border: 1px solid #ddd; border-radius: 6px;
+      font-size: 12px; font-family: inherit; outline: none; cursor: pointer; }
+    .status-select:focus { border-color: #c9a84c; }
+    .notes-input { padding: 4px 8px; border: 1px solid #ddd; border-radius: 6px;
+      font-size: 12px; font-family: inherit; outline: none; width: 130px; }
+    .notes-input:focus { border-color: #c9a84c; }
+
+    .tab-btn {
+      padding: 12px 22px; border: none; background: none; cursor: pointer;
+      font-size: 14px; font-weight: 600; font-family: inherit; color: #6b7280;
+      border-bottom: 3px solid transparent; transition: all .2s;
+    }
+    .tab-btn:hover { color: #1a2c1e; }
+    .tab-btn.active { color: #c9a84c; border-bottom-color: #c9a84c; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* WhatsApp transcript */
+    .wa-table td { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .btn-view { padding: 4px 10px; background: #6366f1; color: #fff; border: none;
+      border-radius: 6px; font-size: 12px; cursor: pointer; font-family: inherit; }
+    .btn-view:hover { background: #4f46e5; }
+    .transcript-modal { max-width: 560px; max-height: 80vh; display: flex; flex-direction: column; }
+    .transcript-body { flex: 1; overflow-y: auto; padding: 16px; }
+    .msg { margin-bottom: 14px; }
+    .msg.agent { text-align: left; }
+    .msg.client { text-align: right; }
+    .bubble { display: inline-block; padding: 8px 13px; border-radius: 10px;
+      font-size: 13px; max-width: 80%; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+    .bubble-agent { background: #e0e7ff; color: #1e1b4b; }
+    .bubble-client { background: #dcfce7; color: #14532d; }
+    .msg-label { font-size: 11px; font-weight: 700; margin-bottom: 3px; color: #6366f1; }
+    .msg.client .msg-label { color: #16a34a; }
+
+    /* Email */
+    .email-body-preview { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: #6b7280; }
+
+    /* Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.55); z-index: 1000;
+      align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #faf8f3; border: 1px solid #c9a84c; border-radius: 12px;
+      width: 100%; max-width: 460px; padding: 28px; direction: rtl; }
+    .modal h3 { font-size: 17px; color: #c9a84c; margin-bottom: 18px; }
+    .modal label { display: block; font-size: 12px; font-weight: 600; color: #4a3a28; margin: 10px 0 3px; }
+    .modal input, .modal select, .modal textarea {
+      width: 100%; padding: 9px 11px; border: 1px solid #ddd; border-radius: 6px;
+      font-size: 13px; font-family: inherit; color: #1a1a1a; outline: none; background: #fff; }
+    .modal input:focus, .modal select:focus, .modal textarea:focus { border-color: #c9a84c; }
+    .modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+    .modal-btns button { flex: 1; padding: 10px; border: none; border-radius: 6px;
+      font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; }
+    .btn-save { background: #c9a84c; color: #fff; }
+    .btn-cancel { background: #e5e7eb; color: #555; }
+
+    @media (max-width: 768px) {
+      table, thead, tbody, th, td, tr { display: block; }
+      thead { display: none; }
+      tr { background: #fff; border-radius: 10px; margin-bottom: 12px; padding: 12px;
+        box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+      td { border: none; padding: 4px 0; display: flex; justify-content: space-between; align-items: center; }
+      td::before { content: attr(data-label); font-weight: 600; color: #6b7280; font-size: 11px; flex-shrink: 0; margin-left: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Login -->
+<div id="login-screen" style="min-height:100vh;background:linear-gradient(135deg,#0f1923,#1a2c1e);display:flex;align-items:center;justify-content:center;">
+  <div style="background:rgba(255,255,255,0.08);border:1px solid #c9a84c;border-radius:16px;padding:40px 32px;width:320px;text-align:center;color:#fff;">
+    <div style="font-size:40px;margin-bottom:12px">🇺🇸</div>
+    <h2 style="color:#c9a84c;margin-bottom:6px">פלורידה 2026</h2>
+    <p style="font-size:13px;color:#a0b0a0;margin-bottom:20px">ניהול נרשמים</p>
+    <input type="password" id="pw" placeholder="סיסמה" onkeydown="if(event.key==='Enter')login()"
+      style="width:100%;padding:11px;border-radius:8px;border:1px solid #c9a84c;background:rgba(255,255,255,0.1);color:#fff;font-size:15px;text-align:center;outline:none;margin-bottom:12px;font-family:inherit;" />
+    <button onclick="login()" style="width:100%;padding:11px;border-radius:8px;border:none;background:#c9a84c;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">כניסה</button>
+    <div id="pw-err" style="color:#f87171;font-size:12px;margin-top:8px;display:none">סיסמה שגויה</div>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard" style="display:none">
+
+<div class="header">
+  <h1>🇺🇸 פלורידה 2026 — ניהול</h1>
+  <div class="header-actions">
+    <button class="btn btn-green" onclick="openAddModal()">+ הוסף פגישה</button>
+    <a href="/export-florida" class="btn">⬇️ Excel</a>
+    <button onclick="fetchAll()" class="btn btn-dark">🔄 רענן</button>
+    <button onclick="sendTest()" class="btn" style="background:#dc2626">🧪 שלח ניסיון</button>
+    <button onclick="resetSession()" class="btn" style="background:#7c3aed">🔄 אפס Session</button>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div style="background:#fff;border-bottom:2px solid #e5e7eb;display:flex;gap:0;">
+  <button class="tab-btn" id="tab-reg" onclick="switchTab('reg')">📋 נרשמים</button>
+  <button class="tab-btn" id="tab-wa" onclick="switchTab('wa')">💬 שיחות וואטסאפ</button>
+  <button class="tab-btn" id="tab-email" onclick="switchTab('email')">📧 מיילים</button>
+  <button class="tab-btn" id="tab-leads" onclick="switchTab('leads')">👥 לקוחות פלורידה</button>
+  <button class="tab-btn" id="tab-invite" onclick="switchTab('invite')">📨 שליחת זימונים</button>
+  <button class="tab-btn active" id="tab-cal" onclick="switchTab('cal')">📅 לוח שנה</button>
+</div>
+
+<!-- Tab: נרשמים -->
+<div class="tab-content" id="content-reg">
+
+<div class="stats">
+  <div class="stat total"><div class="num" id="s-total">0</div><div class="lbl">סה"כ</div></div>
+  <div class="stat personal"><div class="num" id="s-personal">0</div><div class="lbl">🤝 אישית</div></div>
+  <div class="stat community"><div class="num" id="s-community">0</div><div class="lbl">🏛️ כנס</div></div>
+  <div class="stat webinar"><div class="num" id="s-webinar">0</div><div class="lbl">💻 Zoom</div></div>
+</div>
+
+<div class="filters">
+  <select id="f-meeting" onchange="render()">
+    <option value="">כל סוגי הפגישות</option>
+    <option value="personal">🤝 פגישה אישית</option>
+    <option value="community">🏛️ כנס קהילתי</option>
+    <option value="webinar">💻 וובינר Zoom</option>
+    <option value="manual">✏️ הוספה ידנית</option>
+  </select>
+  <select id="f-status" onchange="render()">
+    <option value="">כל הסטטוסים</option>
+    <option value="לטיפול">לטיפול</option>
+    <option value="בתיאום">בתיאום</option>
+    <option value="נקבע">נקבע</option>
+    <option value="בוצע">בוצע</option>
+  </select>
+  <input id="f-search" type="text" placeholder="חיפוש שם / טלפון..." oninput="render()" />
+</div>
+
+<div class="main">
+  <table>
+    <thead><tr>
+      <th>#</th><th>שם</th><th>טלפון</th><th>אימייל</th><th>עיר</th>
+      <th>סוג פגישה</th><th>תחומי עניין</th><th>הערות לקוח</th>
+      <th>סטטוס</th><th>הערות פנימיות</th><th>תאריך</th>
+    </tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div class="empty" id="empty" style="display:none">אין נרשמים עדיין</div>
+</div>
+</div>
+
+<!-- Tab: וואטסאפ -->
+<div class="tab-content" id="content-wa">
+<div class="main">
+  <table class="wa-table">
+    <thead><tr>
+      <th>#</th><th>שם</th><th>טלפון</th><th>סוכן</th><th>סטטוס</th><th>תאריך שליחה</th><th>תמליל</th>
+    </tr></thead>
+    <tbody id="wa-tbody"></tbody>
+  </table>
+  <div class="empty" id="wa-empty" style="display:none">אין שיחות</div>
+</div>
+</div>
+
+<!-- Tab: מיילים -->
+<div class="tab-content" id="content-email">
+<div class="main">
+  <table>
+    <thead><tr>
+      <th>#</th><th>שם</th><th>אימייל</th><th>נושא</th><th>תוכן</th><th>סטטוס</th><th>תאריך</th>
+    </tr></thead>
+    <tbody id="email-tbody"></tbody>
+  </table>
+  <div class="empty" id="email-empty" style="display:none">אין מיילים</div>
+</div>
+</div>
+
+<!-- Tab: לקוחות פלורידה -->
+<div class="tab-content" id="content-leads">
+<div class="filters">
+  <select id="fl-sent" onchange="renderLeads()">
+    <option value="">כולם</option>
+    <option value="yes">✅ נשלח</option>
+    <option value="no">⏳ לא נשלח</option>
+  </select>
+  <select id="fl-location" onchange="renderLeads()">
+    <option value="">כל אזורי פלורידה</option>
+    <option value="Miami">Miami-Dade</option>
+    <option value="Broward">Broward / Fort Lauderdale</option>
+    <option value="Palm Beach">Palm Beach</option>
+    <option value="Orlando">Orlando</option>
+    <option value="Tampa">Tampa</option>
+  </select>
+  <input id="fl-search" type="text" placeholder="חיפוש שם / טלפון..." oninput="renderLeads()" />
+  <button onclick="sendToAll()" style="background:#1a2c1e;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📤 שלח לכולם שלא נשלח</button>
+  <span id="fl-stats" style="font-size:13px;color:#6b7280;margin-right:8px"></span>
+</div>
+<div class="main">
+  <table>
+    <thead><tr>
+      <th>#</th><th>שם</th><th>טלפון</th><th>אימייל</th><th>מיקום בפלורידה</th><th>סוכן</th><th>נשלח?</th><th>תאריך שליחה</th><th>פעולה</th>
+    </tr></thead>
+    <tbody id="leads-tbody"></tbody>
+  </table>
+  <div class="empty" id="leads-empty" style="display:none">אין לקוחות</div>
+  <div id="leads-pagination" style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;gap:8px">
+    <span id="leads-page-info" style="font-size:13px;color:#6b7280"></span>
+    <div style="display:flex;gap:8px">
+      <button onclick="leadsPage(-1)" id="leads-prev" style="padding:6px 14px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;font-size:13px">→ הקודם</button>
+      <span id="leads-page-num" style="font-size:13px;font-weight:600"></span>
+      <button onclick="leadsPage(1)" id="leads-next" style="padding:6px 14px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;font-size:13px">הבא ←</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Tab: שליחת זימונים -->
+<div class="tab-content" id="content-invite">
+<div class="main">
+
+  <!-- כרטיסיית זום -->
+  <div style="background:#fff;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-right:4px solid #0369a1">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <h3 style="font-size:16px;color:#0369a1">💻 זימון לוובינר Zoom</h3>
+      <span id="webinar-count" style="font-size:13px;color:#6b7280"></span>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">תאריך מדויק *</label>
+      <input type="date" id="zoom-exact-date" min="2026-11-01" max="2026-11-30" style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none" />
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">קישור Zoom *</label>
+      <input type="url" id="zoom-link" placeholder="https://zoom.us/j/..." style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none" />
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">הודעה אישית (אופציונלי)</label>
+      <textarea id="zoom-msg" rows="3" placeholder="Hi {{name}}, You're invited to our exclusive Zoom webinar..." style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none;resize:vertical"></textarea>
+      <div style="font-size:11px;color:#9ca3af;margin-top:4px">אם ריק — תישלח הודעה ברירת מחדל</div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button onclick="sendInvites('webinar','wa')" style="background:#25d366;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
+        💬 שלח בוואטסאפ לכל נרשמי זום
+      </button>
+      <button onclick="sendInvites('webinar','email')" style="background:#6366f1;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
+        📧 שלח במייל לכל נרשמי זום
+      </button>
+    </div>
+  </div>
+
+  <!-- כרטיסיית כנס -->
+  <div style="background:#fff;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-right:4px solid #d97706">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <h3 style="font-size:16px;color:#d97706">🏛️ זימון לכנס קהילתי</h3>
+      <span id="community-count" style="font-size:13px;color:#6b7280"></span>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">תאריך מדויק *</label>
+      <input type="date" id="conf-exact-date" min="2026-11-01" max="2026-11-30" style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none" />
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div>
+        <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">תאריך לתצוגה (טקסט)</label>
+        <input type="text" id="conf-date" placeholder="e.g. November 20, 2026" style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none" />
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">שעה *</label>
+        <input type="text" id="conf-time" placeholder="e.g. 7:30 PM" style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none" />
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">מיקום / כתובת *</label>
+      <input type="text" id="conf-location" placeholder="e.g. 123 Collins Ave, Miami Beach, FL" style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none" />
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:11px;font-weight:600;color:#4a3a28;display:block;margin-bottom:4px">הודעה אישית (אופציונלי)</label>
+      <textarea id="conf-msg" rows="3" placeholder="Hi {{name}}, You're invited to our community gathering..." style="width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none;resize:vertical"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button onclick="sendInvites('community','wa')" style="background:#25d366;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
+        💬 שלח בוואטסאפ לכל נרשמי כנס
+      </button>
+      <button onclick="sendInvites('community','email')" style="background:#6366f1;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
+        📧 שלח במייל לכל נרשמי כנס
+      </button>
+    </div>
+  </div>
+
+  <div id="invite-result" style="display:none;background:#dcfce7;border:1px solid #16a34a;border-radius:8px;padding:14px;font-size:14px;color:#166534"></div>
+
+</div>
+</div>
+</div>
+
+<!-- Tab: לוח שנה -->
+<div id="content-cal" style="display:block">
+<div class="main">
+
+  <!-- כותרת לוח -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <div>
+      <h2 style="font-size:20px;color:#1a2c1e">November 2026 🇺🇸</h2>
+      <p style="font-size:13px;color:#6b7280;margin-top:2px">לוח פגישות פלורידה</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <span style="display:flex;align-items:center;gap:5px;font-size:12px">
+        <span style="width:12px;height:12px;border-radius:3px;background:#dcfce7;border:1px solid #16a34a;display:inline-block"></span>🤝 אישית
+      </span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:12px">
+        <span style="width:12px;height:12px;border-radius:3px;background:#fef9c3;border:1px solid #d97706;display:inline-block"></span>🏛️ כנס
+      </span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:12px">
+        <span style="width:12px;height:12px;border-radius:3px;background:#e0f2fe;border:1px solid #0369a1;display:inline-block"></span>💻 Zoom
+      </span>
+      <button onclick="openCalEventModal()" style="background:#c9a84c;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">+ הוסף אירוע</button>
+    </div>
+  </div>
+
+  <!-- גריד לוח שנה -->
+  <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+    <!-- ימי שבוע -->
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);background:#1a2c1e">
+      <div style="padding:10px;text-align:center;font-size:12px;font-weight:700;color:#c9a84c">Sun</div>
+      <div style="padding:10px;text-align:center;font-size:12px;font-weight:700;color:#c9a84c">Mon</div>
+      <div style="padding:10px;text-align:center;font-size:12px;font-weight:700;color:#c9a84c">Tue</div>
+      <div style="padding:10px;text-align:center;font-size:12px;font-weight:700;color:#c9a84c">Wed</div>
+      <div style="padding:10px;text-align:center;font-size:12px;font-weight:700;color:#c9a84c">Thu</div>
+      <div style="padding:10px;text-align:center;font-size:12px;font-weight:700;color:#c9a84c">Fri</div>
+      <div style="padding:10px;text-align:center;font-size:12px;font-weight:700;color:#c9a84c">Sat</div>
+    </div>
+    <!-- תאים -->
+    <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid #e5e7eb"><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fafafa" id="cal-day-1"><div style="font-size:13px;font-weight:400;color:#9ca3af">1</div><div id="cal-events-1"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fff" id="cal-day-2"><div style="font-size:13px;font-weight:400;color:#9ca3af">2</div><div id="cal-events-2"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fff" id="cal-day-3"><div style="font-size:13px;font-weight:400;color:#9ca3af">3</div><div id="cal-events-3"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fff" id="cal-day-4"><div style="font-size:13px;font-weight:400;color:#9ca3af">4</div><div id="cal-events-4"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fff" id="cal-day-5"><div style="font-size:13px;font-weight:400;color:#9ca3af">5</div><div id="cal-events-5"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fff" id="cal-day-6"><div style="font-size:13px;font-weight:400;color:#9ca3af">6</div><div id="cal-events-6"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fafafa" id="cal-day-7"><div style="font-size:13px;font-weight:400;color:#9ca3af">7</div><div id="cal-events-7"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fafafa" id="cal-day-8"><div style="font-size:13px;font-weight:400;color:#9ca3af">8</div><div id="cal-events-8"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fff" id="cal-day-9"><div style="font-size:13px;font-weight:400;color:#9ca3af">9</div><div id="cal-events-9"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fff" id="cal-day-10"><div style="font-size:13px;font-weight:400;color:#9ca3af">10</div><div id="cal-events-10"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fff" id="cal-day-11"><div style="font-size:13px;font-weight:400;color:#9ca3af">11</div><div id="cal-events-11"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fff" id="cal-day-12"><div style="font-size:13px;font-weight:400;color:#9ca3af">12</div><div id="cal-events-12"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fff" id="cal-day-13"><div style="font-size:13px;font-weight:400;color:#9ca3af">13</div><div id="cal-events-13"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fafafa" id="cal-day-14"><div style="font-size:13px;font-weight:400;color:#9ca3af">14</div><div id="cal-events-14"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fafafa" id="cal-day-15"><div style="font-size:13px;font-weight:400;color:#9ca3af">15</div><div id="cal-events-15"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fff" id="cal-day-16"><div style="font-size:13px;font-weight:400;color:#9ca3af">16</div><div id="cal-events-16"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fff" id="cal-day-17"><div style="font-size:13px;font-weight:400;color:#9ca3af">17</div><div id="cal-events-17"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fff" id="cal-day-18"><div style="font-size:13px;font-weight:400;color:#9ca3af">18</div><div id="cal-events-18"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fff" id="cal-day-19"><div style="font-size:13px;font-weight:400;color:#9ca3af">19</div><div id="cal-events-19"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fff" id="cal-day-20"><div style="font-size:13px;font-weight:400;color:#9ca3af">20</div><div id="cal-events-20"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fafafa" id="cal-day-21"><div style="font-size:13px;font-weight:400;color:#9ca3af">21</div><div id="cal-events-21"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fafafa" id="cal-day-22"><div style="font-size:13px;font-weight:400;color:#9ca3af">22</div><div id="cal-events-22"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fff" id="cal-day-23"><div style="font-size:13px;font-weight:400;color:#9ca3af">23</div><div id="cal-events-23"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fff" id="cal-day-24"><div style="font-size:13px;font-weight:400;color:#9ca3af">24</div><div id="cal-events-24"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fff" id="cal-day-25"><div style="font-size:13px;font-weight:400;color:#9ca3af">25</div><div id="cal-events-25"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fff" id="cal-day-26"><div style="font-size:13px;font-weight:400;color:#9ca3af">26</div><div id="cal-events-26"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fff" id="cal-day-27"><div style="font-size:13px;font-weight:400;color:#9ca3af">27</div><div id="cal-events-27"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fafafa" id="cal-day-28"><div style="font-size:13px;font-weight:400;color:#9ca3af">28</div><div id="cal-events-28"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fafafa" id="cal-day-29"><div style="font-size:13px;font-weight:400;color:#9ca3af">29</div><div id="cal-events-29"></div></div><div style="min-height:90px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;padding:6px;background:#fff" id="cal-day-30"><div style="font-size:13px;font-weight:400;color:#9ca3af">30</div><div id="cal-events-30"></div></div></div>
+  </div>
+
+</div>
+</div>
+
+<!-- Cal Event Modal -->
+<div class="modal-overlay" id="cal-event-modal">
+  <div class="modal" style="max-width:420px">
+    <h3>📅 הוסף אירוע ללוח</h3>
+    <label>תאריך *</label>
+    <input type="date" id="cal-date" min="2026-11-01" max="2026-11-30" />
+    <label>שעה</label>
+    <input type="text" id="cal-time" placeholder="e.g. 7:00 PM" />
+    <label>סוג אירוע *</label>
+    <select id="cal-type">
+      <option value="personal">🤝 פגישה אישית</option>
+      <option value="community">🏛️ כנס קהילתי</option>
+      <option value="webinar">💻 וובינר Zoom</option>
+    </select>
+    <label>תיאור / מיקום</label>
+    <input type="text" id="cal-desc" placeholder="e.g. Miami Beach Community Center" />
+    <div class="modal-btns">
+      <button class="btn-save" onclick="saveCalEvent()">שמור</button>
+      <button class="btn-cancel" onclick="closeCalModal()">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<!-- Transcript Modal -->
+<div class="modal-overlay" id="transcript-modal">
+  <div class="modal transcript-modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 id="transcript-title" style="font-size:16px;color:#c9a84c">תמליל שיחה</h3>
+      <button onclick="closeTranscript()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#6b7280">✕</button>
+    </div>
+    <div class="transcript-body" id="transcript-body"></div>
+  </div>
+</div>
+
+<!-- Add Modal -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <h3>➕ הוספת פגישה ידנית</h3>
+    <div class="modal-row">
+      <div>
+        <label>שם מלא *</label>
+        <input type="text" id="m-name" placeholder="David Cohen" />
+      </div>
+      <div>
+        <label>טלפון *</label>
+        <input type="tel" id="m-phone" placeholder="+1 (305) 000-0000" />
+      </div>
+    </div>
+    <div class="modal-row">
+      <div>
+        <label>אימייל</label>
+        <input type="email" id="m-email" placeholder="email@example.com" />
+      </div>
+      <div>
+        <label>עיר</label>
+        <input type="text" id="m-city" placeholder="Miami, FL" />
+      </div>
+    </div>
+    <label>סוג פגישה *</label>
+    <select id="m-meeting">
+      <option value="personal">🤝 פגישה אישית 1 על 1</option>
+      <option value="community">🏛️ כנס / מפגש קהילתי</option>
+      <option value="webinar">💻 וובינר Zoom</option>
+      <option value="manual">✏️ אחר</option>
+    </select>
+    <label>תחומי עניין</label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px">
+      <label style="display:flex;align-items:center;gap:6px;font-weight:400;font-size:12px;cursor:pointer"><input type="checkbox" id="mi-re" value="realestate" style="accent-color:#c9a84c"> 🏠 נדל"ן</label>
+      <label style="display:flex;align-items:center;gap:6px;font-weight:400;font-size:12px;cursor:pointer"><input type="checkbox" id="mi-al" value="aliyah" style="accent-color:#c9a84c"> ✈️ עלייה</label>
+      <label style="display:flex;align-items:center;gap:6px;font-weight:400;font-size:12px;cursor:pointer"><input type="checkbox" id="mi-ti" value="timing" style="accent-color:#c9a84c"> 📅 תזמון</label>
+      <label style="display:flex;align-items:center;gap:6px;font-weight:400;font-size:12px;cursor:pointer"><input type="checkbox" id="mi-do" value="dollar" style="accent-color:#c9a84c"> 💵 דולר</label>
+    </div>
+    <label>הערות</label>
+    <textarea id="m-notes" rows="2" placeholder="הערות נוספות..."></textarea>
+    <div class="modal-btns">
+      <button class="btn-save" onclick="saveManual()">שמור</button>
+      <button class="btn-cancel" onclick="closeModal()">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PW = 'florida2026';
+let regData = [], waData = [], emailData = [];
+let calEvents = JSON.parse(localStorage.getItem('fl_cal_events') || '[]');
+const MEETING_LABEL = { personal:'🤝 פגישה אישית', community:'🏛️ כנס קהילתי', webinar:'💻 Zoom', manual:'✏️ ידני' };
+const MEETING_CLS   = { personal:'b-personal', community:'b-community', webinar:'b-webinar', manual:'b-manual' };
+const INTEREST_HE   = { realestate:'נדל"ן', aliyah:'עלייה', timing:'תזמון', dollar:'דולר' };
+const STATUSES = ['לטיפול','בתיאום','נקבע','בוצע'];
+
+function login() {
+  if (document.getElementById('pw').value === PW) {
+    sessionStorage.setItem('fl_auth','1');
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    fetchAll(); setInterval(fetchAll, 30000);
+    setTimeout(() => switchTab('cal'), 50);
+  } else {
+    document.getElementById('pw-err').style.display = 'block';
+    document.getElementById('pw').value = '';
+  }
+}
+if (sessionStorage.getItem('fl_auth')) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  fetchAll(); setInterval(fetchAll, 30000);
+  setTimeout(() => switchTab('cal'), 50);
+}
+
+async function fetchAll() {
+  try {
+    const [r1, r2, r3] = await Promise.all([
+      fetch('/api/florida/registrations'),
+      fetch('/api/florida/whatsapp'),
+      fetch('/api/florida/emails'),
+    ]);
+    if (r1.ok) regData = await r1.json();
+    if (r2.ok) { const d = await r2.json(); waData = d.conversations || []; }
+    if (r3.ok) { const d = await r3.json(); emailData = d.emails || []; }
+    updateStats(); render(); renderWA(); renderEmail();
+  } catch(e) {}
+}
+
+// ── Tabs ──
+function switchTab(tab) {
+  ['reg','wa','email','leads','invite','cal'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+    if (t === 'cal') {
+      document.getElementById('content-cal').style.display = (tab === 'cal') ? 'block' : 'none';
+    } else {
+      document.getElementById('content-'+t).classList.toggle('active', t===tab);
+    }
+  });
+  if (tab === 'leads' && leadsData.length === 0) fetchLeads();
+  if (tab === 'invite') updateInviteCounts();
+  if (tab === 'cal') renderCalendar();
+}
+
+// ── Registrations ──
+function updateStats() {
+  document.getElementById('s-total').textContent = regData.length;
+  document.getElementById('s-personal').textContent  = regData.filter(r=>r.meeting==='personal').length;
+  document.getElementById('s-community').textContent = regData.filter(r=>r.meeting==='community').length;
+  document.getElementById('s-webinar').textContent   = regData.filter(r=>r.meeting==='webinar').length;
+}
+
+function render() {
+  const fm = document.getElementById('f-meeting').value;
+  const fs = document.getElementById('f-status').value;
+  const fq = document.getElementById('f-search').value.toLowerCase();
+  const rows = regData.filter(r =>
+    (!fm || r.meeting===fm) && (!fs || r.status===fs) &&
+    (!fq || (r.name||'').toLowerCase().includes(fq) || (r.phone||'').includes(fq))
+  );
+  const tbody = document.getElementById('tbody');
+  document.getElementById('empty').style.display = rows.length ? 'none' : 'block';
+  if (!rows.length) { tbody.innerHTML=''; return; }
+  const istr = r => (r.interests||'').split(',').map(x=>INTEREST_HE[x.trim()]||x.trim()).filter(Boolean).join(' · ');
+  tbody.innerHTML = rows.map((r,i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td><strong>${r.name||'—'}</strong></td>
+      <td style="direction:ltr;color:#6b7280">${r.phone||'—'}</td>
+      <td style="font-size:12px;color:#6b7280">${r.email||'—'}</td>
+      <td>${r.city||'—'}</td>
+      <td><span class="badge ${MEETING_CLS[r.meeting]||''}">${MEETING_LABEL[r.meeting]||r.meeting}</span></td>
+      <td style="font-size:12px">${istr(r)}</td>
+      <td style="font-size:12px;color:#6b7280">${r.notes||'—'}</td>
+      <td><select class="status-select" onchange="updateStatus(${r.id},this.value)">
+        ${STATUSES.map(s=>`<option value="${s}" ${r.status===s?'selected':''}>${s}</option>`).join('')}
+      </select></td>
+      <td><input class="notes-input" value="${(r.internal_notes||'').replace(/"/g,'&quot;')}" placeholder="הערה..." onblur="updateNotes(${r.id},this.value)" /></td>
+      <td style="font-size:11px;color:#9ca3af">${fmtDate(r.created_at)}</td>
+    </tr>`).join('');
+}
+
+async function updateStatus(id,status) {
+  await fetch(`/api/florida/update/${id}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})});
+  const r=regData.find(x=>x.id===id); if(r) r.status=status;
+}
+async function updateNotes(id,notes) {
+  await fetch(`/api/florida/update/${id}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({internal_notes:notes})});
+  const r=regData.find(x=>x.id===id); if(r) r.internal_notes=notes;
+}
+
+// ── WhatsApp ──
+function renderWA() {
+  const tbody = document.getElementById('wa-tbody');
+  document.getElementById('wa-empty').style.display = waData.length ? 'none' : 'block';
+  if (!waData.length) { tbody.innerHTML=''; return; }
+  tbody.innerHTML = waData.map((c,i) => {
+    const st = c.handoff ? '📋 הועבר' : c.replied ? '💬 ענה' : c.read_at ? '👁️ נקרא' : '⏳ ממתין';
+    const stCls = c.handoff ? 'b-personal' : c.replied ? 'b-community' : c.read_at ? 'b-webinar' : '';
+    const hasT = c.transcript && c.transcript.trim().length > 0;
+    return `<tr>
+      <td>${i+1}</td>
+      <td><strong>${c.client_name||'—'}</strong></td>
+      <td style="direction:ltr;color:#6b7280">${c.phone||'—'}</td>
+      <td>${c.agent_label||'—'}</td>
+      <td><span class="badge ${stCls}">${st}</span></td>
+      <td style="font-size:11px;color:#9ca3af">${fmtDate(c.sent_at)}</td>
+      <td>${hasT ? `<button class="btn-view" onclick="showTranscript('${c.phone}','${(c.client_name||'').replace(/'/g,"\\'")}')">&#128172; צפה</button>` : '<span style="color:#ccc;font-size:12px">אין</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function showTranscript(phone, name) {
+  const c = waData.find(x => x.phone === phone);
+  if (!c || !c.transcript) return;
+  document.getElementById('transcript-title').textContent = `שיחה עם ${name}`;
+  const lines = c.transcript.split('\n').filter(l=>l.trim());
+  const blocks = []; let cur = null;
+  for (const line of lines) {
+    const isAgent = ['דניאל:','Daniel:'].some(p=>line.startsWith(p));
+    const isClient = ['לקוח:','Client:'].some(p=>line.startsWith(p));
+    if (isAgent||isClient) {
+      if (cur) blocks.push(cur);
+      cur = { type: isAgent?'agent':'client', text: line.replace(/^[^:]+:\s*/,'').trim() };
+    } else if (cur && line.trim() && !line.startsWith('[')) {
+      cur.text += '\n' + line.trim();
+    }
+  }
+  if (cur) blocks.push(cur);
+  document.getElementById('transcript-body').innerHTML = blocks.map(b => {
+    if (!b.text.trim()) return '';
+    const isEng = (b.text.match(/[a-zA-Z]/g)||[]).length > b.text.length * 0.4;
+    return `<div class="msg ${b.type}">
+      <div class="msg-label">${b.type==='agent'?'דניאל':'לקוח'}</div>
+      <div class="bubble bubble-${b.type}" style="direction:${isEng?'ltr':'rtl'}">${b.text.replace(/\n/g,'<br>')}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('transcript-modal').classList.add('open');
+}
+function closeTranscript() { document.getElementById('transcript-modal').classList.remove('open'); }
+
+// ── Email ──
+function renderEmail() {
+  const tbody = document.getElementById('email-tbody');
+  document.getElementById('email-empty').style.display = emailData.length ? 'none' : 'block';
+  if (!emailData.length) { tbody.innerHTML=''; return; }
+  tbody.innerHTML = emailData.map((e,i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td><strong>${e.name||e.to_name||'—'}</strong></td>
+      <td style="direction:ltr;color:#6b7280">${e.to_email||'—'}</td>
+      <td>${e.subject||'—'}</td>
+      <td class="email-body-preview">${(e.body||'').replace(/<[^>]+>/g,'').substring(0,80)}...</td>
+      <td><span class="badge ${e.opened?'b-personal':''}">${e.opened?'👁️ נפתח':'נשלח'}</span></td>
+      <td style="font-size:11px;color:#9ca3af">${fmtDate(e.sent_at||e.created_at)}</td>
+    </tr>`).join('');
+}
+
+// ── Florida Leads ──
+let leadsData = [], leadsPage_ = 0;
+const LEADS_PER_PAGE = 30;
+
+async function fetchLeads() {
+  try {
+    const res = await fetch('/api/florida/leads');
+    if (!res.ok) return;
+    leadsData = await res.json();
+    leadsPage_ = 0;
+    renderLeads();
+  } catch(e) {}
+}
+
+function renderLeads() {
+  const fs = document.getElementById('fl-sent').value;
+  const fl = document.getElementById('fl-location').value.toLowerCase();
+  const fq = document.getElementById('fl-search').value.toLowerCase();
+  let rows = leadsData.filter(r =>
+    (!fs || (fs==='yes' ? r.sent : !r.sent)) &&
+    (!fl || (r.florida_location||'').toLowerCase().includes(fl)) &&
+    (!fq || (r.name||'').toLowerCase().includes(fq) || (r.phone1||'').includes(fq))
+  );
+  const total = rows.length;
+  const sent = rows.filter(r=>r.sent).length;
+  document.getElementById('fl-stats').textContent = `${total} לקוחות | ✅ ${sent} נשלח | ⏳ ${total-sent} ממתין`;
+  const totalPages = Math.max(1, Math.ceil(total/LEADS_PER_PAGE));
+  if (leadsPage_ >= totalPages) leadsPage_ = totalPages-1;
+  const start = leadsPage_ * LEADS_PER_PAGE;
+  const pageRows = rows.slice(start, start+LEADS_PER_PAGE);
+  document.getElementById('leads-page-info').textContent = total ? `${start+1}–${Math.min(start+LEADS_PER_PAGE,total)} מתוך ${total}` : '';
+  document.getElementById('leads-page-num').textContent = total ? `עמוד ${leadsPage_+1} מתוך ${totalPages}` : '';
+  document.getElementById('leads-prev').disabled = leadsPage_===0;
+  document.getElementById('leads-next').disabled = leadsPage_>=totalPages-1;
+  const tbody = document.getElementById('leads-tbody');
+  document.getElementById('leads-empty').style.display = pageRows.length ? 'none' : 'block';
+  if (!pageRows.length) { tbody.innerHTML=''; return; }
+  tbody.innerHTML = pageRows.map((r,i) => {
+    const sentBadge = r.sent
+      ? `<span class="badge b-personal">✅ נשלח</span>`
+      : `<span class="badge" style="background:#fef9c3;color:#854d0e">⏳ לא נשלח</span>`;
+    const btn = r.sent
+      ? `<button class="btn-view" style="background:#dc2626" onclick="toggleSent(${r.id},false)">❌ בטל</button>`
+      : `<button class="btn-view" style="background:#16a34a" onclick="sendToOne(${r.id},'${(r.phone1||'').replace(/'/g,"\'")}','${(r.name||'').replace(/'/g,"\'")}')">📤 שלח</button>`;
+    return `<tr style="${r.sent?'opacity:.65':''}">
+      <td>${start+i+1}</td>
+      <td><strong>${r.name||'—'}</strong></td>
+      <td style="direction:ltr;color:#6b7280">${r.phone1||'—'}</td>
+      <td style="font-size:12px;color:#6b7280">${r.email||'—'}</td>
+      <td style="font-size:12px">${r.florida_location||'—'}</td>
+      <td style="font-size:12px;color:#6b7280">${r.agent||'—'}</td>
+      <td>${sentBadge}</td>
+      <td style="font-size:11px;color:#9ca3af">${r.sent_at ? fmtDate(r.sent_at) : '—'}</td>
+      <td>${btn}</td>
+      <td>${r.email ? `<button class="btn-view" style="background:#6366f1" onclick="sendEmailToOne(${r.id},'${(r.email||'').replace(/'/g,\"\\'\")}',' ${(r.name||'').replace(/'/g,\"\\'\")}')">📧 Mail</button>` : '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function leadsPage(dir) { leadsPage_+=dir; renderLeads(); }
+
+async function toggleSent(id, sent) {
+  const url = sent ? `/api/florida/leads/${id}/mark-sent` : `/api/florida/leads/${id}/unmark-sent`;
+  await fetch(url, {method:'POST'});
+  const r = leadsData.find(x=>x.id===id);
+  if (r) { r.sent = sent; r.sent_at = sent ? new Date().toISOString() : null; }
+  renderLeads();
+}
+
+// ── Invites ──
+function updateInviteCounts() {
+  const webinar   = regData.filter(r => r.meeting === 'webinar').length;
+  const community = regData.filter(r => r.meeting === 'community').length;
+  document.getElementById('webinar-count').textContent   = `${webinar} נרשמים`;
+  document.getElementById('community-count').textContent = `${community} נרשמים`;
+}
+
+async function sendInvites(type, channel) {
+  const isZoom = type === 'webinar';
+  const exactDate = document.getElementById(isZoom ? 'zoom-exact-date' : 'conf-exact-date').value;
+  const date     = exactDate ? new Date(exactDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : document.getElementById(isZoom ? 'zoom-date' : 'conf-date').value.trim();
+  const time     = document.getElementById(isZoom ? 'zoom-time'     : 'conf-time').value.trim();
+  const link     = isZoom ? document.getElementById('zoom-link').value.trim() : '';
+  const location = isZoom ? '' : document.getElementById('conf-location').value.trim();
+  const customMsg = document.getElementById(isZoom ? 'zoom-msg' : 'conf-msg').value.trim();
+
+  if (!date || !time || (isZoom && !link) || (!isZoom && !location)) {
+    alert('נא למלא את כל השדות הנדרשים'); return;
+  }
+
+  // הוסף ללוח שנה אוטומטית אם יש תאריך מדויק
+  if (exactDate) {
+    const day = parseInt(exactDate.split('-')[2]);
+    const label = isZoom ? `Zoom Webinar · ${time}` : `כנס · ${time}`;
+    const newEvent = { _id: Date.now(), day, type, label, time };
+    calEvents.push(newEvent);
+    localStorage.setItem('fl_cal_events', JSON.stringify(calEvents));
+  }
+
+  const recipients = regData.filter(r => r.meeting === type);
+  if (!recipients.length) { alert('אין נרשמים לסוג זה'); return; }
+
+  const typeLabel = isZoom ? 'Zoom Webinar' : 'Community Gathering';
+  const confirmed = confirm(`שליחת זימון ל-${recipients.length} נרשמים ב${channel === 'wa' ? 'וואטסאפ' : 'מייל'}?`);
+  if (!confirmed) return;
+
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = 'שולח...';
+
+  try {
+    const res = await fetch('/api/florida/send-invites', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        type, channel, date, time, link, location, customMsg,
+        secret: 'florida2026send'
+      })
+    });
+    const data = await res.json();
+    const resultEl = document.getElementById('invite-result');
+    resultEl.style.display = 'block';
+    resultEl.textContent = `✅ נשלחו ${data.sent} זימונים בהצלחה${data.failed ? ` | נכשלו ${data.failed}` : ''}`;
+    setTimeout(() => resultEl.style.display = 'none', 5000);
+  } catch(e) {
+    alert('שגיאה בשליחה');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = btn.textContent.replace('שולח...', channel === 'wa' ? '💬 שלח בוואטסאפ' : '📧 שלח במייל');
+  }
+}
+
+// ── Test Send ──
+async function resetSession() {
+  const phone = prompt('טלפון לאיפוס session:', '0504183337');
+  if (!phone) return;
+  const res = await fetch('/api/whatsapp/florida/reset', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({phone})
+  });
+  const data = await res.json();
+  alert('Session אופס: ' + JSON.stringify(data));
+}
+
+async function sendTest() {
+  const phone = prompt('טלפון לניסיון:', '0504183337');
+  if (!phone) return;
+  const name = prompt('שם:', 'Test');
+  const res = await fetch('/api/whatsapp/florida/start', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({secret: 'florida2026send', leads: [{phone, name}]})
+  });
+  const data = await res.json();
+  alert(JSON.stringify(data));
+}
+
+// ── Calendar ──
+
+const CAL_COLORS = {
+  personal:  { bg: '#dcfce7', border: '#16a34a', text: '#166534' },
+  community: { bg: '#fef9c3', border: '#d97706', text: '#854d0e' },
+  webinar:   { bg: '#e0f2fe', border: '#0369a1', text: '#0369a1' },
+};
+const CAL_ICONS = { personal: '🤝', community: '🏛️', webinar: '💻' };
+
+function renderCalendar() {
+  // נקה אירועים קיימים
+  for (let d = 1; d <= 30; d++) {
+    const el = document.getElementById('cal-events-' + d);
+    if (el) el.innerHTML = '';
+    const dayEl = document.getElementById('cal-day-' + d);
+    if (dayEl) {
+      const numEl = dayEl.querySelector('div');
+      if (numEl) { numEl.style.fontWeight = '400'; numEl.style.color = '#9ca3af'; }
+    }
+  }
+  const grid = document.getElementById('cal-grid');
+  if (!grid) return;
+  // נובמבר 2026 מתחיל ביום ראשון (0=Sun)
+  const firstDay = new Date(2026, 10, 1).getDay(); // 0
+  const daysInMonth = 30;
+
+  // אסוף אירועים מהנרשמים
+  const regEvents = regData
+    .filter(r => r.meeting && r.internal_notes && r.internal_notes.match(/\d{4}-11-\d{2}/))
+    .map(r => {
+      const m = r.internal_notes.match(/(\d{4}-11-(\d{2}))/);
+      return m ? { day: parseInt(m[2]), type: r.meeting, label: r.name, time: '' } : null;
+    }).filter(Boolean);
+
+  // אירועים מהזימונים (שמורים ב-localStorage)
+  const allEvents = [...calEvents, ...regEvents];
+
+  let html = '';
+  // תאים ריקים לפני היום הראשון
+  for (let i = 0; i < firstDay; i++) {
+    html += `<div style="min-height:100px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;background:#fafafa"></div>`;
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dayEvents = allEvents.filter(e => e.day === d);
+    const isWeekend = (firstDay + d - 1) % 7 === 0 || (firstDay + d - 1) % 7 === 6;
+    const evHtml = dayEvents.map(e => {
+      const c = CAL_COLORS[e.type] || CAL_COLORS.personal;
+      return `<div style="background:${c.bg};border-right:3px solid ${c.border};color:${c.text};
+        font-size:11px;padding:2px 5px;border-radius:3px;margin-top:2px;
+        white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer"
+        title="${e.label}${e.time ? ' · ' + e.time : ''}" onclick="removeCalEvent(${e._id !== undefined ? e._id : -1})">
+        ${CAL_ICONS[e.type] || ''} ${e.label}${e.time ? ' ' + e.time : ''}
+      </div>`;
+    }).join('');
+    html += `<div style="min-height:100px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;
+      padding:6px;background:${isWeekend ? '#fafafa' : '#fff'};vertical-align:top;position:relative">
+      <div style="font-size:13px;font-weight:${dayEvents.length ? '700' : '400'};color:${dayEvents.length ? '#1a2c1e' : '#9ca3af'}">${d}</div>
+      ${evHtml}
+    </div>`;
+  }
+  grid.innerHTML = html;
+}
+
+function openCalEventModal() {
+  document.getElementById('cal-event-modal').classList.add('open');
+}
+function closeCalModal() {
+  document.getElementById('cal-event-modal').classList.remove('open');
+  ['cal-date','cal-time','cal-desc'].forEach(id => document.getElementById(id).value = '');
+}
+function saveCalEvent() {
+  const dateVal = document.getElementById('cal-date').value;
+  if (!dateVal) { alert('נא לבחור תאריך'); return; }
+  const day = parseInt(dateVal.split('-')[2]);
+  const type = document.getElementById('cal-type').value;
+  const time = document.getElementById('cal-time').value.trim();
+  const desc = document.getElementById('cal-desc').value.trim();
+  const label = desc || (type === 'personal' ? 'פגישה אישית' : type === 'community' ? 'כנס' : 'Zoom');
+  const newEvent = { _id: Date.now(), day, type, label, time };
+  calEvents.push(newEvent);
+  localStorage.setItem('fl_cal_events', JSON.stringify(calEvents));
+  closeCalModal();
+  renderCalendar();
+}
+function removeCalEvent(id) {
+  if (id < 0) return;
+  if (!confirm('להסיר אירוע זה?')) return;
+  calEvents = calEvents.filter(e => e._id !== id);
+  localStorage.setItem('fl_cal_events', JSON.stringify(calEvents));
+  renderCalendar();
+}
+
+// ── Calendar ──
+// ── Florida Send ──
+// מפת שמות עברית לאנגלית
+const HE_TO_EN = {
+  'אביגיל':'Abigail','אברהם':'Abraham','אדיר':'Adir','אהרון':'Aaron','אורי':'Uri','אורן':'Oren','אורית':'Orit',
+  'אילן':'Ilan','אילנה':'Ilana','איתן':'Itan','אלי':'Eli','אליעזר':'Eliezer','אלישע':'Elisha',
+  'אלקסנדר':'Alexander','אמיר':'Amir','אסתר':'Esther','אריאל':'Ariel','אריה':'Aryeh','ארית':'Arit',
+  'אשר':'Asher','בתשבע':'Batsheva','בנימין':'Benjamin','ברך':'Baruch','ברקה':'Bracha',
+  'גבריאל':'Gabriel','דבורה':'Devorah','דוד':'David','דינה':'Dina','דניאל':'Daniel',
+  'הדסה':'Hadassah','הנה':'Hannah','ורד':'Vered','זאב':'Zeev','זוהר':'Zohar','זכריה':'Zechariah',
+  'חיים':'Chaim','חנה':'Chana','חנן':'Chanan','טוביה':'Tovia','יאיר':'Yair','יהודה':'Yehuda',
+  'יהושע':'Yehoshua','יוסף':'Yosef','יונתן':'Yonatan','יוני':'Yoni','יחיאל':'Yechiel',
+  'יצחק':'Yitzchak','יעקב':'Yaakov','יעל':'Yael','ירדן':'Yarden','ישראל':'Yisrael',
+  'כלב':'Caleb','לאה':'Leah','ליאור':'Lior','ליאורה':'Liora','ליאנה':'Liana','ליבי':'Libi',
+  'לילי':'Lily','לינור':'Linor','מיכאל':'Michael','מירי':'Miri','מנחם':'Menachem','משה':'Moshe',
+  'נחום':'Nachum','נטע':'Neta','ניר':'Nir','נירית':'Nirit','נעמה':'Naama','נעמי':'Naomi',
+  'נתן':'Natan','נתנאל':'Netanel','סוניא':'Sonia','סורין':'Sorin','עדי':'Adi','עירית':'Irit',
+  'עמית':'Amit','עמנואל':'Emanuel','פיליפ':'Philip','פנינה':'Penina','צבי':'Tzvi','ציפורה':'Tzipora',
+  'צלמן':'Zalman','קרן':'Keren','רבקה':'Rivka','רחל':'Rachel','רוני':'Roni','רות':'Ruth',
+  'רינה':'Rina','רינת':'Rinat','שאול':'Shaul','שירה':'Shira','שלומית':'Shlomit','שלומו':'Shlomo',
+  'שמואל':'Shmuel','שרה':'Sarah','תמר':'Tamar','תפארה':'Tifara'
+};
+
+function translateName(hebrewName) {
+  if (!hebrewName) return 'there';
+  // אם כבר אנגלית — שמור כמו שהוא
+  if (/^[a-zA-Z\s]+$/.test(hebrewName)) return hebrewName.split(' ')[0];
+  // נסה לתרגם את השם הראשון
+  const first = hebrewName.trim().split(/[\s|]+/)[0];
+  return HE_TO_EN[first] || first;
+}
+
+async function sendToOne(id, phone, name) {
+  const engName = translateName(name);
+  const editedName = prompt(`שם באנגלית (ניתן לערוך):`, engName);
+  if (editedName === null) return;
+  if (!confirm(`שלח הודעת פלורידה ל-${editedName} (${phone})?`)) return;
+  const res = await fetch('/api/whatsapp/florida/start', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({secret: 'florida2026send', leads: [{phone, name: editedName}]})
+  });
+  const data = await res.json();
+  if (data.results && data.results[0]?.status === 'sent') {
+    const r = leadsData.find(x => x.id === id);
+    if (r) { r.sent = true; r.sent_at = new Date().toISOString(); }
+    renderLeads();
+    alert('✅ נשלח בהצלחה!');
+  } else {
+    alert('שגיאה: ' + JSON.stringify(data.results?.[0]?.reason || data));
+  }
+}
+
+async function sendEmailToOne(id, email, name) {
+  const engName = translateName(name);
+  const editedName = prompt(`שם באנגלית:`, engName);
+  if (editedName === null) return;
+  const res = await fetch('/api/florida/send-email-lead', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({email, name: editedName, secret: 'florida2026send'})
+  });
+  const data = await res.json();
+  if (data.status === 'ok') {
+    const r = leadsData.find(x => x.id === id);
+    if (r) { r.sent = true; r.sent_at = new Date().toISOString(); }
+    renderLeads();
+    alert('✅ מייל נשלח!');
+  } else {
+    alert('שגיאה: ' + JSON.stringify(data));
+  }
+}
+
+async function sendToAll() {
+  const unsent = leadsData.filter(r => !r.sent && r.phone1);
+  if (!unsent.length) { alert('כולם כבר קיבלו הודעה!'); return; }
+  if (!confirm(`שלח הודעת פלורידה ל-${unsent.length} לקוחות שלא קיבלו עדיין?`)) return;
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = 'שולח...';
+  const leads = unsent.map(r => ({phone: r.phone1, name: translateName(r.name)}));
+  let sent = 0, failed = 0;
+  for (let i = 0; i < leads.length; i += 50) {
+    const batch = leads.slice(i, i + 50);
+    const res = await fetch('/api/whatsapp/florida/start', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({secret: 'florida2026send', leads: batch})
+    });
+    const data = await res.json();
+    sent += data.sent || 0;
+    failed += data.failed || 0;
+    btn.textContent = `שולח... ${sent+failed}/${leads.length}`;
+    await new Promise(r => setTimeout(r, 2000));
+  }
+  btn.disabled = false; btn.textContent = '📤 שלח לכולם שלא נשלח';
+  await fetchLeads();
+  alert(`✅ נשלחו ${sent} | ❌ נכשלו ${failed}`);
+}
+
+// ── Utils ──
+function fmtDate(s) {
+  if (!s) return '—';
+  const d = new Date(s);
+  return d.toLocaleDateString('he-IL')+' '+d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
+}
+
+// ── Add Manual ──
+function openAddModal() { document.getElementById('add-modal').classList.add('open'); }
+function closeModal() {
+  document.getElementById('add-modal').classList.remove('open');
+  ['m-name','m-phone','m-email','m-city','m-notes'].forEach(id=>document.getElementById(id).value='');
+  ['mi-re','mi-al','mi-ti','mi-do'].forEach(id=>document.getElementById(id).checked=false);
+}
+async function saveManual() {
+  const name=document.getElementById('m-name').value.trim();
+  const phone=document.getElementById('m-phone').value.trim();
+  if (!name||!phone) { alert('נא למלא שם וטלפון'); return; }
+  const interests=['mi-re','mi-al','mi-ti','mi-do'].filter(id=>document.getElementById(id).checked).map(id=>document.getElementById(id).value);
+  await fetch('/api/florida/register',{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ name, phone,
+      email:document.getElementById('m-email').value.trim(),
+      city:document.getElementById('m-city').value.trim(),
+      meeting:document.getElementById('m-meeting').value,
+      interests, notes:document.getElementById('m-notes').value.trim(), lang:'he'
+    })
+  });
+  closeModal(); await fetchAll();
+}
+
+</script>
+</body>
+</html>
