@@ -1202,3 +1202,31 @@ def save_florida_email_sent(email: str, name: str, subject: str) -> None:
     except Exception as e:
         print(f"[FLORIDA EMAIL SAVE ERROR] {e}")
     conn.close()
+
+
+def save_florida_email_reply(email: str, reply_text: str) -> None:
+    """שומר תשובת מייל מלקוח פלורידה."""
+    conn = get_db()
+    cur = conn.cursor()
+    now = datetime.now(timezone.utc).isoformat()
+    try:
+        cur.execute(
+            f"UPDATE florida_emails_sent SET reply={PH}, replied_at={PH} WHERE to_email={PH}",
+            (reply_text, now, email)
+        )
+        if cur.rowcount == 0:
+            # אם אין רשומה — צור אחת
+            if DATABASE_URL:
+                cur.execute(
+                    "INSERT INTO florida_emails_sent (to_email, to_name, subject, reply, replied_at, sent_at) VALUES (%s,%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING",
+                    (email, '', 'Reply', reply_text, now, now)
+                )
+            else:
+                cur.execute(
+                    "INSERT OR IGNORE INTO florida_emails_sent (to_email, to_name, subject, reply, replied_at, sent_at) VALUES (?,?,?,?,?,?)",
+                    (email, '', 'Reply', reply_text, now, now)
+                )
+        conn.commit()
+    except Exception as e:
+        print(f"[FLORIDA EMAIL REPLY SAVE ERROR] {e}")
+    conn.close()

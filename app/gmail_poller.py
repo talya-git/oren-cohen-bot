@@ -98,6 +98,21 @@ def poll_inbox():
 
         # בדוק שיש רשומה ב-DB
         record = db.get_reengagement_record(f"email:{from_email}")
+        
+        # בדוק אם זה לקוח פלורידה
+        is_florida = False
+        try:
+            _, florida_emails = db._get_florida_phones_and_emails()
+            if from_email in florida_emails:
+                is_florida = True
+                # שמור תשובה בטבלת פלורידה
+                db.save_florida_email_reply(from_email, _get_text(msg)[:500])
+                print(f"[FLORIDA EMAIL REPLY] from={from_email}")
+                mail.store(num, "+FLAGS", "\\Seen")
+                continue
+        except Exception:
+            pass
+        
         if not record:
             mail.store(num, "+FLAGS", "\\Seen")
             continue

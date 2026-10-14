@@ -220,7 +220,7 @@
 <div class="main">
   <table>
     <thead><tr>
-      <th>#</th><th>שם</th><th>אימייל</th><th>נושא</th><th>תוכן</th><th>סטטוס</th><th>תאריך</th>
+      <th>#</th><th>שם</th><th>אימייל</th><th>נושא</th><th>תאריך שליחה</th><th>סטטוס</th><th>תשובה</th>
     </tr></thead>
     <tbody id="email-tbody"></tbody>
   </table>
@@ -629,14 +629,14 @@ function renderEmail() {
   document.getElementById('email-empty').style.display = emailData.length ? 'none' : 'block';
   if (!emailData.length) { tbody.innerHTML=''; return; }
   tbody.innerHTML = emailData.map((e,i) => `
-    <tr>
+    <tr style="${e.reply?'background:#f0fdf4':''}">
       <td>${i+1}</td>
       <td><strong>${e.name||e.to_name||'—'}</strong></td>
       <td style="direction:ltr;color:#6b7280">${e.to_email||'—'}</td>
       <td>${e.subject||'—'}</td>
-      <td class="email-body-preview">${(e.body||'').replace(/<[^>]+>/g,'').substring(0,80)}...</td>
-      <td><span class="badge ${e.opened?'b-personal':''}">${e.opened?'👁️ נפתח':'נשלח'}</span></td>
       <td style="font-size:11px;color:#9ca3af">${fmtDate(e.sent_at||e.created_at)}</td>
+      <td>${e.reply ? `<span class="badge b-personal">✅ ענה</span>` : '<span style="color:#9ca3af;font-size:12px">ממתין</span>'}</td>
+      <td style="font-size:12px;color:#166534;max-width:200px;overflow:hidden;text-overflow:ellipsis">${e.reply||''}</td>
     </tr>`).join('');
 }
 
