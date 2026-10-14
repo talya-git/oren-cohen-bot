@@ -1045,21 +1045,15 @@ def get_all_florida_conversations() -> list:
 
 
 def get_florida_emails() -> list:
-    """מיילים רק של לקוחות פלורידה."""
-    _, florida_emails = _get_florida_phones_and_emails()
+    """מיילים שנשלחו ללקוחות פלורידה."""
     conn = get_db()
     cur = conn.cursor()
     try:
-        cur.execute("SELECT * FROM email_sent ORDER BY created_at DESC")
-        rows = _fetchall(cur)
+        cur.execute("SELECT to_email, to_name as name, subject, sent_at as created_at FROM florida_emails_sent ORDER BY sent_at DESC")
+        result = _fetchall(cur)
     except Exception:
-        rows = []
+        result = []
     conn.close()
-    result = []
-    for r in rows:
-        email = str(r.get('to_email','')).strip().lower()
-        if email in florida_emails:
-            result.append(r)
     return result
 
 
@@ -1172,3 +1166,39 @@ def get_florida_event_info() -> dict:
         result = {}
     conn.close()
     return result
+
+
+def save_florida_email_sent(email: str, name: str, subject: str) -> None:
+    """שומר מייל שנשלח ללקוח פלורידה."""
+    conn = get_db()
+    cur = conn.cursor()
+    now = datetime.now(timezone.utc).isoformat()
+    try:
+        if DATABASE_URL:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS florida_emails_sent (
+                    id SERIAL PRIMARY KEY,
+                    to_email TEXT, to_name TEXT, subject TEXT,
+                    sent_at TIMESTAMPTZ DEFAULT NOW()
+                )
+            """)
+            cur.execute(
+                "INSERT INTO florida_emails_sent (to_email, to_name, subject, sent_at) VALUES (%s,%s,%s,%s)",
+                (email, name, subject, now)
+            )
+        else:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS florida_emails_sent (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    to_email TEXT, to_name TEXT, subject TEXT,
+                    sent_at TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            cur.execute(
+                "INSERT INTO florida_emails_sent (to_email, to_name, subject, sent_at) VALUES (?,?,?,?)",
+                (email, name, subject, now)
+            )
+        conn.commit()
+    except Exception as e:
+        print(f"[FLORIDA EMAIL SAVE ERROR] {e}")
+    conn.close()

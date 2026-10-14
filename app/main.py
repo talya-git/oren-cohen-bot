@@ -1131,6 +1131,8 @@ Oren Cohen Group"""
     try:
         from .mailer import send_email
         send_email(to=email, subject=subject, body=body)
+        # שמור ב-DB
+        db.save_florida_email_sent(email=email, name=name, subject=subject)
         return {"status": "ok"}
     except Exception as e:
         return {"status": "error", "reason": str(e)}
