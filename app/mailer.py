@@ -343,22 +343,24 @@ def send_bulk_report(agent_label: str, results: list[dict], agent_email: str | N
 
 
 def send_email(to: str, subject: str, body: str) -> None:
-    """שולח מייל דרך Mailjet."""
+    """שולח מייל דרך Gmail SMTP."""
+    import smtplib
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+    from email.utils import formataddr
+
+    gmail_user = os.getenv("GMAIL_USER", "orencohengroup2020@gmail.com")
+    gmail_pass = os.getenv("GMAIL_APP_PASSWORD", "").replace(" ", "")
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = formataddr(("Oren Cohen Group", gmail_user))
+    msg["To"] = to
     html_body = f"<html><body style='font-family:Arial,sans-serif;font-size:14px;line-height:1.6'>{body.replace(chr(10), '<br>')}</body></html>"
-    payload = json.dumps({
-        "Messages": [{
-            "From": {"Email": FROM_EMAIL, "Name": "Oren Cohen Group"},
-            "To": [{"Email": to}],
-            "Subject": subject,
-            "HTMLPart": html_body,
-        }]
-    }).encode()
-    credentials = base64.b64encode(f"{MAILJET_API_KEY}:{MAILJET_SECRET_KEY}".encode()).decode()
-    req = urllib.request.Request(
-        "https://api.mailjet.com/v3.1/send",
-        data=payload,
-        headers={"Authorization": f"Basic {credentials}", "Content-Type": "application/json"},
-        method="POST",
-    )
-    with urllib.request.urlopen(req) as resp:
-        print(f"[EMAIL] sent to {to} | {subject}")
+    msg.attach(MIMEText(html_body, "html", "utf-8"))
+
+    with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        server.starttls()
+        server.login(gmail_user, gmail_pass)
+        server.sendmail(gmail_user, to, msg.as_string())
+    print(f"[EMAIL] sent to {to} | {subject}")
