@@ -68,6 +68,17 @@ def init_db():
             except Exception:
                 conn.rollback()
 
+        for col, definition in [
+            ("opened_at", "TIMESTAMPTZ"),
+            ("reply", "TEXT"),
+            ("replied_at", "TIMESTAMPTZ"),
+        ]:
+            try:
+                cur.execute(f"ALTER TABLE florida_emails_sent ADD COLUMN IF NOT EXISTS {col} {definition}")
+                conn.commit()
+            except Exception:
+                conn.rollback()
+
     if DATABASE_URL:
         cur.execute("""
             CREATE TABLE IF NOT EXISTS users (
