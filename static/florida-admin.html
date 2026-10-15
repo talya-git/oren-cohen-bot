@@ -207,7 +207,7 @@
 <div class="main">
   <table class="wa-table">
     <thead><tr>
-      <th>#</th><th>שם</th><th>טלפון</th><th>סוכן</th><th>סטטוס</th><th>תאריך שליחה</th><th>תמליל</th>
+      <th>#</th><th>שם</th><th>טלפון</th><th>אימייל</th><th>ערוץ שליחה</th><th>תאריך שליחה</th><th>הערות</th>
     </tr></thead>
     <tbody id="wa-tbody"></tbody>
   </table>
@@ -471,7 +471,7 @@
 
 <script>
 const PW = 'florida2026';
-let regData = [], waData = [], emailData = [];
+let regData = [], leadsData = [], emailData = [];
 let calEvents = JSON.parse(localStorage.getItem('fl_cal_events') || '[]');
 const MEETING_LABEL = { personal:'🤝 פגישה אישית', community:'🏛️ כנס קהילתי', webinar:'💻 Zoom', manual:'✏️ ידני' };
 const MEETING_CLS   = { personal:'b-personal', community:'b-community', webinar:'b-webinar', manual:'b-manual' };
@@ -501,11 +501,11 @@ async function fetchAll() {
   try {
     const [r1, r2, r3] = await Promise.all([
       fetch('/api/florida/registrations'),
-      fetch('/api/florida/whatsapp'),
+      fetch('/api/florida/leads'),
       fetch('/api/florida/emails'),
     ]);
     if (r1.ok) regData = await r1.json();
-    if (r2.ok) { const d = await r2.json(); waData = d.conversations || []; }
+    if (r2.ok) leadsData = await r2.json();
     if (r3.ok) { const d = await r3.json(); emailData = d.emails || []; }
     updateStats(); render(); renderWA(); renderEmail();
   } catch(e) {}
@@ -522,6 +522,7 @@ function switchTab(tab) {
     }
   });
   if (tab === 'leads' && leadsData.length === 0) fetchLeads();
+  if (tab === 'wa') renderWA();
   if (tab === 'invite') updateInviteCounts();
   if (tab === 'cal') renderCalendar();
 }
@@ -573,25 +574,43 @@ async function updateNotes(id,notes) {
   const r=regData.find(x=>x.id===id); if(r) r.internal_notes=notes;
 }
 
-// ── WhatsApp ──
+// ── WhatsApp — מבוסס על florida_leads בלבד ──
 function renderWA() {
+  // לידים שנשלח להם WA (bot או ידני) = sent=true ואין מייל תואם
+  const emailsSent = new Set(emailData.map(e => (e.to_email||'').toLowerCase()));
+  const rows = leadsData.filter(r => r.sent && !(r.email && emailsSent.has((r.email||'').toLowerCase())));
   const tbody = document.getElementById('wa-tbody');
-  document.getElementById('wa-empty').style.display = waData.length ? 'none' : 'block';
-  if (!waData.length) { tbody.innerHTML=''; return; }
-  tbody.innerHTML = waData.map((c,i) => {
-    const st = c.handoff ? '📋 הועבר' : c.replied ? '💬 ענה' : c.read_at ? '👁️ נקרא' : '⏳ ממתין';
-    const stCls = c.handoff ? 'b-personal' : c.replied ? 'b-community' : c.read_at ? 'b-webinar' : '';
-    const hasT = c.transcript && c.transcript.trim().length > 0;
+  document.getElementById('wa-empty').style.display = rows.length ? 'none' : 'block';
+  if (!rows.length) { tbody.innerHTML=''; return; }
+  const CHANNELS = ['bot','manual','whatsapp','sms','other'];
+  tbody.innerHTML = rows.map((r,i) => {
+    const ch = r.wa_channel || 'bot';
+    const chLabel = {bot:'🤖 בוט', manual:'✋ ידני', whatsapp:'💬 WA ידני', sms:'📱 SMS', other:'אחר'}[ch] || ch;
     return `<tr>
       <td>${i+1}</td>
-      <td><strong>${c.client_name||'—'}</strong></td>
-      <td style="direction:ltr;color:#6b7280">${c.phone||'—'}</td>
-      <td>${c.agent_label||'—'}</td>
-      <td><span class="badge ${stCls}">${st}</span></td>
-      <td style="font-size:11px;color:#9ca3af">${fmtDate(c.sent_at)}</td>
-      <td>${hasT ? `<button class="btn-view" onclick="showTranscript('${c.phone}','${(c.client_name||'').replace(/'/g,"\\'")}')">&#128172; צפה</button>` : '<span style="color:#ccc;font-size:12px">אין</span>'}</td>
+      <td><strong>${r.name||'—'}</strong></td>
+      <td style="direction:ltr;color:#6b7280">${r.phone1||'—'}</td>
+      <td style="font-size:12px;color:#6b7280">${r.email||'—'}</td>
+      <td>
+        <select style="padding:3px 6px;border:1px solid #ddd;border-radius:5px;font-size:12px;font-family:inherit" onchange="updateWaChannel(${r.id},this.value)">
+          ${CHANNELS.map(c=>`<option value="${c}" ${ch===c?'selected':''}>${{bot:'🤖 בוט',manual:'✋ ידני',whatsapp:'💬 WA ידני',sms:'📱 SMS',other:'אחר'}[c]}</option>`).join('')}
+        </select>
+      </td>
+      <td style="font-size:11px;color:#9ca3af">${fmtDate(r.wa_sent_at||r.sent_at)}</td>
+      <td><input style="padding:4px 7px;border:1px solid #ddd;border-radius:5px;font-size:12px;font-family:inherit;width:160px" value="${(r.wa_notes||'').replace(/"/g,'&quot;')}" placeholder="הערה..." onblur="updateWaNotes(${r.id},this.value)" /></td>
     </tr>`;
   }).join('');
+}
+
+async function updateWaChannel(id, channel) {
+  const r = leadsData.find(x=>x.id===id);
+  const notes = r ? (r.wa_notes||'') : '';
+  await fetch(`/api/florida/leads/${id}/wa`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({channel,notes})});
+  if (r) r.wa_channel = channel;
+}
+async function updateWaNotes(id, notes) {
+  await fetch(`/api/florida/leads/${id}/wa-notes`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({notes})});
+  const r = leadsData.find(x=>x.id===id); if(r) r.wa_notes = notes;
 }
 
 function showTranscript(phone, name) {
@@ -641,7 +660,7 @@ function renderEmail() {
 }
 
 // ── Florida Leads ──
-let leadsData = [], leadsPage_ = 0;
+let leadsPage_ = 0;
 const LEADS_PER_PAGE = 30;
 
 async function fetchLeads() {

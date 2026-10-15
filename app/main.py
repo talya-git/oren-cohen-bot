@@ -1188,6 +1188,20 @@ def florida_unmark_sent(lead_id: int):
     return {"status": "ok"}
 
 
+@app.post("/api/florida/leads/{lead_id}/wa")
+async def florida_update_wa(lead_id: int, request: Request):
+    data = await request.json()
+    db.update_florida_wa(lead_id, data.get("channel", ""), data.get("notes", ""))
+    return {"status": "ok"}
+
+
+@app.post("/api/florida/leads/{lead_id}/wa-notes")
+async def florida_update_wa_notes(lead_id: int, request: Request):
+    data = await request.json()
+    db.update_florida_wa_notes(lead_id, data.get("notes", ""))
+    return {"status": "ok"}
+
+
 @app.post("/api/florida/send-invites")
 async def florida_send_invites(request: Request):
     data = await request.json()

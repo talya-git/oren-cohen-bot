@@ -79,6 +79,17 @@ def init_db():
             except Exception:
                 conn.rollback()
 
+        for col, definition in [
+            ("wa_channel", "TEXT DEFAULT ''"),
+            ("wa_notes", "TEXT DEFAULT ''"),
+            ("wa_sent_at", "TIMESTAMPTZ"),
+        ]:
+            try:
+                cur.execute(f"ALTER TABLE florida_leads ADD COLUMN IF NOT EXISTS {col} {definition}")
+                conn.commit()
+            except Exception:
+                conn.rollback()
+
     if DATABASE_URL:
         cur.execute("""
             CREATE TABLE IF NOT EXISTS users (
@@ -1219,6 +1230,34 @@ def save_florida_email_sent(email: str, name: str, subject: str) -> None:
         conn.commit()
     except Exception as e:
         print(f"[FLORIDA EMAIL SAVE ERROR] {e}")
+    conn.close()
+
+
+def update_florida_wa(lead_id: int, channel: str, notes: str) -> None:
+    """מעדכן ערוץ שליחה והערות לליד פלורידה."""
+    conn = get_db()
+    cur = conn.cursor()
+    now = datetime.now(timezone.utc).isoformat()
+    try:
+        cur.execute(
+            f"UPDATE florida_leads SET wa_channel={PH}, wa_notes={PH}, wa_sent_at=COALESCE(wa_sent_at,{PH}), sent={PH}, sent_at=COALESCE(sent_at,{PH}) WHERE id={PH}",
+            (channel, notes, now, True if DATABASE_URL else 1, now, lead_id)
+        )
+        conn.commit()
+    except Exception as e:
+        print(f"[FLORIDA WA UPDATE ERROR] {e}")
+    conn.close()
+
+
+def update_florida_wa_notes(lead_id: int, notes: str) -> None:
+    """מעדכן הערות בלבד."""
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute(f"UPDATE florida_leads SET wa_notes={PH} WHERE id={PH}", (notes, lead_id))
+        conn.commit()
+    except Exception as e:
+        print(f"[FLORIDA WA NOTES ERROR] {e}")
     conn.close()
 
 
