@@ -1049,7 +1049,7 @@ def get_florida_emails() -> list:
     conn = get_db()
     cur = conn.cursor()
     try:
-        cur.execute("SELECT to_email, to_name as name, subject, sent_at as created_at FROM florida_emails_sent ORDER BY sent_at DESC")
+        cur.execute("SELECT to_email, to_name as name, subject, sent_at as created_at, opened_at, reply, replied_at FROM florida_emails_sent ORDER BY sent_at DESC")
         result = _fetchall(cur)
     except Exception:
         result = []
@@ -1179,9 +1179,15 @@ def save_florida_email_sent(email: str, name: str, subject: str) -> None:
                 CREATE TABLE IF NOT EXISTS florida_emails_sent (
                     id SERIAL PRIMARY KEY,
                     to_email TEXT, to_name TEXT, subject TEXT,
-                    sent_at TIMESTAMPTZ DEFAULT NOW()
+                    sent_at TIMESTAMPTZ DEFAULT NOW(),
+                    opened_at TIMESTAMPTZ, reply TEXT, replied_at TIMESTAMPTZ
                 )
             """)
+            try:
+                cur.execute("ALTER TABLE florida_emails_sent ADD COLUMN IF NOT EXISTS opened_at TIMESTAMPTZ")
+                conn.commit()
+            except Exception:
+                conn.rollback()
             cur.execute(
                 "INSERT INTO florida_emails_sent (to_email, to_name, subject, sent_at) VALUES (%s,%s,%s,%s)",
                 (email, name, subject, now)
@@ -1191,7 +1197,8 @@ def save_florida_email_sent(email: str, name: str, subject: str) -> None:
                 CREATE TABLE IF NOT EXISTS florida_emails_sent (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     to_email TEXT, to_name TEXT, subject TEXT,
-                    sent_at TEXT DEFAULT CURRENT_TIMESTAMP
+                    sent_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                    opened_at TEXT, reply TEXT, replied_at TEXT
                 )
             """)
             cur.execute(
@@ -1201,6 +1208,22 @@ def save_florida_email_sent(email: str, name: str, subject: str) -> None:
         conn.commit()
     except Exception as e:
         print(f"[FLORIDA EMAIL SAVE ERROR] {e}")
+    conn.close()
+
+
+def mark_florida_email_opened(email: str) -> None:
+    """מסמן שהמייל נפתח."""
+    conn = get_db()
+    cur = conn.cursor()
+    now = datetime.now(timezone.utc).isoformat()
+    try:
+        cur.execute(
+            f"UPDATE florida_emails_sent SET opened_at={PH} WHERE to_email={PH} AND opened_at IS NULL",
+            (now, email)
+        )
+        conn.commit()
+    except Exception as e:
+        print(f"[FLORIDA EMAIL OPEN ERROR] {e}")
     conn.close()
 
 

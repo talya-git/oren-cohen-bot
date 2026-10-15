@@ -350,6 +350,13 @@ async def start_meeting_reminders():
 
 
 @app.on_event("startup")
+async def start_control_bot():
+    import asyncio
+    from .control_bot import run_control_bot
+    asyncio.create_task(run_control_bot())
+
+
+@app.on_event("startup")
 async def start_no_response_scheduler():
     import asyncio
     async def _no_response_scheduler():
@@ -1092,6 +1099,28 @@ def florida_emails():
     return {"emails": emails}
 
 
+@app.get("/api/florida/track/{email_b64}")
+def florida_track_open(email_b64: str):
+    """Tracking pixel — מסמן פתיחת מייל."""
+    import base64
+    from fastapi.responses import Response
+    try:
+        email = base64.urlsafe_b64decode(email_b64 + "==").decode()
+        db.mark_florida_email_opened(email)
+        print(f"[EMAIL OPENED] {email}")
+    except Exception:
+        pass
+    # תמונה שקופה 1x1
+    pixel = bytes([
+        0x47,0x49,0x46,0x38,0x39,0x61,0x01,0x00,0x01,0x00,0x80,0x00,0x00,
+        0xff,0xff,0xff,0x00,0x00,0x00,0x21,0xf9,0x04,0x00,0x00,0x00,0x00,
+        0x00,0x2c,0x00,0x00,0x00,0x00,0x01,0x00,0x01,0x00,0x00,0x02,0x02,
+        0x44,0x01,0x00,0x3b
+    ])
+    return Response(content=pixel, media_type="image/gif",
+                    headers={"Cache-Control": "no-store"})
+
+
 @app.post("/api/florida/import-leads")
 async def florida_import_leads(request: Request):
     data = await request.json()
@@ -1129,8 +1158,12 @@ Looking forward to seeing you in Florida!
 
 Oren Cohen Group"""
     try:
+        import base64 as _b64
+        email_b64 = _b64.urlsafe_b64encode(email.encode()).decode().rstrip("=")
+        pixel_url = f"https://oren-cohen-bot.onrender.com/api/florida/track/{email_b64}"
+        html_body = body.replace("\n", "<br>") + f'<img src="{pixel_url}" width="1" height="1" style="display:none">'
         from .mailer import send_email
-        send_email(to=email, subject=subject, body=body)
+        send_email(to=email, subject=subject, body=html_body)
         # שמור ב-DB
         db.save_florida_email_sent(email=email, name=name, subject=subject)
         return {"status": "ok"}
@@ -1226,7 +1259,11 @@ async def florida_send_invites(request: Request):
             subject = f"You're Invited — Oren Cohen Group {'Zoom Webinar' if type_ == 'webinar' else 'Community Gathering'}"
             msg = message_template.replace("{name}", name.split()[0] if name else "there")
             try:
-                send_email(to=email, subject=subject, body=msg)
+                import base64 as _b64
+                email_b64 = _b64.urlsafe_b64encode(email.encode()).decode().rstrip("=")
+                pixel_url = f"https://oren-cohen-bot.onrender.com/api/florida/track/{email_b64}"
+                html_msg = msg.replace("\n", "<br>") + f'<img src="{pixel_url}" width="1" height="1" style="display:none">'
+                send_email(to=email, subject=subject, body=html_msg)
                 sent += 1
             except Exception as e:
                 print(f"[INVITE EMAIL ERROR] {email}: {e}")
@@ -1723,6 +1760,16 @@ async def backfill_sehel(request: Request):
         except Exception as e:
             results.append({"phone": phone, "name": name, "status": "error", "reason": str(e)})
     return {"results": results}
+
+
+@app.post("/api/admin/control-check")
+async def control_check_now(request: Request):
+    """הרצה ידנית של בוט הבקרה — בדיקה מיידית."""
+    data = await request.json()
+    if data.get("secret") != os.getenv("ADMIN_SECRET", "oren2024admin"):
+        return {"error": "unauthorized"}
+    from .control_bot import run_check_now
+    return run_check_now()
 
 
 if __name__ == "__main__":

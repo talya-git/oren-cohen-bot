@@ -343,7 +343,7 @@ def send_bulk_report(agent_label: str, results: list[dict], agent_email: str | N
 
 
 def send_email(to: str, subject: str, body: str) -> None:
-    """שולח מייל דרך Gmail SMTP."""
+    """שולח מייל דרך Gmail SMTP. body יכול להיות HTML מלא או טקסט רגיל."""
     import smtplib
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
@@ -356,7 +356,11 @@ def send_email(to: str, subject: str, body: str) -> None:
     msg["Subject"] = subject
     msg["From"] = formataddr(("Oren Cohen Group", gmail_user))
     msg["To"] = to
-    html_body = f"<html><body style='font-family:Arial,sans-serif;font-size:14px;line-height:1.6'>{body.replace(chr(10), '<br>')}</body></html>"
+    # אם ה-body כבר HTML (מכיל תגיות) — השתמש בו ישירות
+    if "<" in body and ">" in body:
+        html_body = body if body.strip().startswith("<html") else f"<html><body style='font-family:Arial,sans-serif;font-size:14px;line-height:1.6'>{body}</body></html>"
+    else:
+        html_body = f"<html><body style='font-family:Arial,sans-serif;font-size:14px;line-height:1.6'>{body.replace(chr(10), '<br>')}</body></html>"
     msg.attach(MIMEText(html_body, "html", "utf-8"))
 
     with smtplib.SMTP("smtp.gmail.com", 587) as server:
