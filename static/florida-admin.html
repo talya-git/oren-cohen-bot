@@ -584,7 +584,7 @@ function renderWA() {
   if (!rows.length) { tbody.innerHTML=''; return; }
   const CHANNELS = ['bot','manual','whatsapp','sms','other'];
   tbody.innerHTML = rows.map((r,i) => {
-    const ch = r.wa_channel || 'bot';
+    const ch = r.wa_channel || 'manual';
     const chLabel = {bot:'🤖 בוט', manual:'✋ ידני', whatsapp:'💬 WA ידני', sms:'📱 SMS', other:'אחר'}[ch] || ch;
     return `<tr>
       <td>${i+1}</td>
