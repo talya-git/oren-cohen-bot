@@ -521,7 +521,7 @@ function switchTab(tab) {
       document.getElementById('content-'+t).classList.toggle('active', t===tab);
     }
   });
-  if (tab === 'leads' && leadsData.length === 0) fetchLeads();
+  if (tab === 'leads') { leadsPage_ = 0; renderLeads(); }
   if (tab === 'wa') renderWA();
   if (tab === 'invite') updateInviteCounts();
   if (tab === 'cal') renderCalendar();
